@@ -11,7 +11,7 @@ import java.util.Map;
 public class DataTypes {
     public static final Map<Class<?>, String> javaToSqlite = new HashMap<>();
 
-    {
+    static {
         javaToSqlite.put(Integer.class, "INTEGER");
         javaToSqlite.put(int.class, "INTEGER");
         javaToSqlite.put(Long.class, "INTEGER");
