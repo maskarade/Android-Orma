@@ -8,8 +8,10 @@ import org.junit.Test;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 public class TodoTest {
 
@@ -23,16 +25,35 @@ public class TodoTest {
     public void setUp() throws Exception {
         db = new OrmaDatabase(getContext(), "test.db");
         db.getOrma().resetDatabase();
+
+        {
+            Todo todo = new Todo();
+            todo.title = "today";
+            todo.content = "milk, banana";
+            db.insert(todo);
+        }
+
+        {
+            Todo todo = new Todo();
+            todo.title = "friday";
+            todo.content = "apple";
+            db.insert(todo);
+        }
     }
 
     @Test
-    public void testInsertAndCount() throws Exception {
-        Todo todo = new Todo();
-        todo.title = "hoge";
-        todo.content = "fuga";
-        db.insert(todo);
+    public void testCount() throws Exception {
+        assertThat(db.fromTodo().count(), is(2L));
+    }
 
-        assertThat(db.fromTodo().count(), is(1L));
+    @Test
+    public void toList() throws Exception {
+        List<Todo> todos = db.fromTodo().toList();
+        assertThat(todos, hasSize(2));
+        assertThat(todos.get(0).title, is("today"));
+        assertThat(todos.get(0).content, is("milk, banana"));
 
+        assertThat(todos.get(1).title, is("friday"));
+        assertThat(todos.get(1).content, is("apple"));
     }
 }

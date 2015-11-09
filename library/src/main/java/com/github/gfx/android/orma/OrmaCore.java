@@ -11,13 +11,13 @@ import android.util.Log;
 
 import java.util.List;
 
-public class Orma extends SQLiteOpenHelper {
+public class OrmaCore extends SQLiteOpenHelper {
 
     static final int VERSION = 1;
 
     final List<Schema<?>> schemas;
 
-    public Orma(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
+    public OrmaCore(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         super(context, filename, null, VERSION);
         this.schemas = schemas;
     }
@@ -30,13 +30,13 @@ public class Orma extends SQLiteOpenHelper {
     public long insert(String table, ContentValues values) {
         // TODO: support transaction blocks
         SQLiteDatabase db = getDatabase();
-        return db.insertOrThrow(table, null, values);
+        return db.insertWithOnConflict(table, null, values, SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
 
     public long update(String table, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getDatabase();
-        return db.update(table, values, whereClause, whereArgs);
+        return db.updateWithOnConflict(table, values, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
     public long count(String table, String whereClause, String[] whereArgs) {
@@ -129,16 +129,18 @@ public class Orma extends SQLiteOpenHelper {
 
         sb.append(column.getSqlType());
         sb.append(' ');
-        if (column.nullable) {
-            sb.append("NULL ");
-        } else {
-            sb.append("NOT NULL ");
-        }
 
         if (column.primaryKey) {
             sb.append("PRIMARY KEY ");
-        } else if (column.unique) {
-            sb.append("UNIQUE ");
+        } else {
+            if (column.nullable) {
+                sb.append("NULL ");
+            } else {
+                sb.append("NOT NULL ");
+            }
+            if (column.unique) {
+                sb.append("UNIQUE ");
+            }
         }
     }
 

@@ -52,9 +52,11 @@ public class Todo_Schema extends Schema<Todo> {
     @Override
     public ContentValues serializeToContentValues(@NonNull Todo todo) {
         ContentValues contentValues = new ContentValues($COLUMN_NAMES.length);
-        contentValues.put(id.name, todo.id);
+        if (todo.id != 0) {
+            contentValues.put(id.name, todo.id);
+        }
         contentValues.put(title.name, todo.title);
-        contentValues.put(content.name, todo.title);
+        contentValues.put(content.name, todo.content);
         return contentValues;
     }
 

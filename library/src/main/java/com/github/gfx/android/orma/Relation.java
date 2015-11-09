@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class Relation<T, R extends Relation>{
 
-    protected final Orma orma;
+    protected final OrmaCore orma;
 
     protected final Schema<T> schema;
 
@@ -32,7 +32,7 @@ public abstract class Relation<T, R extends Relation>{
     @Nullable
     protected String limit;
 
-    public Relation(Orma orma, Schema<T> schema) {
+    public Relation(OrmaCore orma, Schema<T> schema) {
         this.orma = orma;
         this.schema = schema;
     }
