@@ -57,15 +57,30 @@ public class OrmaCore extends SQLiteOpenHelper {
         return db.query(table, columns, whereClause, whereArgs, groupBy, having, orderBy, limit);
     }
 
-    public void resetDatabase() {
+    public void transaction(@NonNull TransactionTask task) {
         SQLiteDatabase db = getDatabase();
         db.beginTransaction();
 
-        dropAllTables(db);
-        onCreate(db);
+        try {
+            task.execute();
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            throw new TransactionAbortException(e);
+        } finally {
+            db.endTransaction();
+        }
+    }
 
-        db.setTransactionSuccessful();
-        db.endTransaction();
+    public void resetDatabase() {
+        transaction(new TransactionTask() {
+            @Override
+            public void execute() throws Exception {
+                SQLiteDatabase db = getDatabase();
+
+                dropAllTables(db);
+                onCreate(db);
+            }
+        });
     }
 
     void dropAllTables(SQLiteDatabase db) {
@@ -91,13 +106,13 @@ public class OrmaCore extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.beginTransaction();
-
-        createAllTables(db);
-
-        db.setTransactionSuccessful();
-        db.endTransaction();
+    public void onCreate(final SQLiteDatabase db) {
+        transaction(new TransactionTask() {
+            @Override
+            public void execute() throws Exception {
+                createAllTables(db);
+            }
+        });
     }
 
     // https://www.sqlite.org/lang_createtable.html

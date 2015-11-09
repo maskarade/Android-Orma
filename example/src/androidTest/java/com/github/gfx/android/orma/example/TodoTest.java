@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma.example;
 
+import com.github.gfx.android.orma.TransactionAbortException;
+import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 
 import org.junit.Before;
@@ -12,6 +14,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 
 public class TodoTest {
 
@@ -92,4 +95,45 @@ public class TodoTest {
         assertThat(todos.get(0).title, is("friday"));
         assertThat(todos.get(0).content, is("apple"));
     }
+
+    @Test
+    public void transactionSuccess() throws Exception {
+        db.transaction(new TransactionTask() {
+            @Override
+            public void execute() throws Exception {
+                for (int i = 0; i < 5; i++) {
+                    Todo todo = new Todo();
+                    todo.title = "friday";
+                    todo.content = "apple" + i;
+                    db.insert(todo);
+                }
+            }
+        });
+
+        assertThat(db.fromTodo().count(), is(7L));
+    }
+
+    @Test
+    public void transactionAbort() throws Exception {
+        try {
+            db.transaction(new TransactionTask() {
+                @Override
+                public void execute() throws Exception {
+                    for (int i = 0; i < 5; i++) {
+                        Todo todo = new Todo();
+                        todo.title = "friday";
+                        todo.content = "apple" + i;
+                        db.insert(todo);
+                    }
+                    throw new RuntimeException("abort!");
+                }
+            });
+            fail("not reached");
+        } catch (TransactionAbortException e) {
+            assertThat(e.getCause(), instanceOf(RuntimeException.class));
+        }
+
+        assertThat(db.fromTodo().count(), is(2L));
+    }
+
 }

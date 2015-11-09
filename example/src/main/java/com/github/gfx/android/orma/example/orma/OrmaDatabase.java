@@ -2,6 +2,7 @@ package com.github.gfx.android.orma.example.orma;
 
 import com.github.gfx.android.orma.OrmaCore;
 import com.github.gfx.android.orma.Schema;
+import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.Todo;
 
 import android.content.Context;
@@ -29,6 +30,11 @@ public class OrmaDatabase {
     public OrmaCore getOrma() {
         return orma;
     }
+
+    public void transaction(@NonNull TransactionTask task) {
+        orma.transaction(task);
+    }
+
 
     public Todo_Relation fromTodo() {
         return new Todo_Relation(orma, todoSchema);
