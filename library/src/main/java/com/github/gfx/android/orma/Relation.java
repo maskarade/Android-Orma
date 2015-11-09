@@ -96,7 +96,27 @@ public abstract class Relation<T, R extends Relation>{
 
     @Nullable
     private String[] getWhereArgs() {
-        return (String[]) (whereArgs != null ? whereArgs.toArray() : null);
+        if (whereArgs != null) {
+            String[] array = new String[whereArgs.size()];
+            return whereArgs.toArray(array);
+        } else {
+            return null;
+        }
+    }
+
+    @Nullable
+    public T single() {
+        Cursor cursor = orma.query(schema.getTableName(), schema.getColumnNames(), getWhereClause(),
+                getWhereArgs(), groupBy, having, orderBy, limit);
+
+        T model = null;
+
+        if (cursor.moveToFirst()) {
+            model = schema.newFromCursor(cursor);
+        }
+        cursor.close();
+
+        return model;
     }
 
     @NonNull

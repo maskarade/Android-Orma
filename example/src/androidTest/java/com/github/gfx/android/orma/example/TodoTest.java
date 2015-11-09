@@ -42,7 +42,7 @@ public class TodoTest {
     }
 
     @Test
-    public void testCount() throws Exception {
+    public void count() throws Exception {
         assertThat(db.fromTodo().count(), is(2L));
     }
 
@@ -55,5 +55,41 @@ public class TodoTest {
 
         assertThat(todos.get(1).title, is("friday"));
         assertThat(todos.get(1).content, is("apple"));
+    }
+
+    @Test
+    public void single() throws Exception {
+        Todo todo = db.fromTodo().single();
+
+        assert todo != null;
+        assertThat(todo.title, is("today"));
+        assertThat(todo.content, is("milk, banana"));
+    }
+
+    @Test
+    public void whereEquals() throws Exception {
+        List<Todo> todos = db.fromTodo().where("title = ?", "today").toList();
+        assertThat(todos, hasSize(1));
+        assertThat(todos.get(0).title, is("today"));
+        assertThat(todos.get(0).content, is("milk, banana"));
+    }
+
+    @Test
+    public void whereLike() throws Exception {
+        List<Todo> todos = db.fromTodo().where("title LIKE ?", "t%").toList();
+        assertThat(todos, hasSize(1));
+        assertThat(todos.get(0).title, is("today"));
+        assertThat(todos.get(0).content, is("milk, banana"));
+    }
+
+    @Test
+    public void orderBy() throws Exception {
+        List<Todo> todos = db.fromTodo().orderBy("id DESC").toList();
+        assertThat(todos, hasSize(2));
+        assertThat(todos.get(1).title, is("today"));
+        assertThat(todos.get(1).content, is("milk, banana"));
+
+        assertThat(todos.get(0).title, is("friday"));
+        assertThat(todos.get(0).content, is("apple"));
     }
 }
