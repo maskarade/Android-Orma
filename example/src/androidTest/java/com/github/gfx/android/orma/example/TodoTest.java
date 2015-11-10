@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.example;
 
+import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.TransactionAbortException;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
@@ -94,6 +95,43 @@ public class TodoTest {
 
         assertThat(todos.get(0).title, is("friday"));
         assertThat(todos.get(0).content, is("apple"));
+    }
+
+    @Test
+    public void limit() throws Exception {
+        List<Todo> todos = db.fromTodo().limit(1).toList();
+        assertThat(todos, hasSize(1));
+        assertThat(todos.get(0).title, is("today"));
+        assertThat(todos.get(0).content, is("milk, banana"));
+    }
+
+    @Test
+    public void limitAndOffset() throws Exception {
+        List<Todo> todos = db.fromTodo().limit(1).offset(1).toList();
+        assertThat(todos, hasSize(1));
+        assertThat(todos.get(0).title, is("friday"));
+        assertThat(todos.get(0).content, is("apple"));
+    }
+
+    @Test
+    public void offset() throws Exception {
+        try {
+            db.fromTodo().offset(1).toList();
+            fail("not reached");
+        } catch (Relation.InvalidStatementException e) {
+            assertThat(e, is(notNullValue()));
+        }
+    }
+
+    @Test
+    public void delete() throws Exception {
+        int result = db.fromTodo()
+                .where("title = ?", "today")
+                .delete();
+
+        assertThat(result, is(1));
+        assertThat(db.fromTodo().count(), is(1L));
+        assertThat(db.fromTodo().single().title, is("friday"));
     }
 
     @Test

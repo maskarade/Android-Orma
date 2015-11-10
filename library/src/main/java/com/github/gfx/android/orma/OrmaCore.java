@@ -57,6 +57,11 @@ public class OrmaCore extends SQLiteOpenHelper {
         return db.query(table, columns, whereClause, whereArgs, groupBy, having, orderBy, limit);
     }
 
+    public int delete(@NonNull String table, @Nullable String whereClause, @Nullable String[] whereArgs) {
+        SQLiteDatabase db = getDatabase();
+        return db.delete(table, whereClause, whereArgs);
+    }
+
     public void transaction(@NonNull TransactionTask task) {
         SQLiteDatabase db = getDatabase();
         db.beginTransaction();

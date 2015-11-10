@@ -8,7 +8,7 @@ import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Relation<T, R extends Relation>{
+public abstract class Relation<T, R extends Relation> {
 
     protected final OrmaCore orma;
 
@@ -29,8 +29,9 @@ public abstract class Relation<T, R extends Relation>{
     @Nullable
     protected String orderBy;
 
-    @Nullable
-    protected String limit;
+    protected long limit = -1;
+
+    protected long offset = -1;
 
     public Relation(OrmaCore orma, Schema<T> schema) {
         this.orma = orma;
@@ -80,9 +81,32 @@ public abstract class Relation<T, R extends Relation>{
     }
 
     @SuppressWarnings("unchecked")
-    public R limit(String limit) {
+    public R limit(long limit) {
         this.limit = limit;
         return (R) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public R offset(long offset) {
+        this.offset = offset;
+        return (R) this;
+    }
+
+    @Nullable
+    private String getLimitClause() {
+        if (limit != -1) {
+            if (offset != -1) {
+                return limit + "," + offset;
+            } else {
+                return String.valueOf(limit);
+            }
+        } else {
+            if (offset != -1) {
+                throw new InvalidStatementException("Missing limit()");
+            } else {
+                return null;
+            }
+        }
     }
 
     public long count() {
@@ -104,10 +128,51 @@ public abstract class Relation<T, R extends Relation>{
         }
     }
 
+    public int delete() {
+        assertNoExtraClausesForDeleteOrUpdate("delete");
+        return orma.delete(schema.getTableName(), getWhereClause(), getWhereArgs());
+    }
+
+    void assertNoExtraClausesForDeleteOrUpdate(String statementName) {
+        List<String> extraClauses = null;
+        if (groupBy != null) {
+            extraClauses = new ArrayList<>();
+            extraClauses.add("groupBy");
+        }
+        if (having != null) {
+            if (extraClauses == null) {
+                extraClauses = new ArrayList<>();
+            }
+            extraClauses.add("having");
+        }
+        if (orderBy != null) {
+            if (extraClauses == null) {
+                extraClauses = new ArrayList<>();
+            }
+            extraClauses.add("orderBy");
+        }
+        if (limit != -1) {
+            if (extraClauses == null) {
+                extraClauses = new ArrayList<>();
+            }
+            extraClauses.add("limit");
+        }
+        if (offset != -1) {
+            if (extraClauses == null) {
+                extraClauses = new ArrayList<>();
+            }
+            extraClauses.add("offset");
+        }
+        if (extraClauses != null) {
+            throw new InvalidStatementException(
+                    "Extra clauses for " + statementName + ": " + TextUtils.join(", ", extraClauses));
+        }
+    }
+
     @Nullable
     public T single() {
         Cursor cursor = orma.query(schema.getTableName(), schema.getColumnNames(), getWhereClause(),
-                getWhereArgs(), groupBy, having, orderBy, limit);
+                getWhereArgs(), groupBy, having, orderBy, getLimitClause());
 
         T model = null;
 
@@ -123,16 +188,23 @@ public abstract class Relation<T, R extends Relation>{
     public List<T> toList() {
         List<T> list = new ArrayList<>();
         Cursor cursor = orma.query(schema.getTableName(), schema.getColumnNames(), getWhereClause(),
-                getWhereArgs(), groupBy, having, orderBy, limit);
+                getWhereArgs(), groupBy, having, orderBy, getLimitClause());
 
         if (cursor.moveToFirst()) {
             do {
                 list.add(schema.newFromCursor(cursor));
             }
-            while(cursor.moveToNext());
+            while (cursor.moveToNext());
         }
         cursor.close();
 
         return list;
+    }
+
+    public static class InvalidStatementException extends RuntimeException {
+
+        public InvalidStatementException(String detailMessage) {
+            super(detailMessage);
+        }
     }
 }
