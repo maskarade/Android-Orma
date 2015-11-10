@@ -46,11 +46,11 @@ public class OrmaDatabase {
 
     public long insert(Todo model) {
         // FIXME
-        return orma.insert(todoSchema.getTableName(), todoSchema.serializeToContentValues(model));
+        return orma.insert(todoSchema.getTableName(), todoSchema.serializeModelToContentValues(model));
     }
 
     public long update(Todo model, String whereClause, String[] whereArgs) {
         // FIXME
-        return orma.update(todoSchema.getTableName(), todoSchema.serializeToContentValues(model), whereClause, whereArgs);
+        return orma.update(todoSchema.getTableName(), todoSchema.serializeModelToContentValues(model), whereClause, whereArgs);
     }
 }

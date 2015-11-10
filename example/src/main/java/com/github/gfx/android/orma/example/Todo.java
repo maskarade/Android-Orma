@@ -5,6 +5,8 @@ import com.github.gfx.android.orma.annotation.Index;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
+import android.support.annotation.Nullable;
+
 @Table
 public class Todo {
 
@@ -16,5 +18,6 @@ public class Todo {
     public String title;
 
     @Column
+    @Nullable
     public String content;
 }

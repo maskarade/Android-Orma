@@ -2,7 +2,7 @@ package com.github.gfx.android.orma;
 
 import android.support.annotation.NonNull;
 
-public class Column<T> {
+public class ColumnDef<T> {
 
     public final String name;
 
@@ -16,7 +16,7 @@ public class Column<T> {
 
     public final boolean unique;
 
-    public Column(String name, Class<T> type, boolean nullable, boolean primaryKey, boolean indexed, boolean unique) {
+    public ColumnDef(String name, Class<T> type, boolean nullable, boolean primaryKey, boolean indexed, boolean unique) {
         this.name = name;
         this.type = type;
         this.nullable = nullable;

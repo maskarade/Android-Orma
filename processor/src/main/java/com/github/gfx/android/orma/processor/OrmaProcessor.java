@@ -25,34 +25,36 @@ public class OrmaProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        SchemaMasterWriter schemaMasterWriter = new SchemaMasterWriter(processingEnv);
+        DatabaseWriter databaseWriter = new DatabaseWriter(processingEnv);
 
         buildSchemas(roundEnv)
-                .peek(schema -> {
-                    SchemaWriter schemaWriter = new SchemaWriter(schema, processingEnv);
-                    TypeSpec typeSpec = schemaWriter.buildTypeSpec();
-                    writeToFiler(schema.getElement(),
-                            JavaFile.builder(schema.getPackageName(), typeSpec)
-                                    .build());
-                })
-                .forEach(schemaMasterWriter::add);
+                .peek(this::writeSchema)
+                .forEach(databaseWriter::add);
 
-        if (schemaMasterWriter.isRequired()) {
+        if (databaseWriter.isRequired()) {
             writeToFiler(null,
-                    JavaFile.builder(schemaMasterWriter.getPackageName(),
-                            schemaMasterWriter.buildTypeSpec())
+                    JavaFile.builder(databaseWriter.getPackageName(),
+                            databaseWriter.buildTypeSpec())
                             .build());
         }
 
         return false;
     }
 
-    public Stream<Schema> buildSchemas(RoundEnvironment roundEnv) {
+    public void writeSchema(SchemaDefinition schema) {
+        SchemaWriter schemaWriter = new SchemaWriter(schema, processingEnv);
+        TypeSpec typeSpec = schemaWriter.buildTypeSpec();
+        writeToFiler(schema.getElement(),
+                JavaFile.builder(schema.getPackageName(), typeSpec)
+                        .build());
+    }
+
+    public Stream<SchemaDefinition> buildSchemas(RoundEnvironment roundEnv) {
         SchemaValidator validator = new SchemaValidator();
         return roundEnv
                 .getElementsAnnotatedWith(Table.class)
                 .stream()
-                .map(element -> new Schema(validator.validate(element)));
+                .map(element -> new SchemaDefinition(validator.validate(element)));
     }
 
     public void writeToFiler(Element element, JavaFile javaFile) {

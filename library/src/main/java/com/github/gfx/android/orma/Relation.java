@@ -182,7 +182,7 @@ public abstract class Relation<T, R extends Relation> {
         T model = null;
 
         if (cursor.moveToFirst()) {
-            model = schema.newFromCursor(cursor);
+            model = schema.createModelFromCursor(cursor);
         }
         cursor.close();
 
@@ -197,7 +197,7 @@ public abstract class Relation<T, R extends Relation> {
 
         if (cursor.moveToFirst()) {
             do {
-                list.add(schema.newFromCursor(cursor));
+                list.add(schema.createModelFromCursor(cursor));
             }
             while (cursor.moveToNext());
         }

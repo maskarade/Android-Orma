@@ -7,18 +7,18 @@ import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
 
-public class SchemaMasterWriter {
+public class DatabaseWriter {
     static final String kClassName = "Schemas";
 
     final ProcessingEnvironment processingEnv;
 
-    List<Schema> schemas = new ArrayList<>();
+    List<SchemaDefinition> schemas = new ArrayList<>();
 
-    public SchemaMasterWriter(ProcessingEnvironment processingEnv) {
+    public DatabaseWriter(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
     }
 
-    public void add(Schema schema) {
+    public void add(SchemaDefinition schema) {
         schemas.add(schema);
     }
 

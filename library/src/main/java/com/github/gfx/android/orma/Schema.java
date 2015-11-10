@@ -12,10 +12,10 @@ public interface Schema<T> {
 
     String[] getColumnNames();
 
-    List<Column<?>> getColumns();
+    List<ColumnDef<?>> getColumns();
 
-    ContentValues serializeToContentValues(@NonNull T todo);
+    ContentValues serializeModelToContentValues(@NonNull T todo);
 
-    T newFromCursor(@NonNull Cursor cursor);
+    T createModelFromCursor(@NonNull Cursor cursor);
 
 }

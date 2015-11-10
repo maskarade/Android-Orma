@@ -7,8 +7,6 @@ import android.content.ContentValues;
 
 public class Todo_Builder implements ModelBuilder<Todo> {
 
-
-
     @Override
     public Todo build() {
         return null;

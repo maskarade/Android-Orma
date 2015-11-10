@@ -128,7 +128,7 @@ public class OrmaCore extends SQLiteOpenHelper {
         addIdentifier(sb, schema.getTableName());
         sb.append(" (");
 
-        for (Column<?> column : schema.getColumns()) {
+        for (ColumnDef<?> column : schema.getColumns()) {
             addColumnDef(sb, column);
 
             sb.append(", ");
@@ -143,7 +143,7 @@ public class OrmaCore extends SQLiteOpenHelper {
         return sb.toString();
     }
 
-    void addColumnDef(StringBuilder sb, Column<?> column) {
+    void addColumnDef(StringBuilder sb, ColumnDef<?> column) {
         addIdentifier(sb, column.name);
         sb.append(' ');
 
