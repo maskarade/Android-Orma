@@ -11,7 +11,7 @@ import android.support.annotation.NonNull;
 import java.util.Arrays;
 import java.util.List;
 
-public class Todo_Schema extends Schema<Todo> {
+public class Todo_Schema implements Schema<Todo> {
 
     public static String $TABLE_NAME = "Todo";
 

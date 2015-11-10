@@ -128,6 +128,11 @@ public abstract class Relation<T, R extends Relation> {
         }
     }
 
+    public long update(ModelBuilder<T> modelBuilder) {
+        assertNoExtraClausesForDeleteOrUpdate("update");
+        return orma.update(schema.getTableName(), modelBuilder.buildContentValues(), getWhereClause(), getWhereArgs());
+    }
+
     public int delete() {
         assertNoExtraClausesForDeleteOrUpdate("delete");
         return orma.delete(schema.getTableName(), getWhereClause(), getWhereArgs());

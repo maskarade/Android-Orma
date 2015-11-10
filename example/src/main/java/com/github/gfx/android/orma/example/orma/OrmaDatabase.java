@@ -40,19 +40,17 @@ public class OrmaDatabase {
         return new Todo_Relation(orma, todoSchema);
     }
 
-    public Todo createTodo() {
-        return null;
+    public Todo_Builder createTodoBuilder() {
+        return new Todo_Builder();
     }
 
     public long insert(Todo model) {
+        // FIXME
         return orma.insert(todoSchema.getTableName(), todoSchema.serializeToContentValues(model));
     }
 
     public long update(Todo model, String whereClause, String[] whereArgs) {
+        // FIXME
         return orma.update(todoSchema.getTableName(), todoSchema.serializeToContentValues(model), whereClause, whereArgs);
-    }
-
-    public int delete(Todo model) {
-        return 0;
     }
 }

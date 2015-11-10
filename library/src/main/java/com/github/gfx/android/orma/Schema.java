@@ -6,16 +6,16 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-public abstract class Schema<T> {
+public interface Schema<T> {
 
-    public abstract String getTableName();
+    String getTableName();
 
-    public abstract String[] getColumnNames();
+    String[] getColumnNames();
 
-    public abstract List<Column<?>> getColumns();
+    List<Column<?>> getColumns();
 
-    public abstract ContentValues serializeToContentValues(@NonNull T todo);
+    ContentValues serializeToContentValues(@NonNull T todo);
 
-    public abstract T newFromCursor(@NonNull Cursor cursor);
+    T newFromCursor(@NonNull Cursor cursor);
 
 }
