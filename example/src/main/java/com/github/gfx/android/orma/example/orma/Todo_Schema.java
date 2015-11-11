@@ -2,7 +2,7 @@ package com.github.gfx.android.orma.example.orma;
 
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.Schema;
-import com.github.gfx.android.orma.example.Book;
+import com.github.gfx.android.orma.example.Todo;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -11,7 +11,7 @@ import android.support.annotation.NonNull;
 import java.util.Arrays;
 import java.util.List;
 
-public class Todo_Schema implements Schema<Book> {
+public class Todo_Schema implements Schema<Todo> {
 
     public static String $TABLE_NAME = "Todo";
 
@@ -50,22 +50,22 @@ public class Todo_Schema implements Schema<Book> {
     }
 
     @Override
-    public ContentValues serializeModelToContentValues(@NonNull Book book) {
+    public ContentValues serializeModelToContentValues(@NonNull Todo todo) {
         ContentValues contentValues = new ContentValues($COLUMN_NAMES.length);
-        if (book.id != 0) {
-            contentValues.put(id.name, book.id);
+        if (todo.id != 0) {
+            contentValues.put(id.name, todo.id);
         }
-        contentValues.put(title.name, book.title);
-        contentValues.put(content.name, book.content);
+        contentValues.put(title.name, todo.title);
+        contentValues.put(content.name, todo.content);
         return contentValues;
     }
 
     @Override
-    public Book createModelFromCursor(@NonNull Cursor cursor) {
-        Book book = new Book();
-        book.id = cursor.getInt(0);
-        book.title = cursor.getString(1);
-        book.content = cursor.getString(2);
-        return book;
+    public Todo createModelFromCursor(@NonNull Cursor cursor) {
+        Todo todo = new Todo();
+        todo.id = cursor.getInt(0);
+        todo.title = cursor.getString(1);
+        todo.content = cursor.getString(2);
+        return todo;
     }
 }

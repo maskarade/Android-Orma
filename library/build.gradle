@@ -1,15 +1,17 @@
 apply plugin: 'com.android.library'
-apply plugin: 'android-apt'
+apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -25,7 +27,13 @@ android {
 
 dependencies {
     compile project(':annotations')
-    compile 'javax.annotation:jsr250-api:1.0'
+    provided 'javax.annotation:jsr250-api:1.0'
     compile 'com.android.support:support-annotations:23.1.0'
-    testCompile 'junit:junit:4.12'
+
+    androidTestApt project(':processor')
+    androidTestCompile 'junit:junit:4.12'
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.1') {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
 }

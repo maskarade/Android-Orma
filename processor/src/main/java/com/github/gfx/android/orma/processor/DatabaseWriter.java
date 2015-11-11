@@ -82,7 +82,7 @@ public class DatabaseWriter {
                         .build());
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.OrmaConnection, connection, Modifier.FINAL)
+                FieldSpec.builder(Types.OrmaConnection, connection, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
 
         return fieldSpecs;

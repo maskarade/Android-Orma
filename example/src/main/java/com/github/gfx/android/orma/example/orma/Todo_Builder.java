@@ -1,14 +1,14 @@
 package com.github.gfx.android.orma.example.orma;
 
 import com.github.gfx.android.orma.ModelBuilder;
-import com.github.gfx.android.orma.example.Book;
+import com.github.gfx.android.orma.example.Todo;
 
 import android.content.ContentValues;
 
-public class Todo_Builder implements ModelBuilder<Book> {
+public class Todo_Builder implements ModelBuilder<Todo> {
 
     @Override
-    public Book build() {
+    public Todo build() {
         return null;
     }
 

@@ -114,12 +114,17 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(final SQLiteDatabase db) {
-        transaction(new TransactionTask() {
-            @Override
-            public void execute() throws Exception {
-                createAllTables(db);
-            }
-        });
+        db.beginTransaction();
+
+        try {
+            createAllTables(db);
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            throw new TransactionAbortException(e);
+        } finally {
+            db.endTransaction();
+        }
     }
 
     // https://www.sqlite.org/lang_createtable.html

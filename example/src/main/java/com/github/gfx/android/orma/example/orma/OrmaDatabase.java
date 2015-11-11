@@ -3,7 +3,7 @@ package com.github.gfx.android.orma.example.orma;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.TransactionTask;
-import com.github.gfx.android.orma.example.Book;
+import com.github.gfx.android.orma.example.Todo;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -40,7 +40,7 @@ public class OrmaDatabase {
         return new Todo_Relation(orma, todoSchema);
     }
 
-    public long insert(Book model) {
+    public long insert(Todo model) {
         return orma.insert(todoSchema, model);
     }
 }

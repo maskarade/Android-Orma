@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.example;
+package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.TransactionAbortException;
