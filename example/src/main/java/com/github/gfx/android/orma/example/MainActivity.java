@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -81,18 +82,19 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
+        if (id == R.id.nav_select) {
+            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
+        } else if (id == R.id.nav_insert) {
+            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
+        } else if (id == R.id.nav_update) {
+            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
+        } else if (id == R.id.nav_benchmark) {
+            startActivity(BenchmarkActivity.createIntent(this));
+            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_share) {
-
+            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_send) {
-
+            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
