@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class Relation<T, R extends Relation> {
 
-    protected final OrmaCore orma;
+    protected final OrmaConnection orma;
 
     protected final Schema<T> schema;
 
@@ -33,7 +33,7 @@ public abstract class Relation<T, R extends Relation> {
 
     protected long offset = -1;
 
-    public Relation(OrmaCore orma, Schema<T> schema) {
+    public Relation(OrmaConnection orma, Schema<T> schema) {
         this.orma = orma;
         this.schema = schema;
     }

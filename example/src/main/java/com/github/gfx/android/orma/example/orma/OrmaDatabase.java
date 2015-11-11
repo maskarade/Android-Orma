@@ -1,6 +1,6 @@
 package com.github.gfx.android.orma.example.orma;
 
-import com.github.gfx.android.orma.OrmaCore;
+import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.Book;
@@ -17,17 +17,17 @@ public class OrmaDatabase {
 
     static final List<Schema<?>> schemas = Arrays.<Schema<?>>asList(todoSchema);
 
-    final OrmaCore orma;
+    final OrmaConnection orma;
 
-    public OrmaDatabase(@NonNull OrmaCore orma) {
+    public OrmaDatabase(@NonNull OrmaConnection orma) {
         this.orma = orma;
     }
 
     public OrmaDatabase(@NonNull Context context, String filename) {
-        this(new OrmaCore(context, filename, schemas));
+        this(new OrmaConnection(context, filename, schemas));
     }
 
-    public OrmaCore getOrma() {
+    public OrmaConnection getOrma() {
         return orma;
     }
 

@@ -11,13 +11,13 @@ import android.util.Log;
 
 import java.util.List;
 
-public class OrmaCore extends SQLiteOpenHelper {
+public class OrmaConnection extends SQLiteOpenHelper {
 
     static final int VERSION = 1;
 
     final List<Schema<?>> schemas;
 
-    public OrmaCore(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
+    public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         super(context, filename, null, VERSION);
         this.schemas = schemas;
     }
