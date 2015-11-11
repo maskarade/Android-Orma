@@ -175,9 +175,9 @@ public abstract class Relation<T, R extends Relation> {
     }
 
     @Nullable
-    public T single() {
-        Cursor cursor = orma.query(schema.getTableName(), schema.getColumnNames(), getWhereClause(),
-                getWhereArgs(), groupBy, having, orderBy, getLimitClause());
+    public T singleOrNull() {
+        Cursor cursor = orma.query(schema.getTableName(), schema.getColumnNames(),
+                getWhereClause(), getWhereArgs(), groupBy, having, orderBy, "1");
 
         T model = null;
 
@@ -185,6 +185,17 @@ public abstract class Relation<T, R extends Relation> {
             model = schema.createModelFromCursor(cursor);
         }
         cursor.close();
+
+        return model;
+    }
+
+    @NonNull
+    public T single() {
+        T model = singleOrNull();
+
+        if (model == null) {
+            throw new AssertionError("Expected single value but nothing for " + schema.getTableName());
+        }
 
         return model;
     }

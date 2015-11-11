@@ -64,9 +64,16 @@ public class BookTest {
     public void single() throws Exception {
         Book book = db.fromBook().single();
 
-        assert book != null;
         assertThat(book.title, is("today"));
         assertThat(book.content, is("milk, banana"));
+    }
+
+    @Test
+    public void singleOrNull() throws Exception {
+        db.fromBook().delete();
+        Book book = db.fromBook().singleOrNull();
+
+        assertThat(book, is(nullValue()));
     }
 
     @Test
