@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
 
-public class TodoTest {
+public class BookTest {
 
     OrmaDatabase db;
 
@@ -31,17 +31,17 @@ public class TodoTest {
         db.getOrma().resetDatabase();
 
         {
-            Todo todo = new Todo();
-            todo.title = "today";
-            todo.content = "milk, banana";
-            db.insert(todo);
+            Book book = new Book();
+            book.title = "today";
+            book.content = "milk, banana";
+            db.insert(book);
         }
 
         {
-            Todo todo = new Todo();
-            todo.title = "friday";
-            todo.content = "apple";
-            db.insert(todo);
+            Book book = new Book();
+            book.title = "friday";
+            book.content = "apple";
+            db.insert(book);
         }
     }
 
@@ -52,65 +52,65 @@ public class TodoTest {
 
     @Test
     public void toList() throws Exception {
-        List<Todo> todos = db.fromTodo().toList();
-        assertThat(todos, hasSize(2));
-        assertThat(todos.get(0).title, is("today"));
-        assertThat(todos.get(0).content, is("milk, banana"));
+        List<Book> books = db.fromTodo().toList();
+        assertThat(books, hasSize(2));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
 
-        assertThat(todos.get(1).title, is("friday"));
-        assertThat(todos.get(1).content, is("apple"));
+        assertThat(books.get(1).title, is("friday"));
+        assertThat(books.get(1).content, is("apple"));
     }
 
     @Test
     public void single() throws Exception {
-        Todo todo = db.fromTodo().single();
+        Book book = db.fromTodo().single();
 
-        assert todo != null;
-        assertThat(todo.title, is("today"));
-        assertThat(todo.content, is("milk, banana"));
+        assert book != null;
+        assertThat(book.title, is("today"));
+        assertThat(book.content, is("milk, banana"));
     }
 
     @Test
     public void whereEquals() throws Exception {
-        List<Todo> todos = db.fromTodo().where("title = ?", "today").toList();
-        assertThat(todos, hasSize(1));
-        assertThat(todos.get(0).title, is("today"));
-        assertThat(todos.get(0).content, is("milk, banana"));
+        List<Book> books = db.fromTodo().where("title = ?", "today").toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
     }
 
     @Test
     public void whereLike() throws Exception {
-        List<Todo> todos = db.fromTodo().where("title LIKE ?", "t%").toList();
-        assertThat(todos, hasSize(1));
-        assertThat(todos.get(0).title, is("today"));
-        assertThat(todos.get(0).content, is("milk, banana"));
+        List<Book> books = db.fromTodo().where("title LIKE ?", "t%").toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
     }
 
     @Test
     public void orderBy() throws Exception {
-        List<Todo> todos = db.fromTodo().orderBy("id DESC").toList();
-        assertThat(todos, hasSize(2));
-        assertThat(todos.get(1).title, is("today"));
-        assertThat(todos.get(1).content, is("milk, banana"));
+        List<Book> books = db.fromTodo().orderBy("id DESC").toList();
+        assertThat(books, hasSize(2));
+        assertThat(books.get(1).title, is("today"));
+        assertThat(books.get(1).content, is("milk, banana"));
 
-        assertThat(todos.get(0).title, is("friday"));
-        assertThat(todos.get(0).content, is("apple"));
+        assertThat(books.get(0).title, is("friday"));
+        assertThat(books.get(0).content, is("apple"));
     }
 
     @Test
     public void limit() throws Exception {
-        List<Todo> todos = db.fromTodo().limit(1).toList();
-        assertThat(todos, hasSize(1));
-        assertThat(todos.get(0).title, is("today"));
-        assertThat(todos.get(0).content, is("milk, banana"));
+        List<Book> books = db.fromTodo().limit(1).toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
     }
 
     @Test
     public void limitAndOffset() throws Exception {
-        List<Todo> todos = db.fromTodo().limit(1).offset(1).toList();
-        assertThat(todos, hasSize(1));
-        assertThat(todos.get(0).title, is("friday"));
-        assertThat(todos.get(0).content, is("apple"));
+        List<Book> books = db.fromTodo().limit(1).offset(1).toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("friday"));
+        assertThat(books.get(0).content, is("apple"));
     }
 
     @Test
@@ -140,10 +140,10 @@ public class TodoTest {
             @Override
             public void execute() throws Exception {
                 for (int i = 0; i < 5; i++) {
-                    Todo todo = new Todo();
-                    todo.title = "friday";
-                    todo.content = "apple" + i;
-                    db.insert(todo);
+                    Book book = new Book();
+                    book.title = "friday";
+                    book.content = "apple" + i;
+                    db.insert(book);
                 }
             }
         });
@@ -158,10 +158,10 @@ public class TodoTest {
                 @Override
                 public void execute() throws Exception {
                     for (int i = 0; i < 5; i++) {
-                        Todo todo = new Todo();
-                        todo.title = "friday";
-                        todo.content = "apple" + i;
-                        db.insert(todo);
+                        Book book = new Book();
+                        book.title = "friday";
+                        book.content = "apple" + i;
+                        db.insert(book);
                     }
                     throw new RuntimeException("abort!");
                 }

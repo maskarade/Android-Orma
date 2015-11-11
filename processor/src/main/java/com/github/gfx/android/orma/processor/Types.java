@@ -31,12 +31,18 @@ public class Types {
     public static ClassName ColumnDef = ClassName.get(ormaPackageName, "ColumnDef");
     public static TypeName WildcardColumnDef = getColumnDef(WildcardTypeName.subtypeOf(TypeName.OBJECT));
     public static TypeName ColumnList = ParameterizedTypeName.get(List, WildcardColumnDef);
+    public static ClassName Relation = ClassName.get(ormaPackageName, "Relation");
+    public static ClassName OrmaConnection = ClassName.get(ormaPackageName, "OrmaCore");
 
-    public static ParameterizedTypeName getSchema(TypeName typeName) {
-        return ParameterizedTypeName.get(Schema, typeName);
+    public static ParameterizedTypeName getSchema(TypeName modelType) {
+        return ParameterizedTypeName.get(Schema, modelType);
     }
 
     public static ParameterizedTypeName getColumnDef(TypeName typeName) {
         return ParameterizedTypeName.get(ColumnDef, typeName);
+    }
+
+    public static ParameterizedTypeName getRelation(TypeName modelType, TypeName concreteRelationType) {
+        return ParameterizedTypeName.get(Relation, modelType, concreteRelationType);
     }
 }

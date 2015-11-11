@@ -29,6 +29,7 @@ public class OrmaProcessor extends AbstractProcessor {
 
         buildSchemas(roundEnv)
                 .peek(this::writeSchema)
+                .peek(this::writeRelation)
                 .forEach(databaseWriter::add);
 
         if (databaseWriter.isRequired()) {
@@ -41,20 +42,28 @@ public class OrmaProcessor extends AbstractProcessor {
         return false;
     }
 
-    public void writeSchema(SchemaDefinition schema) {
-        SchemaWriter schemaWriter = new SchemaWriter(schema, processingEnv);
-        TypeSpec typeSpec = schemaWriter.buildTypeSpec();
-        writeToFiler(schema.getElement(),
-                JavaFile.builder(schema.getPackageName(), typeSpec)
-                        .build());
-    }
-
     public Stream<SchemaDefinition> buildSchemas(RoundEnvironment roundEnv) {
         SchemaValidator validator = new SchemaValidator();
         return roundEnv
                 .getElementsAnnotatedWith(Table.class)
                 .stream()
                 .map(element -> new SchemaDefinition(validator.validate(element)));
+    }
+
+    public void writeSchema(SchemaDefinition schema) {
+        SchemaWriter writer = new SchemaWriter(schema, processingEnv);
+        writeToFilerForEachModel(schema, writer.buildTypeSpec());
+    }
+
+    public void writeRelation(SchemaDefinition schema) {
+        RelationWriter writer = new RelationWriter(schema, processingEnv);
+        writeToFilerForEachModel(schema, writer.buildTypeSpec());
+    }
+
+    public void writeToFilerForEachModel(SchemaDefinition schema, TypeSpec typeSpec) {
+        writeToFiler(schema.getElement(),
+                JavaFile.builder(schema.getPackageName(), typeSpec)
+                        .build());
     }
 
     public void writeToFiler(Element element, JavaFile javaFile) {

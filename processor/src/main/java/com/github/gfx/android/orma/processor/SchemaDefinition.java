@@ -12,10 +12,13 @@ public class SchemaDefinition {
 
     final ClassName schemaClassName;
 
+    final ClassName relationClassName;
+
     public SchemaDefinition(TypeElement typeElement) {
         this.typeElement = typeElement;
         this.modelClassName = ClassName.get(typeElement);
-        this.schemaClassName = ClassName.get(modelClassName.packageName(), modelClassName.simpleName() + "_Schema");
+        this.schemaClassName = helperClassName(modelClassName, "_Schema");
+        this.relationClassName = helperClassName(modelClassName, "_Relation");
     }
 
     public TypeElement getElement() {
@@ -26,12 +29,20 @@ public class SchemaDefinition {
         return schemaClassName.packageName();
     }
 
+    public ClassName getModelClassName() {
+        return modelClassName;
+    }
+
     public ClassName getSchemaClassName() {
         return schemaClassName;
     }
 
-    public ClassName getModelClassName() {
-        return modelClassName;
+    public ClassName getRelationClassName() {
+        return relationClassName;
+    }
+
+    private static ClassName helperClassName(ClassName modelClassName, String helperSuffix) {
+        return ClassName.get(modelClassName.packageName(), modelClassName.simpleName() + helperSuffix);
     }
 
     @Override
