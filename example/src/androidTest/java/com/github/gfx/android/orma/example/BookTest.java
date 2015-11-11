@@ -3,7 +3,6 @@ package com.github.gfx.android.orma.example;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.TransactionAbortException;
 import com.github.gfx.android.orma.TransactionTask;
-import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,9 +12,9 @@ import android.support.test.InstrumentationRegistry;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class BookTest {
 
@@ -28,7 +27,7 @@ public class BookTest {
     @Before
     public void setUp() throws Exception {
         db = new OrmaDatabase(getContext(), "test.db");
-        db.getOrma().resetDatabase();
+        db.getConnection().resetDatabase();
 
         {
             Book book = new Book();
@@ -47,12 +46,12 @@ public class BookTest {
 
     @Test
     public void count() throws Exception {
-        assertThat(db.fromTodo().count(), is(2L));
+        assertThat(db.fromBook().count(), is(2L));
     }
 
     @Test
     public void toList() throws Exception {
-        List<Book> books = db.fromTodo().toList();
+        List<Book> books = db.fromBook().toList();
         assertThat(books, hasSize(2));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -63,7 +62,7 @@ public class BookTest {
 
     @Test
     public void single() throws Exception {
-        Book book = db.fromTodo().single();
+        Book book = db.fromBook().single();
 
         assert book != null;
         assertThat(book.title, is("today"));
@@ -72,7 +71,7 @@ public class BookTest {
 
     @Test
     public void whereEquals() throws Exception {
-        List<Book> books = db.fromTodo().where("title = ?", "today").toList();
+        List<Book> books = db.fromBook().where("title = ?", "today").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -80,7 +79,7 @@ public class BookTest {
 
     @Test
     public void whereLike() throws Exception {
-        List<Book> books = db.fromTodo().where("title LIKE ?", "t%").toList();
+        List<Book> books = db.fromBook().where("title LIKE ?", "t%").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -88,7 +87,7 @@ public class BookTest {
 
     @Test
     public void orderBy() throws Exception {
-        List<Book> books = db.fromTodo().orderBy("id DESC").toList();
+        List<Book> books = db.fromBook().orderBy("id DESC").toList();
         assertThat(books, hasSize(2));
         assertThat(books.get(1).title, is("today"));
         assertThat(books.get(1).content, is("milk, banana"));
@@ -99,7 +98,7 @@ public class BookTest {
 
     @Test
     public void limit() throws Exception {
-        List<Book> books = db.fromTodo().limit(1).toList();
+        List<Book> books = db.fromBook().limit(1).toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -107,7 +106,7 @@ public class BookTest {
 
     @Test
     public void limitAndOffset() throws Exception {
-        List<Book> books = db.fromTodo().limit(1).offset(1).toList();
+        List<Book> books = db.fromBook().limit(1).offset(1).toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("friday"));
         assertThat(books.get(0).content, is("apple"));
@@ -116,7 +115,7 @@ public class BookTest {
     @Test
     public void offset() throws Exception {
         try {
-            db.fromTodo().offset(1).toList();
+            db.fromBook().offset(1).toList();
             fail("not reached");
         } catch (Relation.InvalidStatementException e) {
             assertThat(e, is(notNullValue()));
@@ -125,13 +124,13 @@ public class BookTest {
 
     @Test
     public void delete() throws Exception {
-        int result = db.fromTodo()
+        int result = db.fromBook()
                 .where("title = ?", "today")
                 .delete();
 
         assertThat(result, is(1));
-        assertThat(db.fromTodo().count(), is(1L));
-        assertThat(db.fromTodo().single().title, is("friday"));
+        assertThat(db.fromBook().count(), is(1L));
+        assertThat(db.fromBook().single().title, is("friday"));
     }
 
     @Test
@@ -148,7 +147,7 @@ public class BookTest {
             }
         });
 
-        assertThat(db.fromTodo().count(), is(7L));
+        assertThat(db.fromBook().count(), is(7L));
     }
 
     @Test
@@ -171,7 +170,7 @@ public class BookTest {
             assertThat(e.getCause(), instanceOf(RuntimeException.class));
         }
 
-        assertThat(db.fromTodo().count(), is(2L));
+        assertThat(db.fromBook().count(), is(2L));
     }
 
 }

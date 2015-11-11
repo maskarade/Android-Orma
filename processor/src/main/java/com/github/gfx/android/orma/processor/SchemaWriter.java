@@ -1,9 +1,5 @@
 package com.github.gfx.android.orma.processor;
 
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.Index;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Unique;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -18,8 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
 public class SchemaWriter {
@@ -61,11 +55,9 @@ public class SchemaWriter {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
 
         List<FieldSpec> columns = new ArrayList<>();
-        schema.getElement().getEnclosedElements().forEach(element -> {
-            if (element.getAnnotation(Column.class) != null || element.getAnnotation(PrimaryKey.class) != null) {
 
-                columns.add(buildColumnFieldSpec(element));
-            }
+        schema.getColumns().forEach(columnDef -> {
+            columns.add(buildColumnFieldSpec(columnDef));
         });
 
         fieldSpecs.addAll(columns);
@@ -94,33 +86,13 @@ public class SchemaWriter {
         return fieldSpecs;
     }
 
-    public FieldSpec buildColumnFieldSpec(Element element) {
-        // TODO: autoincrement, conflict clause, default value, etc...
-        // See https://www.sqlite.org/lang_createtable.html for full specification
-        PrimaryKey primaryKeyAnnotation = element.getAnnotation(PrimaryKey.class);
-        Index indexAnnotation = element.getAnnotation(Index.class);
-        Unique uniqueAnnotation = element.getAnnotation(Unique.class);
-
-        boolean primaryKey = primaryKeyAnnotation != null;
-        boolean index = indexAnnotation != null || primaryKey;
-        boolean unique = uniqueAnnotation != null || primaryKey;
-
-        boolean nullable = false;
-        for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
-            // allow anything named "Nullable"
-            if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
-                nullable = true;
-            }
-        }
-
-        String columnName = element.getSimpleName().toString();
-        TypeName columnType = ClassName.get(element.asType());
-        TypeName columnDefType = Types.getColumnDef(columnType.box());
+    public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
         CodeBlock initializer = CodeBlock.builder()
                 .add("new $T($S, $T.class, $L, $L, $L, $L)",
-                        columnDefType, columnName, element.asType(), nullable, primaryKey, index, unique)
+                        c.getColumnDefType(), c.getName(), c.getType(),
+                        c.nullable, c.primaryKey, c.indexed, c.unique)
                 .build();
-        return FieldSpec.builder(columnDefType, columnName)
+        return FieldSpec.builder(c.getColumnDefType(), c.getName())
                 .addModifiers(publicStaticFinal)
                 .initializer(initializer)
                 .build();
@@ -208,7 +180,7 @@ public class SchemaWriter {
                                 ParameterSpec.builder(schema.getModelClassName(), "model")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                         .build())
-                        .addCode(CodeBlock.builder().addStatement("return null").build())
+                        .addCode(buildSerializeModelToContentValues())
                         .build()
         );
 
@@ -221,10 +193,59 @@ public class SchemaWriter {
                                 ParameterSpec.builder(Types.Cursor, "cursor")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                         .build())
-                        .addCode(CodeBlock.builder().addStatement("return null").build())
+                        .addCode(buildCreateModelFromCursor())
                         .build()
         );
 
         return methodSpecs;
+    }
+
+    private CodeBlock buildSerializeModelToContentValues() {
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        builder.addStatement("$T contents = new $T()", Types.ContentValues, Types.ContentValues);
+
+        schema.getColumns().forEach(c -> {
+            if (c.primaryKey
+                    && (c.getType().equals(TypeName.INT) || c.getType().equals(TypeName.LONG))) {
+                builder.beginControlFlow("if (model.$L != 0)", c.getName());
+                builder.addStatement("contents.put($S, model.$L)", c.getName(), c.getName());
+                builder.endControlFlow();
+            } else {
+                builder.addStatement("contents.put($S, model.$L)", c.getName(), c.getName());
+            }
+        });
+
+        builder.addStatement("return contents");
+
+        return builder.build();
+    }
+
+    private CodeBlock buildCreateModelFromCursor() {
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
+
+        List<ColumnDefinition> columns = schema.getColumns();
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnDefinition c = columns.get(i);
+            String getter = "get" + capitalize(c.getType());
+            builder.addStatement("model.$L = cursor.$L($L)", c.getName(), getter, i);
+        }
+
+        builder.addStatement("return model");
+
+        return builder.build();
+    }
+
+    private String capitalize(TypeName type) {
+        if (type.isPrimitive()) {
+            String s = type.toString();
+            return s.substring(0, 1).toUpperCase() + s.substring(1);
+        } else if (type instanceof ClassName) {
+            return ((ClassName) type).simpleName();
+        } else {
+            throw new UnsupportedOperationException("TODO: " + type);
+        }
     }
 }

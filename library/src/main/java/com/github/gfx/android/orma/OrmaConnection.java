@@ -27,12 +27,14 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return getWritableDatabase();
     }
 
-    public long insert(String table, ContentValues values) {
-        // TODO: support transaction blocks
+    public <T> long insert(Schema<T> schema, T model) {
         SQLiteDatabase db = getDatabase();
-        return db.insertWithOnConflict(table, null, values, SQLiteDatabase.CONFLICT_ROLLBACK);
+        return db.insertWithOnConflict(
+                schema.getTableName(),
+                null,
+                schema.serializeModelToContentValues(model),
+                SQLiteDatabase.CONFLICT_ROLLBACK);
     }
-
 
     public long update(String table, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getDatabase();

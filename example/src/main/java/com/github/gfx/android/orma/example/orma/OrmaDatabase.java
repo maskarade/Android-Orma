@@ -41,12 +41,6 @@ public class OrmaDatabase {
     }
 
     public long insert(Book model) {
-        // FIXME
-        return orma.insert(todoSchema.getTableName(), todoSchema.serializeModelToContentValues(model));
-    }
-
-    public long update(Book model, String whereClause, String[] whereArgs) {
-        // FIXME
-        return orma.update(todoSchema.getTableName(), todoSchema.serializeModelToContentValues(model), whereClause, whereArgs);
+        return orma.insert(todoSchema, model);
     }
 }
