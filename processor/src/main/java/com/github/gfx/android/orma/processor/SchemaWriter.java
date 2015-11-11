@@ -10,6 +10,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -18,8 +19,8 @@ import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
 
 public class SchemaWriter {
 
@@ -59,29 +60,15 @@ public class SchemaWriter {
     public List<FieldSpec> buildFieldSpecs() {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
 
+        List<FieldSpec> columns = new ArrayList<>();
         schema.getElement().getEnclosedElements().forEach(element -> {
-            if (element.getAnnotation(Column.class) != null && element instanceof VariableElement) {
-                PrimaryKey primaryKey = element.getAnnotation(PrimaryKey.class);
-                Index index = element.getAnnotation(Index.class);
-                Unique unique = element.getAnnotation(Unique.class);
+            if (element.getAnnotation(Column.class) != null || element.getAnnotation(PrimaryKey.class) != null) {
 
-                boolean nullable = false;
-                for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
-                    if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
-                        nullable = true;
-                    }
-                }
-
-                // new ColumnDef<>(name, type, nullable, primaryKey, indexed, unique)
-                String columnName = element.getSimpleName().toString();
-                fieldSpecs.add(
-                        FieldSpec.builder(Types.getColumnDef(ClassName.get(element.asType())), columnName)
-                                .addModifiers(publicStaticFinal)
-                                .initializer("null")
-                                .build()
-                );
+                columns.add(buildColumnFieldSpec(element));
             }
         });
+
+        fieldSpecs.addAll(columns);
 
         fieldSpecs.add(
                 FieldSpec.builder(Types.String, TABLE_NAME)
@@ -93,18 +80,88 @@ public class SchemaWriter {
         fieldSpecs.add(
                 FieldSpec.builder(Types.ColumnList, COLUMNS)
                         .addModifiers(publicStaticFinal)
-                        .initializer("new $T<>()", Types.ArrayList)
+                        .initializer(buildColumnsInitializer(columns))
                         .build()
         );
 
         fieldSpecs.add(
                 FieldSpec.builder(Types.StringArray, COLUMN_NAMES)
                         .addModifiers(publicStaticFinal)
-                        .initializer("$L", "{}")
+                        .initializer(buildColumnNamesInitializer(columns))
                         .build()
         );
 
         return fieldSpecs;
+    }
+
+    public FieldSpec buildColumnFieldSpec(Element element) {
+        // TODO: autoincrement, conflict clause, default value, etc...
+        // See https://www.sqlite.org/lang_createtable.html for full specification
+        PrimaryKey primaryKeyAnnotation = element.getAnnotation(PrimaryKey.class);
+        Index indexAnnotation = element.getAnnotation(Index.class);
+        Unique uniqueAnnotation = element.getAnnotation(Unique.class);
+
+        boolean primaryKey = primaryKeyAnnotation != null;
+        boolean index = indexAnnotation != null || primaryKey;
+        boolean unique = uniqueAnnotation != null || primaryKey;
+
+        boolean nullable = false;
+        for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
+            // allow anything named "Nullable"
+            if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
+                nullable = true;
+            }
+        }
+
+        String columnName = element.getSimpleName().toString();
+        TypeName columnType = ClassName.get(element.asType());
+        TypeName columnDefType = Types.getColumnDef(columnType.box());
+        CodeBlock initializer = CodeBlock.builder()
+                .add("new $T($S, $T.class, $L, $L, $L, $L)",
+                        columnDefType, columnName, element.asType(), nullable, primaryKey, index, unique)
+                .build();
+        return FieldSpec.builder(columnDefType, columnName)
+                .addModifiers(publicStaticFinal)
+                .initializer(initializer)
+                .build();
+    }
+
+    public CodeBlock buildColumnsInitializer(List<FieldSpec> columns) {
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        builder.add("$T.<$T>asList(\n", Types.Arrays, Types.WildcardColumnDef).indent();
+
+        for (int i = 0; i < columns.size(); i++) {
+            builder.add("$N", columns.get(i));
+            if ((i + 1) != columns.size()) {
+                builder.add(",\n");
+            } else {
+                builder.add("\n");
+            }
+        }
+
+        builder.unindent().add(")");
+
+        return builder.build();
+    }
+
+    public CodeBlock buildColumnNamesInitializer(List<FieldSpec> columns) {
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        builder.add("{\n").indent();
+
+        for (int i = 0; i < columns.size(); i++) {
+            builder.add("$S", columns.get(i).name);
+            if ((i + 1) != columns.size()) {
+                builder.add(",\n");
+            } else {
+                builder.add("\n");
+            }
+        }
+
+        builder.unindent().add("}");
+
+        return builder.build();
     }
 
     public List<MethodSpec> buildMethodSpecs() {

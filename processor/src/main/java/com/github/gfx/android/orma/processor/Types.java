@@ -29,8 +29,8 @@ public class Types {
     // Orma types
     public static ClassName Schema = ClassName.get(ormaPackageName, "Schema");
     public static ClassName ColumnDef = ClassName.get(ormaPackageName, "ColumnDef");
-    public static TypeName WildcardColumn = getColumnDef(WildcardTypeName.subtypeOf(TypeName.OBJECT));
-    public static TypeName ColumnList = ParameterizedTypeName.get(List, WildcardColumn);
+    public static TypeName WildcardColumnDef = getColumnDef(WildcardTypeName.subtypeOf(TypeName.OBJECT));
+    public static TypeName ColumnList = ParameterizedTypeName.get(List, WildcardColumnDef);
 
     public static ParameterizedTypeName getSchema(TypeName typeName) {
         return ParameterizedTypeName.get(Schema, typeName);
