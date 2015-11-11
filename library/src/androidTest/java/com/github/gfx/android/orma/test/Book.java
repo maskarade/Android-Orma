@@ -20,7 +20,11 @@ public class Book {
     @Nullable
     public String content;
 
+    // TODO: has-one relations
+    // @Column
+    // public Publisher publisher;
+
     // TODO: has-many relations
     // @Column
-    // public List<Authors>
+    // public HasMany<Author> authors;
 }
