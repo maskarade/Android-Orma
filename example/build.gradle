@@ -27,6 +27,7 @@ android {
 dependencies {
     apt project(':processor')
     compile project(':library')
+    provided 'javax.annotation:jsr250-api:1.0'
     compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.android.support:design:23.1.0'
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.2'
