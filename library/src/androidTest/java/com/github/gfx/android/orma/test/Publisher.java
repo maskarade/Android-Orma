@@ -6,7 +6,7 @@ import com.github.gfx.android.orma.annotation.Table;
 @Table
 public class Publisher {
 
-    @Column
+    @Column(unique = true)
     String name;
 
     @Column

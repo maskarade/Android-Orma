@@ -1,8 +1,7 @@
 package com.github.gfx.android.orma.processor;
 
-import com.github.gfx.android.orma.annotation.Index;
+import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Unique;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -27,14 +26,12 @@ public class ColumnDefinition {
 
         // TODO: autoincrement, conflict clause, default value, etc...
         // See https://www.sqlite.org/lang_createtable.html for full specification
-
+        Column column = element.getAnnotation(Column.class);
         PrimaryKey primaryKeyAnnotation = element.getAnnotation(PrimaryKey.class);
-        Index indexAnnotation = element.getAnnotation(Index.class);
-        Unique uniqueAnnotation = element.getAnnotation(Unique.class);
 
         primaryKey = primaryKeyAnnotation != null;
-        indexed = indexAnnotation != null || primaryKey;
-        unique = uniqueAnnotation != null || primaryKey;
+        indexed = primaryKey || column.indexed();
+        unique = primaryKey || column.unique();
 
         nullable = hasNullableAnnotation(element);
     }
