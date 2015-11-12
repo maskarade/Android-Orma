@@ -21,7 +21,9 @@ import javax.tools.Diagnostic;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
         "com.github.gfx.android.orma.annotation.*",
-        "com.google.gson.annotations.SerializedName"})
+        "com.google.gson.annotations.SerializedName", // GSON
+        "com.fasterxml.jackson.annotation.JsonProperty", // Jackson
+})
 public class OrmaProcessor extends AbstractProcessor {
 
     @Override

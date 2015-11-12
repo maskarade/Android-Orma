@@ -2,6 +2,7 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.annotation.Table;
 import com.squareup.javapoet.ClassName;
 
 import java.util.ArrayList;
@@ -19,13 +20,18 @@ public class SchemaDefinition {
 
     final ClassName relationClassName;
 
+    final String tableName;
+
     final List<ColumnDefinition> columns = new ArrayList<>();
 
     public SchemaDefinition(TypeElement typeElement) {
         this.typeElement = typeElement;
         this.modelClassName = ClassName.get(typeElement);
-        this.schemaClassName = helperClassName(modelClassName, "_Schema");
-        this.relationClassName = helperClassName(modelClassName, "_Relation");
+
+        Table table = typeElement.getAnnotation(Table.class);
+        this.schemaClassName = helperClassName(table.schemaClassName(), modelClassName, "_Schema");
+        this.relationClassName = helperClassName(table.relationClassName(), modelClassName, "_Relation");
+        this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
         typeElement.getEnclosedElements().forEach(element -> {
             if (element.getAnnotation(Column.class) != null || element.getAnnotation(PrimaryKey.class) != null) {
@@ -58,8 +64,18 @@ public class SchemaDefinition {
         return columns;
     }
 
-    private static ClassName helperClassName(ClassName modelClassName, String helperSuffix) {
-        return ClassName.get(modelClassName.packageName(), modelClassName.simpleName() + helperSuffix);
+    private static ClassName helperClassName(String specifiedName, ClassName modelClassName, String helperSuffix) {
+        String simpleName = firstNonEmptyName(specifiedName, modelClassName.simpleName() + helperSuffix);
+        return ClassName.get(modelClassName.packageName(), simpleName);
+    }
+
+    static String firstNonEmptyName(String... names) {
+        for (String name : names) {
+            if (name != null && !name.equals("")) {
+                return name;
+            }
+        }
+        throw new AssertionError("No non-empty string here");
     }
 
     @Override

@@ -14,18 +14,7 @@ public @interface Table {
      */
     String value() default "";
 
-    /**
-     * @return The list of indexed columns
-     */
-    String[] indexed() default {};
+    String schemaClassName() default "";
 
-    /**
-     * @return The list of unique columns
-     */
-    String[] unique() default {};
-
-    /**
-     * @return The primary key columns
-     */
-    String primaryKey() default "";
+    String relationClassName() default "";
 }

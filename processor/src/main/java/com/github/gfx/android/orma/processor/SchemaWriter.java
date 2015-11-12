@@ -65,7 +65,7 @@ public class SchemaWriter {
         fieldSpecs.add(
                 FieldSpec.builder(Types.String, TABLE_NAME)
                         .addModifiers(publicStaticFinal)
-                        .initializer("$S", schema.getModelClassName().simpleName())
+                        .initializer("$S", schema.tableName)
                         .build()
         );
 
@@ -89,10 +89,10 @@ public class SchemaWriter {
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
         CodeBlock initializer = CodeBlock.builder()
                 .add("new $T($S, $T.class, $L, $L, $L, $L)",
-                        c.getColumnDefType(), c.getName(), c.getType(),
+                        c.getColumnDefType(), c.columnName, c.getType(),
                         c.nullable, c.primaryKey, c.indexed, c.unique)
                 .build();
-        return FieldSpec.builder(c.getColumnDefType(), c.getName())
+        return FieldSpec.builder(c.getColumnDefType(), c.name)
                 .addModifiers(publicStaticFinal)
                 .initializer(initializer)
                 .build();
@@ -123,7 +123,7 @@ public class SchemaWriter {
         builder.add("{\n").indent();
 
         for (int i = 0; i < columns.size(); i++) {
-            builder.add("$S", columns.get(i).name);
+            builder.add("$N.name", columns.get(i));
             if ((i + 1) != columns.size()) {
                 builder.add(",\n");
             } else {
@@ -208,11 +208,11 @@ public class SchemaWriter {
         schema.getColumns().forEach(c -> {
             if (c.primaryKey
                     && (c.getType().equals(TypeName.INT) || c.getType().equals(TypeName.LONG))) {
-                builder.beginControlFlow("if (model.$L != 0)", c.getName());
-                builder.addStatement("contents.put($S, model.$L)", c.getName(), c.getName());
+                builder.beginControlFlow("if (model.$L != 0)", c.name);
+                builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
                 builder.endControlFlow();
             } else {
-                builder.addStatement("contents.put($S, model.$L)", c.getName(), c.getName());
+                builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
             }
         });
 
@@ -230,7 +230,7 @@ public class SchemaWriter {
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
             String getter = "get" + capitalize(c.getType());
-            builder.addStatement("model.$L = cursor.$L($L)", c.getName(), getter, i);
+            builder.addStatement("model.$L = cursor.$L($L)", c.name, getter, i);
         }
 
         builder.addStatement("return model");

@@ -16,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-public class BookTest {
+public class RelationTest {
 
     OrmaDatabase db;
 
@@ -180,4 +180,29 @@ public class BookTest {
         assertThat(db.fromBook().count(), is(2L));
     }
 
+    @Test
+    public void initAndInsertForSecondTable() throws Exception {
+        {
+            Publisher publisher = new Publisher();
+            publisher.name = "The Fire";
+            publisher.startedYear = 1998;
+            publisher.startedMonth = 12;
+            db.insert(publisher);
+        }
+
+        {
+            Publisher publisher = new Publisher();
+            publisher.name = "The Ice";
+            publisher.startedYear = 2012;
+            publisher.startedMonth = 6;
+            db.insert(publisher);
+        }
+
+        assertThat(db.fromPublisher().count(), is(2L));
+
+        Publisher publisher = db.fromPublisher().single();
+        assertThat(publisher.name, is("The Fire"));
+        assertThat(publisher.startedYear, is(1998));
+        assertThat(publisher.startedMonth, is(12));
+    }
 }
