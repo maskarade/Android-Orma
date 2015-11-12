@@ -5,27 +5,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Defines a virtual table.
+ *
+ * See https://www.sqlite.org/fts3.html for details.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface Table {
+public @interface VirtualTable {
 
     /**
      * @return The SQLite table name in the database
      */
     String value() default "";
 
-    /**
-     * @return The list of indexed columns
-     */
-    String[] indexed() default {};
+    String using() default "";
 
-    /**
-     * @return The list of unique columns
-     */
-    String[] unique() default {};
+    String content() default "";
 
-    /**
-     * @return The primary key columns
-     */
-    String primaryKey() default "";
 }

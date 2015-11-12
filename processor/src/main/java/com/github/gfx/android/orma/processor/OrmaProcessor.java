@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Table;
+import com.github.gfx.android.orma.annotation.VirtualTable;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
@@ -27,10 +28,15 @@ public class OrmaProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         DatabaseWriter databaseWriter = new DatabaseWriter(processingEnv);
 
-        buildSchemas(roundEnv)
+        buildTableSchemas(roundEnv)
                 .peek(this::writeSchema)
                 .peek(this::writeRelation)
                 .forEach(databaseWriter::add);
+
+        buildVirtualTableSchemas(roundEnv)
+                .peek(schema -> {
+                    throw new RuntimeException("@VirtualTable is not yet implemented.");
+                });
 
         if (databaseWriter.isRequired()) {
             writeToFiler(null,
@@ -42,10 +48,18 @@ public class OrmaProcessor extends AbstractProcessor {
         return false;
     }
 
-    public Stream<SchemaDefinition> buildSchemas(RoundEnvironment roundEnv) {
+    public Stream<SchemaDefinition> buildTableSchemas(RoundEnvironment roundEnv) {
         SchemaValidator validator = new SchemaValidator();
         return roundEnv
                 .getElementsAnnotatedWith(Table.class)
+                .stream()
+                .map(element -> new SchemaDefinition(validator.validate(element)));
+    }
+
+    public Stream<SchemaDefinition> buildVirtualTableSchemas(RoundEnvironment roundEnv) {
+        SchemaValidator validator = new SchemaValidator();
+        return roundEnv
+                .getElementsAnnotatedWith(VirtualTable.class)
                 .stream()
                 .map(element -> new SchemaDefinition(validator.validate(element)));
     }
