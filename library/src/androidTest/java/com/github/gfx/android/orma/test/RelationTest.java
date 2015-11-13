@@ -181,6 +181,29 @@ public class RelationTest {
     }
 
     @Test
+    public void reuseCursor() throws Exception {
+        List<Book> books = db.fromBook().where("title = ?", "today").toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
+
+        books = db.fromBook().where("title = ?", "friday").toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("friday"));
+        assertThat(books.get(0).content, is("apple"));
+
+        books = db.fromBook().where("title = ?", "today").toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
+
+        books = db.fromBook().where("title = ?", "friday").toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("friday"));
+        assertThat(books.get(0).content, is("apple"));
+    }
+
+    @Test
     public void initAndInsertForSecondTable() throws Exception {
         {
             Publisher publisher = new Publisher();

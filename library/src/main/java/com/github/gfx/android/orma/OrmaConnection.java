@@ -3,8 +3,12 @@ package com.github.gfx.android.orma;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
+import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQuery;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -56,7 +60,25 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public Cursor query(String table, String[] columns, String whereClause, String[] whereArgs,
             String groupBy, String having, String orderBy, String limit) {
         SQLiteDatabase db = getDatabase();
-        return db.query(table, columns, whereClause, whereArgs, groupBy, having, orderBy, limit);
+
+        String sql = SQLiteQueryBuilder.buildQueryString(
+                false, table, columns, whereClause, groupBy, having, orderBy, limit);
+
+        // To reuse cursor for each query
+        SQLiteDatabase.CursorFactory cursorFactory = new SQLiteDatabase.CursorFactory() {
+
+            SQLiteCursor cursor;
+
+            @Override
+            public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
+                if (cursor == null) {
+                    cursor = new SQLiteCursor(driver, editTable, query);
+                }
+                return cursor;
+            }
+        };
+
+        return db.rawQueryWithFactory(cursorFactory, sql, whereArgs, table);
     }
 
     public int delete(@NonNull String table, @Nullable String whereClause, @Nullable String[] whereArgs) {
