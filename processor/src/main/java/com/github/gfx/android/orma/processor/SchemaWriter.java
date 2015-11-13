@@ -206,8 +206,7 @@ public class SchemaWriter {
         builder.addStatement("$T contents = new $T()", Types.ContentValues, Types.ContentValues);
 
         schema.getColumns().forEach(c -> {
-            if (c.primaryKey
-                    && (c.getType().equals(TypeName.INT) || c.getType().equals(TypeName.LONG))) {
+            if (c.primaryKey && looksLikeIntegerType(c.getType())) {
                 builder.beginControlFlow("if (model.$L != 0)", c.name);
                 builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
                 builder.endControlFlow();
@@ -219,6 +218,13 @@ public class SchemaWriter {
         builder.addStatement("return contents");
 
         return builder.build();
+    }
+
+    boolean looksLikeIntegerType(TypeName type) {
+        return type.equals(TypeName.INT)
+                || type.equals(TypeName.LONG)
+                || type.equals(TypeName.SHORT)
+                || type.equals(TypeName.BYTE);
     }
 
     private CodeBlock buildCreateModelFromCursor() {
