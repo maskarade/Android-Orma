@@ -29,6 +29,7 @@ android {
 dependencies {
     apt project(':processor')
     compile project(':library')
+    compile 'io.realm:realm-android:0.+'
     provided 'javax.annotation:jsr250-api:1.0'
     compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.android.support:design:23.1.0'

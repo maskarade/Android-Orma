@@ -78,6 +78,9 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * Drops and creates all the tables. This is provided for testing.
+     */
     public void resetDatabase() {
         transaction(new TransactionTask() {
             @Override

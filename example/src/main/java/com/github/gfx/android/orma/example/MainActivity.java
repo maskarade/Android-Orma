@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_benchmark) {
             startActivity(BenchmarkActivity.createIntent(this));
-            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_share) {
             Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_send) {
