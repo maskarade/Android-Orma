@@ -74,6 +74,14 @@ public class BenchmarkActivity extends AppCompatActivity {
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
 
+        db.fromTodo().delete();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.clear(RealmTodo.class);
+            }
+        });
+
         startInsertWithOrma()
                 .flatMap(new Func1<Result, Single<Result>>() {
                     @Override
