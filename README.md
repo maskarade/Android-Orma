@@ -1,4 +1,4 @@
-# Android-Orma
+# Orma for Android [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master)
 
 This is an **alpha** software and the interface will change until released.
 

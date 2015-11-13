@@ -1,0 +1,11 @@
+machine:
+    services:
+        - docker
+
+dependencies:
+    override:
+        - docker build -t test .
+
+test:
+    override:
+        - docker run test
