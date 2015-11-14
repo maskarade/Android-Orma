@@ -49,7 +49,7 @@ public class RelationTest {
                 Book book = new Book();
                 book.title = "today";
                 book.content = "milk, banana";
-                book.publisher = HasOne.just(publisher.id, publisher);
+                book.publisher = HasOne.id(publisher.id);
                 return book;
             }
         });
@@ -60,7 +60,7 @@ public class RelationTest {
                 Book book = new Book();
                 book.title = "friday";
                 book.content = "apple";
-                book.publisher = HasOne.just(publisher.id, publisher);
+                book.publisher = HasOne.id(publisher.id);
                 return book;
             }
         });
@@ -173,7 +173,7 @@ public class RelationTest {
                     Book book = new Book();
                     book.title = "friday";
                     book.content = "apple" + i;
-                    book.publisher = HasOne.just(publisher.id, publisher);
+                    book.publisher = HasOne.id(publisher.id);
                     db.insert(book);
                 }
             }
@@ -264,6 +264,7 @@ public class RelationTest {
         assertThat(publisher.startedMonth, is(12));
     }
 
+    @Test
     public void testHasManyRelation() throws Exception {
         final Publisher a = db.createPublisher(new ModelBuilder<Publisher>() {
             @Override
@@ -289,7 +290,7 @@ public class RelationTest {
                 @Override
                 public Book build() {
                     Book book = new Book();
-                    book.publisher = HasOne.just(a.id, a);
+                    book.publisher = HasOne.id(a.id);
                     book.title = "a " + x;
                     return book;
                 }
@@ -302,7 +303,7 @@ public class RelationTest {
                 @Override
                 public Book build() {
                     Book book = new Book();
-                    book.publisher = HasOne.just(b.id, b);
+                    book.publisher = HasOne.id(b.id);
                     book.title = "b " + x;
                     return book;
                 }

@@ -10,6 +10,15 @@ public class HasOne<T> {
         return new HasOne<>(id, model);
     }
 
+    public static <T> HasOne<T> id(final long id) {
+        return new HasOne<>(id, Single.create(new Single.OnSubscribe<T>() {
+            @Override
+            public void call(SingleSubscriber<? super T> singleSubscriber) {
+                singleSubscriber.onError(new NoValueException("No value set for id=" + id));
+            }
+        }));
+    }
+
     final long id;
 
     final Single<T> single;
