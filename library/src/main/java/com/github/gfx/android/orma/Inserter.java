@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma;
 
 import android.database.sqlite.SQLiteStatement;
+import android.support.annotation.NonNull;
 
 public class Inserter<T> {
 
@@ -13,8 +14,7 @@ public class Inserter<T> {
         this.statement = statement;
     }
 
-    public long insert(T model) {
-        statement.clearBindings();
+    public long insert(@NonNull T model) {
         schema.bindArgs(statement, model);
         return statement.executeInsert();
     }
