@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -128,10 +129,9 @@ public abstract class Relation<T, R extends Relation> {
         }
     }
 
-    public long update(ModelBuilder<T> modelBuilder) {
+    public long update(@NonNull ContentValues contents) {
         assertNoExtraClausesForDeleteOrUpdate("update");
-        throw new UnsupportedOperationException("Not yet implemented");
-        //return connection.update(schema.getTableName(), modelBuilder.buildContentValues(), getWhereClause(), getWhereArgs());
+        return connection.update(schema.getTableName(), contents, getWhereClause(), getWhereArgs());
     }
 
     public int delete() {

@@ -20,6 +20,8 @@ public class SchemaDefinition {
 
     final ClassName relationClassName;
 
+    final ClassName updateBuilderClassName;
+
     final String tableName;
 
     final List<ColumnDefinition> columns = new ArrayList<>();
@@ -31,6 +33,7 @@ public class SchemaDefinition {
         Table table = typeElement.getAnnotation(Table.class);
         this.schemaClassName = helperClassName(table.schemaClassName(), modelClassName, "_Schema");
         this.relationClassName = helperClassName(table.relationClassName(), modelClassName, "_Relation");
+        this.updateBuilderClassName = helperClassName(table.updateClassName(), modelClassName, "_UpdateBuilder");
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
         typeElement.getEnclosedElements().forEach(element -> {
@@ -58,6 +61,10 @@ public class SchemaDefinition {
 
     public ClassName getRelationClassName() {
         return relationClassName;
+    }
+
+    public ClassName getUpdateBuilderClassName() {
+        return updateBuilderClassName;
     }
 
     public List<ColumnDefinition> getColumns() {

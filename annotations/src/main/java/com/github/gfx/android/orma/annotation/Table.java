@@ -17,4 +17,6 @@ public @interface Table {
     String schemaClassName() default "";
 
     String relationClassName() default "";
+
+    String updateClassName() default "";
 }

@@ -33,6 +33,7 @@ public class OrmaProcessor extends AbstractProcessor {
         buildTableSchemas(roundEnv)
                 .peek(this::writeSchema)
                 .peek(this::writeRelation)
+                .peek(this::writeBuilder)
                 .forEach(databaseWriter::add);
 
         buildVirtualTableSchemas(roundEnv)
@@ -73,6 +74,11 @@ public class OrmaProcessor extends AbstractProcessor {
 
     public void writeRelation(SchemaDefinition schema) {
         RelationWriter writer = new RelationWriter(schema, processingEnv);
+        writeToFilerForEachModel(schema, writer.buildTypeSpec());
+    }
+
+    private void writeBuilder(SchemaDefinition schema) {
+        UpdateBuilderWriter writer = new UpdateBuilderWriter(schema, processingEnv);
         writeToFilerForEachModel(schema, writer.buildTypeSpec());
     }
 
