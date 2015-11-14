@@ -1,6 +1,6 @@
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.HasOne;
+import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.ModelBuilder;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.TransactionAbortException;
@@ -49,7 +49,7 @@ public class RelationTest {
                 Book book = new Book();
                 book.title = "today";
                 book.content = "milk, banana";
-                book.publisher = HasOne.id(publisher.id);
+                book.publisher = SingleRelation.id(publisher.id);
                 return book;
             }
         });
@@ -60,7 +60,7 @@ public class RelationTest {
                 Book book = new Book();
                 book.title = "friday";
                 book.content = "apple";
-                book.publisher = HasOne.id(publisher.id);
+                book.publisher = SingleRelation.id(publisher.id);
                 return book;
             }
         });
@@ -173,7 +173,7 @@ public class RelationTest {
                     Book book = new Book();
                     book.title = "friday";
                     book.content = "apple" + i;
-                    book.publisher = HasOne.id(publisher.id);
+                    book.publisher = SingleRelation.id(publisher.id);
                     db.insert(book);
                 }
             }
@@ -290,7 +290,7 @@ public class RelationTest {
                 @Override
                 public Book build() {
                     Book book = new Book();
-                    book.publisher = HasOne.id(a.id);
+                    book.publisher = SingleRelation.id(a.id);
                     book.title = "a " + x;
                     return book;
                 }
@@ -303,7 +303,7 @@ public class RelationTest {
                 @Override
                 public Book build() {
                     Book book = new Book();
-                    book.publisher = HasOne.id(b.id);
+                    book.publisher = SingleRelation.id(b.id);
                     book.title = "b " + x;
                     return book;
                 }

@@ -284,10 +284,10 @@ public class SchemaWriter {
             RelationDefinition r = c.getRelation();
             if (r == null) {
                 builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
-            } else if (r.relationType.equals(Types.HasOne)) {
+            } else if (r.relationType.equals(Types.SingleRelation)) {
                 builder.addStatement("contents.put($S, model.$L.getId())", c.columnName, c.name);
             } else {
-                throw new UnsupportedOperationException(r.relationType + " is not yet supported");
+                throw new UnsupportedOperationException(r.relationType + " is not supported");
             }
         });
 
@@ -320,7 +320,7 @@ public class SchemaWriter {
                 builder.addStatement("statement.bindBlob($L, model.$L", n, c.name);
             } else if (type.equals(Types.String)) {
                 builder.addStatement("statement.bindString($L, model.$L)", n, c.name);
-            } else if (r != null && r.relationType.equals(Types.HasOne)) {
+            } else if (r != null && r.relationType.equals(Types.SingleRelation)) {
                 builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.name);
             } else {
                 builder.addStatement("statement.bindString($L, model.$L.toString())", n, c.name);
@@ -347,7 +347,7 @@ public class SchemaWriter {
             if (r == null) {
                 builder.addStatement("model.$L = cursor.$L($L)",
                         c.name, cursorGetter(c), i);
-            } else { // HasOne or HasMany relationship
+            } else { // SingleRelation
                 builder.addStatement("model.$L = new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
                         c.name, r.relationType, r.modelType, i);
             }

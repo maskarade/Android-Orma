@@ -32,7 +32,7 @@ public class DataTypes {
         javaToSqlite.put(Boolean.class, "BOOLEAN");
         javaToSqlite.put(boolean.class, "BOOLEAN");
 
-        javaToSqlite.put(HasOne.class, "INTEGER");
+        javaToSqlite.put(SingleRelation.class, "INTEGER");
 
         // TODO: DateTime
     }

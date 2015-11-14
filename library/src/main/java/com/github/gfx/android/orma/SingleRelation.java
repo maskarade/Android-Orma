@@ -5,13 +5,13 @@ import android.support.annotation.NonNull;
 import rx.Single;
 import rx.SingleSubscriber;
 
-public class HasOne<T> {
-    public static <T> HasOne<T> just(long id, T model) {
-        return new HasOne<>(id, model);
+public class SingleRelation<T> {
+    public static <T> SingleRelation<T> just(long id, T model) {
+        return new SingleRelation<>(id, model);
     }
 
-    public static <T> HasOne<T> id(final long id) {
-        return new HasOne<>(id, Single.create(new Single.OnSubscribe<T>() {
+    public static <T> SingleRelation<T> id(final long id) {
+        return new SingleRelation<>(id, Single.create(new Single.OnSubscribe<T>() {
             @Override
             public void call(SingleSubscriber<? super T> singleSubscriber) {
                 singleSubscriber.onError(new NoValueException("No value set for id=" + id));
@@ -23,17 +23,17 @@ public class HasOne<T> {
 
     final Single<T> single;
 
-    public HasOne(long id, T model) {
+    public SingleRelation(long id, T model) {
         this.id = id;
         this.single = Single.just(model);
     }
 
-    public HasOne(long id, Single<T> single) {
+    public SingleRelation(long id, Single<T> single) {
         this.id = id;
         this.single = single;
     }
 
-    public HasOne(@NonNull final OrmaConnection conn, @NonNull final Schema<T> schema, final long id) {
+    public SingleRelation(@NonNull final OrmaConnection conn, @NonNull final Schema<T> schema, final long id) {
         this.id = id;
         single = Single.create(new Single.OnSubscribe<T>() {
             @Override

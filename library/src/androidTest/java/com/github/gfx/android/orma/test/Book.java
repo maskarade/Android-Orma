@@ -1,6 +1,6 @@
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.HasOne;
+import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
@@ -21,5 +21,5 @@ public class Book {
     public String content;
 
     @Column
-    public HasOne<Publisher> publisher;
+    public SingleRelation<Publisher> publisher;
 }
