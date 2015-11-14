@@ -104,6 +104,12 @@ public class OrmaSqlGenerator {
         return sb.toString();
     }
 
+    public String identifier(String identifier) {
+        StringBuilder sb =  new StringBuilder(identifier.length() + 2);
+        appendIdentifier(sb, identifier);
+        return sb.toString();
+    }
+
     public void appendIdentifier(StringBuilder sb, String identifier) {
         sb.append('"');
         sb.append(identifier);
