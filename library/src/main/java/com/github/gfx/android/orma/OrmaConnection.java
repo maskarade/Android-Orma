@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.orma.BuildConfig;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -16,6 +18,8 @@ import android.util.Log;
 import java.util.List;
 
 public class OrmaConnection extends SQLiteOpenHelper {
+
+    static final String TAG = OrmaConnection.class.getSimpleName();
 
     static final int VERSION = 1;
 
@@ -116,17 +120,40 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     void dropAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
-            db.execSQL(dropTable(schema));
+            execSQL(db, dropTable(schema));
         }
 
     }
 
     void createAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
-            db.execSQL(createTable(schema));
+            execSQL(db, createTable(schema));
 
-            // TODO: create indexes
+            for (ColumnDef<?> column : schema.getColumns()) {
+                if (column.indexed && !column.primaryKey) {
+                    execSQL(db, createIndex(schema, column));
+                }
+            }
         }
+    }
+
+    private void execSQL(SQLiteDatabase db, String sql) {
+        if (BuildConfig.DEBUG) {
+            Log.v(TAG, sql);
+        }
+        db.execSQL(sql);
+    }
+
+    private String createIndex(Schema<?> schema, ColumnDef<?> column) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE INDEX ");
+        appendIdentifier(sb, "index_" + column.name + "_on_" + schema.getTableName());
+        sb.append(" ON ");
+        appendIdentifier(sb, schema.getTableName());
+        sb.append(" (");
+        appendIdentifier(sb, column.name);
+        sb.append(")");
+        return sb.toString();
     }
 
     @Override
@@ -156,7 +183,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         StringBuilder sb = new StringBuilder();
 
         sb.append("CREATE TABLE ");
-        addIdentifier(sb, schema.getTableName());
+        appendIdentifier(sb, schema.getTableName());
         sb.append(" (");
 
         for (ColumnDef<?> column : schema.getColumns()) {
@@ -169,13 +196,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
         sb.append(')');
 
-        Log.d("Orma", sb.toString());
-
         return sb.toString();
     }
 
     void addColumnDef(StringBuilder sb, ColumnDef<?> column) {
-        addIdentifier(sb, column.name);
+        appendIdentifier(sb, column.name);
         sb.append(' ');
 
         sb.append(column.getSqlType());
@@ -195,14 +220,17 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
-    void addIdentifier(StringBuilder sb, String identifier) {
+    void appendIdentifier(StringBuilder sb, String identifier) {
         sb.append('"');
         sb.append(identifier);
         sb.append('"');
     }
 
     String dropTable(Schema<?> schema) {
-        return "DROP TABLE IF EXISTS " + schema.getTableName();
+        StringBuilder sb = new StringBuilder();
+        sb.append("DROP TABLE IF EXISTS ");
+        appendIdentifier(sb, schema.getTableName());
+        return sb.toString();
     }
 
     @Override
