@@ -1,7 +1,5 @@
 package com.github.gfx.android.orma;
 
-import com.github.gfx.orma.BuildConfig;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -54,18 +52,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return db.updateWithOnConflict(table, values, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
-    public long count(String table, String whereClause, String[] whereArgs) {
-        SQLiteDatabase db = getDatabase();
-        String[] columns = {"COUNT(*)"};
-        Cursor cursor = db.query(table, columns, whereClause, whereArgs, null, null, null);
-        try {
-            cursor.moveToFirst();
-            return cursor.getLong(0);
-        } finally {
-            cursor.close();
-        }
-    }
-
     public Cursor query(String table, String[] columns, String whereClause, String[] whereArgs,
             String groupBy, String having, String orderBy, String limit) {
         SQLiteDatabase db = getDatabase();
@@ -87,6 +73,34 @@ public class OrmaConnection extends SQLiteOpenHelper {
         };
 
         return db.rawQueryWithFactory(cursorFactory, sql, whereArgs, table);
+    }
+
+    public long count(String table, String whereClause, String[] whereArgs) {
+        SQLiteDatabase db = getDatabase();
+        String[] columns = {"COUNT(*)"};
+        Cursor cursor = db.query(table, columns, whereClause, whereArgs, null, null, null);
+        try {
+            cursor.moveToFirst();
+            return cursor.getLong(0);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs,
+            String groupBy, String having, String orderBy) {
+        SQLiteDatabase db = getDatabase();
+        Cursor cursor = db.query(schema.getTableName(), columns, whereClause, whereArgs, groupBy, having, orderBy, "1");
+
+        try {
+            if (cursor.moveToFirst()) {
+                return schema.createModelFromCursor(this, cursor);
+            } else {
+                return null;
+            }
+        } finally {
+            cursor.close();
+        }
     }
 
     public int delete(@NonNull String table, @Nullable String whereClause, @Nullable String[] whereArgs) {

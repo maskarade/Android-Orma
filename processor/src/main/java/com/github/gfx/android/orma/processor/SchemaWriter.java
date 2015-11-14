@@ -7,6 +7,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -35,6 +36,8 @@ public class SchemaWriter {
 
     private final ProcessingEnvironment processingEnv;
 
+    FieldSpec primaryKey;
+
     public SchemaWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
         this.schema = schema;
         this.processingEnv = processingEnv;
@@ -58,7 +61,12 @@ public class SchemaWriter {
         List<FieldSpec> columns = new ArrayList<>();
 
         schema.getColumns().forEach(columnDef -> {
-            columns.add(buildColumnFieldSpec(columnDef));
+            FieldSpec fieldSpec = buildColumnFieldSpec(columnDef);
+            columns.add(fieldSpec);
+
+            if (columnDef.primaryKey) {
+                primaryKey = fieldSpec;
+            }
         });
 
         fieldSpecs.addAll(columns);
@@ -90,7 +98,7 @@ public class SchemaWriter {
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
         CodeBlock initializer = CodeBlock.builder()
                 .add("new $T($S, $T.class, $L, $L, $L, $L, $L, $L)",
-                        c.getColumnDefType(), c.columnName, c.getType(),
+                        c.getColumnDefType(), c.columnName, c.getRawType(),
                         c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
                 .build();
         return FieldSpec.builder(c.getColumnDefType(), c.name)
@@ -145,21 +153,46 @@ public class SchemaWriter {
                 Specs.buildOverrideAnnotationSpec()
         );
 
+        List<AnnotationSpec> overrideAndNullable = Arrays.asList(
+                Specs.buildNullableAnnotationSpec(),
+                Specs.buildOverrideAnnotationSpec()
+        );
+
         methodSpecs.add(
                 MethodSpec.methodBuilder("getTableName")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addCode(CodeBlock.builder().addStatement("return $L", TABLE_NAME).build())
+                        .addStatement("return $L", TABLE_NAME)
                         .build()
         );
+
+        if (primaryKey != null) {
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("getPrimaryKey")
+                            .addAnnotations(overrideAndNonNull)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(Types.WildcardColumnDef)
+                            .addStatement("return $N", primaryKey)
+                            .build()
+            );
+        } else {
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("getPrimaryKey")
+                            .addAnnotations(overrideAndNullable)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(Types.WildcardColumnDef)
+                            .addStatement("return null")
+                            .build()
+            );
+        }
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getColumns")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.ColumnList)
-                        .addCode(CodeBlock.builder().addStatement("return $L", COLUMNS).build())
+                        .addStatement("return $L", COLUMNS)
                         .build()
         );
 
@@ -168,7 +201,7 @@ public class SchemaWriter {
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.StringArray)
-                        .addCode(CodeBlock.builder().addStatement("return $L", COLUMN_NAMES).build())
+                        .addStatement("return $L", COLUMN_NAMES)
                         .build()
         );
 
@@ -207,6 +240,10 @@ public class SchemaWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(TypeName.VOID)
                         .addParameter(
+                                ParameterSpec.builder(Types.OrmaConnection, "conn")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addParameter(
                                 ParameterSpec.builder(Types.Cursor, "cursor")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                         .build())
@@ -218,12 +255,15 @@ public class SchemaWriter {
                         .build()
         );
 
-
         methodSpecs.add(
                 MethodSpec.methodBuilder("createModelFromCursor")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(schema.getModelClassName())
+                        .addParameter(
+                                ParameterSpec.builder(Types.OrmaConnection, "conn")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
                         .addParameter(
                                 ParameterSpec.builder(Types.Cursor, "cursor")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
@@ -241,7 +281,14 @@ public class SchemaWriter {
         builder.addStatement("$T contents = new $T()", Types.ContentValues, Types.ContentValues);
 
         schema.getColumnsWithoutAutoId().forEach(c -> {
-            builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
+            RelationDefinition r = c.getRelation();
+            if (r == null) {
+                builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
+            } else if (r.relationType.equals(Types.HasOne)) {
+                builder.addStatement("contents.put($S, model.$L.getId())", c.columnName, c.name);
+            } else {
+                throw new UnsupportedOperationException(r.relationType + " is not yet supported");
+            }
         });
 
         builder.addStatement("return contents");
@@ -258,6 +305,7 @@ public class SchemaWriter {
             int n = i + 1; // bind index starts 1
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getType();
+            RelationDefinition r = c.getRelation();
 
             if (c.nullable && !type.isPrimitive()) {
                 builder.beginControlFlow("if (model.$L != null)", c.name);
@@ -272,6 +320,8 @@ public class SchemaWriter {
                 builder.addStatement("statement.bindBlob($L, model.$L", n, c.name);
             } else if (type.equals(Types.String)) {
                 builder.addStatement("statement.bindString($L, model.$L)", n, c.name);
+            } else if (r != null && r.relationType.equals(Types.HasOne)) {
+                builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.name);
             } else {
                 builder.addStatement("statement.bindString($L, model.$L.toString())", n, c.name);
             }
@@ -293,8 +343,14 @@ public class SchemaWriter {
         List<ColumnDefinition> columns = schema.getColumns();
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
-            String getter = "get" + capitalize(c.getType());
-            builder.addStatement("model.$L = cursor.$L($L)", c.name, getter, i);
+            RelationDefinition r = c.getRelation();
+            if (r == null) {
+                builder.addStatement("model.$L = cursor.$L($L)",
+                        c.name, cursorGetter(c), i);
+            } else { // HasOne or HasMany relationship
+                builder.addStatement("model.$L = new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
+                        c.name, r.relationType, r.modelType, i);
+            }
         }
         return builder.build();
     }
@@ -302,9 +358,13 @@ public class SchemaWriter {
     private CodeBlock buildCreateModelFromCursor() {
         CodeBlock.Builder builder = CodeBlock.builder();
         builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName()); // FIXME
-        builder.addStatement("populateValuesIntoModel(cursor, model)");
+        builder.addStatement("populateValuesIntoModel(conn, cursor, model)");
         builder.addStatement("return model");
         return builder.build();
+    }
+
+    private String cursorGetter(ColumnDefinition column) {
+        return "get" + capitalize(column.getType());
     }
 
     private String capitalize(TypeName type) {
@@ -313,6 +373,8 @@ public class SchemaWriter {
             return s.substring(0, 1).toUpperCase() + s.substring(1);
         } else if (type instanceof ClassName) {
             return ((ClassName) type).simpleName();
+        } else if (type instanceof ParameterizedTypeName) {
+            return ((ParameterizedTypeName) type).rawType.simpleName();
         } else {
             throw new UnsupportedOperationException("TODO: " + type + " is not yet supported as a column type");
         }

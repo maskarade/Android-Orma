@@ -65,8 +65,27 @@ public class ColumnDefinition {
         nullable = hasNullableAnnotation(element);
     }
 
+    public RelationDefinition getRelation() {
+        if (type instanceof ParameterizedTypeName) {
+            ParameterizedTypeName pt = (ParameterizedTypeName) type;
+            if (pt.rawType.equals(Types.HasOne) || pt.rawType.equals(Types.HasMany)) {
+                return new RelationDefinition(pt.rawType, pt.typeArguments.get(0));
+            }
+        }
+        return null;
+
+    }
+
     public TypeName getType() {
         return type;
+    }
+
+    public TypeName getRawType() {
+        if (type instanceof ParameterizedTypeName) {
+            return ((ParameterizedTypeName)type).rawType;
+        } else {
+            return type;
+        }
     }
 
     /**
