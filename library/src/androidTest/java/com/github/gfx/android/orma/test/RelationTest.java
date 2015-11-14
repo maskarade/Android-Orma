@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.TransactionAbortException;
 import com.github.gfx.android.orma.TransactionTask;
@@ -29,18 +30,20 @@ public class RelationTest {
         db = new OrmaDatabase(getContext(), "test.db");
         db.getConnection().resetDatabase();
 
+        Inserter<Book> statement = db.prepareInsertIntoBook();
+
         {
             Book book = new Book();
             book.title = "today";
             book.content = "milk, banana";
-            db.insert(book);
+            statement.insert(book);
         }
 
         {
             Book book = new Book();
             book.title = "friday";
             book.content = "apple";
-            db.insert(book);
+            statement.insert(book);
         }
     }
 

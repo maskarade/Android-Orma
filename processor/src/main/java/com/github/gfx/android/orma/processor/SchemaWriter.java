@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -88,9 +89,9 @@ public class SchemaWriter {
 
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
         CodeBlock initializer = CodeBlock.builder()
-                .add("new $T($S, $T.class, $L, $L, $L, $L)",
+                .add("new $T($S, $T.class, $L, $L, $L, $L, $L, $L)",
                         c.getColumnDefType(), c.columnName, c.getType(),
-                        c.nullable, c.primaryKey, c.indexed, c.unique)
+                        c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
                 .build();
         return FieldSpec.builder(c.getColumnDefType(), c.name)
                 .addModifiers(publicStaticFinal)
@@ -185,6 +186,22 @@ public class SchemaWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("bindArgs")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(TypeName.VOID)
+                        .addParameter(
+                                ParameterSpec.builder(Types.SQLiteStatement, "statement")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addParameter(
+                                ParameterSpec.builder(schema.getModelClassName(), "model")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addCode(buildBindArgs())
+                        .build()
+        );
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("createModelFromCursor")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
@@ -205,14 +222,8 @@ public class SchemaWriter {
 
         builder.addStatement("$T contents = new $T()", Types.ContentValues, Types.ContentValues);
 
-        schema.getColumns().forEach(c -> {
-            if (c.primaryKey && looksLikeIntegerType(c.getType())) {
-                builder.beginControlFlow("if (model.$L != 0)", c.name);
-                builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
-                builder.endControlFlow();
-            } else {
-                builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
-            }
+        schema.getColumnsWithoutAutoId().forEach(c -> {
+            builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
         });
 
         builder.addStatement("return contents");
@@ -220,12 +231,44 @@ public class SchemaWriter {
         return builder.build();
     }
 
-    boolean looksLikeIntegerType(TypeName type) {
-        return type.equals(TypeName.INT)
-                || type.equals(TypeName.LONG)
-                || type.equals(TypeName.SHORT)
-                || type.equals(TypeName.BYTE);
+    // http://developer.android.com/intl/ja/reference/android/database/sqlite/SQLiteStatement.html
+    private CodeBlock buildBindArgs() {
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        List<ColumnDefinition> columns = schema.getColumnsWithoutAutoId();
+        for (int i = 0; i < columns.size(); i++) {
+            int n = i + 1; // bind index starts 1
+            ColumnDefinition c = columns.get(i);
+            TypeName type = c.getType();
+
+            if (c.nullable && !type.isPrimitive()) {
+                builder.beginControlFlow("if (model.$L != null)", c.name);
+            }
+
+            // TODO: support type adapters
+            if (Types.looksLikeIntegerType(type) || type.equals(TypeName.BOOLEAN)) {
+                builder.addStatement("statement.bindLong($L, model.$L)", n, c.name);
+            } else if (Types.looksLikeFloatType(type)) {
+                builder.addStatement("statement.bindDouble($L, model.$L)", n, c.name);
+            } else if (type.equals(ArrayTypeName.BYTE)) {
+                builder.addStatement("statement.bindBlob($L, model.$L", n, c.name);
+            } else if (type.equals(Types.String)) {
+                builder.addStatement("statement.bindString($L, model.$L)", n, c.name);
+            } else {
+                builder.addStatement("statement.bindString($L, model.$L.toString())", n, c.name);
+            }
+
+            if (c.nullable && !type.isPrimitive()) {
+                builder.endControlFlow();
+                builder.beginControlFlow("else");
+                builder.addStatement("statement.bindNull($L)", n);
+                builder.endControlFlow();
+            }
+        }
+
+        return builder.build();
     }
+
 
     private CodeBlock buildCreateModelFromCursor() {
         CodeBlock.Builder builder = CodeBlock.builder();

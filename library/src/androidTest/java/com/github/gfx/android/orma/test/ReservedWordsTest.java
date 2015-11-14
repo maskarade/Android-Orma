@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.test;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -17,21 +18,26 @@ public class ReservedWordsTest {
         return InstrumentationRegistry.getTargetContext();
     }
 
-    @Ignore // FIXME: SQLiteDatabase#insert() does not quote identifiers
-    @Test
-    public void useReservedWords() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         db = new OrmaDatabase(getContext(), "test.db");
         db.getConnection().resetDatabase();
+    }
 
-        {
-            Where where = new Where();
-            where.where = "a";
-            where.table = "b";
-            where.on = "c";
-            db.insert(where);
-        }
+    @Test
+    public void useReservedWordsInInsert() throws Exception {
+        Where where = new Where();
+        where.where = "a";
+        where.table = "b";
+        where.on = "c";
+        long rowId = db.insert(where);
+        assertThat(rowId, is(1L));
+    }
 
-        assertThat(db.fromWhere().toList(), hasSize(1));
+    @Ignore // FIXME: SQLiteDatabase#query() does not quote names
+    @Test
+    public void useReservedWordsInSelect() throws Exception {
+        assertThat(db.fromWhere().toList(), hasSize(0));
     }
 
 }

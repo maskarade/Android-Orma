@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQuery;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -35,13 +36,15 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return getWritableDatabase();
     }
 
-    public <T> long insert(Schema<T> schema, T model) {
+    public <T> Inserter<T> prepareInsert(Schema<T> schema) {
         SQLiteDatabase db = getDatabase();
-        return db.insertWithOnConflict(
-                schema.getTableName(),
-                null,
-                schema.serializeModelToContentValues(model),
-                SQLiteDatabase.CONFLICT_ROLLBACK);
+        SQLiteStatement statement = db.compileStatement(buildInsertStatement(schema));
+        return new Inserter<>(schema, statement);
+    }
+
+    public <T> long insert(Schema<T> schema, T model) {
+        Inserter<T> statement = prepareInsert(schema);
+        return statement.insert(model);
     }
 
     public long update(String table, ContentValues values, String whereClause, String[] whereArgs) {
@@ -116,6 +119,42 @@ public class OrmaConnection extends SQLiteOpenHelper {
                 onCreate(db);
             }
         });
+    }
+
+    String buildInsertStatement(Schema<?> schema) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("INSERT OR ROLLBACK INTO ");
+        appendIdentifier(sb, schema.getTableName());
+        sb.append(" (");
+
+        List<ColumnDef<?>> columns = schema.getColumns();
+        int nColumns = columns.size();
+        for (int i = 0; i < nColumns; i++) {
+            ColumnDef<?> c = columns.get(i);
+            if (c.autoId) {
+                continue;
+            }
+            appendIdentifier(sb, c.name);
+            if ((i + 1) != nColumns && !columns.get(i + 1).autoId) {
+                sb.append(',');
+            }
+        }
+        sb.append(')');
+        sb.append(" VALUES (");
+        for (int i = 0; i < nColumns; i++) {
+            ColumnDef<?> c = columns.get(i);
+            if (c.autoId) {
+                continue;
+            }
+            sb.append('?');
+            if ((i + 1) != nColumns && !columns.get(i + 1).autoId) {
+                sb.append(',');
+            }
+        }
+        sb.append(')');
+
+        return sb.toString();
     }
 
     void dropAllTables(SQLiteDatabase db) {

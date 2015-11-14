@@ -22,9 +22,15 @@ public class ColumnDefinition {
 
     public final String columnName;
 
+    public final TypeName type;
+
     public final boolean nullable;
 
     public final boolean primaryKey;
+
+    public final boolean autoincrement;
+
+    public final boolean autoId;
 
     public final boolean indexed;
 
@@ -41,7 +47,18 @@ public class ColumnDefinition {
         name = element.getSimpleName().toString();
         columnName = getColumnName(column, element);
 
-        primaryKey = primaryKeyAnnotation != null;
+        type = ClassName.get(element.asType());
+
+        if (primaryKeyAnnotation != null) {
+            primaryKey = true;
+            autoincrement = primaryKeyAnnotation.autoincrement();
+            autoId = primaryKeyAnnotation.auto() && Types.looksLikeIntegerType(type);
+        } else {
+            primaryKey = false;
+            autoincrement = false;
+            autoId = false;
+        }
+
         indexed = primaryKey || column.indexed();
         unique = primaryKey || column.unique();
 
@@ -49,14 +66,14 @@ public class ColumnDefinition {
     }
 
     public TypeName getType() {
-        return ClassName.get(element.asType());
+        return type;
     }
 
     /**
      * @return A representation of {@code ColumnDef<T>}
      */
     public ParameterizedTypeName getColumnDefType() {
-        return Types.getColumnDef(getType().box());
+        return Types.getColumnDef(type.box());
     }
 
     static String getColumnName(Column column, Element element) {
