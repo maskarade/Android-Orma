@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.HasOne;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
@@ -8,6 +9,7 @@ import android.support.annotation.Nullable;
 
 @Table
 public class Book {
+
     @PrimaryKey
     public long id;
 
@@ -18,11 +20,9 @@ public class Book {
     @Nullable
     public String content;
 
-    // TODO: has-one relations
-    // @Column
-    // public Publisher publisher;
-
-    // TODO: has-many relations
-    // @Column
-    // public HasMany<Author> authors;
+    @Column
+    public HasOne<Publisher> publisher;
+//
+//    @Column
+//    public Observable<Author> authors;
 }

@@ -158,6 +158,18 @@ public class DatabaseWriter {
                             )
                             .build());
 
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertInto" + schema.getModelClassName().simpleName())
+                            .addJavadoc("Prepares to insert models to the database.")
+                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .addStatement("return $L.prepareInsert($L)",
+                                    connection,
+                                    schemaInstance
+                            )
+                            .build());
+
+
         });
 
         return methodSpecs;

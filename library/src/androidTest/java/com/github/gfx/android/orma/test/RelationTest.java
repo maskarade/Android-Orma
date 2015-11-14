@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.HasOne;
+import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.TransactionAbortException;
 import com.github.gfx.android.orma.TransactionTask;
@@ -29,18 +31,30 @@ public class RelationTest {
         db = new OrmaDatabase(getContext(), "test.db");
         db.getConnection().resetDatabase();
 
+        Inserter<Book> statement = db.prepareInsertIntoBook();
+
+        Publisher publisher = new Publisher();
+        publisher.name = "foo bar";
+        publisher.startedYear = 2015;
+        publisher.startedMonth = 12;
+        db.insert(publisher);
+
+        publisher = db.fromPublisher().value();
+
         {
             Book book = new Book();
             book.title = "today";
             book.content = "milk, banana";
-            db.insert(book);
+            book.publisher = HasOne.just(publisher.id, publisher);
+            statement.insert(book);
         }
 
         {
             Book book = new Book();
             book.title = "friday";
             book.content = "apple";
-            db.insert(book);
+            book.publisher = HasOne.just(publisher.id, publisher);
+            statement.insert(book);
         }
     }
 
@@ -62,7 +76,7 @@ public class RelationTest {
 
     @Test
     public void single() throws Exception {
-        Book book = db.fromBook().single();
+        Book book = db.fromBook().value();
 
         assertThat(book.title, is("today"));
         assertThat(book.content, is("milk, banana"));
@@ -71,7 +85,7 @@ public class RelationTest {
     @Test
     public void singleOrNull() throws Exception {
         db.fromBook().delete();
-        Book book = db.fromBook().singleOrNull();
+        Book book = db.fromBook().valueOrNull();
 
         assertThat(book, is(nullValue()));
     }
@@ -137,7 +151,7 @@ public class RelationTest {
 
         assertThat(result, is(1));
         assertThat(db.fromBook().count(), is(1L));
-        assertThat(db.fromBook().single().title, is("friday"));
+        assertThat(db.fromBook().value().title, is("friday"));
     }
 
     @Test
@@ -145,10 +159,13 @@ public class RelationTest {
         db.transaction(new TransactionTask() {
             @Override
             public void execute() throws Exception {
+                Publisher publisher = db.fromPublisher().value();
+
                 for (int i = 0; i < 5; i++) {
                     Book book = new Book();
                     book.title = "friday";
                     book.content = "apple" + i;
+                    book.publisher = HasOne.just(publisher.id, publisher);
                     db.insert(book);
                 }
             }
@@ -205,6 +222,8 @@ public class RelationTest {
 
     @Test
     public void initAndInsertForSecondTable() throws Exception {
+        db.fromPublisher().delete();
+
         {
             Publisher publisher = new Publisher();
             publisher.name = "The Fire";
@@ -223,9 +242,17 @@ public class RelationTest {
 
         assertThat(db.fromPublisher().count(), is(2L));
 
-        Publisher publisher = db.fromPublisher().single();
+        Publisher publisher = db.fromPublisher().value();
         assertThat(publisher.name, is("The Fire"));
         assertThat(publisher.startedYear, is(1998));
+        assertThat(publisher.startedMonth, is(12));
+    }
+
+    @Test
+    public void testHasOne() throws Exception {
+        Publisher publisher = db.fromBook().value().publisher.single().toBlocking().value();
+        assertThat(publisher.name, is("foo bar"));
+        assertThat(publisher.startedYear, is(2015));
         assertThat(publisher.startedMonth, is(12));
     }
 }

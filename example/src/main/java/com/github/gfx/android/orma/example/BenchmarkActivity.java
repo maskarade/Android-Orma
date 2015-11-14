@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.example;
 
+import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.databinding.ActivityBenchmarkBinding;
 import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
@@ -30,7 +31,7 @@ public class BenchmarkActivity extends AppCompatActivity {
 
     final int N = 10000;
 
-    OrmaDatabase db;
+    OrmaDatabase orma;
 
     Realm realm;
 
@@ -62,8 +63,8 @@ public class BenchmarkActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        db = new OrmaDatabase(this, "benchmark.db");
-        db.getConnection().resetDatabase();
+        orma = new OrmaDatabase(this, "benchmark.db");
+        orma.getConnection().resetDatabase();
 
         RealmConfiguration realmConf = new RealmConfiguration.Builder(this)
                 .build();
@@ -81,7 +82,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
 
-        db.fromTodo().delete();
+        orma.fromTodo().delete();
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -126,16 +127,18 @@ public class BenchmarkActivity extends AppCompatActivity {
             public void call(SingleSubscriber<? super Result> singleSubscriber) {
                 long t0 = System.currentTimeMillis();
 
-                db.transaction(new TransactionTask() {
+                orma.transaction(new TransactionTask() {
                     @Override
                     public void execute() throws Exception {
+                        Inserter<Todo> statement = orma.prepareInsertIntoTodo();
+
                         for (int i = 0; i < N; i++) {
                             Todo todo = new Todo();
 
                             todo.title = "title " + i;
                             todo.content = "content " + i;
 
-                            db.insert(todo);
+                            statement.insert(todo);
                         }
                     }
                 });
@@ -173,7 +176,7 @@ public class BenchmarkActivity extends AppCompatActivity {
             @Override
             public void call(SingleSubscriber<? super Result> singleSubscriber) {
                 long t0 = System.currentTimeMillis();
-                List<Todo> list = db.fromTodo().toList();
+                List<Todo> list = orma.fromTodo().toList();
                 Log.d(TAG, "Orma/selectAll count: " + list.size());
                 singleSubscriber.onSuccess(new Result("Orma/selectAll", System.currentTimeMillis() - t0));
             }

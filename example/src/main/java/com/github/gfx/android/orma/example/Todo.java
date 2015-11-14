@@ -18,8 +18,4 @@ public class Todo {
     @Column
     @Nullable
     public String content;
-
-    // TODO: has-many authors
-    // @Column
-    // public List<Authors>
 }

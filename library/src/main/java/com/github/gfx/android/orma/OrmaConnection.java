@@ -1,7 +1,5 @@
 package com.github.gfx.android.orma;
 
-import com.github.gfx.orma.BuildConfig;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQuery;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -25,40 +24,32 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final List<Schema<?>> schemas;
 
+    final OrmaSqlGenerator sql;
+
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         super(context, filename, null, VERSION);
         this.schemas = schemas;
+        this.sql = new OrmaSqlGenerator();
     }
-
 
     public SQLiteDatabase getDatabase() {
         return getWritableDatabase();
     }
 
-    public <T> long insert(Schema<T> schema, T model) {
+    public <T> Inserter<T> prepareInsert(Schema<T> schema) {
         SQLiteDatabase db = getDatabase();
-        return db.insertWithOnConflict(
-                schema.getTableName(),
-                null,
-                schema.serializeModelToContentValues(model),
-                SQLiteDatabase.CONFLICT_ROLLBACK);
+        SQLiteStatement statement = db.compileStatement(sql.insert(schema));
+        return new Inserter<>(schema, statement);
+    }
+
+    public <T> long insert(Schema<T> schema, T model) {
+        Inserter<T> statement = prepareInsert(schema);
+        return statement.insert(model);
     }
 
     public long update(String table, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getDatabase();
         return db.updateWithOnConflict(table, values, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
-    }
-
-    public long count(String table, String whereClause, String[] whereArgs) {
-        SQLiteDatabase db = getDatabase();
-        String[] columns = {"COUNT(*)"};
-        Cursor cursor = db.query(table, columns, whereClause, whereArgs, null, null, null);
-        try {
-            cursor.moveToFirst();
-            return cursor.getLong(0);
-        } finally {
-            cursor.close();
-        }
     }
 
     public Cursor query(String table, String[] columns, String whereClause, String[] whereArgs,
@@ -82,6 +73,34 @@ public class OrmaConnection extends SQLiteOpenHelper {
         };
 
         return db.rawQueryWithFactory(cursorFactory, sql, whereArgs, table);
+    }
+
+    public long count(String table, String whereClause, String[] whereArgs) {
+        SQLiteDatabase db = getDatabase();
+        String[] columns = {"COUNT(*)"};
+        Cursor cursor = db.query(table, columns, whereClause, whereArgs, null, null, null);
+        try {
+            cursor.moveToFirst();
+            return cursor.getLong(0);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs,
+            String groupBy, String having, String orderBy) {
+        SQLiteDatabase db = getDatabase();
+        Cursor cursor = db.query(schema.getTableName(), columns, whereClause, whereArgs, groupBy, having, orderBy, "1");
+
+        try {
+            if (cursor.moveToFirst()) {
+                return schema.createModelFromCursor(this, cursor);
+            } else {
+                return null;
+            }
+        } finally {
+            cursor.close();
+        }
     }
 
     public int delete(@NonNull String table, @Nullable String whereClause, @Nullable String[] whereArgs) {
@@ -118,20 +137,20 @@ public class OrmaConnection extends SQLiteOpenHelper {
         });
     }
 
+
     void dropAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
-            execSQL(db, dropTable(schema));
+            execSQL(db, sql.dropTable(schema));
         }
-
     }
 
     void createAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
-            execSQL(db, createTable(schema));
+            execSQL(db, sql.createTable(schema));
 
             for (ColumnDef<?> column : schema.getColumns()) {
                 if (column.indexed && !column.primaryKey) {
-                    execSQL(db, createIndex(schema, column));
+                    execSQL(db, sql.createIndex(schema, column));
                 }
             }
         }
@@ -142,18 +161,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
             Log.v(TAG, sql);
         }
         db.execSQL(sql);
-    }
-
-    private String createIndex(Schema<?> schema, ColumnDef<?> column) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE INDEX ");
-        appendIdentifier(sb, "index_" + column.name + "_on_" + schema.getTableName());
-        sb.append(" ON ");
-        appendIdentifier(sb, schema.getTableName());
-        sb.append(" (");
-        appendIdentifier(sb, column.name);
-        sb.append(")");
-        return sb.toString();
     }
 
     @Override
@@ -176,61 +183,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
-    }
-
-    // https://www.sqlite.org/lang_createtable.html
-    String createTable(Schema<?> schema) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("CREATE TABLE ");
-        appendIdentifier(sb, schema.getTableName());
-        sb.append(" (");
-
-        for (ColumnDef<?> column : schema.getColumns()) {
-            addColumnDef(sb, column);
-
-            sb.append(", ");
-        }
-
-        sb.setLength(sb.length() - ", ".length()); // chop the last ", "
-
-        sb.append(')');
-
-        return sb.toString();
-    }
-
-    void addColumnDef(StringBuilder sb, ColumnDef<?> column) {
-        appendIdentifier(sb, column.name);
-        sb.append(' ');
-
-        sb.append(column.getSqlType());
-        sb.append(' ');
-
-        if (column.primaryKey) {
-            sb.append("PRIMARY KEY ");
-        } else {
-            if (column.nullable) {
-                sb.append("NULL ");
-            } else {
-                sb.append("NOT NULL ");
-            }
-            if (column.unique) {
-                sb.append("UNIQUE ");
-            }
-        }
-    }
-
-    void appendIdentifier(StringBuilder sb, String identifier) {
-        sb.append('"');
-        sb.append(identifier);
-        sb.append('"');
-    }
-
-    String dropTable(Schema<?> schema) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DROP TABLE IF EXISTS ");
-        appendIdentifier(sb, schema.getTableName());
-        return sb.toString();
     }
 
     @Override

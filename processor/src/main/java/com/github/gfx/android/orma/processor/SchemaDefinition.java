@@ -64,6 +64,16 @@ public class SchemaDefinition {
         return columns;
     }
 
+    public List<ColumnDefinition> getColumnsWithoutAutoId() {
+        List<ColumnDefinition> list = new ArrayList<>(columns.size());
+        for (ColumnDefinition c : columns) {
+            if (!c.autoId) {
+                list.add(c);
+            }
+        }
+        return list;
+    }
+
     private static ClassName helperClassName(String specifiedName, ClassName modelClassName, String helperSuffix) {
         String simpleName = firstNonEmptyName(specifiedName, modelClassName.simpleName() + helperSuffix);
         return ClassName.get(modelClassName.packageName(), simpleName);

@@ -20,17 +20,6 @@
                 />
 
         <TextView
-                android:id="@+id/elapsed"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="right"
-                android:paddingRight="32dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                tools:text="100ms"
-                />
-
-        <TextView
                 android:id="@+id/qps"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -40,5 +29,15 @@
                 tools:text="100qps"
                 />
 
+        <TextView
+                android:id="@+id/elapsed"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:paddingRight="32dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                tools:text="100ms"
+                />
     </LinearLayout>
 </layout>

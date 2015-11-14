@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class Relation<T, R extends Relation> {
 
-    protected final OrmaConnection orma;
+    protected final OrmaConnection connection;
 
     protected final Schema<T> schema;
 
@@ -33,8 +33,8 @@ public abstract class Relation<T, R extends Relation> {
 
     protected long offset = -1;
 
-    public Relation(OrmaConnection orma, Schema<T> schema) {
-        this.orma = orma;
+    public Relation(OrmaConnection connection, Schema<T> schema) {
+        this.connection = connection;
         this.schema = schema;
     }
 
@@ -110,7 +110,7 @@ public abstract class Relation<T, R extends Relation> {
     }
 
     public long count() {
-        return orma.count(schema.getTableName(), getWhereClause(), getWhereArgs());
+        return connection.count(schema.getTableName(), getWhereClause(), getWhereArgs());
     }
 
     @Nullable
@@ -130,12 +130,12 @@ public abstract class Relation<T, R extends Relation> {
 
     public long update(ModelBuilder<T> modelBuilder) {
         assertNoExtraClausesForDeleteOrUpdate("update");
-        return orma.update(schema.getTableName(), modelBuilder.buildContentValues(), getWhereClause(), getWhereArgs());
+        return connection.update(schema.getTableName(), modelBuilder.buildContentValues(), getWhereClause(), getWhereArgs());
     }
 
     public int delete() {
         assertNoExtraClausesForDeleteOrUpdate("delete");
-        return orma.delete(schema.getTableName(), getWhereClause(), getWhereArgs());
+        return connection.delete(schema.getTableName(), getWhereClause(), getWhereArgs());
     }
 
     void assertNoExtraClausesForDeleteOrUpdate(String statementName) {
@@ -175,26 +175,16 @@ public abstract class Relation<T, R extends Relation> {
     }
 
     @Nullable
-    public T singleOrNull() {
-        Cursor cursor = orma.query(schema.getTableName(), schema.getColumnNames(),
-                getWhereClause(), getWhereArgs(), groupBy, having, orderBy, "1");
-
-        T model = null;
-
-        if (cursor.moveToFirst()) {
-            model = schema.createModelFromCursor(cursor);
-        }
-        cursor.close();
-
-        return model;
+    public T valueOrNull() {
+        return connection.querySingle(schema, schema.getColumnNames(), getWhereClause(), getWhereArgs(), groupBy, having, orderBy);
     }
 
     @NonNull
-    public T single() {
-        T model = singleOrNull();
+    public T value() {
+        T model = valueOrNull();
 
         if (model == null) {
-            throw new AssertionError("Expected single value but nothing for " + schema.getTableName());
+            throw new NoValueException("Expected single value but nothing for " + schema.getTableName());
         }
 
         return model;
@@ -203,12 +193,13 @@ public abstract class Relation<T, R extends Relation> {
     @NonNull
     public List<T> toList() {
         List<T> list = new ArrayList<>();
-        Cursor cursor = orma.query(schema.getTableName(), schema.getColumnNames(), getWhereClause(),
+
+        Cursor cursor = connection.query(schema.getTableName(), schema.getColumnNames(), getWhereClause(),
                 getWhereArgs(), groupBy, having, orderBy, getLimitClause());
 
         if (cursor.moveToFirst()) {
             do {
-                list.add(schema.createModelFromCursor(cursor));
+                list.add(schema.createModelFromCursor(connection, cursor));
             }
             while (cursor.moveToNext());
         }
