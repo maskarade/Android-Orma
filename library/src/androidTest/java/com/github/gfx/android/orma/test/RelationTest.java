@@ -263,4 +263,53 @@ public class RelationTest {
         assertThat(publisher.startedYear, is(2015));
         assertThat(publisher.startedMonth, is(12));
     }
+
+    public void testHasManyRelation() throws Exception {
+        final Publisher a = db.createPublisher(new ModelBuilder<Publisher>() {
+            @Override
+            public Publisher build() {
+                Publisher publisher = new Publisher();
+                publisher.name = "A";
+                return publisher;
+            }
+        });
+
+        final Publisher b = db.createPublisher(new ModelBuilder<Publisher>() {
+            @Override
+            public Publisher build() {
+                Publisher publisher = new Publisher();
+                publisher.name = "B";
+                return publisher;
+            }
+        });
+
+        for (int i = 0; i < 2; i++) {
+            final int x = i;
+            db.createBook(new ModelBuilder<Book>() {
+                @Override
+                public Book build() {
+                    Book book = new Book();
+                    book.publisher = HasOne.just(a.id, a);
+                    book.title = "a " + x;
+                    return book;
+                }
+            });
+        }
+        for (int i = 0; i < 3; i++) {
+            final int x = i;
+
+            db.createBook(new ModelBuilder<Book>() {
+                @Override
+                public Book build() {
+                    Book book = new Book();
+                    book.publisher = HasOne.just(b.id, b);
+                    book.title = "b " + x;
+                    return book;
+                }
+            });
+        }
+
+        assertThat(a.books(db).count(), is(2L));
+        assertThat(b.books(db).count(), is(3L));
+    }
 }

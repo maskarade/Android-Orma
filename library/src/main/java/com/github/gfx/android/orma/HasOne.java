@@ -6,17 +6,6 @@ import rx.Single;
 import rx.SingleSubscriber;
 
 public class HasOne<T> {
-
-    public static <T> HasOne<T> empty() {
-        Single<T> nothing = Single.create(new Single.OnSubscribe<T>() {
-            @Override
-            public void call(SingleSubscriber<? super T> singleSubscriber) {
-                singleSubscriber.onError(new NoValueException("empty HasOne<T> has no value"));
-            }
-        });
-        return new HasOne<T>(0, nothing);
-    }
-
     public static <T> HasOne<T> just(long id, T model) {
         return new HasOne<>(id, model);
     }

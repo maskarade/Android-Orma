@@ -132,13 +132,8 @@ public class DatabaseWriter {
         schemas.forEach(schema -> {
             String schemaInstance = "schema" + schema.getModelClassName().simpleName();
 
-//            @NonNull
-//            Book createBook(ModelBuilder<Book> builder) {
-//                long id = insert(builder.build());
-//                return fromBook().where("id = ?", id).value();
-//            }
-
             methodSpecs.add(MethodSpec.methodBuilder("create" + schema.getModelClassName().simpleName())
+                    .addJavadoc("Creates and inserts one built by {@code Modelbuilder<T>}.\n")
                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                     .returns(schema.getModelClassName())
                     .addParameter(
@@ -151,7 +146,7 @@ public class DatabaseWriter {
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("from" + schema.getModelClassName().simpleName())
-                            .addJavadoc("Starts building query {@code SELECT * FROM $T ...}.", schema.getModelClassName())
+                            .addJavadoc("Starts building query {@code SELECT * FROM $T ...}.\n", schema.getModelClassName())
                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                             .returns(schema.getRelationClassName())
                             .addStatement("return new $T($L, $L)",

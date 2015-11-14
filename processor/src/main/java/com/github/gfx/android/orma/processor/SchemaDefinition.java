@@ -74,6 +74,15 @@ public class SchemaDefinition {
         return list;
     }
 
+    public ColumnDefinition getPrimaryKey() {
+        for (ColumnDefinition c : columns) {
+            if (c.primaryKey) {
+                return c;
+            }
+        }
+        return null;
+    }
+
     private static ClassName helperClassName(String specifiedName, ClassName modelClassName, String helperSuffix) {
         String simpleName = firstNonEmptyName(specifiedName, modelClassName.simpleName() + helperSuffix);
         return ClassName.get(modelClassName.packageName(), simpleName);

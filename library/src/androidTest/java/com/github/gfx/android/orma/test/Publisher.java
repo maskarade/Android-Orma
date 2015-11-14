@@ -6,7 +6,7 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
-@Table(value = "publishers", schemaClassName = "PublisherSchema", relationClassName = "SchemaRelation")
+@Table(value = "publishers", schemaClassName = "PublisherSchema", relationClassName = "PublisherRelation")
 public class Publisher {
 
     @PrimaryKey
@@ -22,6 +22,7 @@ public class Publisher {
     @Column("started_month")
     int startedMonth;
 
-    // TODO: has-many relations for Book
-    // @Column HasMany<Book> books;
+    Book_Relation books(OrmaDatabase orma) {
+        return orma.fromBook().where("publisher = ?", id);
+    }
 }

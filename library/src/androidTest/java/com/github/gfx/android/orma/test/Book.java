@@ -22,7 +22,4 @@ public class Book {
 
     @Column
     public HasOne<Publisher> publisher;
-//
-//    @Column
-//    public Observable<Author> authors;
 }
