@@ -4,6 +4,11 @@ import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.databinding.ActivityBenchmarkBinding;
 import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
+import com.github.gfx.android.orma.example.dbflow.BenchmarkDatabase;
+import com.github.gfx.android.orma.example.dbflow.FlowTodo;
+import com.raizlabs.android.dbflow.runtime.TransactionManager;
+import com.raizlabs.android.dbflow.sql.language.Delete;
+import com.raizlabs.android.dbflow.sql.language.Select;
 
 import android.content.Context;
 import android.content.Intent;
@@ -89,14 +94,21 @@ public class BenchmarkActivity extends AppCompatActivity {
                 realm.clear(RealmTodo.class);
             }
         });
+        new Delete().from(FlowTodo.class).query();
 
         startInsertWithOrma()
                 .flatMap(new Func1<Result, Single<Result>>() {
                     @Override
                     public Single<Result> call(Result result) {
                         adapter.add(result);
-
                         return startInsertWithRealm();
+                    }
+                })
+                .flatMap(new Func1<Result, Single<Result>>() {
+                    @Override
+                    public Single<Result> call(Result result) {
+                        adapter.add(result);
+                        return startInsertWithDBFlow();
                     }
                 })
                 .flatMap(new Func1<Result, Single<Result>>() {
@@ -111,6 +123,13 @@ public class BenchmarkActivity extends AppCompatActivity {
                     public Single<Result> call(Result result) {
                         adapter.add(result);
                         return startSelectAllWithRealm();
+                    }
+                })
+                .flatMap(new Func1<Result, Single<Result>>() {
+                    @Override
+                    public Single<Result> call(Result result) {
+                        adapter.add(result);
+                        return startSelectAllWithDBFlow();
                     }
                 })
                 .subscribe(new Action1<Result>() {
@@ -171,6 +190,29 @@ public class BenchmarkActivity extends AppCompatActivity {
         });
     }
 
+    Single<Result> startInsertWithDBFlow() {
+        return Single.create(new Single.OnSubscribe<Result>() {
+            @Override
+            public void call(SingleSubscriber<? super Result> singleSubscriber) {
+                long t0 = System.currentTimeMillis();
+
+                TransactionManager.transact(BenchmarkDatabase.NAME, new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 1; i <= N; i++) {
+                            FlowTodo todo = new FlowTodo();
+                            todo.title = "title " + i;
+                            todo.content = "content " + i;
+                            todo.insert();
+                        }
+                    }
+                });
+
+                singleSubscriber.onSuccess(new Result("DBFlow/insert", System.currentTimeMillis() - t0));
+            }
+        });
+    }
+
     Single<Result> startSelectAllWithOrma() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
@@ -191,6 +233,19 @@ public class BenchmarkActivity extends AppCompatActivity {
                 List<RealmTodo> list = realm.allObjects(RealmTodo.class);
                 Log.d(TAG, "Realm/selectAll count: " + list.size());
                 singleSubscriber.onSuccess(new Result("Realm/selectAll", System.currentTimeMillis() - t0));
+            }
+        });
+    }
+
+    Single<Result> startSelectAllWithDBFlow() {
+        return Single.create(new Single.OnSubscribe<Result>() {
+            @Override
+            public void call(SingleSubscriber<? super Result> singleSubscriber) {
+                long t0 = System.currentTimeMillis();
+
+                List<FlowTodo> list = new Select().from(FlowTodo.class).queryList();
+                Log.d(TAG, "DBFlow/selectAll count: " + list.size());
+                singleSubscriber.onSuccess(new Result("DBFlow/selectAll", System.currentTimeMillis() - t0));
             }
         });
     }
