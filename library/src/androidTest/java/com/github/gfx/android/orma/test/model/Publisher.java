@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.test;
+package com.github.gfx.android.orma.test.model;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -10,19 +10,19 @@ import com.github.gfx.android.orma.annotation.Table;
 public class Publisher {
 
     @PrimaryKey
-    long id;
+    public long id;
 
     @Column(unique = true)
-    String name;
+    public String name;
 
     @Column
     @SerializedName("started_year")
-    int startedYear;
+    public int startedYear;
 
     @Column("started_month")
-    int startedMonth;
+    public int startedMonth;
 
-    Book_Relation books(OrmaDatabase orma) {
+    public Book_Relation books(OrmaDatabase orma) {
         return orma.fromBook().where("publisher = ?", id);
     }
 }

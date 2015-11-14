@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.test;
+package com.github.gfx.android.orma.test.model;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.Table;
@@ -9,10 +9,13 @@ import com.github.gfx.android.orma.annotation.Table;
 @Table
 public class Where {
 
-    @Column String table;
+    @Column
+    public String table;
 
-    @Column String on;
+    @Column
+    public String on;
 
-    @Column String where;
+    @Column
+    public String where;
 
 }

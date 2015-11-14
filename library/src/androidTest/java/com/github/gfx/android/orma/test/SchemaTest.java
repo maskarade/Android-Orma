@@ -1,5 +1,9 @@
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.model.PublisherSchema;
+
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.*;

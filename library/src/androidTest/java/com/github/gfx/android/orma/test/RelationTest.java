@@ -5,6 +5,7 @@ import com.github.gfx.android.orma.ModelBuilder;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.TransactionAbortException;
 import com.github.gfx.android.orma.TransactionTask;
+import com.github.gfx.android.orma.test.model.*;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.test.model.*;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

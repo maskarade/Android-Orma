@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.test.model.OrmaDatabase;
+
 import org.junit.Test;
 
 import android.content.Context;

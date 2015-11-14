@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.test;
+package com.github.gfx.android.orma.test.model;
 
 import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.annotation.Column;

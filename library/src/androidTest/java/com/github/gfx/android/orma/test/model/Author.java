@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.test;
+package com.github.gfx.android.orma.test.model;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
@@ -8,9 +8,9 @@ import com.github.gfx.android.orma.annotation.Table;
 public class Author {
 
     @PrimaryKey
-    long id;
+    public long id;
 
     @Column
-    String name;
+    public String name;
 
 }
