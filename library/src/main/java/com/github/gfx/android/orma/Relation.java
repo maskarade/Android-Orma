@@ -129,7 +129,11 @@ public abstract class Relation<T, R extends Relation> {
         }
     }
 
-    public long update(@NonNull ContentValues contents) {
+    /**
+     * @param contents - Values to update
+     * @return Number of rows updated
+     */
+    public int update(@NonNull ContentValues contents) {
         assertNoExtraClausesForDeleteOrUpdate("update");
         return connection.update(schema.getTableName(), contents, getWhereClause(), getWhereArgs());
     }

@@ -53,7 +53,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return statement.insert(model);
     }
 
-    public long update(String table, ContentValues values, String whereClause, String[] whereArgs) {
+    public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getDatabase();
         return db.updateWithOnConflict(table, values, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
     }

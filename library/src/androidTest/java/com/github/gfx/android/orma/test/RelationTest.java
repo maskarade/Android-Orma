@@ -154,11 +154,13 @@ public class RelationTest {
 
     @Test
     public void update() throws Exception {
-        db.fromBook()
+        int count = db.fromBook()
                 .where("title = ?", "today")
                 .update(new Book_UpdateBuilder()
                         .content("modified")
                         .getContentValues());
+
+        assertThat(count, is(1));
 
         Book book = db.fromBook().where("title = ?", "today").value();
         assertThat(book.content, is("modified"));
