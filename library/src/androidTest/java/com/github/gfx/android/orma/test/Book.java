@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 
 @Table
 public class Book {
+
     @PrimaryKey
     public long id;
 
@@ -17,12 +18,10 @@ public class Book {
     @Column
     @Nullable
     public String content;
-
-    // TODO: has-one relations
-    // @Column
-    // public Publisher publisher;
-
-    // TODO: has-many relations
-    // @Column
-    // public HasMany<Author> authors;
+//
+//    @Column
+//    public Single<Publisher> publisher;
+//
+//    @Column
+//    public Observable<Author> authors;
 }

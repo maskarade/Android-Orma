@@ -9,15 +9,22 @@ import java.util.List;
 
 public interface Schema<T> {
 
+    @NonNull
     String getTableName();
 
+    @NonNull
     String[] getColumnNames();
 
+    @NonNull
     List<ColumnDef<?>> getColumns();
 
+    @NonNull
     ContentValues serializeModelToContentValues(@NonNull T model);
 
-    T createModelFromCursor(@NonNull Cursor cursor);
+    void populateValuesIntoModel(@NonNull Cursor cursor, @NonNull T model);
 
     void bindArgs(@NonNull SQLiteStatement statement, @NonNull T model);
+
+    @NonNull
+    T createModelFromCursor(@NonNull Cursor cursor);
 }

@@ -39,6 +39,10 @@ public class Types {
 
     public static final ClassName Nullable = ClassName.get("android.support.annotation", "Nullable");
 
+    public static final ClassName Single = ClassName.get("rx", "Single");
+
+    public static final ClassName Observable = ClassName.get("rx", "Observable");
+
     // Orma types
     public static final ClassName Schema = ClassName.get(ormaPackageName, "Schema");
 
@@ -73,10 +77,18 @@ public class Types {
     public static ParameterizedTypeName getList(TypeName typeName) {
         return ParameterizedTypeName.get(List, typeName);
     }
+
     public static ParameterizedTypeName getInserter(TypeName typeName) {
         return ParameterizedTypeName.get(Inserter, typeName);
     }
 
+    public static ParameterizedTypeName getSingle(TypeName typeName) {
+        return ParameterizedTypeName.get(Single, typeName);
+    }
+
+    public static ParameterizedTypeName getObservable(TypeName typeName) {
+        return ParameterizedTypeName.get(Observable, typeName);
+    }
 
     public static boolean looksLikeIntegerType(TypeName type) {
         return type.equals(TypeName.INT)

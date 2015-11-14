@@ -202,6 +202,24 @@ public class SchemaWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("populateValuesIntoModel")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(TypeName.VOID)
+                        .addParameter(
+                                ParameterSpec.builder(Types.Cursor, "cursor")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addParameter(
+                                ParameterSpec.builder(schema.getModelClassName(), "model")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addCode(buildPopulateValuesIntoCursor())
+                        .build()
+        );
+
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("createModelFromCursor")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
@@ -269,11 +287,8 @@ public class SchemaWriter {
         return builder.build();
     }
 
-
-    private CodeBlock buildCreateModelFromCursor() {
+    private CodeBlock buildPopulateValuesIntoCursor() {
         CodeBlock.Builder builder = CodeBlock.builder();
-
-        builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
 
         List<ColumnDefinition> columns = schema.getColumns();
         for (int i = 0; i < columns.size(); i++) {
@@ -281,9 +296,14 @@ public class SchemaWriter {
             String getter = "get" + capitalize(c.getType());
             builder.addStatement("model.$L = cursor.$L($L)", c.name, getter, i);
         }
+        return builder.build();
+    }
 
+    private CodeBlock buildCreateModelFromCursor() {
+        CodeBlock.Builder builder = CodeBlock.builder();
+        builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName()); // FIXME
+        builder.addStatement("populateValuesIntoModel(cursor, model)");
         builder.addStatement("return model");
-
         return builder.build();
     }
 
@@ -294,7 +314,7 @@ public class SchemaWriter {
         } else if (type instanceof ClassName) {
             return ((ClassName) type).simpleName();
         } else {
-            throw new UnsupportedOperationException("TODO: " + type);
+            throw new UnsupportedOperationException("TODO: " + type + " is not yet supported as a column type");
         }
     }
 }
