@@ -66,7 +66,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
         // To reuse cursor for each query
         SQLiteDatabase.CursorFactory cursorFactory = new SQLiteDatabase.CursorFactory() {
-
             SQLiteCursor cursor;
 
             @Override

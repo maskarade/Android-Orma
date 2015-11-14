@@ -47,14 +47,6 @@ public class BenchmarkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_benchmark);
 
-        db = new OrmaDatabase(this, "benchmark.db");
-        db.getConnection().resetDatabase();
-
-        RealmConfiguration realmConf = new RealmConfiguration.Builder(this)
-                .build();
-        Realm.deleteRealm(realmConf);
-        realm = Realm.getInstance(realmConf);
-
         adapter = new ResultAdapter();
         binding.list.setAdapter(adapter);
 
@@ -69,6 +61,21 @@ public class BenchmarkActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        db = new OrmaDatabase(this, "benchmark.db");
+        db.getConnection().resetDatabase();
+
+        RealmConfiguration realmConf = new RealmConfiguration.Builder(this)
+                .build();
+        Realm.deleteRealm(realmConf);
+        realm = Realm.getInstance(realmConf);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        realm.close();
     }
 
     void run() {
