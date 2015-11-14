@@ -130,7 +130,8 @@ public abstract class Relation<T, R extends Relation> {
 
     public long update(ModelBuilder<T> modelBuilder) {
         assertNoExtraClausesForDeleteOrUpdate("update");
-        return connection.update(schema.getTableName(), modelBuilder.buildContentValues(), getWhereClause(), getWhereArgs());
+        throw new UnsupportedOperationException("Not yet implemented");
+        //return connection.update(schema.getTableName(), modelBuilder.buildContentValues(), getWhereClause(), getWhereArgs());
     }
 
     public int delete() {

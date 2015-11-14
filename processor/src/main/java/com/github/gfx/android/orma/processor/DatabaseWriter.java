@@ -132,9 +132,26 @@ public class DatabaseWriter {
         schemas.forEach(schema -> {
             String schemaInstance = "schema" + schema.getModelClassName().simpleName();
 
+//            @NonNull
+//            Book createBook(ModelBuilder<Book> builder) {
+//                long id = insert(builder.build());
+//                return fromBook().where("id = ?", id).value();
+//            }
+
+            methodSpecs.add(MethodSpec.methodBuilder("create" + schema.getModelClassName().simpleName())
+                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                    .returns(schema.getModelClassName())
+                    .addParameter(
+                            ParameterSpec.builder(Types.getModelBuilder(schema.getModelClassName()), "builder")
+                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .build()
+                    )
+                    .addStatement("return $L.createModel($L, builder)", connection, schemaInstance)
+                    .build());
+
             methodSpecs.add(
                     MethodSpec.methodBuilder("from" + schema.getModelClassName().simpleName())
-                            .addJavadoc("Starts building query <code>SELECT * FROM $T ...</code>.", schema.getModelClassName())
+                            .addJavadoc("Starts building query {@code SELECT * FROM $T ...}.", schema.getModelClassName())
                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                             .returns(schema.getRelationClassName())
                             .addStatement("return new $T($L, $L)",
@@ -157,7 +174,6 @@ public class DatabaseWriter {
                                     schemaInstance
                             )
                             .build());
-
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("prepareInsertInto" + schema.getModelClassName().simpleName())

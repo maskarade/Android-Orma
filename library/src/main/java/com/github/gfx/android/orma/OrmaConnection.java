@@ -36,6 +36,15 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return getWritableDatabase();
     }
 
+    public <T> T createModel(Schema<T> schema, ModelBuilder<T> builder) {
+        long id = insert(schema, builder.build());
+        ColumnDef<?> primaryKey = schema.getPrimaryKey();
+        assert primaryKey != null;
+        String whereClause = primaryKey.name + " = ?";
+        String[] whereArgs = {String.valueOf(id)};
+        return querySingle(schema, schema.getColumnNames(), whereClause, whereArgs, null, null, null);
+    }
+
     public <T> Inserter<T> prepareInsert(Schema<T> schema) {
         SQLiteDatabase db = getDatabase();
         SQLiteStatement statement = db.compileStatement(sql.insert(schema));

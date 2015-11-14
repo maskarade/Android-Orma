@@ -66,6 +66,8 @@ public class Types {
 
     public static final ClassName HasMany = ClassName.get(ormaPackageName, "HasMany");
 
+    public static final ClassName ModelBuilder = ClassName.get(ormaPackageName, "ModelBuilder");
+
     public static ParameterizedTypeName getSchema(TypeName modelType) {
         return ParameterizedTypeName.get(Schema, modelType);
     }
@@ -92,6 +94,10 @@ public class Types {
 
     public static ParameterizedTypeName getObservable(TypeName typeName) {
         return ParameterizedTypeName.get(Observable, typeName);
+    }
+
+    public static ParameterizedTypeName getModelBuilder(TypeName typeName) {
+        return ParameterizedTypeName.get(ModelBuilder, typeName);
     }
 
     public static boolean looksLikeIntegerType(TypeName type) {

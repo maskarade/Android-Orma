@@ -1,7 +1,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.HasOne;
-import com.github.gfx.android.orma.Inserter;
+import com.github.gfx.android.orma.ModelBuilder;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.TransactionAbortException;
 import com.github.gfx.android.orma.TransactionTask;
@@ -31,31 +31,39 @@ public class RelationTest {
         db = new OrmaDatabase(getContext(), "test.db");
         db.getConnection().resetDatabase();
 
-        Inserter<Book> statement = db.prepareInsertIntoBook();
+        final Publisher publisher = db.createPublisher(new ModelBuilder<Publisher>() {
+            @Override
+            public Publisher build() {
+                Publisher publisher = new Publisher();
+                publisher.name = "foo bar";
+                publisher.startedYear = 2015;
+                publisher.startedMonth = 12;
 
-        Publisher publisher = new Publisher();
-        publisher.name = "foo bar";
-        publisher.startedYear = 2015;
-        publisher.startedMonth = 12;
-        db.insert(publisher);
+                return publisher;
+            }
+        });
 
-        publisher = db.fromPublisher().value();
+        db.createBook(new ModelBuilder<Book>() {
+            @Override
+            public Book build() {
+                Book book = new Book();
+                book.title = "today";
+                book.content = "milk, banana";
+                book.publisher = HasOne.just(publisher.id, publisher);
+                return book;
+            }
+        });
 
-        {
-            Book book = new Book();
-            book.title = "today";
-            book.content = "milk, banana";
-            book.publisher = HasOne.just(publisher.id, publisher);
-            statement.insert(book);
-        }
-
-        {
-            Book book = new Book();
-            book.title = "friday";
-            book.content = "apple";
-            book.publisher = HasOne.just(publisher.id, publisher);
-            statement.insert(book);
-        }
+        db.createBook(new ModelBuilder<Book>() {
+            @Override
+            public Book build() {
+                Book book = new Book();
+                book.title = "friday";
+                book.content = "apple";
+                book.publisher = HasOne.just(publisher.id, publisher);
+                return book;
+            }
+        });
     }
 
     @Test
