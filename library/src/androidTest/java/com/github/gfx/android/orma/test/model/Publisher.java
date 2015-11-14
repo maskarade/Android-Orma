@@ -23,6 +23,6 @@ public class Publisher {
     public int startedMonth;
 
     public Book_Relation books(OrmaDatabase orma) {
-        return orma.fromBook().where("publisher = ?", id);
+        return orma.selectFromBook().where("publisher = ?", id);
     }
 }

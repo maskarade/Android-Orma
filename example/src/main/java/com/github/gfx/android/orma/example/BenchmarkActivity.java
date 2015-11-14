@@ -87,7 +87,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
 
-        orma.fromTodo().delete();
+        orma.selectFromTodo().delete();
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -146,21 +146,21 @@ public class BenchmarkActivity extends AppCompatActivity {
             public void call(SingleSubscriber<? super Result> singleSubscriber) {
                 long t0 = System.currentTimeMillis();
 
-                orma.transaction(new TransactionTask() {
-                    @Override
-                    public void execute() throws Exception {
-                        Inserter<Todo> statement = orma.prepareInsertIntoTodo();
+orma.transaction(new TransactionTask() {
+    @Override
+    public void execute() throws Exception {
+        Inserter<Todo> statement = orma.prepareInsertIntoTodo();
 
-                        for (int i = 0; i < N; i++) {
-                            Todo todo = new Todo();
+        for (int i = 0; i < N; i++) {
+            Todo todo = new Todo();
 
-                            todo.title = "title " + i;
-                            todo.content = "content " + i;
+            todo.title = "title " + i;
+            todo.content = "content content content content" + i;
 
-                            statement.insert(todo);
-                        }
-                    }
-                });
+            statement.insert(todo);
+        }
+    }
+});
 
                 singleSubscriber.onSuccess(new Result("Orma/insert", System.currentTimeMillis() - t0));
             }
@@ -180,7 +180,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                             RealmTodo todo = realm.createObject(RealmTodo.class);
 
                             todo.setTitle("title " + i);
-                            todo.setContent("content " + i);
+                            todo.setContent("content content content content " + i);
                         }
                     }
                 });
@@ -202,7 +202,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                         for (int i = 1; i <= N; i++) {
                             FlowTodo todo = new FlowTodo();
                             todo.title = "title " + i;
-                            todo.content = "content " + i;
+                            todo.content = "content content content content " + i;
                             todo.insert();
                         }
                     }
@@ -218,7 +218,7 @@ public class BenchmarkActivity extends AppCompatActivity {
             @Override
             public void call(SingleSubscriber<? super Result> singleSubscriber) {
                 long t0 = System.currentTimeMillis();
-                List<Todo> list = orma.fromTodo().toList();
+                List<Todo> list = orma.selectFromTodo().toList();
                 Log.d(TAG, "Orma/selectAll count: " + list.size());
                 singleSubscriber.onSuccess(new Result("Orma/selectAll", System.currentTimeMillis() - t0));
             }

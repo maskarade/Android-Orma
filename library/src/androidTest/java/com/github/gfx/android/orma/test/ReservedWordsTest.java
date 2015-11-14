@@ -39,7 +39,7 @@ public class ReservedWordsTest {
     @Ignore // FIXME: SQLiteDatabase#query() does not quote names
     @Test
     public void useReservedWordsInSelect() throws Exception {
-        assertThat(db.fromWhere().toList(), hasSize(0));
+        assertThat(db.selectFromWhere().toList(), hasSize(0));
     }
 
 }

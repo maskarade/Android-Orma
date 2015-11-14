@@ -69,12 +69,12 @@ public class RelationTest {
 
     @Test
     public void count() throws Exception {
-        assertThat(db.fromBook().count(), is(2L));
+        assertThat(db.selectFromBook().count(), is(2L));
     }
 
     @Test
     public void toList() throws Exception {
-        List<Book> books = db.fromBook().toList();
+        List<Book> books = db.selectFromBook().toList();
         assertThat(books, hasSize(2));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -85,7 +85,7 @@ public class RelationTest {
 
     @Test
     public void single() throws Exception {
-        Book book = db.fromBook().value();
+        Book book = db.selectFromBook().value();
 
         assertThat(book.title, is("today"));
         assertThat(book.content, is("milk, banana"));
@@ -93,15 +93,15 @@ public class RelationTest {
 
     @Test
     public void singleOrNull() throws Exception {
-        db.fromBook().delete();
-        Book book = db.fromBook().valueOrNull();
+        db.selectFromBook().delete();
+        Book book = db.selectFromBook().valueOrNull();
 
         assertThat(book, is(nullValue()));
     }
 
     @Test
     public void whereEquals() throws Exception {
-        List<Book> books = db.fromBook().where("title = ?", "today").toList();
+        List<Book> books = db.selectFromBook().where("title = ?", "today").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -109,7 +109,7 @@ public class RelationTest {
 
     @Test
     public void whereLike() throws Exception {
-        List<Book> books = db.fromBook().where("title LIKE ?", "t%").toList();
+        List<Book> books = db.selectFromBook().where("title LIKE ?", "t%").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -117,7 +117,7 @@ public class RelationTest {
 
     @Test
     public void orderBy() throws Exception {
-        List<Book> books = db.fromBook().orderBy("id DESC").toList();
+        List<Book> books = db.selectFromBook().orderBy("id DESC").toList();
         assertThat(books, hasSize(2));
         assertThat(books.get(1).title, is("today"));
         assertThat(books.get(1).content, is("milk, banana"));
@@ -128,7 +128,7 @@ public class RelationTest {
 
     @Test
     public void limit() throws Exception {
-        List<Book> books = db.fromBook().limit(1).toList();
+        List<Book> books = db.selectFromBook().limit(1).toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -136,7 +136,7 @@ public class RelationTest {
 
     @Test
     public void limitAndOffset() throws Exception {
-        List<Book> books = db.fromBook().limit(1).offset(1).toList();
+        List<Book> books = db.selectFromBook().limit(1).offset(1).toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("friday"));
         assertThat(books.get(0).content, is("apple"));
@@ -145,7 +145,7 @@ public class RelationTest {
     @Test
     public void offset() throws Exception {
         try {
-            db.fromBook().offset(1).toList();
+            db.selectFromBook().offset(1).toList();
             fail("not reached");
         } catch (Relation.InvalidStatementException e) {
             assertThat(e, is(notNullValue()));
@@ -154,7 +154,7 @@ public class RelationTest {
 
     @Test
     public void update() throws Exception {
-        int count = db.fromBook()
+        int count = db.selectFromBook()
                 .where("title = ?", "today")
                 .update(new Book_UpdateBuilder()
                         .content("modified")
@@ -162,19 +162,19 @@ public class RelationTest {
 
         assertThat(count, is(1));
 
-        Book book = db.fromBook().where("title = ?", "today").value();
+        Book book = db.selectFromBook().where("title = ?", "today").value();
         assertThat(book.content, is("modified"));
     }
 
     @Test
     public void delete() throws Exception {
-        int result = db.fromBook()
+        int result = db.selectFromBook()
                 .where("title = ?", "today")
                 .delete();
 
         assertThat(result, is(1));
-        assertThat(db.fromBook().count(), is(1L));
-        assertThat(db.fromBook().value().title, is("friday"));
+        assertThat(db.selectFromBook().count(), is(1L));
+        assertThat(db.selectFromBook().value().title, is("friday"));
     }
 
     @Test
@@ -182,7 +182,7 @@ public class RelationTest {
         db.transaction(new TransactionTask() {
             @Override
             public void execute() throws Exception {
-                Publisher publisher = db.fromPublisher().value();
+                Publisher publisher = db.selectFromPublisher().value();
 
                 for (int i = 0; i < 5; i++) {
                     Book book = new Book();
@@ -194,7 +194,7 @@ public class RelationTest {
             }
         });
 
-        assertThat(db.fromBook().count(), is(7L));
+        assertThat(db.selectFromBook().count(), is(7L));
     }
 
     @Test
@@ -217,27 +217,27 @@ public class RelationTest {
             assertThat(e.getCause(), instanceOf(RuntimeException.class));
         }
 
-        assertThat(db.fromBook().count(), is(2L));
+        assertThat(db.selectFromBook().count(), is(2L));
     }
 
     @Test
     public void reuseCursor() throws Exception {
-        List<Book> books = db.fromBook().where("title = ?", "today").toList();
+        List<Book> books = db.selectFromBook().where("title = ?", "today").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
 
-        books = db.fromBook().where("title = ?", "friday").toList();
+        books = db.selectFromBook().where("title = ?", "friday").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("friday"));
         assertThat(books.get(0).content, is("apple"));
 
-        books = db.fromBook().where("title = ?", "today").toList();
+        books = db.selectFromBook().where("title = ?", "today").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
 
-        books = db.fromBook().where("title = ?", "friday").toList();
+        books = db.selectFromBook().where("title = ?", "friday").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("friday"));
         assertThat(books.get(0).content, is("apple"));
@@ -245,7 +245,7 @@ public class RelationTest {
 
     @Test
     public void initAndInsertForSecondTable() throws Exception {
-        db.fromPublisher().delete();
+        db.selectFromPublisher().delete();
 
         {
             Publisher publisher = new Publisher();
@@ -263,9 +263,9 @@ public class RelationTest {
             db.insert(publisher);
         }
 
-        assertThat(db.fromPublisher().count(), is(2L));
+        assertThat(db.selectFromPublisher().count(), is(2L));
 
-        Publisher publisher = db.fromPublisher().value();
+        Publisher publisher = db.selectFromPublisher().value();
         assertThat(publisher.name, is("The Fire"));
         assertThat(publisher.startedYear, is(1998));
         assertThat(publisher.startedMonth, is(12));
@@ -273,7 +273,7 @@ public class RelationTest {
 
     @Test
     public void testHasOne() throws Exception {
-        Publisher publisher = db.fromBook().value().publisher.single().toBlocking().value();
+        Publisher publisher = db.selectFromBook().value().publisher.single().toBlocking().value();
         assertThat(publisher.name, is("foo bar"));
         assertThat(publisher.startedYear, is(2015));
         assertThat(publisher.startedMonth, is(12));

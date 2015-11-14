@@ -148,7 +148,7 @@ public class DatabaseWriter {
                     .build());
 
             methodSpecs.add(
-                    MethodSpec.methodBuilder("from" + schema.getModelClassName().simpleName())
+                    MethodSpec.methodBuilder("selectFrom" + schema.getModelClassName().simpleName())
                             .addJavadoc("Starts building query {@code SELECT * FROM $T ...}.\n", schema.getModelClassName())
                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                             .addModifiers(Modifier.PUBLIC)
