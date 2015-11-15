@@ -203,7 +203,7 @@ public class DatabaseWriter {
                                 .build())
                 .addParameter(
                         ParameterSpec.builder(Types.String, "name")
-                                .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                .addAnnotation(Specs.buildNullableAnnotationSpec())
                                 .build())
                 .addStatement("this(new $T(context, name, schemas))", Types.OrmaConnection)
                 .addJavadoc("Create a database context that handles $L.\n", getListOfModelClassesForJavadoc())

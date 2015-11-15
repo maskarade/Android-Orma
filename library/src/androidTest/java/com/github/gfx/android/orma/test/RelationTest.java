@@ -29,8 +29,7 @@ public class RelationTest {
 
     @Before
     public void setUp() throws Exception {
-        db = new OrmaDatabase(getContext(), "test.db");
-        db.getConnection().resetDatabase();
+        db = new OrmaDatabase(getContext(), null);
 
         final Publisher publisher = db.createPublisher(new ModelBuilder<Publisher>() {
             @Override
