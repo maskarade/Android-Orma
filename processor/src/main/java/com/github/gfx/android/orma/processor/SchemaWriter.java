@@ -36,6 +36,8 @@ public class SchemaWriter {
 
     private final ProcessingEnvironment processingEnv;
 
+    private final SqlGenerator sql = new SqlGenerator();
+
     FieldSpec primaryKey;
 
     public SchemaWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
@@ -206,6 +208,43 @@ public class SchemaWriter {
                         .addStatement("return $L", ESCAPED_COLUMN_NAMES)
                         .build()
         );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getCreateTableStatement")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return $S", sql.buildCreateTableStatement(schema))
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getCreateIndexStatements")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.getList(Types.String))
+                        .addCode(sql.buildCreateIndexStatements(schema))
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getDropTableStatement")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return $S", sql.buildDropTableStatement(schema))
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getInsertStatement")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return $S", sql.buildInsertStatement(schema))
+                        .build()
+        );
+
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("serializeModelToContentValues")

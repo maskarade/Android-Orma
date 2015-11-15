@@ -54,6 +54,10 @@ public class SchemaDefinition {
         return schemaClassName.packageName();
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
     public ClassName getModelClassName() {
         return modelClassName;
     }
