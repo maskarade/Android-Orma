@@ -1,3 +1,5 @@
+import java.util.regex.Pattern
+
 buildscript {
     repositories {
         jcenter()
@@ -17,4 +19,59 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+ext {
+    versionFile = project.file("version.properties")
+
+    versionName = {
+        def versionProps = getVersionProps()
+        "${versionProps['major']}.${versionProps['minor']}.${versionProps['patch']}"
+    }
+}
+
+def updateReadme(oldVersion, newVersion) {
+    def template = file('README.md').text
+    def result = template.replaceAll(Pattern.quote(oldVersion), newVersion)
+    file("README.md").withWriter{ it << result }
+}
+
+def Properties getVersionProps() {
+    def Properties versionProps = new Properties()
+    versionProps.load(new FileInputStream(versionFile))
+    return versionProps
+}
+
+task bumpMajor << {
+    def oldVersion = versionName()
+    ant.propertyfile(file: versionFile) {
+        entry(key: 'major', type: 'int', operation: '+', value: 1)
+        entry(key: 'minor', type: 'int', operation: '=', value: 0)
+        entry(key: 'patch', type: 'int', operation: '=', value: 0)
+    }
+    updateReadme(oldVersion, versionName())
+    tasks.version.execute()
+}
+
+task bumpMinor << {
+    def oldVersion = versionName()
+    ant.propertyfile(file: versionFile) {
+        entry(key: 'minor', type: 'int', operation: '+', value: 1)
+        entry(key: 'patch', type: 'int', operation: '=', value: 0)
+    }
+    updateReadme(oldVersion, versionName())
+    tasks.version.execute()
+}
+
+task bumpPatch << {
+    def oldVersion = versionName()
+    ant.propertyfile(file: versionFile) {
+        entry(key: 'patch', type: 'int', operation: '+', value: 1)
+    }
+    updateReadme(oldVersion, versionName())
+    tasks.version.execute()
+}
+
+task version << {
+    println "v" + versionName()
 }
