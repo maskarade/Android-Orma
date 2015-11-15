@@ -6,3 +6,4 @@ gradle.properties
 *.iml
 .DS_Store
 build/
+captures/
