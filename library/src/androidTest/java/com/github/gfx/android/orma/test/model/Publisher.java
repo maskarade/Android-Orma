@@ -9,7 +9,7 @@ import com.github.gfx.android.orma.annotation.Table;
 @Table(value = "publishers", schemaClassName = "PublisherSchema", relationClassName = "PublisherRelation")
 public class Publisher {
 
-    @PrimaryKey
+    @PrimaryKey(autoincrement = true)
     public long id;
 
     @Column(unique = true)

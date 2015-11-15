@@ -18,6 +18,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
+        debug {
+            debuggable true
+            testCoverageEnabled true
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -27,13 +32,16 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+    jacoco {
+        version '0.7.5.+'
+    }
 }
 
 dependencies {
     compile project(':annotations')
     provided 'javax.annotation:jsr250-api:1.0'
     compile 'io.reactivex:rxjava:1.0.16'
-    compile 'com.android.support:support-annotations:23.1.0'
+    compile 'com.android.support:support-annotations:23.1.1'
     androidTestApt project(':processor')
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.1') {
