@@ -28,6 +28,9 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+    }
 }
 
 dependencies {
@@ -35,10 +38,11 @@ dependencies {
     compile project(':library')
     compile 'io.realm:realm-android:0.84.2'
     apt 'com.raizlabs.android:DBFlow-Compiler:2.2.1'
-    compile "com.raizlabs.android:DBFlow-Core:2.2.1"
-    compile "com.raizlabs.android:DBFlow:2.2.1"
+    compile 'com.raizlabs.android:DBFlow-Core:2.2.1'
+    compile 'com.raizlabs.android:DBFlow:2.2.1'
     provided 'javax.annotation:jsr250-api:1.0'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.2'
+    compile 'com.facebook.stetho:stetho:1.2.0'
 }

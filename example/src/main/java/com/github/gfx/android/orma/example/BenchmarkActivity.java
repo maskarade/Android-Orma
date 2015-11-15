@@ -36,6 +36,13 @@ public class BenchmarkActivity extends AppCompatActivity {
 
     final int N = 10000;
 
+    final String titlePrefix = "title ";
+
+    final String contentPrefix = "content content content\n"
+            + "content content content\n"
+            + "content content content\n"
+            + " ";
+
     OrmaDatabase orma;
 
     Realm realm;
@@ -156,8 +163,8 @@ public class BenchmarkActivity extends AppCompatActivity {
                         for (int i = 0; i < N; i++) {
                             Todo todo = new Todo();
 
-                            todo.title = "title " + i;
-                            todo.content = "content content content content" + i;
+                            todo.title = titlePrefix + i;
+                            todo.content = contentPrefix + i;
                             todo.createdTimeMillis = now;
 
                             statement.insert(todo);
@@ -184,8 +191,8 @@ public class BenchmarkActivity extends AppCompatActivity {
                         for (int i = 0; i < N; i++) {
                             RealmTodo todo = realm.createObject(RealmTodo.class);
 
-                            todo.setTitle("title " + i);
-                            todo.setContent("content content content content " + i);
+                            todo.setTitle(titlePrefix + i);
+                            todo.setContent(contentPrefix + i);
                             todo.setCreatedTimeMillis(now);
                         }
                     }
@@ -209,8 +216,8 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                         for (int i = 1; i <= N; i++) {
                             FlowTodo todo = new FlowTodo();
-                            todo.title = "title " + i;
-                            todo.content = "content content content content " + i;
+                            todo.title = titlePrefix + i;
+                            todo.content = contentPrefix + i;
                             todo.createdTimeMillis = now;
                             todo.insert();
                         }
