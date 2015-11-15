@@ -1,4 +1,7 @@
-package com.github.gfx.android.orma;
+package com.github.gfx.android.orma.internal;
+
+import com.github.gfx.android.orma.OrmaConnection;
+import com.github.gfx.android.orma.Schema;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -6,13 +9,13 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ConditionBase<T, C extends ConditionBase> {
+public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
 
     protected final OrmaConnection connection;
 
     protected final Schema<T> schema;
 
-    public ConditionBase(OrmaConnection connection, Schema<T> schema) {
+    public OrmaConditionBase(OrmaConnection connection, Schema<T> schema) {
         this.connection = connection;
         this.schema = schema;
     }

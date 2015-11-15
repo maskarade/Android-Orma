@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma;
+package com.github.gfx.android.orma.internal;
 
 
 import android.database.Cursor;
@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQuery;
 
-public class CachedCursorFactory implements SQLiteDatabase.CursorFactory {
+public class OrmaCachedCursorFactory implements SQLiteDatabase.CursorFactory {
 
     SQLiteCursor cursor;
 

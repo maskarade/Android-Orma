@@ -1,4 +1,7 @@
-package com.github.gfx.android.orma;
+package com.github.gfx.android.orma.internal;
+
+import com.github.gfx.android.orma.ColumnDef;
+import com.github.gfx.android.orma.Schema;
 
 import java.util.List;
 
@@ -6,7 +9,7 @@ public class OrmaSqlGenerator {
 
     static final int INITIAL_CAPACITY = 100;
 
-    String createTable(Schema<?> schema) {
+    public String createTable(Schema<?> schema) {
         StringBuilder sb = new StringBuilder(INITIAL_CAPACITY);
 
         sb.append("CREATE TABLE ");
@@ -26,7 +29,7 @@ public class OrmaSqlGenerator {
         return sb.toString();
     }
 
-    void addColumnDef(StringBuilder sb, ColumnDef<?> column) {
+    public void addColumnDef(StringBuilder sb, ColumnDef<?> column) {
         appendIdentifier(sb, column.name);
         sb.append(' ');
 

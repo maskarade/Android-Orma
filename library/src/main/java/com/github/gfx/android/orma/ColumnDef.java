@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.internal.OrmaDataTypes;
+
 import android.support.annotation.NonNull;
 
 public class ColumnDef<T> {
@@ -37,7 +39,7 @@ public class ColumnDef<T> {
      */
     @NonNull
     public String getSqlType() {
-        return DataTypes.getSqliteType(type);
+        return OrmaDataTypes.getSqliteType(type);
     }
 
     @NonNull

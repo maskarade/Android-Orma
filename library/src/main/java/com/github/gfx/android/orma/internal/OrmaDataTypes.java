@@ -1,4 +1,6 @@
-package com.github.gfx.android.orma;
+package com.github.gfx.android.orma.internal;
+
+import com.github.gfx.android.orma.SingleRelation;
 
 import android.support.annotation.NonNull;
 
@@ -8,7 +10,7 @@ import java.util.Map;
 /**
  * https://www.sqlite.org/datatype3.html
  */
-public class DataTypes {
+public class OrmaDataTypes {
     public static final Map<Class<?>, String> javaToSqlite = new HashMap<>();
 
     static {

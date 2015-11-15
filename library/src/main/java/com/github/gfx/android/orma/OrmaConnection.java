@@ -1,5 +1,8 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.internal.OrmaCachedCursorFactory;
+import com.github.gfx.android.orma.internal.OrmaSqlGenerator;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -64,7 +67,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         String sql = SQLiteQueryBuilder.buildQueryString(
                 false, table, columns, whereClause, groupBy, having, orderBy, limit);
 
-        return db.rawQueryWithFactory(new CachedCursorFactory(), sql, whereArgs, table);
+        return db.rawQueryWithFactory(new OrmaCachedCursorFactory(), sql, whereArgs, table);
     }
 
     public long count(String table, String whereClause, String[] whereArgs) {

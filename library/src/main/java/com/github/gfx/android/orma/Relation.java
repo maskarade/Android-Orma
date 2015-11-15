@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.internal.OrmaConditionBase;
+
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,7 +10,7 @@ import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Relation<T, R extends Relation> extends ConditionBase<T, R> {
+public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<T, R> {
 
     @Nullable
     protected String groupBy;

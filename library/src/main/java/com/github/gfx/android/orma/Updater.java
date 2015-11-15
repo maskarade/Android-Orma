@@ -1,9 +1,11 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.internal.OrmaConditionBase;
+
 import android.content.ContentValues;
 import android.support.annotation.NonNull;
 
-public class Updater<T, C extends Updater> extends ConditionBase<T, C> {
+public class Updater<T, C extends Updater> extends OrmaConditionBase<T, C> {
 
     final protected ContentValues contents = new ContentValues();
 
