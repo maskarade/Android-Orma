@@ -1,7 +1,5 @@
 package com.github.gfx.android.orma;
 
-import com.github.gfx.android.orma.internal.OrmaDataTypes;
-
 import android.support.annotation.NonNull;
 
 public class ColumnDef<T> {
@@ -34,17 +32,9 @@ public class ColumnDef<T> {
         this.unique = unique;
     }
 
-    /**
-     * @return A string representation of its SQLite data type
-     */
-    @NonNull
-    public String getSqlType() {
-        return OrmaDataTypes.getSqliteType(type);
-    }
-
     @NonNull
     @Override
     public String toString() {
-        return name + " " + getSqlType();
+        return name;
     }
 }
