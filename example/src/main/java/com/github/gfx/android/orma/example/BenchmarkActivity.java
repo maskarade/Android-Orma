@@ -149,6 +149,8 @@ public class BenchmarkActivity extends AppCompatActivity {
                 orma.transaction(new TransactionTask() {
                     @Override
                     public void execute() throws Exception {
+                        long now = System.currentTimeMillis();
+
                         Inserter<Todo> statement = orma.prepareInsertIntoTodo();
 
                         for (int i = 0; i < N; i++) {
@@ -156,6 +158,7 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                             todo.title = "title " + i;
                             todo.content = "content content content content" + i;
+                            todo.createdTimeMillis = now;
 
                             statement.insert(todo);
                         }
@@ -176,11 +179,14 @@ public class BenchmarkActivity extends AppCompatActivity {
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
+                        long now = System.currentTimeMillis();
+
                         for (int i = 0; i < N; i++) {
                             RealmTodo todo = realm.createObject(RealmTodo.class);
 
                             todo.setTitle("title " + i);
                             todo.setContent("content content content content " + i);
+                            todo.setCreatedTimeMillis(now);
                         }
                     }
                 });
@@ -199,10 +205,13 @@ public class BenchmarkActivity extends AppCompatActivity {
                 TransactionManager.transact(BenchmarkDatabase.NAME, new Runnable() {
                     @Override
                     public void run() {
+                        long now = System.currentTimeMillis();
+
                         for (int i = 1; i <= N; i++) {
                             FlowTodo todo = new FlowTodo();
                             todo.title = "title " + i;
                             todo.content = "content content content content " + i;
+                            todo.createdTimeMillis = now;
                             todo.insert();
                         }
                     }

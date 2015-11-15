@@ -21,4 +21,5 @@ public class FlowTodo extends BaseModel {
     @Nullable
     public String content;
 
+    @Column public long createdTimeMillis;
 }

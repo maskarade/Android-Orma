@@ -10,6 +10,8 @@ public class RealmTodo extends RealmObject {
 
     private String content;
 
+    private long createdTimeMillis;
+
     public RealmTodo() {
     }
 
@@ -35,5 +37,14 @@ public class RealmTodo extends RealmObject {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+
+    public long getCreatedTimeMillis() {
+        return createdTimeMillis;
+    }
+
+    public void setCreatedTimeMillis(long createdTimeMillis) {
+        this.createdTimeMillis = createdTimeMillis;
     }
 }

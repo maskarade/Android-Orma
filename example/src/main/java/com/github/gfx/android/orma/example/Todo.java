@@ -18,4 +18,6 @@ public class Todo {
     @Column
     @Nullable
     public String content;
+
+    public long createdTimeMillis;
 }
