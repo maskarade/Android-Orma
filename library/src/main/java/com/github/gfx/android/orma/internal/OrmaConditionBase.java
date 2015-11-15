@@ -15,6 +15,8 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
 
     protected final Schema<T> schema;
 
+    protected String whereConjunction = " AND ";
+
     public OrmaConditionBase(OrmaConnection connection, Schema<T> schema) {
         this.connection = connection;
         this.schema = schema;
@@ -32,7 +34,7 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
             whereClause = new StringBuilder(clause.length() + 2);
             whereArgs = new ArrayList<>(args.length);
         } else {
-            whereClause.append(" AND ");
+            whereClause.append(whereConjunction);
         }
 
         whereClause.append('(');
@@ -49,6 +51,17 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
         return (C) this;
     }
 
+    @SuppressWarnings("unchecked")
+    public C and() {
+        whereConjunction = " AND ";
+        return (C)this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public C or() {
+        whereConjunction = " OR ";
+        return (C)this;
+    }
 
     @Nullable
     protected String getWhereClause() {

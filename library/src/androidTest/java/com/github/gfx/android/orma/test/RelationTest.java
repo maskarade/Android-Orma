@@ -127,6 +127,26 @@ public class RelationTest {
     }
 
     @Test
+    public void whereConjunctionOr() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .where("title is ?", "today")
+                .or()
+                .where("title is ?", "friday")
+                .toList();
+        assertThat(books, hasSize(2));
+    }
+
+    @Test
+    public void whereConjunctionAnd() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .where("title is ?", "today")
+                .and()
+                .where("title is ?", "friday")
+                .toList();
+        assertThat(books, hasSize(0));
+    }
+
+    @Test
     public void orderBy() throws Exception {
         List<Book> books = db.selectFromBook().orderBy("id DESC").toList();
         assertThat(books, hasSize(2));
