@@ -26,8 +26,14 @@ import javax.tools.Diagnostic;
 })
 public class OrmaProcessor extends AbstractProcessor {
 
+    static final String TAG = OrmaProcessor.class.getSimpleName();
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        if (annotations.size() == 0) {
+            return true;
+        }
+
         DatabaseWriter databaseWriter = new DatabaseWriter(processingEnv);
 
         buildTableSchemas(roundEnv)
@@ -111,6 +117,6 @@ public class OrmaProcessor extends AbstractProcessor {
     }
 
     void printMessage(Diagnostic.Kind kind, CharSequence message, Element element) {
-        processingEnv.getMessager().printMessage(kind, message, element);
+        processingEnv.getMessager().printMessage(kind, "[" + TAG + "] " + message, element);
     }
 }
