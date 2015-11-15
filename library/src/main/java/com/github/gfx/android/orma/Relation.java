@@ -83,7 +83,7 @@ public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<
     @Nullable
     public T valueOrNull() {
         return connection
-                .querySingle(schema, schema.getColumnNames(), getWhereClause(), getWhereArgs(), groupBy, having, orderBy);
+                .querySingle(schema, schema.getEscapedColumnNames(), getWhereClause(), getWhereArgs(), groupBy, having, orderBy);
     }
 
     @NonNull
@@ -101,7 +101,7 @@ public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<
     public List<T> toList() {
         ArrayList<T> list = new ArrayList<>();
 
-        Cursor cursor = connection.query(schema.getTableName(), schema.getColumnNames(), getWhereClause(),
+        Cursor cursor = connection.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
                 getWhereArgs(), groupBy, having, orderBy, getLimitClause());
 
         if (cursor.moveToFirst()) {

@@ -42,7 +42,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         assert primaryKey != null;
         String whereClause = sql.identifier(primaryKey.name) + " = ?";
         String[] whereArgs = {String.valueOf(id)};
-        return querySingle(schema, schema.getColumnNames(), whereClause, whereArgs, null, null, null);
+        return querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null);
     }
 
     public <T> Inserter<T> prepareInsert(Schema<T> schema) {

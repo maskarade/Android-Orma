@@ -17,7 +17,7 @@ public interface Schema<T> {
     ColumnDef<?> getPrimaryKey();
 
     @NonNull
-    String[] getColumnNames();
+    String[] getEscapedColumnNames();
 
     @NonNull
     List<ColumnDef<?>> getColumns();

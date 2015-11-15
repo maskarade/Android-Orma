@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.test.model.*;
+import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.model.Where;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -36,10 +37,9 @@ public class ReservedWordsTest {
         assertThat(rowId, is(1L));
     }
 
-    @Ignore // FIXME: SQLiteDatabase#query() does not quote names
+    @Ignore("the table name must be escaped.")
     @Test
     public void useReservedWordsInSelect() throws Exception {
         assertThat(db.selectFromWhere().toList(), hasSize(0));
     }
-
 }

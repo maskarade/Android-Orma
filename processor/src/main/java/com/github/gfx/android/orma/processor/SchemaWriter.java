@@ -24,7 +24,7 @@ public class SchemaWriter {
 
     static final String COLUMNS = "$COLUMNS";
 
-    static final String COLUMN_NAMES = "$COLUMN_NAMES";
+    static final String ESCAPED_COLUMN_NAMES = "$ESCAPED_COLUMN_NAMES";
 
     static final Modifier[] publicStaticFinal = {
             Modifier.PUBLIC,
@@ -86,9 +86,9 @@ public class SchemaWriter {
         );
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.StringArray, COLUMN_NAMES)
+                FieldSpec.builder(Types.StringArray, ESCAPED_COLUMN_NAMES)
                         .addModifiers(publicStaticFinal)
-                        .initializer(buildColumnNamesInitializer(columns))
+                        .initializer(buildEscapedColumnNamesInitializer())
                         .build()
         );
 
@@ -126,13 +126,15 @@ public class SchemaWriter {
         return builder.build();
     }
 
-    public CodeBlock buildColumnNamesInitializer(List<FieldSpec> columns) {
+    public CodeBlock buildEscapedColumnNamesInitializer() {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         builder.add("{\n").indent();
 
+        List<ColumnDefinition> columns = schema.getColumns();
+
         for (int i = 0; i < columns.size(); i++) {
-            builder.add("$N.name", columns.get(i));
+            builder.add("$S", '"' + columns.get(i).columnName + '"');
             if ((i + 1) != columns.size()) {
                 builder.add(",\n");
             } else {
@@ -197,11 +199,11 @@ public class SchemaWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("getColumnNames")
+                MethodSpec.methodBuilder("getEscapedColumnNames")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.StringArray)
-                        .addStatement("return $L", COLUMN_NAMES)
+                        .addStatement("return $L", ESCAPED_COLUMN_NAMES)
                         .build()
         );
 

@@ -42,7 +42,7 @@ public class SingleRelation<T> {
                 assert primaryKey != null;
                 String whereClause = "\"" + primaryKey.name + "\" = ?";
                 String[] whereArgs = {String.valueOf(id)};
-                T model = conn.querySingle(schema, schema.getColumnNames(), whereClause, whereArgs, null, null, null);
+                T model = conn.querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null);
                 if (model != null) {
                     singleSubscriber.onSuccess(model);
                 } else {
