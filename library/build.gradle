@@ -32,9 +32,6 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
-    jacoco {
-        version '0.7.5.+'
-    }
 }
 
 dependencies {
