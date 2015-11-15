@@ -8,6 +8,7 @@ import com.squareup.javapoet.WildcardTypeName;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Types {
@@ -24,6 +25,8 @@ public class Types {
     public static final ClassName ArrayList = ClassName.get(ArrayList.class);
 
     public static final ClassName Arrays = ClassName.get(Arrays.class);
+
+    public static final ClassName Collections = ClassName.get(Collections.class);
 
     public static final ClassName Context = ClassName.get("android.content", "Context");
 

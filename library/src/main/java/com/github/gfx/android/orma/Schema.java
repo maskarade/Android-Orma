@@ -23,6 +23,18 @@ public interface Schema<T> {
     List<ColumnDef<?>> getColumns();
 
     @NonNull
+    String getCreateTableStatement();
+
+    @NonNull
+    String getDropTableStatement();
+
+    @NonNull
+    List<String> getCreateIndexStatements();
+
+    @NonNull
+    String getInsertStatement();
+
+    @NonNull
     ContentValues serializeModelToContentValues(@NonNull T model);
 
     void populateValuesIntoModel(@NonNull OrmaConnection conn, @NonNull Cursor cursor, @NonNull T model);
