@@ -33,7 +33,8 @@ public class OrmaProcessor extends AbstractProcessor {
         buildTableSchemas(roundEnv)
                 .peek(this::writeSchema)
                 .peek(this::writeRelation)
-                .peek(this::writeBuilder)
+                .peek(this::writeUpdater)
+                .peek(this::writeDeleter)
                 .forEach(databaseWriter::add);
 
         buildVirtualTableSchemas(roundEnv)
@@ -77,8 +78,13 @@ public class OrmaProcessor extends AbstractProcessor {
         writeToFilerForEachModel(schema, writer.buildTypeSpec());
     }
 
-    private void writeBuilder(SchemaDefinition schema) {
-        UpdateBuilderWriter writer = new UpdateBuilderWriter(schema, processingEnv);
+    private void writeUpdater(SchemaDefinition schema) {
+        UpdaterWriter writer = new UpdaterWriter(schema, processingEnv);
+        writeToFilerForEachModel(schema, writer.buildTypeSpec());
+    }
+
+    private void writeDeleter(SchemaDefinition schema) {
+        DeleterWriter writer = new DeleterWriter(schema, processingEnv);
         writeToFilerForEachModel(schema, writer.buildTypeSpec());
     }
 

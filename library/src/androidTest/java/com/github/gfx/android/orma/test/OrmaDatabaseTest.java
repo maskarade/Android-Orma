@@ -12,13 +12,13 @@ import static org.hamcrest.Matchers.*;
 
 public class OrmaDatabaseTest {
 
-    Context getConext() {
+    Context getContext() {
         return InstrumentationRegistry.getTargetContext();
     }
 
     @Test
     public void testCreateInstance() throws Exception {
-        OrmaDatabase db = new OrmaDatabase(getConext(), "test.db");
+        OrmaDatabase db = new OrmaDatabase(getContext(), "test.db");
         assertThat(db.getConnection(), is(not(nullValue())));
     }
 }

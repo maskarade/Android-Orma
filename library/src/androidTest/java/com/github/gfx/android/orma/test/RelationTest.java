@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.NoValueException;
 import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.ModelBuilder;
 import com.github.gfx.android.orma.Relation;
@@ -92,10 +93,21 @@ public class RelationTest {
 
     @Test
     public void singleOrNull() throws Exception {
-        db.selectFromBook().delete();
+        db.deleteFromBook().execute();
         Book book = db.selectFromBook().valueOrNull();
 
         assertThat(book, is(nullValue()));
+    }
+
+    @Test
+    public void singleIfNull() throws Exception {
+        db.deleteFromBook().execute();
+        try {
+            db.selectFromBook().value();
+            fail("not reached");
+        } catch (Exception e) {
+            assertThat(e, is(instanceOf(NoValueException.class)));
+        }
     }
 
     @Test
@@ -153,11 +165,10 @@ public class RelationTest {
 
     @Test
     public void update() throws Exception {
-        int count = db.selectFromBook()
+        int count = db.updateBook()
                 .where("title = ?", "today")
-                .update(new Book_UpdateBuilder()
-                        .content("modified")
-                        .getContentValues());
+                .content("modified")
+                .execute();
 
         assertThat(count, is(1));
 
@@ -167,9 +178,9 @@ public class RelationTest {
 
     @Test
     public void delete() throws Exception {
-        int result = db.selectFromBook()
+        int result = db.deleteFromBook()
                 .where("title = ?", "today")
-                .delete();
+                .execute();
 
         assertThat(result, is(1));
         assertThat(db.selectFromBook().count(), is(1L));
@@ -188,7 +199,7 @@ public class RelationTest {
                     book.title = "friday";
                     book.content = "apple" + i;
                     book.publisher = SingleRelation.id(publisher.id);
-                    db.insert(book);
+                    db.insertIntoBook(book);
                 }
             }
         });
@@ -206,7 +217,7 @@ public class RelationTest {
                         Book book = new Book();
                         book.title = "friday";
                         book.content = "apple" + i;
-                        db.insert(book);
+                        db.insertIntoBook(book);
                     }
                     throw new RuntimeException("abort!");
                 }
@@ -244,14 +255,14 @@ public class RelationTest {
 
     @Test
     public void initAndInsertForSecondTable() throws Exception {
-        db.selectFromPublisher().delete();
+        db.deleteFromPublisher().execute();
 
         {
             Publisher publisher = new Publisher();
             publisher.name = "The Fire";
             publisher.startedYear = 1998;
             publisher.startedMonth = 12;
-            db.insert(publisher);
+            db.insertIntoPublisher(publisher);
         }
 
         {
@@ -259,7 +270,7 @@ public class RelationTest {
             publisher.name = "The Ice";
             publisher.startedYear = 2012;
             publisher.startedMonth = 6;
-            db.insert(publisher);
+            db.insertIntoPublisher(publisher);
         }
 
         assertThat(db.selectFromPublisher().count(), is(2L));

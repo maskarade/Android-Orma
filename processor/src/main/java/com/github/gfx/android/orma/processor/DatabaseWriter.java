@@ -132,9 +132,10 @@ public class DatabaseWriter {
         );
 
         schemas.forEach(schema -> {
-            String schemaInstance = "schema" + schema.getModelClassName().simpleName();
+            String simpleModelName = schema.getModelClassName().simpleName();
+            String schemaInstance = "schema" + simpleModelName;
 
-            methodSpecs.add(MethodSpec.methodBuilder("create" + schema.getModelClassName().simpleName())
+            methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
                     .addJavadoc("Creates and inserts one built by {@code Modelbuilder<T>}.\n")
                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                     .addModifiers(Modifier.PUBLIC)
@@ -148,7 +149,7 @@ public class DatabaseWriter {
                     .build());
 
             methodSpecs.add(
-                    MethodSpec.methodBuilder("selectFrom" + schema.getModelClassName().simpleName())
+                    MethodSpec.methodBuilder("selectFrom" + simpleModelName)
                             .addJavadoc("Starts building query {@code SELECT * FROM $T ...}.\n", schema.getModelClassName())
                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                             .addModifiers(Modifier.PUBLIC)
@@ -160,8 +161,32 @@ public class DatabaseWriter {
                             .build());
 
             methodSpecs.add(
-                    MethodSpec.methodBuilder("insert")
-                            .addJavadoc("Inserts a model to the database.")
+                    MethodSpec.methodBuilder("update" + simpleModelName)
+                            .addJavadoc("Starts building query {@code UPDAT $T ...}.\n", schema.getModelClassName())
+                            .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(schema.getUpdaterClassName())
+                            .addStatement("return new $T($L, $L)",
+                                    schema.getUpdaterClassName(),
+                                    connection,
+                                    schemaInstance)
+                            .build());
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("deleteFrom" + simpleModelName)
+                            .addJavadoc("Starts building query {@code DELETE FROM $T ...}.\n", schema.getModelClassName())
+                            .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(schema.getDeleterClassName())
+                            .addStatement("return new $T($L, $L)",
+                                    schema.getDeleterClassName(),
+                                    connection,
+                                    schemaInstance)
+                            .build());
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("insertInto" + simpleModelName)
+                            .addJavadoc("Starts building query {@code INSERT INTO $T ...}.\n", schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(long.class)
                             .addParameter(
@@ -176,8 +201,8 @@ public class DatabaseWriter {
                             .build());
 
             methodSpecs.add(
-                    MethodSpec.methodBuilder("prepareInsertInto" + schema.getModelClassName().simpleName())
-                            .addJavadoc("Prepares to insert models to the database.")
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
+                            .addJavadoc("Starts building a prepared statement for {@code INSERT INTO $T ...}.\n", schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(Types.getInserter(schema.getModelClassName()))
                             .addStatement("return $L.prepareInsert($L)",
@@ -185,8 +210,6 @@ public class DatabaseWriter {
                                     schemaInstance
                             )
                             .build());
-
-
         });
 
         return methodSpecs;

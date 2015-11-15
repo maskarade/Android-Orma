@@ -20,7 +20,9 @@ public class SchemaDefinition {
 
     final ClassName relationClassName;
 
-    final ClassName updateBuilderClassName;
+    final ClassName updaterClassName;
+
+    final ClassName deleterClassName;
 
     final String tableName;
 
@@ -33,7 +35,8 @@ public class SchemaDefinition {
         Table table = typeElement.getAnnotation(Table.class);
         this.schemaClassName = helperClassName(table.schemaClassName(), modelClassName, "_Schema");
         this.relationClassName = helperClassName(table.relationClassName(), modelClassName, "_Relation");
-        this.updateBuilderClassName = helperClassName(table.updateClassName(), modelClassName, "_UpdateBuilder");
+        this.updaterClassName = helperClassName(table.updaterClassName(), modelClassName, "_Updater");
+        this.deleterClassName = helperClassName(table.deleterClassName(), modelClassName, "_Deleter");
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
         typeElement.getEnclosedElements().forEach(element -> {
@@ -63,9 +66,16 @@ public class SchemaDefinition {
         return relationClassName;
     }
 
-    public ClassName getUpdateBuilderClassName() {
-        return updateBuilderClassName;
+
+    public ClassName getUpdaterClassName() {
+        return updaterClassName;
     }
+
+    public ClassName getDeleterClassName() {
+        return deleterClassName;
+    }
+
+
 
     public List<ColumnDefinition> getColumns() {
         return columns;

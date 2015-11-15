@@ -32,7 +32,7 @@ public class ReservedWordsTest {
         where.where = "a";
         where.table = "b";
         where.on = "c";
-        long rowId = db.insert(where);
+        long rowId = db.insertIntoWhere(where);
         assertThat(rowId, is(1L));
     }
 

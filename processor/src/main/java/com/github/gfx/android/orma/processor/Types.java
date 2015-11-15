@@ -56,6 +56,10 @@ public class Types {
 
     public static final ClassName Relation = ClassName.get(ormaPackageName, "Relation");
 
+    public static final ClassName Updater = ClassName.get(ormaPackageName, "Updater");
+
+    public static final ClassName Deleter = ClassName.get(ormaPackageName, "Deleter");
+
     public static final ClassName OrmaConnection = ClassName.get(ormaPackageName, "OrmaConnection");
 
     public static final ClassName TransactionTask = ClassName.get(ormaPackageName, "TransactionTask");
@@ -76,6 +80,12 @@ public class Types {
 
     public static ParameterizedTypeName getRelation(TypeName modelType, TypeName concreteRelationType) {
         return ParameterizedTypeName.get(Relation, modelType, concreteRelationType);
+    }
+    public static ParameterizedTypeName getUpdater(TypeName modelType, TypeName concreteRelationType) {
+        return ParameterizedTypeName.get(Updater, modelType, concreteRelationType);
+    }
+    public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concreteRelationType) {
+        return ParameterizedTypeName.get(Deleter, modelType, concreteRelationType);
     }
 
     public static ParameterizedTypeName getList(TypeName typeName) {

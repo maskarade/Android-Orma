@@ -1,6 +1,5 @@
 package com.github.gfx.android.orma;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,17 +8,7 @@ import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Relation<T, R extends Relation> {
-
-    protected final OrmaConnection connection;
-
-    protected final Schema<T> schema;
-
-    @Nullable
-    protected StringBuilder whereClause;
-
-    @Nullable
-    protected List<String> whereArgs;
+public abstract class Relation<T, R extends Relation> extends ConditionBase<T, R> {
 
     @Nullable
     protected String groupBy;
@@ -34,33 +23,8 @@ public abstract class Relation<T, R extends Relation> {
 
     protected long offset = -1;
 
-    public Relation(OrmaConnection connection, Schema<T> schema) {
-        this.connection = connection;
-        this.schema = schema;
-    }
-
-    @SuppressWarnings("unchecked")
-    public R where(@NonNull String clause, @NonNull Object... args) {
-        if (whereClause == null) {
-            whereClause = new StringBuilder(clause.length() + 2);
-            whereArgs = new ArrayList<>(args.length);
-        } else {
-            whereClause.append(" AND ");
-        }
-
-        whereClause.append('(');
-        whereClause.append(clause);
-        whereClause.append(')');
-
-        for (Object arg : args) {
-            if (arg == null) {
-                whereArgs.add(null);
-            } else {
-                whereArgs.add(arg.toString());
-            }
-        }
-
-        return (R) this;
+    public Relation(@NonNull OrmaConnection connection, @NonNull Schema<T> schema) {
+        super(connection, schema);
     }
 
     @SuppressWarnings("unchecked")
@@ -112,71 +76,6 @@ public abstract class Relation<T, R extends Relation> {
 
     public long count() {
         return connection.count(schema.getTableName(), getWhereClause(), getWhereArgs());
-    }
-
-    @Nullable
-    private String getWhereClause() {
-        return whereClause != null ? whereClause.toString() : null;
-    }
-
-    @Nullable
-    private String[] getWhereArgs() {
-        if (whereArgs != null) {
-            String[] array = new String[whereArgs.size()];
-            return whereArgs.toArray(array);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * @param contents - Values to update
-     * @return Number of rows updated
-     */
-    public int update(@NonNull ContentValues contents) {
-        assertNoExtraClausesForDeleteOrUpdate("update");
-        return connection.update(schema.getTableName(), contents, getWhereClause(), getWhereArgs());
-    }
-
-    public int delete() {
-        assertNoExtraClausesForDeleteOrUpdate("delete");
-        return connection.delete(schema.getTableName(), getWhereClause(), getWhereArgs());
-    }
-
-    void assertNoExtraClausesForDeleteOrUpdate(String statementName) {
-        List<String> extraClauses = null;
-        if (groupBy != null) {
-            extraClauses = new ArrayList<>();
-            extraClauses.add("groupBy");
-        }
-        if (having != null) {
-            if (extraClauses == null) {
-                extraClauses = new ArrayList<>();
-            }
-            extraClauses.add("having");
-        }
-        if (orderBy != null) {
-            if (extraClauses == null) {
-                extraClauses = new ArrayList<>();
-            }
-            extraClauses.add("orderBy");
-        }
-        if (limit != -1) {
-            if (extraClauses == null) {
-                extraClauses = new ArrayList<>();
-            }
-            extraClauses.add("limit");
-        }
-        if (offset != -1) {
-            if (extraClauses == null) {
-                extraClauses = new ArrayList<>();
-            }
-            extraClauses.add("offset");
-        }
-        if (extraClauses != null) {
-            throw new InvalidStatementException(
-                    "Extra clauses for " + statementName + ": " + TextUtils.join(", ", extraClauses));
-        }
     }
 
     @Nullable

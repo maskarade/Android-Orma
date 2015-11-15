@@ -11,21 +11,22 @@ import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
-public class UpdateBuilderWriter {
+public class UpdaterWriter {
 
     private final SchemaDefinition schema;
 
     private final ProcessingEnvironment processingEnv;
 
-    public UpdateBuilderWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
+    public UpdaterWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
         this.schema = schema;
         this.processingEnv = processingEnv;
     }
 
     public TypeSpec buildTypeSpec() {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getUpdateBuilderClassName().simpleName());
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getUpdaterClassName().simpleName());
         classBuilder.addAnnotation(Specs.buildGeneratedAnnotationSpec());
         classBuilder.addModifiers(Modifier.PUBLIC);
+        classBuilder.superclass(Types.getUpdater(schema.getModelClassName(), schema.getUpdaterClassName()));
 
         classBuilder.addFields(buildFieldSpecs());
         classBuilder.addMethods(buildMethodSpecs());
@@ -35,15 +36,19 @@ public class UpdateBuilderWriter {
 
     public List<FieldSpec> buildFieldSpecs() {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
-        fieldSpecs.add(
-                FieldSpec.builder(Types.ContentValues, "contents", Modifier.FINAL)
-                        .initializer("new $T()", Types.ContentValues)
-                        .build());
         return fieldSpecs;
     }
 
     public List<MethodSpec> buildMethodSpecs() {
         List<MethodSpec> methodSpecs = new ArrayList<>();
+
+        methodSpecs.add(
+                MethodSpec.constructorBuilder()
+                        .addParameter(Types.OrmaConnection, "connection")
+                        .addParameter(schema.getSchemaClassName(), "schema")
+                        .addStatement("super(connection, schema)")
+                .build()
+        );
 
         schema.getColumnsWithoutAutoId().forEach(column -> {
             RelationDefinition r = column.getRelation();
@@ -51,12 +56,12 @@ public class UpdateBuilderWriter {
                 methodSpecs.add(
                         MethodSpec.methodBuilder(column.name)
                                 .addModifiers(Modifier.PUBLIC)
-                                .returns(schema.getUpdateBuilderClassName())
+                                .returns(schema.getUpdaterClassName())
                                 .addParameter(
-                                        ParameterSpec.builder(column.getType(), column.name)
+                                        ParameterSpec.builder(column.getType(), "value")
                                                 .build()
                                 )
-                                .addStatement("this.contents.put($S, $L)", column.columnName, column.name)
+                                .addStatement("contents.put($S, value)", column.columnName)
                                 .addStatement("return this")
                                 .build()
                 );
@@ -64,12 +69,6 @@ public class UpdateBuilderWriter {
                 // FIXME: in case the column represents a relationship
             }
         });
-
-        methodSpecs.add(MethodSpec.methodBuilder("getContentValues")
-                .addModifiers(Modifier.PUBLIC)
-                .returns(Types.ContentValues)
-                .addStatement("return contents")
-                .build());
 
         return methodSpecs;
     }

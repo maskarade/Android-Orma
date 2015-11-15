@@ -18,5 +18,7 @@ public @interface Table {
 
     String relationClassName() default "";
 
-    String updateClassName() default "";
+    String updaterClassName() default "";
+
+    String deleterClassName() default "";
 }

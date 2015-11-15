@@ -87,7 +87,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
 
-        orma.selectFromTodo().delete();
+        orma.deleteFromTodo().execute();
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -146,21 +146,21 @@ public class BenchmarkActivity extends AppCompatActivity {
             public void call(SingleSubscriber<? super Result> singleSubscriber) {
                 long t0 = System.currentTimeMillis();
 
-orma.transaction(new TransactionTask() {
-    @Override
-    public void execute() throws Exception {
-        Inserter<Todo> statement = orma.prepareInsertIntoTodo();
+                orma.transaction(new TransactionTask() {
+                    @Override
+                    public void execute() throws Exception {
+                        Inserter<Todo> statement = orma.prepareInsertIntoTodo();
 
-        for (int i = 0; i < N; i++) {
-            Todo todo = new Todo();
+                        for (int i = 0; i < N; i++) {
+                            Todo todo = new Todo();
 
-            todo.title = "title " + i;
-            todo.content = "content content content content" + i;
+                            todo.title = "title " + i;
+                            todo.content = "content content content content" + i;
 
-            statement.insert(todo);
-        }
-    }
-});
+                            statement.insert(todo);
+                        }
+                    }
+                });
 
                 singleSubscriber.onSuccess(new Result("Orma/insert", System.currentTimeMillis() - t0));
             }
