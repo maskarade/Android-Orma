@@ -6,7 +6,12 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
-@Table(value = "publishers", schemaClassName = "PublisherSchema", relationClassName = "PublisherRelation")
+@Table(value = "publishers",
+        schemaClassName = "PublisherSchema",
+        relationClassName = "PublisherRelation",
+        updaterClassName = "PublisherUpdater",
+        deleterClassName = "PublisherDeleter"
+)
 public class Publisher {
 
     @PrimaryKey(autoincrement = true)

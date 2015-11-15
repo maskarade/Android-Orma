@@ -1,7 +1,6 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.internal.OrmaCachedCursorFactory;
-import com.github.gfx.android.orma.internal.OrmaSqlGenerator;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -24,12 +23,9 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final List<Schema<?>> schemas;
 
-    final OrmaSqlGenerator sql;
-
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         super(context, filename, null, VERSION);
         this.schemas = schemas;
-        this.sql = new OrmaSqlGenerator();
     }
 
     public SQLiteDatabase getDatabase() {
@@ -40,14 +36,14 @@ public class OrmaConnection extends SQLiteOpenHelper {
         long id = insert(schema, builder.build());
         ColumnDef<?> primaryKey = schema.getPrimaryKey();
         assert primaryKey != null;
-        String whereClause = sql.identifier(primaryKey.name) + " = ?";
+        String whereClause = '"' + primaryKey.name + '"' + " = ?";
         String[] whereArgs = {String.valueOf(id)};
         return querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null);
     }
 
     public <T> Inserter<T> prepareInsert(Schema<T> schema) {
         SQLiteDatabase db = getDatabase();
-        SQLiteStatement statement = db.compileStatement(sql.insert(schema));
+        SQLiteStatement statement = db.compileStatement(schema.getInsertStatement());
         return new Inserter<>(schema, statement);
     }
 
@@ -135,18 +131,16 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     void dropAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
-            execSQL(db, sql.dropTable(schema));
+            execSQL(db, schema.getDropTableStatement());
         }
     }
 
     void createAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
-            execSQL(db, sql.createTable(schema));
+            execSQL(db, schema.getCreateTableStatement());
 
-            for (ColumnDef<?> column : schema.getColumns()) {
-                if (column.indexed && !column.primaryKey) {
-                    execSQL(db, sql.createIndex(schema, column));
-                }
+            for (String statement : schema.getCreateIndexStatements()) {
+                execSQL(db, statement);
             }
         }
     }
