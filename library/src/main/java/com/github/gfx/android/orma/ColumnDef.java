@@ -20,6 +20,7 @@ public class ColumnDef<T> {
 
     public final boolean unique;
 
+    @SuppressWarnings("unchecked")
     public ColumnDef(String name, Class<?> type, boolean nullable, boolean primaryKey, boolean autoincrement, boolean autoId,
             boolean indexed, boolean unique) {
         this.name = name;
