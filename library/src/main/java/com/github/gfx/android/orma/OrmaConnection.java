@@ -1,7 +1,6 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.TransactionAbortException;
-import com.github.gfx.android.orma.internal.OrmaCachedCursorFactory;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
@@ -74,7 +73,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         String sql = SQLiteQueryBuilder.buildQueryString(
                 false, table, columns, whereClause, groupBy, having, orderBy, limit);
 
-        return db.rawQueryWithFactory(new OrmaCachedCursorFactory(), sql, whereArgs, table);
+        return db.rawQueryWithFactory(null, sql, whereArgs, table);
     }
 
     public long count(String table, String whereClause, String[] whereArgs) {
