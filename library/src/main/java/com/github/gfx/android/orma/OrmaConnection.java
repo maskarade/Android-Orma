@@ -134,7 +134,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
                 SQLiteDatabase db = getDatabase();
 
                 dropAllTables(db);
-                onCreate(db);
+                createAllTables(db);
             }
         });
     }
