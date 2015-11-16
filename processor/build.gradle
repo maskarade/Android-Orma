@@ -1,18 +1,23 @@
 apply plugin: 'java'
+apply plugin: 'com.novoda.bintray-release'
 
 targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-sourceSets {
-    main {
-        java {
-            srcDirs.add('../library/src/main/java')
-        }
-    }
-}
-
-
 dependencies {
     compile project(':annotations')
     compile 'com.squareup:javapoet:1.3.0'
+}
+
+publish {
+    artifactId = 'orma-processor'
+    desc = 'The Orma annotation processor'
+
+    def metadata = project.rootProject.ext.metadata
+    userOrg = metadata.userOrg
+    groupId = metadata.groupId
+    publishVersion = metadata.version
+    website = metadata.website
+    repository = metadata.repository
+    licences = metadata.licences
 }

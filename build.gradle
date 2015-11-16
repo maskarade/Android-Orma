@@ -1,5 +1,7 @@
 import java.util.regex.Pattern
 
+apply from: project.file('metadata.gradle')
+
 buildscript {
     repositories {
         jcenter()
@@ -28,6 +30,8 @@ ext {
         def versionProps = getVersionProps()
         "${versionProps['major']}.${versionProps['minor']}.${versionProps['patch']}"
     }
+
+    metadata.version = versionName()
 }
 
 def updateReadme(oldVersion, newVersion) {

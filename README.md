@@ -4,9 +4,24 @@ This is an **alpha** software and the interface will change until released.
 
 **DO NOT USE THIS LIBRARY IN PRODUCTION**.
 
-# Version
+# Install
 
-v0.0.1
+```groovy
+dependencies {
+    apt 'com.github.android.orma:orma-processor:0.0.1'
+    provided 'com.github.android.orma:orma-annotations:0.0.1'
+    compile 'com.github.android.orma:orma:0.0.1'
+}
+```
+
+# Release Engineering
+
+```
+./gradlew bumpMajor # or bumpMinor / bumpPatch
+./gradlew check bintrayUpload -PdryRun=true
+./gradlew annotations:bintrayUpload processor:bintrayUpload library:bintrayUpload
+```
+
 
 # Author
 

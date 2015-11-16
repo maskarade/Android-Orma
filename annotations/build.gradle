@@ -1,4 +1,18 @@
 apply plugin: 'java'
+apply plugin: 'com.novoda.bintray-release'
 
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
+
+publish {
+    artifactId = 'orma-annotations'
+    desc = 'Annotations for Orma'
+
+    def metadata = project.rootProject.ext.metadata
+    userOrg = metadata.userOrg
+    groupId = metadata.groupId
+    publishVersion = metadata.version
+    website = metadata.website
+    repository = metadata.repository
+    licences = metadata.licences
+}
