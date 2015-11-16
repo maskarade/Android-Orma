@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelBuilder;
 import com.github.gfx.android.orma.NoValueException;
 import com.github.gfx.android.orma.Relation;
@@ -12,9 +13,12 @@ import com.github.gfx.android.orma.test.model.Publisher;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 
 import java.util.List;
 
@@ -22,12 +26,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class RelationTest {
 
     OrmaDatabase db;
 
     Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
+        return RuntimeEnvironment.application;
     }
 
     @Before
