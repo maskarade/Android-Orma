@@ -25,6 +25,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final List<Schema<?>> schemas;
 
+    final OrmaMigration ormaMigration = new OrmaMigration(); // FIXME: let it customizable
+
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         super(context, filename, null, VERSION);
         this.schemas = schemas;
@@ -167,6 +169,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
         db.enableWriteAheadLogging();
+
+        ormaMigration.start(db, schemas);
     }
 
     @Override
@@ -176,11 +180,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        throw new UnsupportedOperationException("TODO: not yet implemented");
+        throw new UnsupportedOperationException("onUpgrade() is not supported by Orma");
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        throw new UnsupportedOperationException("TODO: not yet implemented");
+        throw new UnsupportedOperationException("onDowngrade() is not supported by Orma");
     }
 }
