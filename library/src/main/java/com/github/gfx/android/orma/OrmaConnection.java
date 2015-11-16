@@ -2,6 +2,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.internal.OrmaCachedCursorFactory;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -9,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -26,6 +28,14 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         super(context, filename, null, VERSION);
         this.schemas = schemas;
+        enableWal();
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void enableWal() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            setWriteAheadLoggingEnabled(true);
+        }
     }
 
     public SQLiteDatabase getDatabase() {
