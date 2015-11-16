@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma;
+package com.github.gfx.android.orma.exception;
 
 @SuppressWarnings("serial")
 public class NoValueException extends RuntimeException {

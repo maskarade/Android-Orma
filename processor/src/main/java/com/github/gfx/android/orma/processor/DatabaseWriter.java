@@ -15,7 +15,7 @@ import javax.lang.model.element.Modifier;
 
 public class DatabaseWriter {
 
-    static final String kClassName = "OrmaDatabase";
+    static final String kClassName = "OrmaDatabase"; // TODO: let it customizable
 
     static final Modifier[] publicStaticFinal = {
             Modifier.PUBLIC,

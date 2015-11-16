@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.exception.TransactionAbortException;
 import com.github.gfx.android.orma.internal.OrmaCachedCursorFactory;
 
 import android.annotation.TargetApi;
@@ -166,7 +167,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
     @Override
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
-
         db.enableWriteAheadLogging();
     }
 

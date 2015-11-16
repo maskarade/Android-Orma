@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.exception.NoValueException;
+
 import android.support.annotation.NonNull;
 
 import rx.Single;

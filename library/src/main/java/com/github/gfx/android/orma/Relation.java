@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.database.Cursor;
