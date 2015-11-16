@@ -62,7 +62,7 @@ public class OrmaMigration {
 
                     if (existsInSchema && existsInDb) {
                         // okay, nothing to do
-                    } else if(existsInSchema) {
+                    } else if (existsInSchema) {
                         statements.add(createIndexStatement);
                     } else { //
                         statements.add(buildDropIndexStatement(createIndexStatement));
@@ -83,14 +83,24 @@ public class OrmaMigration {
     public String buildDropIndexStatement(String createIndexStatement) {
         Pattern indexNamePattern = Pattern.compile(
                 "CREATE \\s+ INDEX (?:\\s+ IF \\s+ NOT \\s+ EXISTS)? \\s+ (\\S+) \\s+ ON .+",
-                Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
+                Pattern.CASE_INSENSITIVE | Pattern.COMMENTS | Pattern.DOTALL);
 
         Matcher matcher = indexNamePattern.matcher(createIndexStatement);
         if (matcher.matches()) {
-            String indexName = matcher.group(1);
+            String indexName = dequote(matcher.group(1));
             return "DROP INDEX IF EXISTS \"" + indexName + "\"";
         } else {
             return "";
+        }
+    }
+
+    public String dequote(String maybeQuoted) {
+        if (maybeQuoted.startsWith("\"") || maybeQuoted.endsWith("\n")) {
+            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
+        } else if (maybeQuoted.startsWith("`") || maybeQuoted.endsWith("`")) {
+            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
+        } else {
+            return maybeQuoted;
         }
     }
 
@@ -101,6 +111,7 @@ public class OrmaMigration {
         try {
             for (String statement : statements) {
                 Log.d(TAG, statement);
+                //db.execSQL(statement);
             }
 
             db.setTransactionSuccessful();
