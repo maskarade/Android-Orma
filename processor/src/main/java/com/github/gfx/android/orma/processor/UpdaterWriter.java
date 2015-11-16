@@ -47,7 +47,7 @@ public class UpdaterWriter {
                         .addParameter(Types.OrmaConnection, "connection")
                         .addParameter(schema.getSchemaClassName(), "schema")
                         .addStatement("super(connection, schema)")
-                .build()
+                        .build()
         );
 
         schema.getColumnsWithoutAutoId().forEach(column -> {

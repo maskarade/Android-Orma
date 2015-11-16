@@ -84,9 +84,11 @@ public class Types {
     public static ParameterizedTypeName getRelation(TypeName modelType, TypeName concreteRelationType) {
         return ParameterizedTypeName.get(Relation, modelType, concreteRelationType);
     }
+
     public static ParameterizedTypeName getUpdater(TypeName modelType, TypeName concreteRelationType) {
         return ParameterizedTypeName.get(Updater, modelType, concreteRelationType);
     }
+
     public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concreteRelationType) {
         return ParameterizedTypeName.get(Deleter, modelType, concreteRelationType);
     }

@@ -83,7 +83,8 @@ public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<
     @Nullable
     public T valueOrNull() {
         return connection
-                .querySingle(schema, schema.getEscapedColumnNames(), getWhereClause(), getWhereArgs(), groupBy, having, orderBy);
+                .querySingle(schema, schema.getEscapedColumnNames(), getWhereClause(), getWhereArgs(), groupBy, having,
+                        orderBy);
     }
 
     @NonNull

@@ -18,7 +18,7 @@ public class SchemaTest {
         PublisherSchema schema = OrmaDatabase.schemaPublisher;
 
         assertThat(schema.getTableName(), is("publishers"));
-        assertThat(schema.getPrimaryKey(), is((ColumnDef)PublisherSchema.id));
+        assertThat(schema.getPrimaryKey(), is((ColumnDef) PublisherSchema.id));
 
         assertThat(PublisherSchema.name.name, is("name"));
         assertThat(PublisherSchema.startedYear.name, is("started_year"));
@@ -30,7 +30,7 @@ public class SchemaTest {
         Book_Schema schema = OrmaDatabase.schemaBook;
 
         assertThat(schema.getTableName(), is("Book"));
-        assertThat(schema.getPrimaryKey(), is((ColumnDef)Book_Schema.id));
+        assertThat(schema.getPrimaryKey(), is((ColumnDef) Book_Schema.id));
 
         assertThat(Book_Schema.id.name, is("id"));
         assertThat(Book_Schema.title.name, is("title"));
@@ -42,7 +42,7 @@ public class SchemaTest {
         Author_Schema schema = OrmaDatabase.schemaAuthor;
 
         assertThat(schema.getTableName(), is("Author"));
-        assertThat(schema.getPrimaryKey(), is((ColumnDef)Author_Schema.name));
+        assertThat(schema.getPrimaryKey(), is((ColumnDef) Author_Schema.name));
     }
 
     @Test

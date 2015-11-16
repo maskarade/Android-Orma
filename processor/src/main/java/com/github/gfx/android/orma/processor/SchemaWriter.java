@@ -245,7 +245,6 @@ public class SchemaWriter {
                         .build()
         );
 
-
         methodSpecs.add(
                 MethodSpec.methodBuilder("serializeModelToContentValues")
                         .addAnnotations(overrideAndNonNull)

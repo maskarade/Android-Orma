@@ -17,8 +17,6 @@ public class DatabaseWriter {
 
     static final String kClassName = "OrmaDatabase";
 
-    final ProcessingEnvironment processingEnv;
-
     static final Modifier[] publicStaticFinal = {
             Modifier.PUBLIC,
             Modifier.STATIC,
@@ -26,6 +24,8 @@ public class DatabaseWriter {
     };
 
     static final String connection = "connection";
+
+    final ProcessingEnvironment processingEnv;
 
     List<SchemaDefinition> schemas = new ArrayList<>();
 
@@ -202,7 +202,8 @@ public class DatabaseWriter {
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
-                            .addJavadoc("Starts building a prepared statement for {@code INSERT INTO $T ...}.\n", schema.getModelClassName())
+                            .addJavadoc("Starts building a prepared statement for {@code INSERT INTO $T ...}.\n",
+                                    schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(Types.getInserter(schema.getModelClassName()))
                             .addStatement("return $L.prepareInsert($L)",

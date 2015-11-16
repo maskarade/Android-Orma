@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 
 @Table
 public class Book {
+
     @PrimaryKey
     public long id;
 

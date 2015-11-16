@@ -23,7 +23,7 @@ public class ColumnDef<T> {
     public ColumnDef(String name, Class<?> type, boolean nullable, boolean primaryKey, boolean autoincrement, boolean autoId,
             boolean indexed, boolean unique) {
         this.name = name;
-        this.type = (Class<T>)type;
+        this.type = (Class<T>) type;
         this.nullable = nullable;
         this.primaryKey = primaryKey;
         this.autoincrement = autoincrement;

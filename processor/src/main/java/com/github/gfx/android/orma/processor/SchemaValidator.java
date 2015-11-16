@@ -5,20 +5,6 @@ import javax.lang.model.element.TypeElement;
 
 public class SchemaValidator {
 
-    public static class ValidationException extends RuntimeException {
-
-        final Element element;
-
-        public ValidationException(Element element, Throwable cause) {
-            super("Invalid type element", cause);
-            this.element = element;
-        }
-
-        public Element getElement() {
-            return element;
-        }
-    }
-
     public SchemaValidator() {
     }
 
@@ -32,5 +18,19 @@ public class SchemaValidator {
             throw new ValidationException(element, e);
         }
         return typeElement;
+    }
+
+    public static class ValidationException extends RuntimeException {
+
+        final Element element;
+
+        public ValidationException(Element element, Throwable cause) {
+            super("Invalid type element", cause);
+            this.element = element;
+        }
+
+        public Element getElement() {
+            return element;
+        }
     }
 }

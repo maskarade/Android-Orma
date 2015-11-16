@@ -65,36 +65,6 @@ public class ColumnDefinition {
         nullable = hasNullableAnnotation(element);
     }
 
-    public RelationDefinition getRelation() {
-        if (type instanceof ParameterizedTypeName) {
-            ParameterizedTypeName pt = (ParameterizedTypeName) type;
-            if (pt.rawType.equals(Types.SingleRelation)) {
-                return new RelationDefinition(pt.rawType, pt.typeArguments.get(0));
-            }
-        }
-        return null;
-
-    }
-
-    public TypeName getType() {
-        return type;
-    }
-
-    public TypeName getRawType() {
-        if (type instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName)type).rawType;
-        } else {
-            return type;
-        }
-    }
-
-    /**
-     * @return A representation of {@code ColumnDef<T>}
-     */
-    public ParameterizedTypeName getColumnDefType() {
-        return Types.getColumnDef(type.box());
-    }
-
     static String getColumnName(Column column, Element element) {
         if (column != null && !column.value().equals("")) {
             return column.value();
@@ -124,5 +94,35 @@ public class ColumnDefinition {
             }
         }
         return false;
+    }
+
+    public RelationDefinition getRelation() {
+        if (type instanceof ParameterizedTypeName) {
+            ParameterizedTypeName pt = (ParameterizedTypeName) type;
+            if (pt.rawType.equals(Types.SingleRelation)) {
+                return new RelationDefinition(pt.rawType, pt.typeArguments.get(0));
+            }
+        }
+        return null;
+
+    }
+
+    public TypeName getType() {
+        return type;
+    }
+
+    public TypeName getRawType() {
+        if (type instanceof ParameterizedTypeName) {
+            return ((ParameterizedTypeName) type).rawType;
+        } else {
+            return type;
+        }
+    }
+
+    /**
+     * @return A representation of {@code ColumnDef<T>}
+     */
+    public ParameterizedTypeName getColumnDefType() {
+        return Types.getColumnDef(type.box());
     }
 }

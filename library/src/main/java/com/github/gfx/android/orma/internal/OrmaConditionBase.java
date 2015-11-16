@@ -17,16 +17,16 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
 
     protected String whereConjunction = " AND ";
 
-    public OrmaConditionBase(OrmaConnection connection, Schema<T> schema) {
-        this.connection = connection;
-        this.schema = schema;
-    }
-
     @Nullable
     protected StringBuilder whereClause;
 
     @Nullable
     protected List<String> whereArgs;
+
+    public OrmaConditionBase(OrmaConnection connection, Schema<T> schema) {
+        this.connection = connection;
+        this.schema = schema;
+    }
 
     @SuppressWarnings("unchecked")
     public C where(@NonNull String clause, @NonNull Object... args) {
@@ -54,13 +54,13 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
     @SuppressWarnings("unchecked")
     public C and() {
         whereConjunction = " AND ";
-        return (C)this;
+        return (C) this;
     }
 
     @SuppressWarnings("unchecked")
     public C or() {
         whereConjunction = " OR ";
-        return (C)this;
+        return (C) this;
     }
 
     @Nullable

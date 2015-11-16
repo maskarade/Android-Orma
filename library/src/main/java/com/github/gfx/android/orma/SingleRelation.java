@@ -6,18 +6,6 @@ import rx.Single;
 import rx.SingleSubscriber;
 
 public class SingleRelation<T> {
-    public static <T> SingleRelation<T> just(long id, T model) {
-        return new SingleRelation<>(id, model);
-    }
-
-    public static <T> SingleRelation<T> id(final long id) {
-        return new SingleRelation<>(id, Single.create(new Single.OnSubscribe<T>() {
-            @Override
-            public void call(SingleSubscriber<? super T> singleSubscriber) {
-                singleSubscriber.onError(new NoValueException("No value set for id=" + id));
-            }
-        }));
-    }
 
     final long id;
 
@@ -51,6 +39,19 @@ public class SingleRelation<T> {
                 }
             }
         });
+    }
+
+    public static <T> SingleRelation<T> just(long id, T model) {
+        return new SingleRelation<>(id, model);
+    }
+
+    public static <T> SingleRelation<T> id(final long id) {
+        return new SingleRelation<>(id, Single.create(new Single.OnSubscribe<T>() {
+            @Override
+            public void call(SingleSubscriber<? super T> singleSubscriber) {
+                singleSubscriber.onError(new NoValueException("No value set for id=" + id));
+            }
+        }));
     }
 
     public long getId() {

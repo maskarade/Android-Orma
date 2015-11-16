@@ -1,12 +1,14 @@
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.NoValueException;
-import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.NoValueException;
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.TransactionAbortException;
 import com.github.gfx.android.orma.TransactionTask;
-import com.github.gfx.android.orma.test.model.*;
+import com.github.gfx.android.orma.test.model.Book;
+import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.model.Publisher;
 
 import org.junit.Before;
 import org.junit.Test;

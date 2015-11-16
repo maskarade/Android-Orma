@@ -46,6 +46,20 @@ public class SchemaDefinition {
         });
     }
 
+    private static ClassName helperClassName(String specifiedName, ClassName modelClassName, String helperSuffix) {
+        String simpleName = firstNonEmptyName(specifiedName, modelClassName.simpleName() + helperSuffix);
+        return ClassName.get(modelClassName.packageName(), simpleName);
+    }
+
+    static String firstNonEmptyName(String... names) {
+        for (String name : names) {
+            if (name != null && !name.equals("")) {
+                return name;
+            }
+        }
+        throw new AssertionError("No non-empty string here");
+    }
+
     public TypeElement getElement() {
         return typeElement;
     }
@@ -70,7 +84,6 @@ public class SchemaDefinition {
         return relationClassName;
     }
 
-
     public ClassName getUpdaterClassName() {
         return updaterClassName;
     }
@@ -78,8 +91,6 @@ public class SchemaDefinition {
     public ClassName getDeleterClassName() {
         return deleterClassName;
     }
-
-
 
     public List<ColumnDefinition> getColumns() {
         return columns;
@@ -102,20 +113,6 @@ public class SchemaDefinition {
             }
         }
         return null;
-    }
-
-    private static ClassName helperClassName(String specifiedName, ClassName modelClassName, String helperSuffix) {
-        String simpleName = firstNonEmptyName(specifiedName, modelClassName.simpleName() + helperSuffix);
-        return ClassName.get(modelClassName.packageName(), simpleName);
-    }
-
-    static String firstNonEmptyName(String... names) {
-        for (String name : names) {
-            if (name != null && !name.equals("")) {
-                return name;
-            }
-        }
-        throw new AssertionError("No non-empty string here");
     }
 
     @Override

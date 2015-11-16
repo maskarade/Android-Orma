@@ -88,10 +88,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
-    public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs,
-            String groupBy, String having, String orderBy) {
+    public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
+            String having, String orderBy) {
         SQLiteDatabase db = getDatabase();
-        Cursor cursor = db.query(schema.getTableName(), columns, whereClause, whereArgs, groupBy, having, orderBy, "1");
+        Cursor cursor = db.query(schema.getTableName(), columns, whereClause, whereArgs, groupBy,
+                having, orderBy, "1");
 
         try {
             if (cursor.moveToFirst()) {
