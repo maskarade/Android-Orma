@@ -1,7 +1,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
-import com.github.gfx.android.orma.OrmaMigration;
+import com.github.gfx.android.orma.migration.OrmaMigration;
 
 import org.junit.Before;
 import org.junit.Test;

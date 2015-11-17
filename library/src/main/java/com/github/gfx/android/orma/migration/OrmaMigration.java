@@ -1,4 +1,6 @@
-package com.github.gfx.android.orma;
+package com.github.gfx.android.orma.migration;
+
+import com.github.gfx.android.orma.Schema;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -169,26 +171,4 @@ public class OrmaMigration {
         return tables;
     }
 
-    public static class SQLiteMaster {
-
-        public String type;
-
-        public String name;
-
-        public String tableName;
-
-        public String sql;
-
-        public List<SQLiteMaster> indexes = new ArrayList<>();
-
-        public SQLiteMaster() {
-        }
-
-        public SQLiteMaster(String type, String name, String tableName, String sql) {
-            this.type = type;
-            this.name = name;
-            this.tableName = tableName;
-            this.sql = sql;
-        }
-    }
 }

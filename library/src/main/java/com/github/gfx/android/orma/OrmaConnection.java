@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.TransactionAbortException;
+import com.github.gfx.android.orma.migration.OrmaMigration;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
