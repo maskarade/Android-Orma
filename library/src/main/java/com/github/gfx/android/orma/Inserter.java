@@ -14,7 +14,7 @@ public class Inserter<T> {
         this.statement = statement;
     }
 
-    public long insert(@NonNull T model) {
+    public long execute(@NonNull T model) {
         schema.bindArgs(statement, model);
         return statement.executeInsert();
     }

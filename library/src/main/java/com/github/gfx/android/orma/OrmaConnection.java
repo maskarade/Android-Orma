@@ -58,8 +58,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public <T> long insert(Schema<T> schema, T model) {
-        Inserter<T> statement = prepareInsert(schema);
-        return statement.insert(model);
+        Inserter<T> sth = prepareInsert(schema);
+        return sth.execute(model);
     }
 
     public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
