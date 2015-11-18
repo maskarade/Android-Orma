@@ -72,7 +72,7 @@ public class SqlGenerator {
             ColumnDefinition column = indexedColumns.get(i);
             StringBuilder sb = new StringBuilder();
 
-            sb.append("CREATE INDEX IF NOT EXISTS ");
+            sb.append("CREATE INDEX ");
             appendIdentifier(sb, "index_" + column.columnName + "_on_" + schema.getTableName());
             sb.append(" ON ");
             appendIdentifier(sb, schema.getTableName());

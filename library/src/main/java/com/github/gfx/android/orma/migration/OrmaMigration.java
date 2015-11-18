@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.migration;
 
+import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.exception.MigrationAbortException;
 
@@ -31,19 +32,19 @@ public class OrmaMigration {
         long t0 = System.currentTimeMillis();
 
         Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
-        List<String> statements = diff(schemas, metadata);
+        List<String> statements = diffAll(schemas, metadata);
         executeStatements(db, statements);
 
         Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
     }
 
     @NonNull
-    public List<String> diff(List<Schema<?>> schemas, Map<String, SQLiteMaster> tables) {
+    public List<String> diffAll(List<Schema<?>> schemas, Map<String, SQLiteMaster> dbTables) {
         List<String> statements = new ArrayList<>();
 
-        // ignore tables which exist only in database
+        // NOTE: ignore tables which exist only in database
         for (Schema<?> schema : schemas) {
-            SQLiteMaster table = tables.get(schema.getTableName());
+            SQLiteMaster table = dbTables.get(schema.getTableName());
             if (table == null) {
                 statements.add(schema.getCreateTableStatement());
             } else {
@@ -53,33 +54,46 @@ public class OrmaMigration {
 
                 Set<String> schemaIndexes = new LinkedHashSet<>();
                 Set<String> dbIndexes = new LinkedHashSet<>();
-                Set<String> allIndexes = new LinkedHashSet<>();
 
                 schemaIndexes.addAll(schema.getCreateIndexStatements());
 
                 for (SQLiteMaster index : table.indexes) {
                     dbIndexes.add(index.sql);
                 }
-
-                allIndexes.addAll(schemaIndexes);
-                allIndexes.addAll(dbIndexes);
-
-                for (String createIndexStatement : allIndexes) {
-                    boolean existsInSchema = schemaIndexes.contains(createIndexStatement);
-                    boolean existsInDb = dbIndexes.contains(createIndexStatement);
-
-                    if (existsInSchema && existsInDb) {
-                        // okay, nothing to do
-                    } else if (existsInSchema) {
-                        statements.add(createIndexStatement);
-                    } else { //
-                        statements.add(buildDropIndexStatement(createIndexStatement));
-                    }
-                }
-
+                statements.addAll(indexDiff(schemaIndexes, dbIndexes));
             }
         }
         return statements;
+    }
+
+    @NonNull
+    public List<String> indexDiff(@NonNull Set<String> schemaIndexes, @NonNull Set<String> dbIndexes) {
+        //System.out.println("schemaIndexes: " + schemaIndexes);
+        //System.out.println("dbIndexes:     " + dbIndexes);
+
+        List<String> createIndexStatements = new ArrayList<>();
+
+        Set<String> unionIndexes = new LinkedHashSet<>();
+
+        unionIndexes.addAll(schemaIndexes);
+        unionIndexes.addAll(dbIndexes);
+
+        for (String createIndexStatement : unionIndexes) {
+            boolean existsInSchema = schemaIndexes.contains(createIndexStatement);
+            boolean existsInDb = dbIndexes.contains(createIndexStatement);
+
+            if (existsInSchema && existsInDb) {
+                // okay, nothing to do
+            } else if (existsInSchema) {
+                createIndexStatements.add(createIndexStatement);
+            } else {
+                String statement = buildDropIndexStatement(createIndexStatement);
+                if (!TextUtils.isEmpty(statement)) {
+                    createIndexStatements.add(buildDropIndexStatement(createIndexStatement));
+                }
+            }
+        }
+        return createIndexStatements;
     }
 
     public List<String> tableDiff(String from, String to) {
@@ -93,26 +107,27 @@ public class OrmaMigration {
             throw new MigrationAbortException(e);
         }
 
-        Map<String, ColumnDefinition> columnUnion = new LinkedHashMap<>();
+        Map<String, ColumnDefinition> unionColumns = new LinkedHashMap<>();
         Map<String, ColumnDefinition> fromColumns = new LinkedHashMap<>();
         Map<String, ColumnDefinition> toColumns = new LinkedHashMap<>();
 
         for (ColumnDefinition column : fromTable.getColumnDefinitions()) {
             String key = column.toString();
-            columnUnion.put(key, column);
+            unionColumns.put(key, column);
             fromColumns.put(key, column);
         }
         for (ColumnDefinition column : toTable.getColumnDefinitions()) {
             String key = column.toString();
-            columnUnion.put(key, column);
+            unionColumns.put(key, column);
             toColumns.put(key, column);
         }
         List<String> statements = new ArrayList<>();
 
-        for (Map.Entry<String, ColumnDefinition> entry : columnUnion.entrySet()) {
+        for (Map.Entry<String, ColumnDefinition> entry : unionColumns.entrySet()) {
             if (fromColumns.containsKey(entry.getKey()) && toColumns.containsKey(entry.getKey())) {
                 // nothing to do
-            } if (fromColumns.containsKey(entry.getKey())) {
+            }
+            if (fromColumns.containsKey(entry.getKey())) {
                 // TODO: remove the column
             } else {
                 // to be added
@@ -123,7 +138,7 @@ public class OrmaMigration {
                 columnSpec.append(quote(column.getColumnName()));
                 columnSpec.append(' ');
                 columnSpec.append(column.getColDataType().toString());
-                if ( column.getColumnSpecStrings() != null) {
+                if (column.getColumnSpecStrings() != null) {
                     columnSpec.append(' ');
                     columnSpec.append(TextUtils.join(" ", column.getColumnSpecStrings()));
                 }
@@ -135,6 +150,9 @@ public class OrmaMigration {
     }
 
     public String buildDropIndexStatement(String createIndexStatement) {
+        if (TextUtils.isEmpty(createIndexStatement)) {
+            throw new AssertionError("No create index statement given");
+        }
         Pattern indexNamePattern = Pattern.compile(
                 "CREATE \\s+ INDEX (?:\\s+ IF \\s+ NOT \\s+ EXISTS)? \\s+ (\\S+) \\s+ ON .+",
                 Pattern.CASE_INSENSITIVE | Pattern.COMMENTS | Pattern.DOTALL);
@@ -154,8 +172,10 @@ public class OrmaMigration {
 
         try {
             for (String statement : statements) {
-                Log.d(TAG, statement);
-                //db.execSQL(statement);
+                if (BuildConfig.DEBUG) {
+                    Log.v(TAG, statement);
+                }
+                db.execSQL(statement);
             }
 
             db.setTransactionSuccessful();
@@ -196,8 +216,10 @@ public class OrmaMigration {
                         meta.sql = sql;
                         break;
                     case "index":
-                        // attach the index to the table
-                        meta.indexes.add(new SQLiteMaster(type, name, tableName, sql));
+                        // sql=null for sqlite_autoindex_${table}_${columnIndex}
+                        if (sql != null) {
+                            meta.indexes.add(new SQLiteMaster(type, name, tableName, sql));
+                        }
                         break;
                     default:
                         throw new UnsupportedOperationException("FIXME: unsupported type: " + type);
