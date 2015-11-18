@@ -1,6 +1,11 @@
 package com.github.gfx.android.orma.migration;
 
 import com.github.gfx.android.orma.Schema;
+import com.github.gfx.android.orma.exception.MigrationAbortException;
+
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
+import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,6 +15,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,9 +83,55 @@ public class OrmaMigration {
     }
 
     public List<String> tableDiff(String from, String to) {
-        List<String> alters = new ArrayList<>();
-        // TODO
-        return alters;
+        CreateTable fromTable;
+        CreateTable toTable;
+
+        try {
+            fromTable = (CreateTable) CCJSqlParserUtil.parse(from);
+            toTable = (CreateTable) CCJSqlParserUtil.parse(to);
+        } catch (Exception e) {
+            throw new MigrationAbortException(e);
+        }
+
+        Map<String, ColumnDefinition> columnUnion = new LinkedHashMap<>();
+        Map<String, ColumnDefinition> fromColumns = new LinkedHashMap<>();
+        Map<String, ColumnDefinition> toColumns = new LinkedHashMap<>();
+
+        for (ColumnDefinition column : fromTable.getColumnDefinitions()) {
+            String key = column.toString();
+            columnUnion.put(key, column);
+            fromColumns.put(key, column);
+        }
+        for (ColumnDefinition column : toTable.getColumnDefinitions()) {
+            String key = column.toString();
+            columnUnion.put(key, column);
+            toColumns.put(key, column);
+        }
+        List<String> statements = new ArrayList<>();
+
+        for (Map.Entry<String, ColumnDefinition> entry : columnUnion.entrySet()) {
+            if (fromColumns.containsKey(entry.getKey()) && toColumns.containsKey(entry.getKey())) {
+                // nothing to do
+            } if (fromColumns.containsKey(entry.getKey())) {
+                // TODO: remove the column
+            } else {
+                // to be added
+                String tableName = quote(fromTable.getTable().getName());
+                ColumnDefinition column = entry.getValue();
+
+                StringBuilder columnSpec = new StringBuilder();
+                columnSpec.append(quote(column.getColumnName()));
+                columnSpec.append(' ');
+                columnSpec.append(column.getColDataType().toString());
+                if ( column.getColumnSpecStrings() != null) {
+                    columnSpec.append(' ');
+                    columnSpec.append(TextUtils.join(" ", column.getColumnSpecStrings()));
+                }
+                statements.add("ALTER TABLE " + tableName + " ADD COLUMN " + columnSpec);
+            }
+        }
+
+        return statements;
     }
 
     public String buildDropIndexStatement(String createIndexStatement) {
@@ -93,16 +145,6 @@ public class OrmaMigration {
             return "DROP INDEX IF EXISTS \"" + indexName + "\"";
         } else {
             return "";
-        }
-    }
-
-    public String dequote(String maybeQuoted) {
-        if (maybeQuoted.startsWith("\"") || maybeQuoted.endsWith("\n")) {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-        } else if (maybeQuoted.startsWith("`") || maybeQuoted.endsWith("`")) {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-        } else {
-            return maybeQuoted;
         }
     }
 
@@ -125,7 +167,7 @@ public class OrmaMigration {
     public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<Schema<?>> schemas) {
         List<String> tableNames = new ArrayList<>();
         for (Schema<?> schema : schemas) {
-            tableNames.add('"' + schema.getTableName() + '"');
+            tableNames.add(quote(schema.getTableName()));
         }
         Cursor cursor = db.rawQuery(
                 "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE tbl_name IN "
@@ -169,6 +211,22 @@ public class OrmaMigration {
         cursor.close();
 
         return tables;
+    }
+
+    @NonNull
+    public String quote(String name) {
+        return '"' + name + '"';
+    }
+
+    @NonNull
+    public String dequote(String maybeQuoted) {
+        if (maybeQuoted.startsWith("\"") || maybeQuoted.endsWith("\n")) {
+            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
+        } else if (maybeQuoted.startsWith("`") || maybeQuoted.endsWith("`")) {
+            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
+        } else {
+            return maybeQuoted;
+        }
     }
 
 }
