@@ -1,7 +1,6 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.TransactionAbortException;
-import com.github.gfx.android.orma.migration.OrmaMigration;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
@@ -25,8 +24,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
     static final int VERSION = 1;
 
     final List<Schema<?>> schemas;
-
-    final OrmaMigration ormaMigration = new OrmaMigration(); // FIXME: let it customizable
 
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         super(context, filename, null, VERSION);
@@ -170,8 +167,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
         db.enableWriteAheadLogging();
-
-        ormaMigration.start(db, schemas);
     }
 
     @Override

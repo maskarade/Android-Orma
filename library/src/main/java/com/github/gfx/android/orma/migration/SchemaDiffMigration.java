@@ -24,9 +24,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class OrmaMigration {
+public class SchemaDiffMigration {
 
-    static final String TAG = OrmaMigration.class.getSimpleName();
+    static final String TAG = SchemaDiffMigration.class.getSimpleName();
 
     public void start(SQLiteDatabase db, List<Schema<?>> schemas) {
         long t0 = System.currentTimeMillis();
