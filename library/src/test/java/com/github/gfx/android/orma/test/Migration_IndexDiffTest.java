@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
-public class IndexDiffTest {
+public class Migration_IndexDiffTest {
 
     OrmaMigration migration;
 

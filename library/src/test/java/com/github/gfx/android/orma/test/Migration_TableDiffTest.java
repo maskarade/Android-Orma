@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
-public class TableDiffTest {
+public class Migration_TableDiffTest {
 
     OrmaMigration migration;
 
