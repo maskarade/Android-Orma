@@ -167,7 +167,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                             todo.content = contentPrefix + i;
                             todo.createdTimeMillis = now;
 
-                            statement.insert(todo);
+                            statement.execute(todo);
                         }
                     }
                 });
