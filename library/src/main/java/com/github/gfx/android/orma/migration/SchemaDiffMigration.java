@@ -3,6 +3,7 @@ package com.github.gfx.android.orma.migration;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.exception.MigrationAbortException;
+import com.github.gfx.android.orma.internal.OrmaUtils;
 
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -15,6 +16,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -107,44 +110,84 @@ public class SchemaDiffMigration {
             throw new MigrationAbortException(e);
         }
 
-        Map<String, ColumnDefinition> unionColumns = new LinkedHashMap<>();
-        Map<String, ColumnDefinition> fromColumns = new LinkedHashMap<>();
         Map<String, ColumnDefinition> toColumns = new LinkedHashMap<>();
+        List<ColumnDefinition> intersectionColumns = new ArrayList<>();
+
+        for (ColumnDefinition column : toTable.getColumnDefinitions()) {
+            String key = column.toString();
+            toColumns.put(key, column);
+        }
 
         for (ColumnDefinition column : fromTable.getColumnDefinitions()) {
             String key = column.toString();
-            unionColumns.put(key, column);
-            fromColumns.put(key, column);
+            if (toColumns.containsKey(key)) {
+                intersectionColumns.add(column);
+            }
         }
-        for (ColumnDefinition column : toTable.getColumnDefinitions()) {
-            String key = column.toString();
-            unionColumns.put(key, column);
-            toColumns.put(key, column);
+
+        if (intersectionColumns.size() != toTable.getColumnDefinitions().size() ||
+                intersectionColumns.size() != fromTable.getColumnDefinitions().size()) {
+            return buildRecreateTable(fromTable, toTable, intersectionColumns);
+        } else {
+            return Collections.emptyList();
         }
+    }
+
+    private List<String> buildRecreateTable(CreateTable fromTable, CreateTable toTable,
+            Collection<ColumnDefinition> intersectionColumns) {
         List<String> statements = new ArrayList<>();
 
-        for (Map.Entry<String, ColumnDefinition> entry : unionColumns.entrySet()) {
-            if (fromColumns.containsKey(entry.getKey()) && toColumns.containsKey(entry.getKey())) {
-                // nothing to do
-            }
-            if (fromColumns.containsKey(entry.getKey())) {
-                // TODO: remove the column
-            } else {
-                // to be added
-                String tableName = quote(fromTable.getTable().getName());
-                ColumnDefinition column = entry.getValue();
+        String tempTable = "__temp_" + toTable.getTable().getName();
 
-                StringBuilder columnSpec = new StringBuilder();
-                columnSpec.append(quote(column.getColumnName()));
-                columnSpec.append(' ');
-                columnSpec.append(column.getColDataType().toString());
-                if (column.getColumnSpecStrings() != null) {
-                    columnSpec.append(' ');
-                    columnSpec.append(TextUtils.join(" ", column.getColumnSpecStrings()));
-                }
-                statements.add("ALTER TABLE " + tableName + " ADD COLUMN " + columnSpec);
+        // create the new table
+        StringBuilder createNewTable = new StringBuilder();
+        createNewTable.append("CREATE TABLE ");
+        createNewTable.append(OrmaUtils.quote(tempTable));
+        createNewTable.append(" (");
+        createNewTable.append(OrmaUtils.joinBy(", ", toTable.getColumnDefinitions(),
+                new OrmaUtils.Func1<ColumnDefinition, String>() {
+                    @Override
+                    public String call(ColumnDefinition arg) {
+                        String columnSpec = arg.getColumnSpecStrings() != null ? TextUtils
+                                .join(" ", arg.getColumnSpecStrings()) : "";
+                        return OrmaUtils.quote(arg.getColumnName()) + ' ' + arg.getColDataType() + columnSpec;
+                    }
+                }));
+        createNewTable.append(")");
+        statements.add(createNewTable.toString());
+
+        // insert into the new table
+        StringBuilder insertIntoNewTable = new StringBuilder();
+        insertIntoNewTable.append("INSERT INTO ");
+        insertIntoNewTable.append(OrmaUtils.quote(tempTable));
+        insertIntoNewTable.append(" (");
+        String unionColumnNames = OrmaUtils.joinBy(", ", intersectionColumns, new OrmaUtils.Func1<ColumnDefinition, String>() {
+            @Override
+            public String call(ColumnDefinition arg) {
+                return OrmaUtils.quote(arg.getColumnName());
             }
-        }
+        });
+        insertIntoNewTable.append(unionColumnNames);
+        insertIntoNewTable.append(") SELECT ");
+        insertIntoNewTable.append(unionColumnNames);
+        insertIntoNewTable.append(" FROM ");
+        insertIntoNewTable.append(OrmaUtils.quote(fromTable.getTable().getName()));
+        statements.add(insertIntoNewTable.toString());
+
+        // drop the old table
+
+        StringBuilder dropOldTable = new StringBuilder();
+        dropOldTable.append("DROP TABLE ");
+        dropOldTable.append(OrmaUtils.quote(toTable.getTable().getName()));
+        statements.add(dropOldTable.toString());
+
+        // rename table
+        StringBuilder alterTableRename = new StringBuilder();
+        alterTableRename.append("ALTER TABLE ");
+        alterTableRename.append(OrmaUtils.quote(tempTable));
+        alterTableRename.append(" RENAME TO ");
+        alterTableRename.append(OrmaUtils.quote(toTable.getTable().getName()));
+        statements.add(alterTableRename.toString());
 
         return statements;
     }
@@ -159,13 +202,12 @@ public class SchemaDiffMigration {
 
         Matcher matcher = indexNamePattern.matcher(createIndexStatement);
         if (matcher.matches()) {
-            String indexName = dequote(matcher.group(1));
+            String indexName = OrmaUtils.dequote(matcher.group(1));
             return "DROP INDEX IF EXISTS \"" + indexName + "\"";
         } else {
             return "";
         }
     }
-
 
     public void executeStatements(SQLiteDatabase db, List<String> statements) {
         db.beginTransaction();
@@ -187,7 +229,7 @@ public class SchemaDiffMigration {
     public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<Schema<?>> schemas) {
         List<String> tableNames = new ArrayList<>();
         for (Schema<?> schema : schemas) {
-            tableNames.add(quote(schema.getTableName()));
+            tableNames.add(OrmaUtils.quote(schema.getTableName()));
         }
         Cursor cursor = db.rawQuery(
                 "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE tbl_name IN "
@@ -235,20 +277,5 @@ public class SchemaDiffMigration {
         return tables;
     }
 
-    @NonNull
-    public String quote(String name) {
-        return '"' + name + '"';
-    }
-
-    @NonNull
-    public String dequote(String maybeQuoted) {
-        if (maybeQuoted.startsWith("\"") || maybeQuoted.endsWith("\n")) {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-        } else if (maybeQuoted.startsWith("`") || maybeQuoted.endsWith("`")) {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-        } else {
-            return maybeQuoted;
-        }
-    }
 
 }

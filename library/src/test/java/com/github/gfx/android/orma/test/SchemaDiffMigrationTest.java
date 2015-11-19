@@ -6,6 +6,7 @@ import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -33,7 +34,6 @@ public class SchemaDiffMigrationTest {
         return RuntimeEnvironment.application;
     }
 
-
     @Before
     public void setUp() throws Exception {
         orma = new OrmaDatabase(getContext(), null);
@@ -58,19 +58,53 @@ public class SchemaDiffMigrationTest {
     }
 
     @Test
-    public void tableDiff_addColumn() throws Exception {
+    public void tableDiff_reorder() throws Exception {
         String from = "CREATE TABLE todo (title TEXT, content TEXT)";
-        String to = "CREATE TABLE todo (id TEXT, title TEXT, content TEXT)";
+        String to = "CREATE TABLE todo (content TEXT, title TEXT)";
         List<String> statements = migration.tableDiff(from, to);
-        assertThat(statements, contains("ALTER TABLE \"todo\" ADD COLUMN \"id\" TEXT"));
+
+        assertThat(statements, is(empty()));
     }
 
     @Test
-    public void tableDiff_addUniqueConstraint() throws Exception {
-        String from = "CREATE TABLE todo (title TEXT, content TEXT)";
-        String to = "CREATE TABLE todo (title TEXT UNIQUE, content TEXT)";
+    public void tableDiff_addColumn() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT)";
+        String to = "CREATE TABLE todo (title TEXT, content TEXT)";
         List<String> statements = migration.tableDiff(from, to);
-        assertThat(statements, contains("ALTER TABLE \"todo\" ADD COLUMN \"title\" TEXT UNIQUE"));
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
+                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+    }
+
+
+    @Ignore // FIXME
+    @Test
+    public void tableDiff_changeColumnConstraint() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT)";
+        String to = "CREATE TABLE todo (title TEXT, content TEXT NOT NULL)";
+        List<String> statements = migration.tableDiff(from, to);
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
+                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+    }
+
+    @Test
+    public void tableDiff_dropColumn() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT, content TEXT)";
+        String to = "CREATE TABLE todo (title TEXT)";
+        List<String> statements = migration.tableDiff(from, to);
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT)",
+                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
     }
 
     @Test
@@ -116,7 +150,4 @@ public class SchemaDiffMigrationTest {
         assertThat(migration.buildDropIndexStatement("CREATE INDEX IF NOT EXISTS `index_foo` ON `foo` (`bar`)"),
                 is("DROP INDEX IF EXISTS \"index_foo\""));
     }
-
-
-
 }
