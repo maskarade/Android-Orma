@@ -1,6 +1,5 @@
 package com.github.gfx.android.orma.migration;
 
-import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.exception.MigrationAbortException;
 import com.github.gfx.android.orma.internal.OrmaUtils;
@@ -45,10 +44,13 @@ public class SchemaDiffMigration implements MigrationEngine {
         try {
             t = context.getPackageManager()
                     .getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).lastUpdateTime;
+            if (t == 0) {
+                t = TimeUnit.MINUTES.toMillis(1); // robolectric
+            }
         } catch (PackageManager.NameNotFoundException e) {
             throw new AssertionError(e);
         }
-        return (int) TimeUnit.MILLISECONDS.toMinutes(t);
+        return (int)TimeUnit.MILLISECONDS.toMinutes(t);
     }
 
     @Override
@@ -62,6 +64,8 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public void start(SQLiteDatabase db, List<Schema<?>> schemas) {
+        Log.v(TAG, "migration start");
+
         long t0 = System.currentTimeMillis();
 
         Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
@@ -174,7 +178,7 @@ public class SchemaDiffMigration implements MigrationEngine {
             Collection<String> intersectionColumns) {
         List<String> statements = new ArrayList<>();
 
-        String tempTable = "__temp_" + toTable.getTable().getName();
+        String tempTable = "__temp_" + OrmaUtils.dequote(toTable.getTable().getName());
 
         // create the new table
         StringBuilder createNewTable = new StringBuilder();
@@ -255,9 +259,7 @@ public class SchemaDiffMigration implements MigrationEngine {
 
         try {
             for (String statement : statements) {
-                if (BuildConfig.DEBUG) {
-                    Log.v(TAG, statement);
-                }
+                Log.v(TAG, statement);
                 db.execSQL(statement);
             }
 
@@ -309,8 +311,6 @@ public class SchemaDiffMigration implements MigrationEngine {
                 }
 
                 tables.put(name, new SQLiteMaster(type, name, tableName, sql));
-
-                Log.d(TAG, type + " " + name + " " + tableName + " " + sql);
             } while (cursor.moveToNext());
         }
         cursor.close();

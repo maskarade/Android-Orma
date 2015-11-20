@@ -34,6 +34,9 @@ public class OrmaUtils {
      */
     @NonNull
     public static String quote(@NonNull String name) {
+        if (name.startsWith("\"") || name.startsWith("`")) {
+            return name;
+        }
         return '"' + name + '"';
     }
 

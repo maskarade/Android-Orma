@@ -1,6 +1,8 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.TransactionAbortException;
+import com.github.gfx.android.orma.migration.MigrationEngine;
+import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
@@ -25,9 +27,16 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final List<Schema<?>> schemas;
 
+    final MigrationEngine migration;
+
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
-        super(context, filename, null, VERSION);
+        this(context, filename, schemas, new SchemaDiffMigration(context));
+    }
+
+    public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas, MigrationEngine migration) {
+        super(context, filename, null, migration.getVersion());
         this.schemas = schemas;
+        this.migration = migration;
         enableWal();
     }
 
@@ -176,11 +185,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        throw new UnsupportedOperationException("onUpgrade() is not supported by Orma");
+        migration.onMigrate(db, schemas, oldVersion, newVersion);
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        throw new UnsupportedOperationException("onDowngrade() is not supported by Orma");
+        migration.onMigrate(db, schemas, oldVersion, newVersion);
     }
 }
