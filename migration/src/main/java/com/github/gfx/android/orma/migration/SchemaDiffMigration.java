@@ -149,17 +149,17 @@ public class SchemaDiffMigration implements MigrationEngine {
             fromTable = (CreateTable) CCJSqlParserUtil.parse(from);
             toTable = (CreateTable) CCJSqlParserUtil.parse(to);
         } catch (Exception e) {
-            throw new MigrationAbortException(e);
+            throw new AssertionError(e);
         }
 
         Map<String, ColumnDefinition> toColumns = new HashMap<>();
-        Set<String> toCollumnNameAndTypes = new HashSet<>();
+        Set<String> toColumnNameAndTypes = new HashSet<>();
         List<ColumnDefinition> intersectionColumns = new ArrayList<>();
         Map<String, String> intersectionColumnNameAndTypes = new HashMap<>();
 
         for (ColumnDefinition column : toTable.getColumnDefinitions()) {
             toColumns.put(column.toString(), column);
-            toCollumnNameAndTypes.add(column.getColumnName() + ' ' + column.getColDataType());
+            toColumnNameAndTypes.add(column.getColumnName() + ' ' + column.getColDataType());
         }
 
         for (ColumnDefinition column : fromTable.getColumnDefinitions()) {
@@ -169,7 +169,7 @@ public class SchemaDiffMigration implements MigrationEngine {
             }
 
             String columnNameAndType = column.getColumnName() + ' ' + column.getColDataType();
-            if (toCollumnNameAndTypes.contains(columnNameAndType)) {
+            if (toColumnNameAndTypes.contains(columnNameAndType)) {
                 intersectionColumnNameAndTypes.put(columnNameAndType, column.getColumnName());
             }
         }
