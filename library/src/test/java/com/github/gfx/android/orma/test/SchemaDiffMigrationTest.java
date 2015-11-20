@@ -37,7 +37,7 @@ public class SchemaDiffMigrationTest {
     public void setUp() throws Exception {
         orma = new OrmaDatabase(getContext(), null);
 
-        migration = new SchemaDiffMigration();
+        migration = new SchemaDiffMigration(getContext());
     }
 
     @Test

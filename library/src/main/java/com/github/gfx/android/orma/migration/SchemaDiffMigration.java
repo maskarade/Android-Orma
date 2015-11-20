@@ -9,6 +9,8 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
@@ -24,12 +26,40 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SchemaDiffMigration {
+public class SchemaDiffMigration implements MigrationEngine {
 
     static final String TAG = SchemaDiffMigration.class.getSimpleName();
+
+    final int version;
+
+    public SchemaDiffMigration(@NonNull Context context) {
+        version = extractVersion(context);
+    }
+
+    static int extractVersion(Context context) {
+        long t;
+        try {
+            t = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).lastUpdateTime;
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new AssertionError(e);
+        }
+        return (int) TimeUnit.MILLISECONDS.toMinutes(t);
+    }
+
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void onMigrate(SQLiteDatabase db, List<Schema<?>> schemas, int oldVersion, int newVersion) {
+        start(db, schemas);
+    }
 
     public void start(SQLiteDatabase db, List<Schema<?>> schemas) {
         long t0 = System.currentTimeMillis();
@@ -134,14 +164,14 @@ public class SchemaDiffMigration {
 
         if (intersectionColumns.size() != toTable.getColumnDefinitions().size() ||
                 intersectionColumns.size() != fromTable.getColumnDefinitions().size()) {
-            return buildRecreateTable(fromTable, toTable, intersectionColumns, intersectionColumnNameAndTypes.values());
+            return buildRecreateTable(fromTable, toTable, intersectionColumnNameAndTypes.values());
         } else {
             return Collections.emptyList();
         }
     }
 
     private List<String> buildRecreateTable(CreateTable fromTable, CreateTable toTable,
-            Collection<ColumnDefinition> intersectionColumns, Collection<String> intersectionColumnNameAndTypes) {
+            Collection<String> intersectionColumns) {
         List<String> statements = new ArrayList<>();
 
         String tempTable = "__temp_" + toTable.getTable().getName();
@@ -172,7 +202,7 @@ public class SchemaDiffMigration {
         insertIntoNewTable.append("INSERT INTO ");
         insertIntoNewTable.append(OrmaUtils.quote(tempTable));
         insertIntoNewTable.append(" (");
-        String intersectionColumnNames = OrmaUtils.joinBy(", ", intersectionColumnNameAndTypes, new OrmaUtils.Func1<String, String>() {
+        String intersectionColumnNames = OrmaUtils.joinBy(", ", intersectionColumns, new OrmaUtils.Func1<String, String>() {
             @Override
             public String call(String name) {
                 return OrmaUtils.quote(name);
@@ -287,6 +317,4 @@ public class SchemaDiffMigration {
 
         return tables;
     }
-
-
 }
