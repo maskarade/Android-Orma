@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -110,31 +110,38 @@ public class SchemaDiffMigration {
             throw new MigrationAbortException(e);
         }
 
-        Map<String, ColumnDefinition> toColumns = new LinkedHashMap<>();
+        Map<String, ColumnDefinition> toColumns = new HashMap<>();
+        Set<String> toCollumnNameAndTypes = new HashSet<>();
         List<ColumnDefinition> intersectionColumns = new ArrayList<>();
+        Map<String, String> intersectionColumnNameAndTypes = new HashMap<>();
 
         for (ColumnDefinition column : toTable.getColumnDefinitions()) {
-            String key = column.toString();
-            toColumns.put(key, column);
+            toColumns.put(column.toString(), column);
+            toCollumnNameAndTypes.add(column.getColumnName() + ' ' + column.getColDataType());
         }
 
         for (ColumnDefinition column : fromTable.getColumnDefinitions()) {
-            String key = column.toString();
-            if (toColumns.containsKey(key)) {
+            String columnSpec = column.toString();
+            if (toColumns.containsKey(columnSpec)) {
                 intersectionColumns.add(column);
+            }
+
+            String columnNameAndType = column.getColumnName() + ' ' + column.getColDataType();
+            if (toCollumnNameAndTypes.contains(columnNameAndType)) {
+                intersectionColumnNameAndTypes.put(columnNameAndType, column.getColumnName());
             }
         }
 
         if (intersectionColumns.size() != toTable.getColumnDefinitions().size() ||
                 intersectionColumns.size() != fromTable.getColumnDefinitions().size()) {
-            return buildRecreateTable(fromTable, toTable, intersectionColumns);
+            return buildRecreateTable(fromTable, toTable, intersectionColumns, intersectionColumnNameAndTypes.values());
         } else {
             return Collections.emptyList();
         }
     }
 
     private List<String> buildRecreateTable(CreateTable fromTable, CreateTable toTable,
-            Collection<ColumnDefinition> intersectionColumns) {
+            Collection<ColumnDefinition> intersectionColumns, Collection<String> intersectionColumnNameAndTypes) {
         List<String> statements = new ArrayList<>();
 
         String tempTable = "__temp_" + toTable.getTable().getName();
@@ -148,8 +155,12 @@ public class SchemaDiffMigration {
                 new OrmaUtils.Func1<ColumnDefinition, String>() {
                     @Override
                     public String call(ColumnDefinition arg) {
-                        String columnSpec = arg.getColumnSpecStrings() != null ? TextUtils
-                                .join(" ", arg.getColumnSpecStrings()) : "";
+                        String columnSpec;
+                        if (arg.getColumnSpecStrings() != null) {
+                            columnSpec = ' ' + TextUtils.join(" ", arg.getColumnSpecStrings());
+                        } else {
+                            columnSpec = "";
+                        }
                         return OrmaUtils.quote(arg.getColumnName()) + ' ' + arg.getColDataType() + columnSpec;
                     }
                 }));
@@ -161,15 +172,15 @@ public class SchemaDiffMigration {
         insertIntoNewTable.append("INSERT INTO ");
         insertIntoNewTable.append(OrmaUtils.quote(tempTable));
         insertIntoNewTable.append(" (");
-        String unionColumnNames = OrmaUtils.joinBy(", ", intersectionColumns, new OrmaUtils.Func1<ColumnDefinition, String>() {
+        String intersectionColumnNames = OrmaUtils.joinBy(", ", intersectionColumnNameAndTypes, new OrmaUtils.Func1<String, String>() {
             @Override
-            public String call(ColumnDefinition arg) {
-                return OrmaUtils.quote(arg.getColumnName());
+            public String call(String name) {
+                return OrmaUtils.quote(name);
             }
         });
-        insertIntoNewTable.append(unionColumnNames);
+        insertIntoNewTable.append(intersectionColumnNames);
         insertIntoNewTable.append(") SELECT ");
-        insertIntoNewTable.append(unionColumnNames);
+        insertIntoNewTable.append(intersectionColumnNames);
         insertIntoNewTable.append(" FROM ");
         insertIntoNewTable.append(OrmaUtils.quote(fromTable.getTable().getName()));
         statements.add(insertIntoNewTable.toString());

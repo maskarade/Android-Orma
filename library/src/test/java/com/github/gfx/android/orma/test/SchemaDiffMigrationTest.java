@@ -6,7 +6,6 @@ import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -79,17 +78,15 @@ public class SchemaDiffMigrationTest {
                 "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
     }
 
-
-    @Ignore // FIXME
     @Test
-    public void tableDiff_changeColumnConstraint() throws Exception {
+    public void tableDiff_addTowColumns() throws Exception {
         String from = "CREATE TABLE todo (title TEXT)";
-        String to = "CREATE TABLE todo (title TEXT, content TEXT NOT NULL)";
+        String to = "CREATE TABLE todo (title TEXT, content TEXT, createdDate TIMESTAMP)";
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT, \"createdDate\" TIMESTAMP)",
+                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
                 "DROP TABLE \"todo\"",
                 "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
     }
@@ -106,6 +103,73 @@ public class SchemaDiffMigrationTest {
                 "DROP TABLE \"todo\"",
                 "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
     }
+
+    @Test
+    public void tableDiff_dropTowColumns() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT, content TEXT, createdDate TIMESTAMP)";
+        String to = "CREATE TABLE todo (title TEXT)";
+        List<String> statements = migration.tableDiff(from, to);
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT)",
+                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+    }
+
+
+    @Test
+    public void tableDiff_addNonNullConstraint() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT, content TEXT)";
+        String to = "CREATE TABLE todo (title TEXT, content TEXT NOT NULL)";
+        List<String> statements = migration.tableDiff(from, to);
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT NOT NULL)",
+                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+    }
+
+    @Test
+    public void tableDiff_removeNonNullConstraint() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT, content TEXT NOT NULL)";
+        String to = "CREATE TABLE todo (title TEXT, content TEXT)";
+        List<String> statements = migration.tableDiff(from, to);
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
+                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+    }
+
+    @Test
+    public void tableDiff_addPrimaryKeyConstraint() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT, content TEXT)";
+        String to = "CREATE TABLE todo (title TEXT PRIMARY KEY, content TEXT)";
+        List<String> statements = migration.tableDiff(from, to);
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT PRIMARY KEY, \"content\" TEXT)",
+                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+    }
+
+    @Test
+    public void tableDiff_addUniqueConstraint() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT, content TEXT)";
+        String to = "CREATE TABLE todo (title TEXT UNIQUE, content TEXT)";
+        List<String> statements = migration.tableDiff(from, to);
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT UNIQUE, \"content\" TEXT)",
+                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+    }
+
 
     @Test
     public void buildDropIndexStatement() throws Exception {
