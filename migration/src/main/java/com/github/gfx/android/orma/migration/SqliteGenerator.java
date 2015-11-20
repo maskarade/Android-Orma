@@ -1,10 +1,10 @@
-package com.github.gfx.android.orma.internal;
+package com.github.gfx.android.orma.migration;
 
 import android.support.annotation.NonNull;
 
 import java.util.Collection;
 
-public class OrmaUtils {
+public class SqliteGenerator {
 
     public interface Func1<A, R> {
 

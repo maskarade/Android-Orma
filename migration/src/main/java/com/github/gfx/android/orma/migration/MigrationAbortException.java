@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.exception;
+package com.github.gfx.android.orma.migration;
 
 public class MigrationAbortException extends RuntimeException {
 

@@ -1,8 +1,5 @@
 package com.github.gfx.android.orma.migration;
 
-import com.github.gfx.android.orma.exception.MigrationAbortException;
-import com.github.gfx.android.orma.internal.OrmaUtils;
-
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -34,7 +31,7 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     final int version;
 
-    public SchemaDiffMigration(@NonNull Context context) {
+    public SchemaDiffMigration( Context context) {
         version = extractVersion(context);
     }
 
@@ -177,15 +174,15 @@ public class SchemaDiffMigration implements MigrationEngine {
             Collection<String> intersectionColumns) {
         List<String> statements = new ArrayList<>();
 
-        String tempTable = "__temp_" + OrmaUtils.dequote(toTable.getTable().getName());
+        String tempTable = "__temp_" + SqliteGenerator.dequote(toTable.getTable().getName());
 
         // create the new table
         StringBuilder createNewTable = new StringBuilder();
         createNewTable.append("CREATE TABLE ");
-        createNewTable.append(OrmaUtils.quote(tempTable));
+        createNewTable.append(SqliteGenerator.quote(tempTable));
         createNewTable.append(" (");
-        createNewTable.append(OrmaUtils.joinBy(", ", toTable.getColumnDefinitions(),
-                new OrmaUtils.Func1<ColumnDefinition, String>() {
+        createNewTable.append(SqliteGenerator.joinBy(", ", toTable.getColumnDefinitions(),
+                new SqliteGenerator.Func1<ColumnDefinition, String>() {
                     @Override
                     public String call(ColumnDefinition arg) {
                         String columnSpec;
@@ -194,7 +191,7 @@ public class SchemaDiffMigration implements MigrationEngine {
                         } else {
                             columnSpec = "";
                         }
-                        return OrmaUtils.quote(arg.getColumnName()) + ' ' + arg.getColDataType() + columnSpec;
+                        return SqliteGenerator.quote(arg.getColumnName()) + ' ' + arg.getColDataType() + columnSpec;
                     }
                 }));
         createNewTable.append(")");
@@ -203,34 +200,35 @@ public class SchemaDiffMigration implements MigrationEngine {
         // insert into the new table
         StringBuilder insertIntoNewTable = new StringBuilder();
         insertIntoNewTable.append("INSERT INTO ");
-        insertIntoNewTable.append(OrmaUtils.quote(tempTable));
+        insertIntoNewTable.append(SqliteGenerator.quote(tempTable));
         insertIntoNewTable.append(" (");
-        String intersectionColumnNames = OrmaUtils.joinBy(", ", intersectionColumns, new OrmaUtils.Func1<String, String>() {
-            @Override
-            public String call(String name) {
-                return OrmaUtils.quote(name);
-            }
-        });
+        String intersectionColumnNames = SqliteGenerator
+                .joinBy(", ", intersectionColumns, new SqliteGenerator.Func1<String, String>() {
+                    @Override
+                    public String call(String name) {
+                        return SqliteGenerator.quote(name);
+                    }
+                });
         insertIntoNewTable.append(intersectionColumnNames);
         insertIntoNewTable.append(") SELECT ");
         insertIntoNewTable.append(intersectionColumnNames);
         insertIntoNewTable.append(" FROM ");
-        insertIntoNewTable.append(OrmaUtils.quote(fromTable.getTable().getName()));
+        insertIntoNewTable.append(SqliteGenerator.quote(fromTable.getTable().getName()));
         statements.add(insertIntoNewTable.toString());
 
         // drop the old table
 
         StringBuilder dropOldTable = new StringBuilder();
         dropOldTable.append("DROP TABLE ");
-        dropOldTable.append(OrmaUtils.quote(toTable.getTable().getName()));
+        dropOldTable.append(SqliteGenerator.quote(toTable.getTable().getName()));
         statements.add(dropOldTable.toString());
 
         // rename table
         StringBuilder alterTableRename = new StringBuilder();
         alterTableRename.append("ALTER TABLE ");
-        alterTableRename.append(OrmaUtils.quote(tempTable));
+        alterTableRename.append(SqliteGenerator.quote(tempTable));
         alterTableRename.append(" RENAME TO ");
-        alterTableRename.append(OrmaUtils.quote(toTable.getTable().getName()));
+        alterTableRename.append(SqliteGenerator.quote(toTable.getTable().getName()));
         statements.add(alterTableRename.toString());
 
         return statements;
@@ -246,7 +244,7 @@ public class SchemaDiffMigration implements MigrationEngine {
 
         Matcher matcher = indexNamePattern.matcher(createIndexStatement);
         if (matcher.matches()) {
-            String indexName = OrmaUtils.dequote(matcher.group(1));
+            String indexName = SqliteGenerator.dequote(matcher.group(1));
             return "DROP INDEX IF EXISTS \"" + indexName + "\"";
         } else {
             return "";
@@ -271,7 +269,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<NamedDdl> schemas) {
         List<String> tableNames = new ArrayList<>();
         for (NamedDdl schema : schemas) {
-            tableNames.add(OrmaUtils.quote(schema.getTableName()));
+            tableNames.add(SqliteGenerator.quote(schema.getTableName()));
         }
         Cursor cursor = db.rawQuery(
                 "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE tbl_name IN "
