@@ -5,6 +5,7 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -29,24 +30,31 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     static final String TAG = SchemaDiffMigration.class.getSimpleName();
 
+    final boolean debug;
+
     final int version;
 
-    public SchemaDiffMigration( Context context) {
+    public SchemaDiffMigration(Context context) {
         version = extractVersion(context);
+        debug = extractDebug(context);
+    }
+
+    static boolean extractDebug(Context context) {
+        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
     static int extractVersion(Context context) {
+        PackageManager pm = context.getPackageManager();
         long t;
         try {
-            t = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).lastUpdateTime;
+            t = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).lastUpdateTime;
             if (t == 0) {
                 t = TimeUnit.MINUTES.toMillis(1); // robolectric
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new AssertionError(e);
         }
-        return (int)TimeUnit.MILLISECONDS.toMinutes(t);
+        return (int) TimeUnit.MILLISECONDS.toMinutes(t);
     }
 
     @Override
@@ -60,7 +68,9 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public void start(SQLiteDatabase db, List<NamedDdl> schemas) {
-        Log.v(TAG, "migration start");
+        if (debug) {
+            Log.v(TAG, "migration start");
+        }
 
         long t0 = System.currentTimeMillis();
 
@@ -68,7 +78,9 @@ public class SchemaDiffMigration implements MigrationEngine {
         List<String> statements = diffAll(schemas, metadata);
         executeStatements(db, statements);
 
-        Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+        if (debug) {
+            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+        }
     }
 
     @NonNull
@@ -256,7 +268,9 @@ public class SchemaDiffMigration implements MigrationEngine {
 
         try {
             for (String statement : statements) {
-                Log.v(TAG, statement);
+                if (debug) {
+                    Log.v(TAG, statement);
+                }
                 db.execSQL(statement);
             }
 
