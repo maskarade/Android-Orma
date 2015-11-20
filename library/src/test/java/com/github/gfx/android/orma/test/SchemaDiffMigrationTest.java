@@ -1,6 +1,8 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
+import com.github.gfx.android.orma.OrmaConnection;
+import com.github.gfx.android.orma.migration.NamedDdl;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -42,16 +44,18 @@ public class SchemaDiffMigrationTest {
 
     @Test
     public void start() throws Exception {
-        SQLiteDatabase db = orma.getConnection().getDatabase();
-        migration.start(db, OrmaDatabase.schemas);
+        OrmaConnection conn = orma.getConnection();
+        migration.start(conn.getDatabase(), conn.getNamedDdls());
     }
 
     @Test
     public void diffAll() throws Exception {
-        SQLiteDatabase db = orma.getConnection().getDatabase();
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, OrmaDatabase.schemas);
+        OrmaConnection conn = orma.getConnection();
+        SQLiteDatabase db = conn.getDatabase();
+        List<NamedDdl> namedDdls = conn.getNamedDdls();
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls);
 
-        List<String> statements = migration.diffAll(OrmaDatabase.schemas, metadata);
+        List<String> statements = migration.diffAll(namedDdls, metadata);
 
         assertThat(statements, is(empty()));
     }

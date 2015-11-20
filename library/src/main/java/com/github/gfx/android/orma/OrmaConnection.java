@@ -2,6 +2,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.TransactionAbortException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
+import com.github.gfx.android.orma.migration.NamedDdl;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
 import android.annotation.TargetApi;
@@ -17,6 +18,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OrmaConnection extends SQLiteOpenHelper {
@@ -33,7 +35,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
         this(context, filename, schemas, new SchemaDiffMigration(context));
     }
 
-    public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas, MigrationEngine migration) {
+    public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas,
+            MigrationEngine migration) {
         super(context, filename, null, migration.getVersion());
         this.schemas = schemas;
         this.migration = migration;
@@ -172,6 +175,21 @@ public class OrmaConnection extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
+    public List<NamedDdl> getNamedDdls() {
+        List<NamedDdl> list = new ArrayList<>();
+
+        for (Schema<?> schema : schemas) {
+            NamedDdl namedDDL = new NamedDdl(schema.getTableName(),
+                    schema.getCreateTableStatement(),
+                    schema.getCreateIndexStatements());
+            list.add(namedDDL);
+        }
+
+        return list;
+    }
+
+    // SQLiteOpenHelper
+
     @Override
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
@@ -185,11 +203,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        migration.onMigrate(db, schemas, oldVersion, newVersion);
+        migration.onMigrate(db, getNamedDdls(), oldVersion, newVersion);
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        migration.onMigrate(db, schemas, oldVersion, newVersion);
+        migration.onMigrate(db, getNamedDdls(), oldVersion, newVersion);
     }
 }

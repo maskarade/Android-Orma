@@ -1,6 +1,5 @@
 package com.github.gfx.android.orma.migration;
 
-import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.exception.MigrationAbortException;
 import com.github.gfx.android.orma.internal.OrmaUtils;
 
@@ -59,11 +58,11 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @Override
-    public void onMigrate(SQLiteDatabase db, List<Schema<?>> schemas, int oldVersion, int newVersion) {
+    public void onMigrate(SQLiteDatabase db, List<NamedDdl> schemas, int oldVersion, int newVersion) {
         start(db, schemas);
     }
 
-    public void start(SQLiteDatabase db, List<Schema<?>> schemas) {
+    public void start(SQLiteDatabase db, List<NamedDdl> schemas) {
         Log.v(TAG, "migration start");
 
         long t0 = System.currentTimeMillis();
@@ -76,11 +75,11 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @NonNull
-    public List<String> diffAll(List<Schema<?>> schemas, Map<String, SQLiteMaster> dbTables) {
+    public List<String> diffAll(List<NamedDdl> schemas, Map<String, SQLiteMaster> dbTables) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database
-        for (Schema<?> schema : schemas) {
+        for (NamedDdl schema : schemas) {
             SQLiteMaster table = dbTables.get(schema.getTableName());
             if (table == null) {
                 statements.add(schema.getCreateTableStatement());
@@ -269,9 +268,9 @@ public class SchemaDiffMigration implements MigrationEngine {
         }
     }
 
-    public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<Schema<?>> schemas) {
+    public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<NamedDdl> schemas) {
         List<String> tableNames = new ArrayList<>();
-        for (Schema<?> schema : schemas) {
+        for (NamedDdl schema : schemas) {
             tableNames.add(OrmaUtils.quote(schema.getTableName()));
         }
         Cursor cursor = db.rawQuery(
