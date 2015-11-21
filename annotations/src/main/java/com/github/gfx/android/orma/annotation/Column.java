@@ -11,6 +11,8 @@ public @interface Column {
 
     String value() default "";
 
+    String defaultValue() default "";
+
     boolean indexed() default false;
 
     boolean unique() default false;

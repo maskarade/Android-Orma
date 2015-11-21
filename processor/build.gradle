@@ -11,7 +11,7 @@ dependencies {
 
 publish {
     artifactId = 'orma-processor'
-    desc = 'The Orma annotation processor'
+    desc = 'An annotation processor for Ormat to generate schema representations'
 
     def metadata = project.rootProject.ext.metadata
     groupId = metadata.groupId

@@ -18,6 +18,9 @@ import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
+/**
+ * {@code Schema<T>} represents how a model is connected to an SQLite table.
+ */
 public class SchemaWriter {
 
     static final String TABLE_NAME = "$TABLE_NAME";
