@@ -8,9 +8,9 @@ This is an **alpha** software and the interface will change until a stable versi
 
 ```groovy
 dependencies {
-    apt 'com.github.android.orma:orma-processor:0.0.1'
-    provided 'com.github.android.orma:orma-annotations:0.0.1'
-    compile 'com.github.android.orma:orma:0.0.1'
+    apt 'com.github.gfx.android.orma:orma-processor:0.0.1'
+    provided 'com.github.gfx.android.orma:orma-annotations:0.0.1'
+    compile 'com.github.gfx.android.orma:orma:0.0.1'
 }
 ```
 
@@ -92,6 +92,10 @@ orma.deleteTodo()
 ./gradlew annotations:bintrayUpload processor:bintrayUpload library:bintrayUpload
 ```
 
+# Licenses in Runtime Dependencies
+
+* https://github.com/ReactiveX/RxJava - Apache Software License 2.0
+* https://github.com/JSQLParser/JSqlParser - LGPL v2.1 and Apache Software License 2.0 (dual licenses)
 
 # Author
 
