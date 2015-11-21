@@ -38,6 +38,10 @@ public class ColumnDefinition {
 
     public final String collate;
 
+    public Element getter;
+
+    public Element setter;
+
     public ColumnDefinition(Element element) {
         this.element = element;
 
@@ -133,5 +137,13 @@ public class ColumnDefinition {
      */
     public ParameterizedTypeName getColumnDefType() {
         return Types.getColumnDef(type.box());
+    }
+
+    public String getColumnGetterExpr() {
+        if (getter != null) {
+            return getter.getSimpleName() + "()";
+        } else {
+            return name;
+        }
     }
 }
