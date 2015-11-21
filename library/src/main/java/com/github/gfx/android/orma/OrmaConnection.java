@@ -25,8 +25,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     static final String TAG = OrmaConnection.class.getSimpleName();
 
-    static final int VERSION = 1;
-
     final List<Schema<?>> schemas;
 
     final MigrationEngine migration;
@@ -36,7 +34,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas,
-            MigrationEngine migration) {
+            @NonNull MigrationEngine migration) {
         super(context, filename, null, migration.getVersion());
         this.schemas = schemas;
         this.migration = migration;

@@ -25,6 +25,8 @@ public class DatabaseWriter {
 
     static final String connection = "connection";
 
+    static final String SCHEMAS = "SCHEMAS";
+
     final ProcessingEnvironment processingEnv;
 
     List<SchemaDefinition> schemas = new ArrayList<>();
@@ -77,7 +79,7 @@ public class DatabaseWriter {
         fieldSpecs.addAll(schemaFields);
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.getList(Types.WildcardSchema), "schemas", publicStaticFinal)
+                FieldSpec.builder(Types.getList(Types.WildcardSchema), SCHEMAS, publicStaticFinal)
                         .initializer(buildSchemasInitializer(schemaFields))
                         .build());
 
@@ -110,6 +112,15 @@ public class DatabaseWriter {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
         methodSpecs.addAll(buildConstructorSpecs());
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getSchemas")
+                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.getList(Types.WildcardSchema))
+                        .addStatement("return $L", SCHEMAS)
+                        .build()
+        );
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getConnection")
@@ -229,9 +240,28 @@ public class DatabaseWriter {
                         ParameterSpec.builder(Types.String, "name")
                                 .addAnnotation(Specs.buildNullableAnnotationSpec())
                                 .build())
-                .addStatement("this(new $T(context, name, schemas))", Types.OrmaConnection)
+                .addStatement("this(new $T(context, name, $L))", Types.OrmaConnection, SCHEMAS)
                 .addJavadoc("Create a database context that handles $L.\n", getListOfModelClassesForJavadoc())
                 .build());
+
+        methodSpecs.add(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(
+                        ParameterSpec.builder(Types.Context, "context")
+                                .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                .build())
+                .addParameter(
+                        ParameterSpec.builder(Types.String, "name")
+                                .addAnnotation(Specs.buildNullableAnnotationSpec())
+                                .build())
+                .addParameter(
+                        ParameterSpec.builder(Types.MigrationEngine, "migration")
+                                .addAnnotation(Specs.buildNullableAnnotationSpec())
+                                .build())
+                .addStatement("this(new $T(context, name, $L, migration))", Types.OrmaConnection, SCHEMAS)
+                .addJavadoc("Create a database context that handles $L.\n", getListOfModelClassesForJavadoc())
+                .build());
+
 
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)

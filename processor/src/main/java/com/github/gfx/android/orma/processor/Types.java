@@ -6,7 +6,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,14 +14,14 @@ public class Types {
 
     public static final String ormaPackageName = "com.github.gfx.android.orma";
 
+    public static final String ormaMigrationPackageName = ormaPackageName + ".migration";
+
     // Android standard types
     public static final ClassName String = ClassName.get(String.class);
 
     public static final ArrayTypeName StringArray = ArrayTypeName.of(String);
 
     public static final ClassName List = ClassName.get(List.class);
-
-    public static final ClassName ArrayList = ClassName.get(ArrayList.class);
 
     public static final ClassName Arrays = ClassName.get(Arrays.class);
 
@@ -33,8 +32,6 @@ public class Types {
     public static final ClassName ContentValues = ClassName.get("android.content", "ContentValues");
 
     public static final ClassName Cursor = ClassName.get("android.database", "Cursor");
-
-    public static final ClassName SQLiteDatabase = ClassName.get("android.database.sqlite", "SQLiteDatabase");
 
     public static final ClassName SQLiteStatement = ClassName.get("android.database.sqlite", "SQLiteStatement");
 
@@ -72,6 +69,8 @@ public class Types {
     public static final ClassName SingleRelation = ClassName.get(ormaPackageName, "SingleRelation");
 
     public static final ClassName ModelBuilder = ClassName.get(ormaPackageName, "ModelBuilder");
+
+    public static final ClassName MigrationEngine = ClassName.get(ormaMigrationPackageName, "MigrationEngine");
 
     public static ParameterizedTypeName getSchema(TypeName modelType) {
         return ParameterizedTypeName.get(Schema, modelType);
