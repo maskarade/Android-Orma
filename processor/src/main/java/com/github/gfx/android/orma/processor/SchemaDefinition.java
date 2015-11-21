@@ -5,7 +5,6 @@ import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 import com.squareup.javapoet.ClassName;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +26,7 @@ public class SchemaDefinition {
 
     final String tableName;
 
-    final List<ColumnDefinition> columns = new ArrayList<>();
+    final List<ColumnDefinition> columns;
 
     public SchemaDefinition(TypeElement typeElement) {
         this.typeElement = typeElement;
@@ -40,11 +39,7 @@ public class SchemaDefinition {
         this.deleterClassName = helperClassName(table.deleterClassName(), modelClassName, "_Deleter");
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
-        typeElement.getEnclosedElements().forEach(element -> {
-            if (element.getAnnotation(Column.class) != null || element.getAnnotation(PrimaryKey.class) != null) {
-                columns.add(new ColumnDefinition(element));
-            }
-        });
+        this.columns = collectColumns(typeElement);
     }
 
     private static ClassName helperClassName(String specifiedName, ClassName modelClassName, String helperSuffix) {
@@ -59,6 +54,16 @@ public class SchemaDefinition {
             }
         }
         throw new AssertionError("No non-empty string found");
+    }
+
+    static List<ColumnDefinition> collectColumns(TypeElement typeElement) {
+        return typeElement.getEnclosedElements()
+                .stream()
+                .filter(element -> element.getAnnotation(Column.class) != null
+                        || element.getAnnotation(PrimaryKey.class) != null)
+                .map(ColumnDefinition::new)
+                .collect(Collectors.toList());
+
     }
 
     public TypeElement getElement() {
