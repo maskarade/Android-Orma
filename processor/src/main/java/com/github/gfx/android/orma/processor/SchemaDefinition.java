@@ -1,13 +1,18 @@
 package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Column;
+import com.github.gfx.android.orma.annotation.Getter;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 import com.squareup.javapoet.ClassName;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 public class SchemaDefinition {
@@ -57,13 +62,30 @@ public class SchemaDefinition {
     }
 
     static List<ColumnDefinition> collectColumns(TypeElement typeElement) {
+        Map<String, Element> getters = new HashMap<>();
+        Map<String, Element> setters = new HashMap<>();
+
+        typeElement.getEnclosedElements()
+                .stream()
+                .filter(element -> element.getAnnotation(Getter.class) != null)
+                .forEach(element -> getters.put(element.getAnnotation(Getter.class).value(), element));
+
+        typeElement.getEnclosedElements()
+                .stream()
+                .filter(element -> element.getAnnotation(Setter.class) != null)
+                .forEach(element -> setters.put(element.getAnnotation(Setter.class).value(), element));
+
         return typeElement.getEnclosedElements()
                 .stream()
                 .filter(element -> element.getAnnotation(Column.class) != null
                         || element.getAnnotation(PrimaryKey.class) != null)
-                .map(ColumnDefinition::new)
+                .map((element) -> {
+                    ColumnDefinition column = new ColumnDefinition(element);
+                    column.getter = getters.get(column.columnName);
+                    column.setter = setters.get(column.columnName);
+                    return column;
+                })
                 .collect(Collectors.toList());
-
     }
 
     public TypeElement getElement() {

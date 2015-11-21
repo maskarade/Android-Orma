@@ -323,9 +323,9 @@ public class SchemaWriter {
         schema.getColumnsWithoutAutoId().forEach(c -> {
             RelationDefinition r = c.getRelation();
             if (r == null) {
-                builder.addStatement("contents.put($S, model.$L)", c.columnName, c.name);
+                builder.addStatement("contents.put($S, model.$L)", c.columnName, c.getColumnGetterExpr());
             } else if (r.relationType.equals(Types.SingleRelation)) {
-                builder.addStatement("contents.put($S, model.$L.getId())", c.columnName, c.name);
+                builder.addStatement("contents.put($S, model.$L.getId())", c.columnName, c.getColumnGetterExpr());
             } else {
                 throw new UnsupportedOperationException(r.relationType + " is not supported");
             }
@@ -354,17 +354,17 @@ public class SchemaWriter {
 
             // TODO: support type adapters
             if (Types.looksLikeIntegerType(type) || type.equals(TypeName.BOOLEAN)) {
-                builder.addStatement("statement.bindLong($L, model.$L)", n, c.name);
+                builder.addStatement("statement.bindLong($L, model.$L)", n, c.getColumnGetterExpr());
             } else if (Types.looksLikeFloatType(type)) {
-                builder.addStatement("statement.bindDouble($L, model.$L)", n, c.name);
+                builder.addStatement("statement.bindDouble($L, model.$L)", n, c.getColumnGetterExpr());
             } else if (type.equals(Types.ByteArray)) {
-                builder.addStatement("statement.bindBlob($L, model.$L)", n, c.name);
+                builder.addStatement("statement.bindBlob($L, model.$L)", n, c.getColumnGetterExpr());
             } else if (type.equals(Types.String)) {
-                builder.addStatement("statement.bindString($L, model.$L)", n, c.name);
+                builder.addStatement("statement.bindString($L, model.$L)", n, c.getColumnGetterExpr());
             } else if (r != null && r.relationType.equals(Types.SingleRelation)) {
-                builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.name);
+                builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.getColumnGetterExpr());
             } else {
-                builder.addStatement("statement.bindString($L, model.$L.toString())", n, c.name);
+                builder.addStatement("statement.bindString($L, model.$L.toString())", n, c.getColumnGetterExpr());
             }
 
             if (nullable) {
@@ -386,11 +386,23 @@ public class SchemaWriter {
             ColumnDefinition c = columns.get(i);
             RelationDefinition r = c.getRelation();
             if (r == null) {
-                builder.addStatement("model.$L = cursor.$L($L)",
-                        c.name, cursorGetter(c), i);
+                if (c.setter != null) {
+                    builder.addStatement("model.$L(cursor.$L($L))",
+                            c.setter.getSimpleName(), cursorGetter(c), i);
+
+                } else {
+                    builder.addStatement("model.$L = cursor.$L($L)",
+                            c.name, cursorGetter(c), i);
+                }
             } else { // SingleRelation
-                builder.addStatement("model.$L = new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
-                        c.name, r.relationType, r.modelType, i);
+                if (c.setter != null) {
+                    builder.addStatement("model.$L(new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L)))",
+                            c.setter.getSimpleName(), r.relationType, r.modelType, i);
+
+                } else {
+                    builder.addStatement("model.$L = new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
+                            c.name, r.relationType, r.modelType, i);
+                }
             }
         }
         return builder.build();
