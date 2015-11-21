@@ -92,6 +92,10 @@ orma.deleteTodo()
 ./gradlew annotations:bintrayUpload processor:bintrayUpload library:bintrayUpload
 ```
 
+# Licenses in Runtime Dependencies
+
+* https://github.com/ReactiveX/RxJava - Apache Software License 2.0
+* https://github.com/JSQLParser/JSqlParser - LGPL v2.1 and Apache Software License 2.0 (dual licenses)
 
 # Author
 
