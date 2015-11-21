@@ -349,8 +349,9 @@ public class SchemaWriter {
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getType();
             RelationDefinition r = c.getRelation();
+            boolean nullable = !type.isPrimitive() && c.nullable;
 
-            if (c.nullable && !type.isPrimitive()) {
+            if (nullable) {
                 builder.beginControlFlow("if (model.$L != null)", c.name);
             }
 
@@ -369,7 +370,7 @@ public class SchemaWriter {
                 builder.addStatement("statement.bindString($L, model.$L.toString())", n, c.name);
             }
 
-            if (c.nullable && !type.isPrimitive()) {
+            if (nullable) {
                 builder.endControlFlow();
                 builder.beginControlFlow("else");
                 builder.addStatement("statement.bindNull($L)", n);

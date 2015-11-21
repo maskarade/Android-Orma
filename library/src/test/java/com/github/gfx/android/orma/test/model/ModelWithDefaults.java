@@ -5,14 +5,15 @@ import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
 @Table
-public class Model_v3_addIndexes {
+public class ModelWithDefaults {
 
     @PrimaryKey
-    long id;
+    public long id;
 
-    @Column(indexed = true)
-    String field;
+    @Column
+    public String s = "foo";
 
-    @Column(indexed = true)
-    long field2;
+    @Column
+    public long i = 10;
+
 }

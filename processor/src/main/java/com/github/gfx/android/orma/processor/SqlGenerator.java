@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SqlGenerator {
 
@@ -37,18 +38,26 @@ public class SqlGenerator {
         sb.append(SqlTypes.getSqliteType(column.getRawType()));
         sb.append(' ');
 
+        List<String> constraints = new ArrayList<>();
+
         if (column.primaryKey) {
-            sb.append("PRIMARY KEY");
+            constraints.add("PRIMARY KEY");
         } else {
             if (column.unique) {
-                sb.append("UNIQUE ");
+                constraints.add("UNIQUE");
             }
             if (column.nullable) {
-                sb.append("NULL");
+                constraints.add("NULL");
             } else {
-                sb.append("NOT NULL");
+                constraints.add("NOT NULL");
             }
         }
+
+        if (!Strings.isEmpty(column.collate)) {
+            constraints.add("COLLATE " + column.collate);
+        }
+
+        sb.append(constraints.stream().collect(Collectors.joining(" ")));
     }
 
     public CodeBlock buildCreateIndexStatements(SchemaDefinition schema) {

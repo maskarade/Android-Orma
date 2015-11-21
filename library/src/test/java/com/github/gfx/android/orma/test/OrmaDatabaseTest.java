@@ -26,5 +26,6 @@ public class OrmaDatabaseTest {
     public void testCreateInstance() throws Exception {
         OrmaDatabase db = new OrmaDatabase(getContext(), "test.db");
         assertThat(db.getConnection(), is(not(nullValue())));
+        assertThat(db.getSchemas(), is(not(nullValue())));
     }
 }

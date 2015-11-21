@@ -16,7 +16,7 @@ import android.content.Context;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
-public class EmptyMigrationTest {
+public class MigrationEngineTest {
 
     SchemaDiffMigration migration;
 

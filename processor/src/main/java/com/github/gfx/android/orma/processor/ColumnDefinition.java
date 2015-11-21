@@ -36,6 +36,8 @@ public class ColumnDefinition {
 
     public final boolean unique;
 
+    public final String collate;
+
     public ColumnDefinition(Element element) {
         this.element = element;
 
@@ -49,6 +51,16 @@ public class ColumnDefinition {
 
         type = ClassName.get(element.asType());
 
+        if (column != null) {
+            collate = column.collate();
+            indexed = column.indexed();
+            unique = column.unique();
+        } else {
+            collate = null;
+            indexed = false;
+            unique = false;
+        }
+
         if (primaryKeyAnnotation != null) {
             primaryKey = true;
             autoincrement = primaryKeyAnnotation.autoincrement();
@@ -58,9 +70,6 @@ public class ColumnDefinition {
             autoincrement = false;
             autoId = false;
         }
-
-        indexed = primaryKey || column.indexed();
-        unique = primaryKey || column.unique();
 
         nullable = hasNullableAnnotation(element);
     }

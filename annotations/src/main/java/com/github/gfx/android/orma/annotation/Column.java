@@ -9,11 +9,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Column {
 
+    /**
+     * @return A column name representation for SQLite tables.
+     */
     String value() default "";
-
-    String defaultValue() default "";
 
     boolean indexed() default false;
 
     boolean unique() default false;
+
+    /**
+     * @return Must be one of {@code "BINARY"}, {@code "NOCASE"} or {@code "RTRIM"}
+     */
+    String collate() default "";
 }
