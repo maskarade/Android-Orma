@@ -5,8 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD})
+@Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.SOURCE)
 public @interface Getter {
-    String value() default "";
+
+    /**
+     * @return The name of the getter of the specified column.
+     */
+    String value();
 }
