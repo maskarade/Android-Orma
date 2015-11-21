@@ -1,13 +1,10 @@
 package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -360,8 +357,8 @@ public class SchemaWriter {
                 builder.addStatement("statement.bindLong($L, model.$L)", n, c.name);
             } else if (Types.looksLikeFloatType(type)) {
                 builder.addStatement("statement.bindDouble($L, model.$L)", n, c.name);
-            } else if (type.equals(ArrayTypeName.BYTE)) {
-                builder.addStatement("statement.bindBlob($L, model.$L", n, c.name);
+            } else if (type.equals(Types.ByteArray)) {
+                builder.addStatement("statement.bindBlob($L, model.$L)", n, c.name);
             } else if (type.equals(Types.String)) {
                 builder.addStatement("statement.bindString($L, model.$L)", n, c.name);
             } else if (r != null && r.relationType.equals(Types.SingleRelation)) {
@@ -408,17 +405,14 @@ public class SchemaWriter {
     }
 
     private String cursorGetter(ColumnDefinition column) {
-        return "get" + capitalize(column.getType());
-    }
-
-    private String capitalize(TypeName type) {
+        TypeName type = column.getType();
         if (type.isPrimitive()) {
             String s = type.toString();
-            return s.substring(0, 1).toUpperCase() + s.substring(1);
-        } else if (type instanceof ClassName) {
-            return ((ClassName) type).simpleName();
-        } else if (type instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) type).rawType.simpleName();
+            return "get" + s.substring(0, 1).toUpperCase() + s.substring(1);
+        } else if (type.equals(Types.String)) {
+            return "getString";
+        } else  if (type.equals(Types.ByteArray)){
+            return "getBlob";
         } else {
             throw new UnsupportedOperationException("TODO: " + type + " is not yet supported as a column type");
         }

@@ -7,3 +7,6 @@ gradle.properties
 .DS_Store
 build/
 captures/
+
+# gradlew's bug?
+true

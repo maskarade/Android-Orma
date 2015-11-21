@@ -21,6 +21,8 @@ public class Types {
 
     public static final ArrayTypeName StringArray = ArrayTypeName.of(String);
 
+    public static final ArrayTypeName ByteArray = ArrayTypeName.of(byte.class);
+
     public static final ClassName List = ClassName.get(List.class);
 
     public static final ClassName Arrays = ClassName.get(Arrays.class);

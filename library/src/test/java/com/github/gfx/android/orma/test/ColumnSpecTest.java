@@ -2,6 +2,7 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.test.model.ModelWithBlob;
 import com.github.gfx.android.orma.test.model.ModelWithCollation;
 import com.github.gfx.android.orma.test.model.ModelWithDefaults;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -20,7 +21,7 @@ import static org.hamcrest.Matchers.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
-public class ColumnConstraintsTest {
+public class ColumnSpecTest {
 
     OrmaDatabase db;
 
@@ -72,4 +73,17 @@ public class ColumnConstraintsTest {
         assertThat(db.selectFromModelWithCollation().where("noCollationField = ?", "foo").count(), is(1L));
     }
 
+    @Test
+    public void testBlob() throws Exception {
+        ModelWithBlob model = db.createModelWithBlob(new ModelBuilder<ModelWithBlob>() {
+            @Override
+            public ModelWithBlob build() {
+                ModelWithBlob model = new ModelWithBlob();
+                model.blob = new byte[] {0, 1, 2, 3};
+                return model;
+            }
+        });
+
+        assertThat(model.blob, is(new byte[]{0, 1, 2, 3}));
+    }
 }
