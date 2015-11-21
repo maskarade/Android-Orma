@@ -26,40 +26,45 @@ import javax.tools.Diagnostic;
 })
 public class OrmaProcessor extends AbstractProcessor {
 
-    static final String TAG = OrmaProcessor.class.getSimpleName();
+    public static final String TAG = OrmaProcessor.class.getSimpleName();
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (annotations.size() == 0) {
             return true;
         }
+        try {
+            DatabaseWriter databaseWriter = new DatabaseWriter(processingEnv);
 
-        DatabaseWriter databaseWriter = new DatabaseWriter(processingEnv);
+            buildTableSchemas(roundEnv)
+                    .peek(this::writeSchema)
+                    .peek(this::writeRelation)
+                    .peek(this::writeUpdater)
+                    .peek(this::writeDeleter)
+                    .forEach(databaseWriter::add);
 
-        buildTableSchemas(roundEnv)
-                .peek(this::writeSchema)
-                .peek(this::writeRelation)
-                .peek(this::writeUpdater)
-                .peek(this::writeDeleter)
-                .forEach(databaseWriter::add);
+            buildVirtualTableSchemas(roundEnv)
+                    .peek(schema -> {
+                        throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
+                    });
 
-        buildVirtualTableSchemas(roundEnv)
-                .peek(schema -> {
-                    throw new RuntimeException("@VirtualTable is not yet implemented.");
-                });
+            if (databaseWriter.isRequired()) {
+                writeToFiler(null,
+                        JavaFile.builder(databaseWriter.getPackageName(),
+                                databaseWriter.buildTypeSpec())
+                                .build());
+            }
 
-        if (databaseWriter.isRequired()) {
-            writeToFiler(null,
-                    JavaFile.builder(databaseWriter.getPackageName(),
-                            databaseWriter.buildTypeSpec())
-                            .build());
+        } catch (ProcessingException e) {
+            error(e.getMessage(), e.element);
+            throw e;
         }
 
         return false;
     }
 
     public Stream<SchemaDefinition> buildTableSchemas(RoundEnvironment roundEnv) {
-        SchemaValidator validator = new SchemaValidator();
+        SchemaValidator validator = new SchemaValidator(processingEnv);
         return roundEnv
                 .getElementsAnnotatedWith(Table.class)
                 .stream()
@@ -67,7 +72,7 @@ public class OrmaProcessor extends AbstractProcessor {
     }
 
     public Stream<SchemaDefinition> buildVirtualTableSchemas(RoundEnvironment roundEnv) {
-        SchemaValidator validator = new SchemaValidator();
+        SchemaValidator validator = new SchemaValidator(processingEnv);
         return roundEnv
                 .getElementsAnnotatedWith(VirtualTable.class)
                 .stream()

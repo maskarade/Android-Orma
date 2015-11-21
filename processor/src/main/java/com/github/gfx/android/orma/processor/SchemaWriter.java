@@ -414,7 +414,7 @@ public class SchemaWriter {
         } else  if (type.equals(Types.ByteArray)){
             return "getBlob";
         } else {
-            throw new UnsupportedOperationException("TODO: " + type + " is not yet supported as a column type");
+            throw new ProcessingException("FIXME: " + type + " is not yet supported as a column type", column.element);
         }
     }
 }

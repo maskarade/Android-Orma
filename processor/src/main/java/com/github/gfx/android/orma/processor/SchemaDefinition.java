@@ -57,7 +57,7 @@ public class SchemaDefinition {
                 return name;
             }
         }
-        throw new AssertionError("No non-empty string here");
+        throw new AssertionError("No non-empty string found");
     }
 
     public TypeElement getElement() {
