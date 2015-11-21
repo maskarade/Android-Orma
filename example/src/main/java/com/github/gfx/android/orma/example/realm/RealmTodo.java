@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.example;
+package com.github.gfx.android.orma.example.realm;
 
 import io.realm.RealmObject;
 

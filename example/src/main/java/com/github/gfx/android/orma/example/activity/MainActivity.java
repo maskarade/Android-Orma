@@ -1,5 +1,11 @@
-package com.github.gfx.android.orma.example;
+package com.github.gfx.android.orma.example.activity;
 
+import com.github.gfx.android.orma.example.BuildConfig;
+import com.github.gfx.android.orma.example.R;
+import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
+import com.github.gfx.android.orma.example.orma.OrmaDatabase;
+
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -17,16 +23,19 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    ActivityMainBinding activityMain;
+
     OrmaDatabase orma;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        activityMain = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        Toolbar toolbar = activityMain.appBarMain.toolbar;
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = activityMain.appBarMain.fab;
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -35,15 +44,18 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = activityMain.drawerLayout;
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = activityMain.navView;
         navigationView.setNavigationItemSelectedListener(this);
+
+        activityMain.appBarMain.contentMain.textInfo.setText(
+                "This is an example app for Orma v" + BuildConfig.VERSION_NAME + ".");
 
         orma = new OrmaDatabase(this, "main.db");
         orma.deleteFromTodo().execute();
@@ -51,7 +63,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = activityMain.drawerLayout;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -101,8 +113,7 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        activityMain.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 }

@@ -12,7 +12,7 @@
             android:theme="@style/AppTheme"
             >
         <activity
-                android:name=".MainActivity"
+                android:name=".activity.MainActivity"
                 android:label="@string/app_name"
                 android:theme="@style/AppTheme.NoActionBar"
                 >
@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".BenchmarkActivity" />
+        <activity android:name=".activity.BenchmarkActivity" />
     </application>
 
 </manifest>

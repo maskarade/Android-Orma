@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.example;
+package com.github.gfx.android.orma.example.orma;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;

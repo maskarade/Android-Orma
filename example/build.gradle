@@ -27,6 +27,7 @@ android {
 
     lintOptions {
         disable 'InvalidPackage'
+        disable 'SetTextI18n'
     }
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
