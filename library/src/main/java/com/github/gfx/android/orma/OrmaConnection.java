@@ -8,6 +8,7 @@ import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -31,6 +32,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final MigrationEngine migration;
 
+    final boolean trace;
+
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         this(context, filename, schemas, new SchemaDiffMigration(context));
     }
@@ -40,7 +43,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
         super(context, filename, null, migration.getVersion());
         this.schemas = schemas;
         this.migration = migration;
+        this.trace = extractDebug(context);
         enableWal();
+    }
+
+
+    static boolean extractDebug(Context context) {
+        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) == ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -168,7 +177,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     private void execSQL(SQLiteDatabase db, String sql) {
-        if (BuildConfig.DEBUG) {
+        if (trace) {
             Log.v(TAG, sql);
         }
         db.execSQL(sql);
