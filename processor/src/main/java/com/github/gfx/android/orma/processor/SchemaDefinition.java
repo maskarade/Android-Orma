@@ -7,6 +7,7 @@ import com.squareup.javapoet.ClassName;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.TypeElement;
 
@@ -97,13 +98,7 @@ public class SchemaDefinition {
     }
 
     public List<ColumnDefinition> getColumnsWithoutAutoId() {
-        List<ColumnDefinition> list = new ArrayList<>(columns.size());
-        for (ColumnDefinition c : columns) {
-            if (!c.autoId) {
-                list.add(c);
-            }
-        }
-        return list;
+        return columns.stream().filter(c -> !c.autoId).collect(Collectors.toList());
     }
 
     public ColumnDefinition getPrimaryKey() {
