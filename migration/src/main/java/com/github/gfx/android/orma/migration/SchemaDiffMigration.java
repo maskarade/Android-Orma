@@ -34,6 +34,8 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     final int version;
 
+    final SqliteDdlBuilder builder = new SqliteDdlBuilder();
+
     public SchemaDiffMigration(Context context) {
         version = extractVersion(context);
         debug = extractDebug(context);
@@ -184,17 +186,16 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     private List<String> buildRecreateTable(CreateTable fromTable, CreateTable toTable,
             Collection<String> intersectionColumns) {
+
+        String fromTableName = fromTable.getTable().getName();
+        String toTableName = toTable.getTable().getName();
+
         List<String> statements = new ArrayList<>();
 
-        String tempTable = "__temp_" + SqliteGenerator.dequote(toTable.getTable().getName());
+        String tempTableName = "__temp_" + SqliteDdlBuilder.ensureNotQuoted(toTableName);
 
-        // create the new table
-        StringBuilder createNewTable = new StringBuilder();
-        createNewTable.append("CREATE TABLE ");
-        createNewTable.append(SqliteGenerator.quote(tempTable));
-        createNewTable.append(" (");
-        createNewTable.append(SqliteGenerator.joinBy(", ", toTable.getColumnDefinitions(),
-                new SqliteGenerator.Func1<ColumnDefinition, String>() {
+        statements.add(builder.buildCreateTable(tempTableName,
+                builder.map(toTable.getColumnDefinitions(), new SqliteDdlBuilder.Func1<ColumnDefinition, String>() {
                     @Override
                     public String call(ColumnDefinition arg) {
                         String columnSpec;
@@ -203,45 +204,13 @@ public class SchemaDiffMigration implements MigrationEngine {
                         } else {
                             columnSpec = "";
                         }
-                        return SqliteGenerator.quote(arg.getColumnName()) + ' ' + arg.getColDataType() + columnSpec;
+                        return SqliteDdlBuilder.ensureQuoted(arg.getColumnName()) + ' ' + arg.getColDataType() + columnSpec;
                     }
-                }));
-        createNewTable.append(")");
-        statements.add(createNewTable.toString());
+                })));
 
-        // insert into the new table
-        StringBuilder insertIntoNewTable = new StringBuilder();
-        insertIntoNewTable.append("INSERT INTO ");
-        insertIntoNewTable.append(SqliteGenerator.quote(tempTable));
-        insertIntoNewTable.append(" (");
-        String intersectionColumnNames = SqliteGenerator
-                .joinBy(", ", intersectionColumns, new SqliteGenerator.Func1<String, String>() {
-                    @Override
-                    public String call(String name) {
-                        return SqliteGenerator.quote(name);
-                    }
-                });
-        insertIntoNewTable.append(intersectionColumnNames);
-        insertIntoNewTable.append(") SELECT ");
-        insertIntoNewTable.append(intersectionColumnNames);
-        insertIntoNewTable.append(" FROM ");
-        insertIntoNewTable.append(SqliteGenerator.quote(fromTable.getTable().getName()));
-        statements.add(insertIntoNewTable.toString());
-
-        // drop the old table
-
-        StringBuilder dropOldTable = new StringBuilder();
-        dropOldTable.append("DROP TABLE ");
-        dropOldTable.append(SqliteGenerator.quote(toTable.getTable().getName()));
-        statements.add(dropOldTable.toString());
-
-        // rename table
-        StringBuilder alterTableRename = new StringBuilder();
-        alterTableRename.append("ALTER TABLE ");
-        alterTableRename.append(SqliteGenerator.quote(tempTable));
-        alterTableRename.append(" RENAME TO ");
-        alterTableRename.append(SqliteGenerator.quote(toTable.getTable().getName()));
-        statements.add(alterTableRename.toString());
+        statements.add(builder.buildInsertFromSelect(tempTableName, fromTableName, intersectionColumns));
+        statements.add(builder.buildDropTable(fromTableName));
+        statements.add(builder.buildRenameTable(tempTableName, toTableName));
 
         return statements;
     }
@@ -256,7 +225,7 @@ public class SchemaDiffMigration implements MigrationEngine {
 
         Matcher matcher = indexNamePattern.matcher(createIndexStatement);
         if (matcher.matches()) {
-            String indexName = SqliteGenerator.dequote(matcher.group(1));
+            String indexName = SqliteDdlBuilder.ensureNotQuoted(matcher.group(1));
             return "DROP INDEX IF EXISTS \"" + indexName + "\"";
         } else {
             return "";
@@ -283,7 +252,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<NamedDdl> schemas) {
         List<String> tableNames = new ArrayList<>();
         for (NamedDdl schema : schemas) {
-            tableNames.add(SqliteGenerator.quote(schema.getTableName()));
+            tableNames.add(SqliteDdlBuilder.ensureQuoted(schema.getTableName()));
         }
         Cursor cursor = db.rawQuery(
                 "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE tbl_name IN "
