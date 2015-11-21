@@ -36,7 +36,7 @@ android {
 dependencies {
     apt project(':processor')
     compile project(':library')
-    compile 'io.realm:realm-android:0.84.2'
+    compile 'io.realm:realm-android:0.85.0'
     apt 'com.raizlabs.android:DBFlow-Compiler:2.2.1'
     compile 'com.raizlabs.android:DBFlow-Core:2.2.1'
     compile 'com.raizlabs.android:DBFlow:2.2.1'
