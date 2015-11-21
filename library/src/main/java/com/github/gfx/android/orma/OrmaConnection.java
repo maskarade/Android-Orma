@@ -25,6 +25,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     static final String TAG = OrmaConnection.class.getSimpleName();
 
+    static final String[] countSelections = {"COUNT(*)"};
+
     final List<Schema<?>> schemas;
 
     final MigrationEngine migration;
@@ -88,8 +90,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public long count(String table, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getDatabase();
-        String[] columns = {"COUNT(*)"};
-        Cursor cursor = db.query(table, columns, whereClause, whereArgs, null, null, null);
+        Cursor cursor = db.query(table, countSelections, whereClause, whereArgs, null, null, null);
         try {
             cursor.moveToFirst();
             return cursor.getLong(0);
