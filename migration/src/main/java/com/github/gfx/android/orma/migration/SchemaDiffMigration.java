@@ -42,7 +42,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     static boolean extractDebug(Context context) {
-        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != ApplicationInfo.FLAG_DEBUGGABLE;
+        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) == ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
     static int extractVersion(Context context) {
