@@ -1,1 +1,1 @@
-include ':processor', ':annotations', ':migration',':library', ':example'
+include ':annotations', ':processor', ':migration',':library', ':example'

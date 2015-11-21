@@ -14,7 +14,6 @@ publish {
     desc = 'The Orma annotation processor'
 
     def metadata = project.rootProject.ext.metadata
-    userOrg = metadata.userOrg
     groupId = metadata.groupId
     publishVersion = metadata.version
     website = metadata.website

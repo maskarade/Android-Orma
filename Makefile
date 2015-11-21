@@ -1,7 +1,6 @@
 
-dry-run:
-	./gradlew check bintrayUpload -DdryRun=true
-
+check:
+	./gradlew clean check bintrayUpload
 
 publish:
-	./gradlew check bintrayUpload -DdryRun=false
+	./gradlew -PdryRun=false bintrayUpload
