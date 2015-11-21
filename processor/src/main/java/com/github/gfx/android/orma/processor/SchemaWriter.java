@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -98,11 +99,26 @@ public class SchemaWriter {
     }
 
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
-        CodeBlock initializer = CodeBlock.builder()
-                .add("new $T($S, $T.class, $L, $L, $L, $L, $L, $L)",
-                        c.getColumnDefType(), c.columnName, c.getRawType(),
-                        c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
-                .build();
+        TypeName type = c.getType();
+
+        CodeBlock initializer;
+        if (type instanceof ParameterizedTypeName) {
+            initializer = CodeBlock.builder()
+                    .add("new $T($S, $T.getType(new $T<$T>(){}), $L, $L, $L, $L, $L, $L)",
+                            c.getColumnDefType(), c.columnName,
+                            Types.ParameterizedTypes, Types.TypeHolder, type,
+                            c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
+                    .build();
+
+        } else {
+            initializer = CodeBlock.builder()
+                    .add("new $T($S, $T.class, $L, $L, $L, $L, $L, $L)",
+                            c.getColumnDefType(), c.columnName,
+                            type,
+                            c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
+                    .build();
+        }
+
         return FieldSpec.builder(c.getColumnDefType(), c.name)
                 .addModifiers(publicStaticFinal)
                 .initializer(initializer)
@@ -246,22 +262,13 @@ public class SchemaWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("serializeModelToContentValues")
-                        .addAnnotations(overrideAndNonNull)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.ContentValues)
-                        .addParameter(
-                                ParameterSpec.builder(schema.getModelClassName(), "model")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                                        .build())
-                        .addCode(buildSerializeModelToContentValues())
-                        .build()
-        );
-
-        methodSpecs.add(
                 MethodSpec.methodBuilder("bindArgs")
                         .addModifiers(Modifier.PUBLIC)
                         .returns(TypeName.VOID)
+                        .addParameter(
+                                ParameterSpec.builder(Types.OrmaConnection, "conn")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
                         .addParameter(
                                 ParameterSpec.builder(Types.SQLiteStatement, "statement")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
@@ -315,27 +322,6 @@ public class SchemaWriter {
         return methodSpecs;
     }
 
-    private CodeBlock buildSerializeModelToContentValues() {
-        CodeBlock.Builder builder = CodeBlock.builder();
-
-        builder.addStatement("$T contents = new $T()", Types.ContentValues, Types.ContentValues);
-
-        schema.getColumnsWithoutAutoId().forEach(c -> {
-            RelationDefinition r = c.getRelation();
-            if (r == null) {
-                builder.addStatement("contents.put($S, model.$L)", c.columnName, c.getColumnGetterExpr());
-            } else if (r.relationType.equals(Types.SingleRelation)) {
-                builder.addStatement("contents.put($S, model.$L.getId())", c.columnName, c.getColumnGetterExpr());
-            } else {
-                throw new UnsupportedOperationException(r.relationType + " is not supported");
-            }
-        });
-
-        builder.addStatement("return contents");
-
-        return builder.build();
-    }
-
     // http://developer.android.com/intl/ja/reference/android/database/sqlite/SQLiteStatement.html
     private CodeBlock buildBindArgs() {
         CodeBlock.Builder builder = CodeBlock.builder();
@@ -364,7 +350,8 @@ public class SchemaWriter {
             } else if (r != null && r.relationType.equals(Types.SingleRelation)) {
                 builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.getColumnGetterExpr());
             } else {
-                builder.addStatement("statement.bindString($L, model.$L.toString())", n, c.getColumnGetterExpr());
+                builder.addStatement("statement.bindString($L, conn.getTypeAdapters().serialize($T.$L.type, model.$L))",
+                        n, schema.getSchemaClassName(), c.name, c.getColumnGetterExpr());
             }
 
             if (nullable) {
@@ -386,13 +373,24 @@ public class SchemaWriter {
             ColumnDefinition c = columns.get(i);
             RelationDefinition r = c.getRelation();
             if (r == null) {
+                CodeBlock.Builder getCursorExpr = CodeBlock.builder();
+
+                if (Types.needsTypeAdapter(c.type)) {
+                    getCursorExpr.add("conn.getTypeAdapters().deserialize($T.$L.type, cursor.$L($L))",
+                            schema.getSchemaClassName(), c.name,
+                            cursorGetter(c), i);
+                } else {
+                    getCursorExpr.add("cursor.$L($L)",
+                            cursorGetter(c), i);
+                }
+
                 if (c.setter != null) {
-                    builder.addStatement("model.$L(cursor.$L($L))",
-                            c.setter.getSimpleName(), cursorGetter(c), i);
+                    builder.addStatement("model.$L($L)",
+                            c.setter.getSimpleName(), getCursorExpr.build());
 
                 } else {
-                    builder.addStatement("model.$L = cursor.$L($L)",
-                            c.name, cursorGetter(c), i);
+                    builder.addStatement("model.$L = $L",
+                            c.name, getCursorExpr.build());
                 }
             } else { // SingleRelation
                 if (c.setter != null) {
@@ -423,10 +421,10 @@ public class SchemaWriter {
             return "get" + s.substring(0, 1).toUpperCase() + s.substring(1);
         } else if (type.equals(Types.String)) {
             return "getString";
-        } else  if (type.equals(Types.ByteArray)){
+        } else if (type.equals(Types.ByteArray)) {
             return "getBlob";
         } else {
-            throw new ProcessingException("FIXME: " + type + " is not yet supported as a column type", column.element);
+            return "getString"; // handled by type adapters
         }
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
 
-    protected final OrmaConnection connection;
+    protected final OrmaConnection conn;
 
     protected final Schema<T> schema;
 
@@ -23,8 +23,8 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
     @Nullable
     protected List<String> whereArgs;
 
-    public OrmaConditionBase(OrmaConnection connection, Schema<T> schema) {
-        this.connection = connection;
+    public OrmaConditionBase(OrmaConnection conn, Schema<T> schema) {
+        this.conn = conn;
         this.schema = schema;
     }
 

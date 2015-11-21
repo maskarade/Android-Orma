@@ -12,6 +12,6 @@ public class Deleter<T, C extends Deleter> extends OrmaConditionBase<T, C> {
      * @return Number of rows updated
      */
     public int execute() {
-        return connection.delete(schema.getTableName(), getWhereClause(), getWhereArgs());
+        return conn.delete(schema.getTableName(), getWhereClause(), getWhereArgs());
     }
 }

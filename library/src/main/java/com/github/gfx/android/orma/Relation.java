@@ -78,12 +78,12 @@ public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<
     }
 
     public long count() {
-        return connection.count(schema.getTableName(), getWhereClause(), getWhereArgs());
+        return conn.count(schema.getTableName(), getWhereClause(), getWhereArgs());
     }
 
     @Nullable
     public T valueOrNull() {
-        return connection
+        return conn
                 .querySingle(schema, schema.getEscapedColumnNames(), getWhereClause(), getWhereArgs(), groupBy, having,
                         orderBy);
     }
@@ -103,13 +103,13 @@ public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<
     public List<T> toList() {
         ArrayList<T> list = new ArrayList<>();
 
-        Cursor cursor = connection.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
+        Cursor cursor = conn.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
                 getWhereArgs(), groupBy, having, orderBy, getLimitClause());
 
         if (cursor.moveToFirst()) {
             list.ensureCapacity(cursor.getCount());
             do {
-                list.add(schema.createModelFromCursor(connection, cursor));
+                list.add(schema.createModelFromCursor(conn, cursor));
             } while (cursor.moveToNext());
         }
         cursor.close();

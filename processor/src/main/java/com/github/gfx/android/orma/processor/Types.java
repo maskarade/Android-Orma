@@ -14,8 +14,6 @@ public class Types {
 
     public static final String ormaPackageName = "com.github.gfx.android.orma";
 
-    public static final String ormaMigrationPackageName = ormaPackageName + ".migration";
-
     // Android standard types
     public static final ClassName String = ClassName.get(String.class);
 
@@ -72,7 +70,18 @@ public class Types {
 
     public static final ClassName ModelBuilder = ClassName.get(ormaPackageName, "ModelBuilder");
 
-    public static final ClassName MigrationEngine = ClassName.get(ormaMigrationPackageName, "MigrationEngine");
+    public static final ClassName MigrationEngine = ClassName.get(ormaPackageName + ".migration", "MigrationEngine");
+
+    public static final ClassName ParameterizedTypes = ClassName.get(ormaPackageName + ".internal", "ParameterizedTypes");
+
+    public static final ClassName TypeHolder = ClassName
+            .get(ormaPackageName + ".internal", "ParameterizedTypes", "TypeHolder");
+
+    public static final ClassName TypeAdapter = ClassName.get(ormaPackageName + ".adapter", "TypeAdapter");
+
+    public static final ParameterizedTypeName WildcardTypeAdapter = ParameterizedTypeName
+            .get(TypeAdapter, WildcardTypeName.subtypeOf(TypeName.OBJECT));
+
 
     public static ParameterizedTypeName getSchema(TypeName modelType) {
         return ParameterizedTypeName.get(Schema, modelType);
@@ -126,5 +135,9 @@ public class Types {
                 || type.equals(TypeName.DOUBLE);
     }
 
+    public static boolean needsTypeAdapter(TypeName type) {
+        return type instanceof ParameterizedTypeName
+                || !(type.isPrimitive() || type.equals(Types.String) || type.equals(Types.ByteArray));
+    }
 
 }

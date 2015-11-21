@@ -2,9 +2,11 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.test.model.ModelWithBlob;
 import com.github.gfx.android.orma.test.model.ModelWithCollation;
 import com.github.gfx.android.orma.test.model.ModelWithDefaults;
+import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.Before;
@@ -15,13 +17,17 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import android.content.Context;
+import android.net.Uri;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
-public class ColumnSpecTest {
+public class ModelSpecTest {
 
     OrmaDatabase db;
 
@@ -31,8 +37,8 @@ public class ColumnSpecTest {
 
     @Before
     public void setUp() throws Exception {
-        db = new OrmaDatabase(getContext(), "test.db");
-        db.getConnection().resetDatabase();
+        db = new OrmaDatabase(getContext(), null);
+        db.addTypeAdapters(TypeAdapterRegistry.defaultTypeAdapters());
     }
 
     @Test
@@ -79,11 +85,34 @@ public class ColumnSpecTest {
             @Override
             public ModelWithBlob build() {
                 ModelWithBlob model = new ModelWithBlob();
-                model.blob = new byte[] {0, 1, 2, 3};
+                model.blob = new byte[]{0, 1, 2, 3};
                 return model;
             }
         });
 
         assertThat(model.blob, is(new byte[]{0, 1, 2, 3}));
+    }
+
+
+    @Test
+    public void testObjectMapping() throws Exception {
+        ModelWithTypeAdapters model = db.createModelWithTypeAdapters(new ModelBuilder<ModelWithTypeAdapters>() {
+            @Override
+            public ModelWithTypeAdapters build() {
+                ModelWithTypeAdapters model = new ModelWithTypeAdapters();
+                model.list = Arrays.asList("foo", "bar", "baz");
+                model.set = new HashSet<String>() {{
+                    add("foo");
+                    add("bar");
+                    add("baz");
+                }};
+                model.uri = Uri.parse("http://example.com");
+                return model;
+            }
+        });
+
+        assertThat(model.list, contains("foo", "bar", "baz"));
+        assertThat(model.set, containsInAnyOrder("foo", "bar", "baz"));
+        assertThat(model.uri, is(Uri.parse("http://example.com")));
     }
 }
