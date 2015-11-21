@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.processor;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -44,15 +45,25 @@ public class UpdaterWriter {
 
         methodSpecs.add(
                 MethodSpec.constructorBuilder()
-                        .addParameter(Types.OrmaConnection, "connection")
+                        .addParameter(Types.OrmaConnection, "conn")
                         .addParameter(schema.getSchemaClassName(), "schema")
-                        .addStatement("super(connection, schema)")
+                        .addStatement("super(conn, schema)")
                         .build()
         );
 
         schema.getColumnsWithoutAutoId().forEach(column -> {
             RelationDefinition r = column.getRelation();
             if (r == null) {
+                CodeBlock.Builder valueExpr = CodeBlock.builder();
+
+                if (Types.needsTypeAdapter(column.type)) {
+                    valueExpr.add("conn.getTypeAdapters().serialize($T.$L.type, value)",
+                            schema.getSchemaClassName(), column.name);
+                }
+                else {
+                    valueExpr.add("value");
+                }
+
                 methodSpecs.add(
                         MethodSpec.methodBuilder(column.name)
                                 .addModifiers(Modifier.PUBLIC)
@@ -61,7 +72,7 @@ public class UpdaterWriter {
                                         ParameterSpec.builder(column.getType(), "value")
                                                 .build()
                                 )
-                                .addStatement("contents.put($S, value)", column.columnName)
+                                .addStatement("contents.put($S, $L)", column.columnName, valueExpr.build())
                                 .addStatement("return this")
                                 .build()
                 );

@@ -1,9 +1,11 @@
 package com.github.gfx.android.orma.processor;
 
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -128,6 +130,19 @@ public class DatabaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.OrmaConnection)
                         .addStatement("return $L", connection)
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("addTypeAdapters")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(TypeName.VOID)
+                        .addParameter(
+                                ParameterSpec.builder(ArrayTypeName.of(Types.WildcardTypeAdapter), "adapters")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .varargs(true)
+                        .addStatement("$L.addTypeAdapters(adapters)", connection)
                         .build()
         );
 
@@ -263,7 +278,6 @@ public class DatabaseWriter {
                 .addStatement("this(new $T(context, name, $L, migration))", Types.OrmaConnection, SCHEMAS)
                 .addJavadoc("Create a database context that handles $L.\n", getListOfModelClassesForJavadoc())
                 .build());
-
 
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)

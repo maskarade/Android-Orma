@@ -9,8 +9,8 @@ public class Updater<T, C extends Updater> extends OrmaConditionBase<T, C> {
 
     final protected ContentValues contents = new ContentValues();
 
-    public Updater(OrmaConnection connection, Schema<T> schema) {
-        super(connection, schema);
+    public Updater(OrmaConnection conn, Schema<T> schema) {
+        super(conn, schema);
     }
 
     @NonNull
@@ -19,6 +19,6 @@ public class Updater<T, C extends Updater> extends OrmaConditionBase<T, C> {
     }
 
     public int execute() {
-        return connection.update(schema.getTableName(), contents, getWhereClause(), getWhereArgs());
+        return conn.update(schema.getTableName(), contents, getWhereClause(), getWhereArgs());
     }
 }

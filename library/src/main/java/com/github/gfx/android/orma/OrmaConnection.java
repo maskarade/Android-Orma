@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.adapter.TypeAdapter;
+import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.NamedDdl;
@@ -34,6 +36,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean trace;
 
+    final TypeAdapterRegistry typeAdapters = new TypeAdapterRegistry();
+
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
         this(context, filename, schemas, new SchemaDiffMigration(context));
     }
@@ -46,7 +50,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
         this.trace = extractDebug(context);
         enableWal();
     }
-
 
     static boolean extractDebug(Context context) {
         return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) == ApplicationInfo.FLAG_DEBUGGABLE;
@@ -63,6 +66,16 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return getWritableDatabase();
     }
 
+    public TypeAdapterRegistry getTypeAdapters() {
+        return typeAdapters;
+    }
+
+    public void addTypeAdapters(TypeAdapter<?> ...adapters) {
+        for (TypeAdapter<?> typeAdapter : adapters) {
+            typeAdapters.add(typeAdapter);
+        }
+    }
+
     public <T> T createModel(Schema<T> schema, ModelBuilder<T> builder) {
         long id = insert(schema, builder.build());
         ColumnDef<?> primaryKey = schema.getPrimaryKey();
@@ -75,7 +88,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public <T> Inserter<T> prepareInsert(Schema<T> schema) {
         SQLiteDatabase db = getDatabase();
         SQLiteStatement statement = db.compileStatement(schema.getInsertStatement());
-        return new Inserter<>(schema, statement);
+        return new Inserter<>(this, schema, statement);
     }
 
     public <T> long insert(Schema<T> schema, T model) {
