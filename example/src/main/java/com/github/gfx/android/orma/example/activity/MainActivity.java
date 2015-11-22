@@ -4,7 +4,9 @@ import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
+import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -18,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
@@ -57,7 +60,16 @@ public class MainActivity extends AppCompatActivity
         activityMain.appBarMain.contentMain.textInfo.setText(
                 "This is an example app for Orma v" + BuildConfig.VERSION_NAME + ".");
 
-        orma = new OrmaDatabase(this, "main.db");
+        final ArrayAdapter<String> logsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        activityMain.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
+
+        orma = new OrmaDatabase(this, "main.db", new SchemaDiffMigration(this) {
+            @Override
+            public void execSQL(SQLiteDatabase db, String statement) {
+                logsAdapter.add(statement);
+                super.execSQL(db, statement);
+            }
+        });
         orma.deleteFromTodo().execute();
     }
 

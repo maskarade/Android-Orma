@@ -7,7 +7,7 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
@@ -21,8 +21,31 @@
                 android:id="@+id/textInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                tools:text="Hello World!"
+                tools:text="This is an example for Orma"
+                />
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:text="The following list shows how SchemaDiffMigration works.\nChange Todo.java to invoke migration."
+                />
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="8dp"
+                android:background="@color/colorPrimaryDark"
+                android:alpha="0.6"
+                />
+
+        <ListView
+                android:id="@+id/listLogs"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 />
     </LinearLayout>
 </layout>
