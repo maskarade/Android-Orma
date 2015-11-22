@@ -44,6 +44,8 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
         for (Object arg : args) {
             if (arg == null) {
                 whereArgs.add(null);
+            } else if (arg instanceof Boolean) {
+                whereArgs.add((Boolean) arg ? "1" : "0");
             } else {
                 whereArgs.add(arg.toString());
             }

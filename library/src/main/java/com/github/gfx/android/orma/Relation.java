@@ -118,7 +118,6 @@ public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<
         return list;
     }
 
-    @NonNull
     public void forEach(@NonNull Action1<T> action) {
         Cursor cursor = conn.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
                 getWhereArgs(), groupBy, having, orderBy, getLimitClause());

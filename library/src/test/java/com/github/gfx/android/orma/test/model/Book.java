@@ -21,5 +21,8 @@ public class Book {
     public String content;
 
     @Column
+    public boolean inPrint;
+
+    @Column
     public SingleRelation<Publisher> publisher;
 }

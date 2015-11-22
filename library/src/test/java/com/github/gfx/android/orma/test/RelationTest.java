@@ -58,6 +58,7 @@ public class RelationTest {
                 Book book = new Book();
                 book.title = "today";
                 book.content = "milk, banana";
+                book.inPrint = true;
                 book.publisher = SingleRelation.id(publisher.id);
                 return book;
             }
@@ -69,6 +70,7 @@ public class RelationTest {
                 Book book = new Book();
                 book.title = "friday";
                 book.content = "apple";
+                book.inPrint = false;
                 book.publisher = SingleRelation.id(publisher.id);
                 return book;
             }
@@ -142,6 +144,19 @@ public class RelationTest {
                 .where("title is ?", "friday")
                 .toList();
         assertThat(books, hasSize(2));
+    }
+
+    @Test
+    public void whereWithBoolean() throws Exception {
+        List<Book> books = db.selectFromBook().where("inPrint = ?", true).toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
+
+        books = db.selectFromBook().where("inPrint = ?", false).toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("friday"));
+        assertThat(books.get(0).content, is("apple"));
     }
 
     @Test
