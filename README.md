@@ -2,9 +2,11 @@
 
 Orma is a lightning-fast ORM for Android, generating DAO at compile time with annotation processing.
 
-Model classes that are handled by Orma has no restriction: you can define just a POJO class with Orma annotations.
+Model classes that are handled by Orma has no restriction:
+you can define just a POJO class with Orma annotations, create they the `new` operator,
+and pass them to another threads.
 
-Note that this is an **alpha** software and the interface will change until a stable version is released.
+Note that this is an **alpha** software and the interface will change until v1.0.0.
 
 # Install
 
@@ -150,21 +152,34 @@ If you use type adapters, you can add them to `OrmaDatabase`:
 ```java
 class FooAdapter extends AbstractTypeAdapter<Foo> {
     @Override
-    public String serialize(Foo source) {
+    @NonNull
+    public String serialize(@NonNull Foo source) {
         return ... serialize ...;
     }
 
     @Override
-    public Foo deserialize(String serialized) {
+    @NonNull
+    public Foo deserialize(@NonNull String serialized) {
         return ... deserialize ...;
     }
 }
 
-
 OrmaDatabase orma = ...;
-orma.addTypeAdapters(TypeAdapterRegistry.defaultTypeAdapters()); // add defaults
+orma.addTypeAdapters(TypeAdapterRegistry.defaultTypeAdapters()); // add built-ins
 orma.addTypeAdapters(new FooAdapter());
 ```
+
+## Default Type Adapters
+
+There are a few built-in type adapter provided by default:
+
+* `StringListAdapter` for `List<String>`
+* `StringSetAdapter` for `Set<String>`
+* `DateAdapter` for `Date`
+* `UriAdapter` for `Uri`
+
+Currently, you should explicitly register with
+`orma.addTypeAdapters(TypeAdapterRegistry.defaultTypeAdapters()`.
 
 # Example
 
@@ -176,7 +191,6 @@ See [example/](example/) for details
 
 ```shell
 ./gradlew bumpMajor # or bumpMinor / bumpPatch
-make # builds modules and runs tests
 make publish # does release engineering
 ```
 
