@@ -129,7 +129,6 @@ public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<
         cursor.close();
     }
 
-
     @NonNull
     public Observable<T> observable() {
         return Observable.create(new Observable.OnSubscribe<T>() {
