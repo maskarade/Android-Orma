@@ -10,9 +10,9 @@ Note that this is an **alpha** software and the interface will change until a st
 
 ```groovy
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:0.4.0'
-    provided 'com.github.gfx.android.orma:orma-annotations:0.4.0'
-    compile 'com.github.gfx.android.orma:orma:0.4.0'
+    apt 'com.github.gfx.android.orma:orma-processor:0.5.0'
+    provided 'com.github.gfx.android.orma:orma-annotations:0.5.0'
+    compile 'com.github.gfx.android.orma:orma:0.5.0'
 }
 ```
 
