@@ -23,7 +23,6 @@ public class RelationWriter {
 
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getRelationClassName().simpleName());
-        classBuilder.addAnnotation(Specs.buildGeneratedAnnotationSpec());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getRelation(schema.getModelClassName(), schema.getRelationClassName()));
 

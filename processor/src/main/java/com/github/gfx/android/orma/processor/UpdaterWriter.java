@@ -25,7 +25,6 @@ public class UpdaterWriter {
 
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getUpdaterClassName().simpleName());
-        classBuilder.addAnnotation(Specs.buildGeneratedAnnotationSpec());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getUpdater(schema.getModelClassName(), schema.getUpdaterClassName()));
 

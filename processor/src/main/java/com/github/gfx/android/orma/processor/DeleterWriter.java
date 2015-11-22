@@ -23,7 +23,6 @@ public class DeleterWriter {
 
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getDeleterClassName().simpleName());
-        classBuilder.addAnnotation(Specs.buildGeneratedAnnotationSpec());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getDeleter(schema.getModelClassName(), schema.getDeleterClassName()));
 

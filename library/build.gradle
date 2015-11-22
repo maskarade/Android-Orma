@@ -36,7 +36,6 @@ android {
 dependencies {
     compile project(':migration')
     compile project(':annotations')
-    provided 'javax.annotation:jsr250-api:1.0'
     compile 'io.reactivex:rxjava:1.0.16'
     compile 'com.android.support:support-annotations:23.1.1'
     testApt project(':processor')

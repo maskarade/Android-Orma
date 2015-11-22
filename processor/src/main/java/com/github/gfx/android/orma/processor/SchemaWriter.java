@@ -48,7 +48,6 @@ public class SchemaWriter {
 
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getSchemaClassName().simpleName());
-        classBuilder.addAnnotation(Specs.buildGeneratedAnnotationSpec());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.addSuperinterface(Types.getSchema(schema.getModelClassName()));
 
