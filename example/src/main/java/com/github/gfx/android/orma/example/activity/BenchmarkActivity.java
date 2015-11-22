@@ -10,6 +10,7 @@ import com.github.gfx.android.orma.example.dbflow.FlowTodo;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.realm.RealmTodo;
+import com.raizlabs.android.dbflow.list.FlowCursorList;
 import com.raizlabs.android.dbflow.runtime.TransactionManager;
 import com.raizlabs.android.dbflow.sql.language.Delete;
 import com.raizlabs.android.dbflow.sql.language.Select;
@@ -24,8 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -238,9 +239,17 @@ public class BenchmarkActivity extends AppCompatActivity {
             @Override
             public void call(SingleSubscriber<? super Result> singleSubscriber) {
                 long t0 = System.currentTimeMillis();
-                List<Todo> list = orma.selectFromTodo().toList();
-                Log.d(TAG, "Orma/selectAll count: " + list.size());
-                singleSubscriber.onSuccess(new Result("Orma/selectAll", System.currentTimeMillis() - t0));
+                final AtomicInteger count = new AtomicInteger();
+
+                orma.selectFromTodo().forEach(new Action1<Todo>() {
+                    @Override
+                    public void call(Todo todo) {
+                        count.incrementAndGet();
+                    }
+                });
+
+                Log.d(TAG, "Orma/selectAll count: " + count);
+                singleSubscriber.onSuccess(new Result("Orma/forEachAll", System.currentTimeMillis() - t0));
             }
         });
     }
@@ -250,9 +259,13 @@ public class BenchmarkActivity extends AppCompatActivity {
             @Override
             public void call(SingleSubscriber<? super Result> singleSubscriber) {
                 long t0 = System.currentTimeMillis();
-                List<RealmTodo> list = realm.allObjects(RealmTodo.class);
-                Log.d(TAG, "Realm/selectAll count: " + list.size());
-                singleSubscriber.onSuccess(new Result("Realm/selectAll", System.currentTimeMillis() - t0));
+                AtomicInteger count = new AtomicInteger();
+
+                for (@SuppressWarnings("unused") RealmTodo todo : realm.allObjects(RealmTodo.class)) {
+                    count.incrementAndGet();
+                }
+                Log.d(TAG, "Realm/selectAll count: " + count);
+                singleSubscriber.onSuccess(new Result("Realm/forEachAll", System.currentTimeMillis() - t0));
             }
         });
     }
@@ -262,10 +275,16 @@ public class BenchmarkActivity extends AppCompatActivity {
             @Override
             public void call(SingleSubscriber<? super Result> singleSubscriber) {
                 long t0 = System.currentTimeMillis();
+                AtomicInteger count = new AtomicInteger();
 
-                List<FlowTodo> list = new Select().from(FlowTodo.class).queryList();
-                Log.d(TAG, "DBFlow/selectAll count: " + list.size());
-                singleSubscriber.onSuccess(new Result("DBFlow/selectAll", System.currentTimeMillis() - t0));
+                FlowCursorList<FlowTodo> list = new Select().from(FlowTodo.class).queryCursorList();
+                for (int i = 0, size = list.getCount(); i < size; i++) {
+                    list.getItem(i);
+                    count.incrementAndGet();
+                }
+
+                Log.d(TAG, "DBFlow/selectAll count: " + count);
+                singleSubscriber.onSuccess(new Result("DBFlow/forEachAll", System.currentTimeMillis() - t0));
             }
         });
     }
