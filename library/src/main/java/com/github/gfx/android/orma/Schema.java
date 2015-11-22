@@ -3,7 +3,6 @@ package com.github.gfx.android.orma;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ public interface Schema<T> {
     @NonNull
     String getTableName();
 
-    @Nullable
+    @NonNull
     ColumnDef<?> getPrimaryKey();
 
     @NonNull

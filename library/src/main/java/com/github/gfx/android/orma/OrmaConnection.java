@@ -79,7 +79,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public <T> T createModel(Schema<T> schema, ModelBuilder<T> builder) {
         long id = insert(schema, builder.build());
         ColumnDef<?> primaryKey = schema.getPrimaryKey();
-        assert primaryKey != null;
         String whereClause = '"' + primaryKey.name + '"' + " = ?";
         String[] whereArgs = {String.valueOf(id)};
         return querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null);

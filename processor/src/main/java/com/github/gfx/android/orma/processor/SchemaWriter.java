@@ -72,6 +72,13 @@ public class SchemaWriter {
             }
         });
 
+        if (primaryKey == null) {
+            // Even if primary key is omitted, "_rowid_" is always available.
+            // (WITHOUT ROWID is not supported by Orma)
+            primaryKey = buildRowIdColumnFieldSpec();
+            fieldSpecs.add(primaryKey);
+        }
+
         fieldSpecs.addAll(columns);
 
         fieldSpecs.add(
@@ -124,6 +131,26 @@ public class SchemaWriter {
                 .initializer(initializer)
                 .build();
     }
+
+    public FieldSpec buildRowIdColumnFieldSpec() {
+        String name = "_rowid_";
+        TypeName columnDefType = ParameterizedTypeName.get(Types.ColumnDef, TypeName.LONG.box());
+
+        CodeBlock initializer;
+        initializer = CodeBlock.builder()
+                .add("new $T($S, $T.class, $L, $L, $L, $L, $L, $L)",
+                        columnDefType, name,
+                        TypeName.LONG,
+                        false /* nullable */, true /* primary key */, false /* autoincrement */, true /* autoId */, false,
+                        false)
+                .build();
+
+        return FieldSpec.builder(columnDefType, name)
+                .addModifiers(publicStaticFinal)
+                .initializer(initializer)
+                .build();
+    }
+
 
     public CodeBlock buildColumnsInitializer(List<FieldSpec> columns) {
         CodeBlock.Builder builder = CodeBlock.builder();
@@ -187,25 +214,14 @@ public class SchemaWriter {
                         .build()
         );
 
-        if (primaryKey != null) {
-            methodSpecs.add(
-                    MethodSpec.methodBuilder("getPrimaryKey")
-                            .addAnnotations(overrideAndNonNull)
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(Types.WildcardColumnDef)
-                            .addStatement("return $N", primaryKey)
-                            .build()
-            );
-        } else {
-            methodSpecs.add(
-                    MethodSpec.methodBuilder("getPrimaryKey")
-                            .addAnnotations(overrideAndNullable)
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(Types.WildcardColumnDef)
-                            .addStatement("return null")
-                            .build()
-            );
-        }
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getPrimaryKey")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.WildcardColumnDef)
+                        .addStatement("return $N", primaryKey)
+                        .build()
+        );
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getColumns")

@@ -161,20 +161,20 @@ public class DatabaseWriter {
             String simpleModelName = schema.getModelClassName().simpleName();
             String schemaInstance = "schema" + simpleModelName;
 
-            if (schema.getPrimaryKey() != null) {
-                methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
-                        .addJavadoc("Creates and inserts one built by {@code Modelbuilder<T>}.\n")
-                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(schema.getModelClassName())
-                        .addParameter(
-                                ParameterSpec.builder(Types.getModelBuilder(schema.getModelClassName()), "builder")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                                        .build()
-                        )
-                        .addStatement("return $L.createModel($L, builder)", connection, schemaInstance)
-                        .build());
-            }
+            methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
+                    .addJavadoc(
+                            "Creates and inserts a model built by {@code Modelbuilder<T>}.\n"
+                            + "The return value has the primary key\n")
+                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(schema.getModelClassName())
+                    .addParameter(
+                            ParameterSpec.builder(Types.getModelBuilder(schema.getModelClassName()), "builder")
+                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .build()
+                    )
+                    .addStatement("return $L.createModel($L, builder)", connection, schemaInstance)
+                    .build());
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("selectFrom" + simpleModelName)
