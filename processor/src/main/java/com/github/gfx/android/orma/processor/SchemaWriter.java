@@ -354,8 +354,9 @@ public class SchemaWriter {
                 builder.beginControlFlow("if (model.$L != null)", c.name);
             }
 
-            // TODO: support type adapters
-            if (Types.looksLikeIntegerType(type) || type.equals(TypeName.BOOLEAN)) {
+            if (type.equals(TypeName.BOOLEAN)) {
+                builder.addStatement("statement.bindLong($L, model.$L ? 1 : 0)", n, c.getColumnGetterExpr());
+            } else if (Types.looksLikeIntegerType(type)) {
                 builder.addStatement("statement.bindLong($L, model.$L)", n, c.getColumnGetterExpr());
             } else if (Types.looksLikeFloatType(type)) {
                 builder.addStatement("statement.bindDouble($L, model.$L)", n, c.getColumnGetterExpr());
@@ -392,12 +393,12 @@ public class SchemaWriter {
                 CodeBlock.Builder getCursorExpr = CodeBlock.builder();
 
                 if (Types.needsTypeAdapter(c.type)) {
-                    getCursorExpr.add("conn.getTypeAdapters().deserialize($T.$L.type, cursor.$L($L))",
+                    getCursorExpr.add("conn.getTypeAdapters().deserialize($T.$L.type, $L)",
                             schema.getSchemaClassName(), c.name,
-                            cursorGetter(c), i);
+                            cursorGetter(c, i));
                 } else {
-                    getCursorExpr.add("cursor.$L($L)",
-                            cursorGetter(c), i);
+                    getCursorExpr.add("$L",
+                            cursorGetter(c, i));
                 }
 
                 if (c.setter != null) {
@@ -430,17 +431,21 @@ public class SchemaWriter {
         return builder.build();
     }
 
-    private String cursorGetter(ColumnDefinition column) {
+    private String cursorGetter(ColumnDefinition column, int position) {
         TypeName type = column.getType();
-        if (type.isPrimitive()) {
+        if (type.equals(TypeName.BOOLEAN)) {
+            return "cursor.getInt(" + position + ") != 0";
+        } else if (type.equals(TypeName.BYTE)) {
+            return "(byte)cursor.getShort(" + position + ")";
+        } else if (type.isPrimitive()) {
             String s = type.toString();
-            return "get" + s.substring(0, 1).toUpperCase() + s.substring(1);
+            return "cursor.get" + s.substring(0, 1).toUpperCase() + s.substring(1) + "(" + position + ")";
         } else if (type.equals(Types.String)) {
-            return "getString";
+            return "cursor.getString(" + position + ")";
         } else if (type.equals(Types.ByteArray)) {
-            return "getBlob";
+            return "cursor.getBlob(" + position + ")";
         } else {
-            return "getString"; // handled by type adapters
+            return "cursor.getString(" + position + ")"; // handled by type adapters
         }
     }
 }
