@@ -28,17 +28,24 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
         this.schema = schema;
     }
 
+
+    /**
+     * Builds general `where` clause with arguments.
+     * e.g. {@code where("title = ? OR title = ?", a, b)}
+     * @param conditions SQL's WHERE conditions.
+     * @param args Arguments bound to the {@param conditions}.
+     */
     @SuppressWarnings("unchecked")
-    public C where(@NonNull String clause, @NonNull Object... args) {
+    public C where(@NonNull String conditions, @NonNull Object... args) {
         if (whereClause == null) {
-            whereClause = new StringBuilder(clause.length() + 2);
+            whereClause = new StringBuilder(conditions.length() + 2);
             whereArgs = new ArrayList<>(args.length);
         } else {
             whereClause.append(whereConjunction);
         }
 
         whereClause.append('(');
-        whereClause.append(clause);
+        whereClause.append(conditions);
         whereClause.append(')');
 
         for (Object arg : args) {
