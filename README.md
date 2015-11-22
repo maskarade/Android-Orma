@@ -1,12 +1,25 @@
 # Orma for Android [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/_latestVersion)
 
-Orma is a lightning-fast ORM for Android, generating DAO at compile time with annotation processing.
+* Note that this is an **alpha** software and the interface will change until v1.0.0.
 
-Model classes that are handled by Orma has no restriction:
-you can define just a POJO class with Orma annotations, create they the `new` operator,
-and pass them to another threads.
+Orma is a lightning-fast ORM for Android, generating helper classes at compile time with annotation processing.
 
-Note that this is an **alpha** software and the interface will change until v1.0.0.
+There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I have to add another?
+
+The answer is that I need ORM that have the following features:
+
+* Fast
+* Model classes must have no restriction
+  * They might be POJO, Parcelable and/or even models that are managed by another ORM
+  * They should be passed to another thread
+* Database handles must be instances
+  * Not a singleton nor static-method based
+* Automatic migration
+  * For what can be detected logically
+  * i.e. simple `add column` and `drop column`
+
+They are just what Orma has. This is as fast as Realm, its models have no restriction, database handle is
+not a singleton, and has `SchemaDiffMigration`, which detects `add column` and `drop column` automatically.
 
 # Install
 
@@ -187,17 +200,22 @@ There is an example app to show how to use Orma.
 
 See [example/](example/) for details
 
+# Support
+
+* Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
+* Feel free to ask for questions to the author [@_\_\gfx_\_\](https://twitter.com/__gfx__)
+
+# Licenses in Runtime Dependencies
+
+* https://github.com/ReactiveX/RxJava - Apache Software License 2.0
+* https://github.com/JSQLParser/JSqlParser - LGPL v2.1 and Apache Software License 2.0 (dual licenses)
+
 # Release Engineering
 
 ```shell
 ./gradlew bumpMajor # or bumpMinor / bumpPatch
 make publish # does release engineering
 ```
-
-# Licenses in Runtime Dependencies
-
-* https://github.com/ReactiveX/RxJava - Apache Software License 2.0
-* https://github.com/JSQLParser/JSqlParser - LGPL v2.1 and Apache Software License 2.0 (dual licenses)
 
 # Author
 
