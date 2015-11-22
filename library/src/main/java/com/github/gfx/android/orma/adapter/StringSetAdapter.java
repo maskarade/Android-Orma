@@ -3,14 +3,16 @@ package com.github.gfx.android.orma.adapter;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.support.annotation.NonNull;
+
 import java.util.HashSet;
 import java.util.Set;
 
 public class StringSetAdapter extends AbstractTypeAdapter<Set<String>> {
 
-    @SuppressWarnings("unchecked")
+    @NonNull
     @Override
-    public String serialize(Set<String> source) {
+    public String serialize(@NonNull Set<String> source) {
         JSONArray array = new JSONArray();
         for (String s : source) {
             array.put(s);
@@ -18,9 +20,9 @@ public class StringSetAdapter extends AbstractTypeAdapter<Set<String>> {
         return array.toString();
     }
 
-    @SuppressWarnings("unchecked")
+    @NonNull
     @Override
-    public Set<String> deserialize(String serialized) {
+    public Set<String> deserialize(@NonNull String serialized) {
         JSONArray jsonArray;
         try {
             jsonArray = new JSONArray(serialized);

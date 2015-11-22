@@ -20,6 +20,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -93,9 +94,10 @@ public class ModelSpecTest {
         assertThat(model.blob, is(new byte[]{0, 1, 2, 3}));
     }
 
-
     @Test
     public void testObjectMapping() throws Exception {
+        final long now = new Date().getTime();
+
         ModelWithTypeAdapters model = db.createModelWithTypeAdapters(new ModelBuilder<ModelWithTypeAdapters>() {
             @Override
             public ModelWithTypeAdapters build() {
@@ -107,6 +109,7 @@ public class ModelSpecTest {
                     add("baz");
                 }};
                 model.uri = Uri.parse("http://example.com");
+                model.date = new Date(now);
                 return model;
             }
         });
@@ -114,5 +117,6 @@ public class ModelSpecTest {
         assertThat(model.list, contains("foo", "bar", "baz"));
         assertThat(model.set, containsInAnyOrder("foo", "bar", "baz"));
         assertThat(model.uri, is(Uri.parse("http://example.com")));
+        assertThat(model.date, is(new Date(now)));
     }
 }

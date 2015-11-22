@@ -1,13 +1,16 @@
 package com.github.gfx.android.orma.adapter;
 
+import android.support.annotation.NonNull;
+
 import java.lang.reflect.Type;
 
 public interface TypeAdapter<SourceType> {
 
     Type getSourceType();
 
-    String serialize(SourceType source);
+    @NonNull
+    String serialize(@NonNull SourceType source);
 
-    SourceType deserialize(String serialized);
-
+    @NonNull
+    SourceType deserialize(@NonNull String serialized);
 }

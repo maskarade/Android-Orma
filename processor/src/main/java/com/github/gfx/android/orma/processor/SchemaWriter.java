@@ -393,7 +393,8 @@ public class SchemaWriter {
                 CodeBlock.Builder getCursorExpr = CodeBlock.builder();
 
                 if (Types.needsTypeAdapter(c.type)) {
-                    getCursorExpr.add("conn.getTypeAdapters().deserialize($T.$L.type, $L)",
+                    getCursorExpr.add("conn.getTypeAdapters().$L($T.$L.type, $L)",
+                            c.nullable ? "deserializeNullable" : "deserialize",
                             schema.getSchemaClassName(), c.name,
                             cursorGetter(c, i));
                 } else {
