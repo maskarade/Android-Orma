@@ -2,8 +2,8 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
-import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
 import com.github.gfx.android.orma.TransactionTask;
@@ -186,7 +186,7 @@ public class RelationTest {
         try {
             db.selectFromBook().offset(1).toList();
             fail("not reached");
-        } catch (Relation.InvalidStatementException e) {
+        } catch (InvalidStatementException e) {
             assertThat(e, is(notNullValue()));
         }
     }

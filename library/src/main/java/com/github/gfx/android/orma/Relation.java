@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
@@ -10,6 +11,10 @@ import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Action1;
 
 public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<T, R> {
 
@@ -101,26 +106,48 @@ public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<
 
     @NonNull
     public List<T> toList() {
-        ArrayList<T> list = new ArrayList<>();
+        final ArrayList<T> list = new ArrayList<>();
 
-        Cursor cursor = conn.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
-                getWhereArgs(), groupBy, having, orderBy, getLimitClause());
-
-        if (cursor.moveToFirst()) {
-            list.ensureCapacity(cursor.getCount());
-            do {
-                list.add(schema.createModelFromCursor(conn, cursor));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
+        forEach(new Action1<T>() {
+            @Override
+            public void call(T item) {
+                list.add(item);
+            }
+        });
 
         return list;
     }
 
-    public static class InvalidStatementException extends RuntimeException {
+    @NonNull
+    public void forEach(@NonNull Action1<T> action) {
+        Cursor cursor = conn.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
+                getWhereArgs(), groupBy, having, orderBy, getLimitClause());
 
-        public InvalidStatementException(String detailMessage) {
-            super(detailMessage);
+        if (cursor.moveToFirst()) {
+            do {
+                action.call(schema.createModelFromCursor(conn, cursor));
+            } while (cursor.moveToNext());
         }
+        cursor.close();
+    }
+
+
+    @NonNull
+    public Observable<T> observable() {
+        return Observable.create(new Observable.OnSubscribe<T>() {
+            @Override
+            public void call(final Subscriber<? super T> subscriber) {
+                // FIXME: error handling, run-on-background
+
+                forEach(new Action1<T>() {
+                    @Override
+                    public void call(T item) {
+                        subscriber.onNext(item);
+                    }
+                });
+
+                subscriber.onCompleted();
+            }
+        });
     }
 }
