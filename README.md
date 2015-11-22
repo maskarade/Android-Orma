@@ -127,7 +127,7 @@ public class KeyValuePair {
 
 # Migration
 
-The default migration engine, `SchemaDiffMigration`, can handle column additions and removal.
+The default migration engine, `SchemaDiffMigration`, can handle column additions and removals.
 
 You can also set a custom migration engine:
 
@@ -147,7 +147,7 @@ Type adapters, which serializes and deserializes custom classes, are supported.
 
 If you use type adapters, you can add them to `OrmaDatabase`:
 
-```
+```java
 class FooAdapter extends AbstractTypeAdapter<Foo> {
     @Override
     public String serialize(Foo source) {
