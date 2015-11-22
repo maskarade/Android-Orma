@@ -137,7 +137,7 @@ class CustomMigrationEngine implements MigrationEngine { ... }
 OrmaDatabase orma = new OrmaDatabase(context, "orma.db", new CustomMigrationEngine());
 ```
 
-See [migration/] for details.
+See [migration/](migration/) for details.
 
 (TODO: more concise description)
 
@@ -166,12 +166,18 @@ orma.addTypeAdapters(TypeAdapterRegistry.defaultTypeAdapters()); // add defaults
 orma.addTypeAdapters(new FooAdapter());
 ```
 
+# Example
+
+There is an example app to show how to use Orma.
+
+See [example/](example/) for details
+
 # Release Engineering
 
 ```shell
 ./gradlew bumpMajor # or bumpMinor / bumpPatch
-./gradlew check bintrayUpload -PdryRun=true
-./gradlew annotations:bintrayUpload processor:bintrayUpload library:bintrayUpload
+make # builds modules and runs tests
+make publish # does release engineering
 ```
 
 # Licenses in Runtime Dependencies
@@ -186,3 +192,23 @@ FUJI Goro (gfx).
 # License
 
 The MIT License.
+
+Copyright (c) 2015 FUJI Goro (gfx) <gfuji@cpan.org>.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
