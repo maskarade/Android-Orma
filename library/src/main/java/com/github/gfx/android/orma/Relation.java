@@ -16,7 +16,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
 
-public abstract class Relation<T, R extends Relation> extends OrmaConditionBase<T, R> {
+public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditionBase<T, R> {
 
     @Nullable
     protected String groupBy;

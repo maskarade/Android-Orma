@@ -12,7 +12,7 @@ import java.util.Map;
 public class TypeAdapterRegistry {
 
     public static TypeAdapter<?>[] defaultTypeAdapters() {
-        return new TypeAdapter[]{
+        return new TypeAdapter<?>[]{
                 new StringListAdapter(),
                 new StringSetAdapter(),
                 new UriAdapter(),

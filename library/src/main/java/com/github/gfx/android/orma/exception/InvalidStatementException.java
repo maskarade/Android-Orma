@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.exception;
 
-public class InvalidStatementException extends RuntimeException {
+@SuppressWarnings("serial")
+public class InvalidStatementException extends OrmaException {
 
     public InvalidStatementException(String detailMessage) {
         super(detailMessage);

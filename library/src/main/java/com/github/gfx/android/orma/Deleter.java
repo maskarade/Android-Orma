@@ -5,7 +5,7 @@ import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import rx.Single;
 import rx.SingleSubscriber;
 
-public class Deleter<T, C extends Deleter> extends OrmaConditionBase<T, C> {
+public class Deleter<T, C extends Deleter<?, ?>> extends OrmaConditionBase<T, C> {
 
     public Deleter(OrmaConnection connection, Schema<T> schema) {
         super(connection, schema);

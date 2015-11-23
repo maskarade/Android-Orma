@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import rx.Single;
 import rx.SingleSubscriber;
 
-public class Updater<T, C extends Updater> extends OrmaConditionBase<T, C> {
+public class Updater<T, C extends Updater<?, ?>> extends OrmaConditionBase<T, C> {
 
     final protected ContentValues contents = new ContentValues();
 

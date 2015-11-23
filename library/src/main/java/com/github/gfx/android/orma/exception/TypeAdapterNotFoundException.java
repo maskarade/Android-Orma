@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.exception;
 
-public class TypeAdapterNotFoundException extends RuntimeException {
+@SuppressWarnings("serial")
+public class TypeAdapterNotFoundException extends OrmaException {
 
     public TypeAdapterNotFoundException(String detailMessage) {
         super(detailMessage);

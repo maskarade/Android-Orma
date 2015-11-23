@@ -2,6 +2,7 @@ package com.github.gfx.android.orma.processor;
 
 import javax.lang.model.element.Element;
 
+@SuppressWarnings("serial")
 public class ProcessingException extends RuntimeException {
 
     public final Element element;

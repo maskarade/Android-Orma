@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.exception;
 
-public class TransactionAbortException extends RuntimeException {
+@SuppressWarnings("serial")
+public class TransactionAbortException extends OrmaException {
 
     public TransactionAbortException(Throwable throwable) {
         super(throwable);

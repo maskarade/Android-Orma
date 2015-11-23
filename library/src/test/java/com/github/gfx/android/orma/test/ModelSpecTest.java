@@ -103,11 +103,10 @@ public class ModelSpecTest {
             public ModelWithTypeAdapters build() {
                 ModelWithTypeAdapters model = new ModelWithTypeAdapters();
                 model.list = Arrays.asList("foo", "bar", "baz");
-                model.set = new HashSet<String>() {{
-                    add("foo");
-                    add("bar");
-                    add("baz");
-                }};
+                model.set = new HashSet<>();
+                model.set.add("foo");
+                model.set.add("bar");
+                model.set.add("baz");
                 model.uri = Uri.parse("http://example.com");
                 model.date = new Date(now);
                 return model;

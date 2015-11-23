@@ -17,6 +17,16 @@ allprojects {
     repositories {
         jcenter()
     }
+
+    gradle.projectsEvaluated {
+        if (project.name == "example") {
+            return
+        }
+
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:all" << "-Xlint:-processing"
+        }
+    }
 }
 
 task clean(type: Delete) {

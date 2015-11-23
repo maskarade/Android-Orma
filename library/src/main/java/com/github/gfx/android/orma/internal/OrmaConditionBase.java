@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class OrmaConditionBase<T, C extends OrmaConditionBase> {
+public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
 
     protected final OrmaConnection conn;
 
