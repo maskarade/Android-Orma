@@ -21,10 +21,12 @@ public class Inserter<T> {
     }
 
     /**
-     * <p>Inserts {@param model} into a table.</p>
+     * <p>Inserts {@code model} into a table. Ths method does not modify the {@code model} even if a new row id is given to
+     * it.</p>
      * <p>Note that {@code Inserter<T>} does not provide `observable()` method because prepared statements should always be
      * grouped by transaction. </p>
      *
+     * @param model a model object to insert
      * @return The last inserted row id.
      */
     public long execute(@NonNull T model) {

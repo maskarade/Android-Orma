@@ -32,8 +32,10 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     /**
      * Builds general `where` clause with arguments.
      * e.g. {@code where("title = ? OR title = ?", a, b)}
-     * @param conditions SQL's WHERE conditions.
-     * @param args Arguments bound to the {@param conditions}.
+     *
+     * @param conditions SQLite's WHERE conditions.
+     * @param args       Arguments bound to the {@code conditions}.
+     * @return The receiver itself.
      */
     @SuppressWarnings("unchecked")
     public C where(@NonNull String conditions, @NonNull Object... args) {
