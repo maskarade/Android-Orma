@@ -93,7 +93,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     }
 
     @NonNull
-    public T value() {
+    public T value() throws NoValueException {
         T model = valueOrNull();
 
         if (model == null) {

@@ -82,6 +82,8 @@ public class Types {
     public static final ParameterizedTypeName WildcardTypeAdapter = ParameterizedTypeName
             .get(TypeAdapter, WildcardTypeName.subtypeOf(TypeName.OBJECT));
 
+    public static final ClassName TransactionAbortException = ClassName
+            .get(ormaPackageName + ".exception", "TransactionAbortException");
 
     public static ParameterizedTypeName getSchema(TypeName modelType) {
         return ParameterizedTypeName.get(Schema, modelType);

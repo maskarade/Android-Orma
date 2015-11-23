@@ -149,6 +149,7 @@ public class DatabaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("transaction")
+                        .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
@@ -165,7 +166,7 @@ public class DatabaseWriter {
             methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
                     .addJavadoc(
                             "Creates and inserts a model built by {@code Modelbuilder<T>}.\n"
-                            + "The return value has the primary key\n")
+                            + "The return value has a newly created row id\n")
                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
