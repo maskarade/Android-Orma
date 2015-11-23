@@ -4,6 +4,7 @@ import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.adapter.StringListAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
+import com.github.gfx.android.orma.exception.TypeAdapterNotFoundException;
 import com.github.gfx.android.orma.internal.ParameterizedTypes;
 
 import org.junit.Test;
@@ -79,4 +80,25 @@ public class TypeAdaptersTest {
 
         assertThat(b, is(a));
     }
+
+    @Test
+    public void serializeNullable() throws Exception {
+        assertThat(registry.serializeNullable(Uri.class, null), is(nullValue()));
+    }
+
+    @Test
+    public void deserializeNullable() throws Exception {
+        assertThat(registry.deserializeNullable(Uri.class, null), is(nullValue()));
+    }
+
+    @Test(expected = TypeAdapterNotFoundException.class)
+    public void serializeNonRegisteredType() throws Exception {
+        registry.serialize(TypeAdaptersTest.class, this);
+    }
+
+    @Test(expected = TypeAdapterNotFoundException.class)
+    public void deserializeNonRegisteredType() throws Exception {
+        registry.deserialize(TypeAdaptersTest.class, "");
+    }
+
 }
