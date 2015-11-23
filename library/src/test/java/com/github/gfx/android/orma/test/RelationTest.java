@@ -262,7 +262,7 @@ public class RelationTest {
                         book.content = "apple" + i;
                         db.insertIntoBook(book);
                     }
-                    throw new RuntimeException("abort!");
+                    throw new Exception("abort!");
                 }
             });
             fail("not reached");
