@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
@@ -73,7 +74,7 @@ public class RxObservableTest {
     }
 
     @Test
-    public void testObservable() throws Exception {
+    public void relationObservable() throws Exception {
         List<Book> list = db.selectFromBook()
                 .where("title = ?", "today")
                 .observable()
@@ -83,5 +84,30 @@ public class RxObservableTest {
 
         assertThat(list.size(), is(1));
         assertThat(list.get(0).title, is("today"));
+    }
+
+    @Test
+    public void updaterObservable() throws Exception {
+        int count = db.updateBook()
+                .where("title = ?", "today")
+                .content("modified")
+                .observable()
+                .toBlocking()
+                .value();
+
+        assertThat(count, is(1));
+        assertThat(db.selectFromBook().where("title = ?", "today").value().content, is("modified"));
+    }
+
+    @Test
+    public void deleterObservable() throws Exception {
+        int count = db.deleteFromBook()
+                .where("title = ?", "today")
+                .observable()
+                .toBlocking()
+                .value();
+
+        assertThat(count, is(1));
+        assertThat(db.selectFromBook().where("title = ?", "today").valueOrNull(), is(nullValue()));
     }
 }
