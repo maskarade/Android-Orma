@@ -85,6 +85,9 @@ public class MainActivity extends AppCompatActivity
         simpleCRUD();
     }
 
+    /**
+     * Demonstrates simple CRUD operations, which makes no sense though.
+     */
     void simpleCRUD() {
         // create
         Todo todo = new Todo();
