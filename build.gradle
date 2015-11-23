@@ -1,3 +1,4 @@
+import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 apply from: project.file('metadata.gradle')
@@ -88,4 +89,33 @@ task bumpPatch << {
 
 task version << {
     println "v" + versionName()
+}
+
+String shell(String command) {
+    def proc = ["sh",  "-c",  "cd ${project.rootDir} ; ${command}"].execute()
+    if (!proc.waitFor(1, TimeUnit.SECONDS)) {
+        throw new RuntimeException("Failed to run: ${command}\n${proc.err.text}" )
+    } else {
+        def err = proc.err.text
+        if (err) {
+            System.err.println(err)
+        }
+    }
+    return proc.in.text;
+}
+
+task releng << {
+    def tag = "v" + versionName()
+    println "Release engineering for ${tag}"
+
+    def changes = shell "git status -s"
+    if (changes.trim()) {
+        throw new RuntimeException("There are changes not commited yet.\n${changes}")
+    }
+
+    println "> git tag ${tag}"
+    shell "git tag ${tag}"
+    println "> git push origin ${tag}"
+    shell "git push origin ${tag}"
+    shell "git push origin master"
 }
