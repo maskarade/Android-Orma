@@ -22,5 +22,8 @@ public class FlowTodo extends BaseModel {
     public String content;
 
     @Column
+    public boolean done;
+
+    @Column
     public long createdTimeMillis;
 }

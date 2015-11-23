@@ -4,6 +4,7 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 
 @Table
@@ -18,6 +19,9 @@ public class Todo {
     @Column
     @Nullable
     public String content;
+
+    @Column
+    public boolean done;
 
     @Column
     public long createdTimeMillis;

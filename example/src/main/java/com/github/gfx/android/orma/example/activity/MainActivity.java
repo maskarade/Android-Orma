@@ -4,6 +4,7 @@ import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
+import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
 import android.content.Intent;
@@ -81,7 +82,32 @@ public class MainActivity extends AppCompatActivity
                 super.execSQL(db, statement);
             }
         });
-        orma.deleteFromTodo().execute();
+        simpleCRUD();
+    }
+
+    void simpleCRUD() {
+        // create
+        Todo todo = new Todo();
+        todo.title = "buy";
+        todo.content = "milk banana apple";
+        todo.createdTimeMillis = System.currentTimeMillis();
+        orma.insertIntoTodo(todo);
+
+        // read
+        todo = orma.selectFromTodo()
+                .where("title = ?", "buy")
+                .value();
+
+        // update
+        orma.updateTodo()
+                .where("title = ?", "buy")
+                .done(true)
+                .execute();
+
+        // delete
+        orma.deleteFromTodo()
+                .where("done = ?", true)
+                .execute();
     }
 
     @Override
