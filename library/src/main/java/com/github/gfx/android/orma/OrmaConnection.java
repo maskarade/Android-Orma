@@ -44,7 +44,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas,
             @NonNull MigrationEngine migration) {
-        super(context, filename, null, migration.getVersion());
+        super(context.getApplicationContext(), filename, null, migration.getVersion());
         this.schemas = schemas;
         this.migration = migration;
         this.trace = extractDebug(context);
