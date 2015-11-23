@@ -3,19 +3,9 @@
 
     <group android:checkableBehavior="single">
         <item
-                android:id="@+id/nav_select"
-                android:icon="@drawable/ic_menu_camera"
-                android:title="Select"
-                />
-        <item
-                android:id="@+id/nav_insert"
-                android:icon="@drawable/ic_menu_gallery"
-                android:title="Insert"
-                />
-        <item
-                android:id="@+id/nav_update"
+                android:id="@+id/nav_todo"
                 android:icon="@drawable/ic_menu_slideshow"
-                android:title="Update"
+                android:title="Todo Example"
                 />
         <item
                 android:id="@+id/nav_benchmark"
