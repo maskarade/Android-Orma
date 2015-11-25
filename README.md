@@ -25,8 +25,8 @@ not a singleton, and has `SchemaDiffMigration`, which detects `add column` and `
 
 ```groovy
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:0.6.0'
-    compile 'com.github.gfx.android.orma:orma:0.6.0'
+    apt 'com.github.gfx.android.orma:orma-processor:0.7.0'
+    compile 'com.github.gfx.android.orma:orma:0.7.0'
 }
 ```
 
