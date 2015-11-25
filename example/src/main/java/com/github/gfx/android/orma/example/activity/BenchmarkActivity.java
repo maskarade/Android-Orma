@@ -274,7 +274,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     }
                 });
 
-                Log.d(TAG, "Orma/selectAll count: " + count);
+                Log.d(TAG, "Orma/forEachAll count: " + count);
                 subscriber.onSuccess(new Result("Orma/forEachAll", System.currentTimeMillis() - t0));
             }
         })
@@ -292,7 +292,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 for (@SuppressWarnings("unused") RealmTodo todo : realm.allObjects(RealmTodo.class)) {
                     count.incrementAndGet();
                 }
-                Log.d(TAG, "Realm/selectAll count: " + count);
+                Log.d(TAG, "Realm/forEachAll count: " + count);
                 subscriber.onSuccess(new Result("Realm/forEachAll", System.currentTimeMillis() - t0));
             }
         });
@@ -311,7 +311,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     count.incrementAndGet();
                 }
 
-                Log.d(TAG, "DBFlow/selectAll count: " + count);
+                Log.d(TAG, "DBFlow/forEachAll count: " + count);
                 subscriber.onSuccess(new Result("DBFlow/forEachAll", System.currentTimeMillis() - t0));
             }
         })
