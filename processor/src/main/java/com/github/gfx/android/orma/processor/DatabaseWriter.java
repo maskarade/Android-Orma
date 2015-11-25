@@ -148,6 +148,20 @@ public class DatabaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("transaction")
+                        .addException(Types.TransactionAbortException)
+                        .addAnnotation(Deprecated.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Types.TransactionTask, "task")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addStatement("$L.transactionSync(task)", connection)
+                        .build()
+        );
+
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("transactionSync")
                         .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
