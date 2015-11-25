@@ -11,6 +11,8 @@ import java.util.Map;
 
 public class TypeAdapterRegistry {
 
+    final Map<Type, TypeAdapter<?>> adapters = new HashMap<>();
+
     public static TypeAdapter<?>[] defaultTypeAdapters() {
         return new TypeAdapter<?>[]{
                 new StringListAdapter(),
@@ -19,8 +21,6 @@ public class TypeAdapterRegistry {
                 new DateAdapter(),
         };
     }
-
-    final Map<Type, TypeAdapter<?>> adapters = new HashMap<>();
 
     public <SourceType> void add(TypeAdapter<SourceType> adapter) {
         adapters.put(adapter.getSourceType(), adapter);
@@ -55,7 +55,7 @@ public class TypeAdapterRegistry {
     @Nullable
     @SuppressWarnings("unchecked")
     public <SourceType> SourceType deserializeNullable(@NonNull Type sourceType, @Nullable String serialized) {
-        return serialized == null ? null : (SourceType)deserialize(sourceType, serialized);
+        return serialized == null ? null : (SourceType) deserialize(sourceType, serialized);
     }
 
 }

@@ -9,14 +9,16 @@ import java.lang.reflect.Type;
  */
 public class ParameterizedTypes {
 
+    public static Type getType(TypeHolder<?> typeHolder) {
+        ParameterizedType t = (ParameterizedType) typeHolder.getClass().getGenericInterfaces()[0];
+        return t.getActualTypeArguments()[0];
+    }
+
     /**
      * A helper class to hold parameterized types.
      */
     @SuppressWarnings("unused")
-    public interface TypeHolder<T> {}
+    public interface TypeHolder<T> {
 
-    public static Type getType(TypeHolder<?> typeHolder) {
-        ParameterizedType t = (ParameterizedType) typeHolder.getClass().getGenericInterfaces()[0];
-        return t.getActualTypeArguments()[0];
     }
 }

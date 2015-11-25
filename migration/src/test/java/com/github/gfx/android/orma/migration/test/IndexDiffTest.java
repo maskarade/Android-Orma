@@ -12,12 +12,13 @@ import org.robolectric.annotation.Config;
 
 import android.content.Context;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class IndexDiffTest {
+
     SchemaDiffMigration migration;
 
     Context getContext() {

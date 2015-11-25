@@ -44,25 +44,6 @@ public class SchemaDiffTest {
                     Collections.<String>emptyList())
     );
 
-    static class OpenHelper extends SQLiteOpenHelper {
-
-        public OpenHelper(Context context) {
-            super(context, null, null, 1);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            for (NamedDdl ddl : namedDdls) {
-                db.execSQL(ddl.getCreateTableStatement());
-            }
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        }
-    }
-
     SchemaDiffMigration migration;
 
     SQLiteDatabase db;
@@ -126,6 +107,25 @@ public class SchemaDiffTest {
         System.out.println(statements.toString());
 
         assertThat(statements, is(namedDdlsWithIndexes.get(0).getCreateIndexStatements()));
+    }
+
+    static class OpenHelper extends SQLiteOpenHelper {
+
+        public OpenHelper(Context context) {
+            super(context, null, null, 1);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            for (NamedDdl ddl : namedDdls) {
+                db.execSQL(ddl.getCreateTableStatement());
+            }
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+        }
     }
 
 }

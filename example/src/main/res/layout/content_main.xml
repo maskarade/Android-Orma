@@ -30,16 +30,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:text="The following list shows how SchemaDiffMigration works.\nChange Todo.java to invoke migration."
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 />
 
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginBottom="8dp"
-                android:background="@color/colorPrimaryDark"
                 android:alpha="0.6"
+                android:background="@color/colorPrimaryDark"
                 />
 
         <ListView

@@ -8,9 +8,23 @@ import java.util.List;
 
 public class SqliteDdlBuilder {
 
-    public interface Func1<A, R> {
+    @NonNull
+    public static String ensureQuoted(@NonNull String name) {
+        if (name.startsWith("\"") || name.startsWith("`")) {
+            return name;
+        }
+        return '"' + name + '"';
+    }
 
-        R call(A arg);
+    @NonNull
+    public static String ensureNotQuoted(@NonNull String maybeQuoted) {
+        if (maybeQuoted.startsWith("\"") || maybeQuoted.endsWith("\n")) {
+            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
+        } else if (maybeQuoted.startsWith("`") || maybeQuoted.endsWith("`")) {
+            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
+        } else {
+            return maybeQuoted;
+        }
     }
 
     @NonNull
@@ -94,22 +108,8 @@ public class SqliteDdlBuilder {
         return sb.toString();
     }
 
-    @NonNull
-    public static String ensureQuoted(@NonNull String name) {
-        if (name.startsWith("\"") || name.startsWith("`")) {
-            return name;
-        }
-        return '"' + name + '"';
-    }
+    public interface Func1<A, R> {
 
-    @NonNull
-    public static String ensureNotQuoted(@NonNull String maybeQuoted) {
-        if (maybeQuoted.startsWith("\"") || maybeQuoted.endsWith("\n")) {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-        } else if (maybeQuoted.startsWith("`") || maybeQuoted.endsWith("`")) {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-        } else {
-            return maybeQuoted;
-        }
+        R call(A arg);
     }
 }

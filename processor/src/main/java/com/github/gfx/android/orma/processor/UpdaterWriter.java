@@ -58,8 +58,7 @@ public class UpdaterWriter {
                 if (Types.needsTypeAdapter(column.type)) {
                     valueExpr.add("conn.getTypeAdapters().serialize($T.$L.type, value)",
                             schema.getSchemaClassName(), column.name);
-                }
-                else {
+                } else {
                     valueExpr.add("value");
                 }
 

@@ -160,7 +160,6 @@ public class DatabaseWriter {
                         .build()
         );
 
-
         methodSpecs.add(
                 MethodSpec.methodBuilder("transactionSync")
                         .addException(Types.TransactionAbortException)
@@ -184,7 +183,6 @@ public class DatabaseWriter {
                         .build()
         );
 
-
         schemas.forEach(schema -> {
             String simpleModelName = schema.getModelClassName().simpleName();
             String schemaInstance = "schema" + simpleModelName;
@@ -192,7 +190,7 @@ public class DatabaseWriter {
             methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
                     .addJavadoc(
                             "Creates and inserts a model built by {@code Modelbuilder<T>}.\n"
-                            + "The return value has a newly created row id\n")
+                                    + "The return value has a newly created row id\n")
                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())

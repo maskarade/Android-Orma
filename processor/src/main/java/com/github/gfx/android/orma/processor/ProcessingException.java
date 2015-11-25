@@ -11,6 +11,7 @@ public class ProcessingException extends RuntimeException {
         super(message, throwable);
         this.element = element;
     }
+
     public ProcessingException(String message, Element element) {
         super(message);
         this.element = element;

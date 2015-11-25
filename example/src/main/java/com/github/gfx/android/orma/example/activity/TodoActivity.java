@@ -28,10 +28,6 @@ import rx.schedulers.Schedulers;
 
 public class TodoActivity extends AppCompatActivity {
 
-    public static Intent createIntent(Context context) {
-        return new Intent(context, TodoActivity.class);
-    }
-
     OrmaDatabase orma;
 
     ActivityTodoBinding binding;
@@ -39,6 +35,10 @@ public class TodoActivity extends AppCompatActivity {
     Adapter adapter;
 
     int number = 0;
+
+    public static Intent createIntent(Context context) {
+        return new Intent(context, TodoActivity.class);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,12 +90,13 @@ public class TodoActivity extends AppCompatActivity {
                     .subscribeOn(Schedulers.io())
                     .toList();
 
-            Observable.combineLatest(countObservable, itemsObservable, new Func2<Integer, List<Todo>, Pair<Integer, List<Todo>>>() {
-                @Override
-                public Pair<Integer, List<Todo>> call(Integer count, List<Todo> todos) {
-                    return Pair.create(count, todos);
-                }
-            })
+            Observable.combineLatest(countObservable, itemsObservable,
+                    new Func2<Integer, List<Todo>, Pair<Integer, List<Todo>>>() {
+                        @Override
+                        public Pair<Integer, List<Todo>> call(Integer count, List<Todo> todos) {
+                            return Pair.create(count, todos);
+                        }
+                    })
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<Pair<Integer, List<Todo>>>() {
                         @Override
