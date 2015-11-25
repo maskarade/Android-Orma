@@ -125,20 +125,21 @@ public class TodoActivity extends AppCompatActivity {
             notifyItemInserted(totalCount);
         }
 
-        public void removeItem(Todo todo) {
+        public boolean removeItem(Todo todo) {
+            int position = items.indexOf(todo);
+            if (position == -1) {
+                return false;
+            }
             orma.deleteFromTodo()
                     .where("id = ?", todo.id)
                     .observable()
                     .subscribeOn(Schedulers.io())
                     .subscribe();
 
-            int position = items.indexOf(todo);
-            if (position == -1) {
-                throw new AssertionError("something is wrong");
-            }
             items.remove(todo);
             totalCount--;
             notifyItemRemoved(position);
+            return true;
         }
 
         @Override
