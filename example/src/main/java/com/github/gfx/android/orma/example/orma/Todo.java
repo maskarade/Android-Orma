@@ -20,5 +20,8 @@ public class Todo {
     public String content;
 
     @Column
+    public boolean done;
+
+    @Column
     public long createdTimeMillis;
 }

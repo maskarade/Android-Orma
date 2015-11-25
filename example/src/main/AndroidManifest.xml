@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.BenchmarkActivity" />
+        <activity android:name=".activity.TodoActivity"></activity>
     </application>
 
 </manifest>

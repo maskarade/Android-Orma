@@ -10,16 +10,22 @@ import java.lang.annotation.Target;
 public @interface Column {
 
     /**
-     * @return A column name representation for SQLite tables.
+     * @return Indicates the column name representation for SQLite tables.
      */
     String value() default "";
 
+    /**
+     * @return Create an index for the column.
+     */
     boolean indexed() default false;
 
+    /**
+     * @return Indicates the column value is unique in rows.
+     */
     boolean unique() default false;
 
     /**
-     * @return Must be one of {@code "BINARY"}, {@code "NOCASE"} or {@code "RTRIM"}
+     * @return Specifies how the column is compared. Must be one of {@code "BINARY"}, {@code "NOCASE"} or {@code "RTRIM"}
      */
     String collate() default "";
 }

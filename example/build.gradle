@@ -39,10 +39,13 @@ dependencies {
     compile project(':library')
     compile 'io.realm:realm-android:0.85.0'
     apt 'com.raizlabs.android:DBFlow-Compiler:2.2.1'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:cardview-v7:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
     compile 'com.raizlabs.android:DBFlow-Core:2.2.1'
     compile 'com.raizlabs.android:DBFlow:2.2.1'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.2'
+    compile 'com.cookpad.android.rxt4a:rxt4a:1.0.0'
     compile 'com.facebook.stetho:stetho:1.2.0'
 }

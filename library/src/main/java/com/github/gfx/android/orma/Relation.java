@@ -86,6 +86,16 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
         return conn.count(schema.getTableName(), getWhereClause(), getWhereArgs());
     }
 
+    public Observable<Long> countAsObservable() {
+        return Observable.create(new Observable.OnSubscribe<Long>() {
+            @Override
+            public void call(Subscriber<? super Long> subscriber) {
+                subscriber.onNext(count());
+                subscriber.onCompleted();
+            }
+        });
+    }
+
     @Nullable
     public T valueOrNull() {
         return conn.querySingle(schema, schema.getEscapedColumnNames(),
