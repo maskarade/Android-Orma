@@ -26,6 +26,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import java.util.List;
+
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
@@ -80,9 +82,10 @@ public class MainActivity extends AppCompatActivity
 
         orma = new OrmaDatabase(this, "main.db", new SchemaDiffMigration(this) {
             @Override
-            public void execSQL(SQLiteDatabase db, String statement) {
-                logsAdapter.add(statement);
-                super.execSQL(db, statement);
+            public void executeStatements(SQLiteDatabase db, List<String> statements) {
+                logsAdapter.addAll(statements);
+
+                super.executeStatements(db, statements);
             }
         });
 

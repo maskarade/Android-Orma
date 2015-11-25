@@ -233,24 +233,22 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public void executeStatements(SQLiteDatabase db, List<String> statements) {
+        if (debug) {
+            for (String statement : statements) {
+                Log.v(TAG, statement);
+            }
+        }
+
         db.beginTransaction();
 
         try {
             for (String statement : statements) {
-                execSQL(db, statement);
+                db.execSQL(statement);
             }
-
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
         }
-    }
-
-    public void execSQL(SQLiteDatabase db, String statement) {
-        if (debug) {
-            Log.v(TAG, statement);
-        }
-        db.execSQL(statement);
     }
 
     public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<NamedDdl> schemas) {
