@@ -122,9 +122,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 .flatMap(new Func1<Integer, Single<Result>>() {
                     @Override
                     public Single<Result> call(Integer integer) {
-                        return startInsertWithOrma()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread());
+                        return startInsertWithOrma();
                     }
                 })
                 .flatMap(new Func1<Result, Single<Result>>() {
@@ -138,18 +136,14 @@ public class BenchmarkActivity extends AppCompatActivity {
                     @Override
                     public Single<Result> call(Result result) {
                         adapter.add(result);
-                        return startInsertWithDBFlow()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread());
+                        return startInsertWithDBFlow();
                     }
                 })
                 .flatMap(new Func1<Result, Single<Result>>() {
                     @Override
                     public Single<Result> call(Result result) {
                         adapter.add(result);
-                        return startSelectAllWithOrma()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread());
+                        return startSelectAllWithOrma();
                     }
                 })
                 .flatMap(new Func1<Result, Single<Result>>() {
@@ -163,9 +157,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     @Override
                     public Single<Result> call(Result result) {
                         adapter.add(result);
-                        return startSelectAllWithDBFlow()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread());
+                        return startSelectAllWithDBFlow();
                     }
                 })
                 .subscribe(new SingleSubscriber<Result>() {
@@ -209,7 +201,9 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                 subscriber.onSuccess(new Result("Orma/insert", System.currentTimeMillis() - t0));
             }
-        });
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     Single<Result> startInsertWithRealm() {
@@ -261,7 +255,9 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                 subscriber.onSuccess(new Result("DBFlow/insert", System.currentTimeMillis() - t0));
             }
-        });
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     Single<Result> startSelectAllWithOrma() {
@@ -281,7 +277,9 @@ public class BenchmarkActivity extends AppCompatActivity {
                 Log.d(TAG, "Orma/selectAll count: " + count);
                 subscriber.onSuccess(new Result("Orma/forEachAll", System.currentTimeMillis() - t0));
             }
-        });
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     Single<Result> startSelectAllWithRealm() {
@@ -316,7 +314,9 @@ public class BenchmarkActivity extends AppCompatActivity {
                 Log.d(TAG, "DBFlow/selectAll count: " + count);
                 subscriber.onSuccess(new Result("DBFlow/forEachAll", System.currentTimeMillis() - t0));
             }
-        });
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
 
