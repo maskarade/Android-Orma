@@ -1,6 +1,5 @@
 package com.github.gfx.android.orma.example.activity;
 
-import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
@@ -76,7 +75,7 @@ public class TodoActivity extends AppCompatActivity {
 
     class Adapter extends RecyclerView.Adapter<VH> {
 
-        int count = 0;
+        int totalCount = 0;
 
         List<Todo> items;
 
@@ -97,20 +96,21 @@ public class TodoActivity extends AppCompatActivity {
                             return Pair.create(count, todos);
                         }
                     })
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<Pair<Integer, List<Todo>>>() {
                         @Override
                         public void call(Pair<Integer, List<Todo>> pair) {
-                            count = pair.first;
-                            items = new ArrayList<>(pair.second);
-                            notifyDataSetChanged();
+                            initialize(pair.first, pair.second);
                         }
                     });
         }
 
-        public void addItem(final Todo todo) {
-            items.add(todo);
+        public void initialize(int totalCount, List<Todo> items) {
+            this.totalCount = totalCount;
+            this.items = new ArrayList<>(items);
+            notifyDataSetChanged();
+        }
 
+        public void addItem(final Todo todo) {
             orma.transactionAsync(new TransactionTask() {
                 @Override
                 public void execute() throws Exception {
@@ -119,9 +119,10 @@ public class TodoActivity extends AppCompatActivity {
                 }
             });
 
-            count++;
+            items.add(todo);
+            totalCount++;
 
-            notifyItemInserted(count);
+            notifyItemInserted(totalCount);
         }
 
         public void removeItem(Todo todo) {
@@ -136,7 +137,7 @@ public class TodoActivity extends AppCompatActivity {
                 throw new AssertionError("something is wrong");
             }
             items.remove(todo);
-            count--;
+            totalCount--;
             notifyItemRemoved(position);
         }
 
@@ -163,7 +164,7 @@ public class TodoActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return count;
+            return totalCount;
         }
     }
 }
