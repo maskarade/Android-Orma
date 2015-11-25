@@ -2,11 +2,11 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.SingleRelation;
+import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
-import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
-import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.test.model.Book;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
@@ -20,7 +20,12 @@ import org.robolectric.annotation.Config;
 
 import android.content.Context;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import rx.functions.Action1;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -79,7 +84,12 @@ public class RelationTest {
 
     @Test
     public void count() throws Exception {
-        assertThat(db.selectFromBook().count(), is(2L));
+        assertThat(db.selectFromBook().count(), is(2));
+    }
+
+    @Test
+    public void countAsObservable() throws Exception {
+        assertThat(db.selectFromBook().countAsObservable().toBlocking().single(), is(2));
     }
 
     @Test
@@ -92,6 +102,26 @@ public class RelationTest {
         assertThat(books.get(1).title, is("friday"));
         assertThat(books.get(1).content, is("apple"));
     }
+
+    @Test
+    public void forEach() throws Exception {
+        final List<Book> books = new ArrayList<>();
+
+        db.selectFromBook().forEach(new Action1<Book>() {
+            @Override
+            public void call(Book book) {
+                books.add(book);
+            }
+        });
+
+        assertThat(books, hasSize(2));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
+
+        assertThat(books.get(1).title, is("friday"));
+        assertThat(books.get(1).content, is("apple"));
+    }
+
 
     @Test
     public void single() throws Exception {
@@ -226,12 +256,12 @@ public class RelationTest {
                 .execute();
 
         assertThat(result, is(1));
-        assertThat(db.selectFromBook().count(), is(1L));
+        assertThat(db.selectFromBook().count(), is(1));
         assertThat(db.selectFromBook().value().title, is("friday"));
     }
 
     @Test
-    public void transactionSuccess() throws Exception {
+    public void transactionSyncSuccess() throws Exception {
         db.transactionSync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
@@ -247,11 +277,11 @@ public class RelationTest {
             }
         });
 
-        assertThat(db.selectFromBook().count(), is(7L));
+        assertThat(db.selectFromBook().count(), is(7));
     }
 
     @Test
-    public void transactionAbort() throws Exception {
+    public void transactionSyncAbort() throws Exception {
         try {
             db.transactionSync(new TransactionTask() {
                 @Override
@@ -270,7 +300,59 @@ public class RelationTest {
             assertThat(e.getCause(), instanceOf(RuntimeException.class));
         }
 
-        assertThat(db.selectFromBook().count(), is(2L));
+        assertThat(db.selectFromBook().count(), is(2));
+    }
+
+    @Test
+    public void transactionAsyncSuccess() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        db.transactionAsync(new TransactionTask() {
+            @Override
+            public void execute() throws Exception {
+                Publisher publisher = db.selectFromPublisher().value();
+
+                for (int i = 0; i < 5; i++) {
+                    Book book = new Book();
+                    book.title = "friday";
+                    book.content = "apple" + i;
+                    book.publisher = SingleRelation.id(publisher.id);
+                    db.insertIntoBook(book);
+                }
+
+                latch.countDown();
+            }
+        });
+
+        assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
+        assertThat(db.selectFromBook().count(), is(7));
+    }
+
+    @Test
+    public void transactionAsyncAbort() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        db.transactionAsync(new TransactionTask() {
+            @Override
+            public void execute() throws Exception {
+                for (int i = 0; i < 5; i++) {
+                    Book book = new Book();
+                    book.title = "friday";
+                    book.content = "apple" + i;
+                    db.insertIntoBook(book);
+                }
+                throw new Exception("abort!");
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                assertThat(exception, is(instanceOf(RuntimeException.class)));
+                latch.countDown();
+            }
+        });
+
+        assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
+        assertThat(db.selectFromBook().count(), is(2));
     }
 
     @Test
@@ -316,7 +398,7 @@ public class RelationTest {
             db.insertIntoPublisher(publisher);
         }
 
-        assertThat(db.selectFromPublisher().count(), is(2L));
+        assertThat(db.selectFromPublisher().count(), is(2));
 
         Publisher publisher = db.selectFromPublisher().value();
         assertThat(publisher.name, is("The Fire"));
@@ -378,7 +460,7 @@ public class RelationTest {
             });
         }
 
-        assertThat(a.books(db).count(), is(2L));
-        assertThat(b.books(db).count(), is(3L));
+        assertThat(a.books(db).count(), is(2));
+        assertThat(b.books(db).count(), is(3));
     }
 }

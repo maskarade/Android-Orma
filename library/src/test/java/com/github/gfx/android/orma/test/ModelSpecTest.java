@@ -75,9 +75,9 @@ public class ModelSpecTest {
         three.nocaseField = "FOO";
         db.insertIntoModelWithCollation(three);
 
-        assertThat(db.selectFromModelWithCollation().where("rtrimField = ?", "foo ").count(), is(2L));
-        assertThat(db.selectFromModelWithCollation().where("nocaseField = ?", "foo").count(), is(2L));
-        assertThat(db.selectFromModelWithCollation().where("noCollationField = ?", "foo").count(), is(1L));
+        assertThat(db.selectFromModelWithCollation().where("rtrimField = ?", "foo ").count(), is(2));
+        assertThat(db.selectFromModelWithCollation().where("nocaseField = ?", "foo").count(), is(2));
+        assertThat(db.selectFromModelWithCollation().where("noCollationField = ?", "foo").count(), is(1));
     }
 
     @Test

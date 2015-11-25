@@ -86,6 +86,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
         return conn.count(schema.getTableName(), getWhereClause(), getWhereArgs());
     }
 
+    @NonNull
     public Observable<Integer> countAsObservable() {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
@@ -114,6 +115,12 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     }
 
     @NonNull
+    public Cursor query() {
+        return conn.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
+                getWhereArgs(), groupBy, having, orderBy, getLimitClause());
+    }
+
+    @NonNull
     public List<T> toList() {
         final ArrayList<T> list = new ArrayList<>();
 
@@ -128,8 +135,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     }
 
     public void forEach(@NonNull Action1<T> action) {
-        Cursor cursor = conn.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
-                getWhereArgs(), groupBy, having, orderBy, getLimitClause());
+        Cursor cursor = query();
 
         if (cursor.moveToFirst()) {
             do {
@@ -144,8 +150,6 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
         return Observable.create(new Observable.OnSubscribe<T>() {
             @Override
             public void call(final Subscriber<? super T> subscriber) {
-                // FIXME: error handling, run-on-background
-
                 forEach(new Action1<T>() {
                     @Override
                     public void call(T item) {
