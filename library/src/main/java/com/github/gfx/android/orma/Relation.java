@@ -82,14 +82,14 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
         }
     }
 
-    public long count() {
+    public int count() {
         return conn.count(schema.getTableName(), getWhereClause(), getWhereArgs());
     }
 
-    public Observable<Long> countAsObservable() {
-        return Observable.create(new Observable.OnSubscribe<Long>() {
+    public Observable<Integer> countAsObservable() {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
-            public void call(Subscriber<? super Long> subscriber) {
+            public void call(Subscriber<? super Integer> subscriber) {
                 subscriber.onNext(count());
                 subscriber.onCompleted();
             }
