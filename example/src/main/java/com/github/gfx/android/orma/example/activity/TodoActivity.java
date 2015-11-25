@@ -38,6 +38,8 @@ public class TodoActivity extends AppCompatActivity {
 
     Adapter adapter;
 
+    int number = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,9 +55,9 @@ public class TodoActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 Todo todo = new Todo();
-                long count = adapter.getItemCount();
-                todo.title = "todo #" + count;
-                todo.content = "content #" + count;
+                number++;
+                todo.title = "todo #" + number;
+                todo.content = "content #" + number;
                 todo.createdTimeMillis = System.currentTimeMillis();
                 adapter.addItem(todo);
             }
@@ -79,7 +81,7 @@ public class TodoActivity extends AppCompatActivity {
         List<Todo> items;
 
         Adapter() {
-            Observable<Long> countObservable = orma.selectFromTodo()
+            Observable<Integer> countObservable = orma.selectFromTodo()
                     .countAsObservable()
                     .subscribeOn(Schedulers.io());
 
@@ -88,17 +90,17 @@ public class TodoActivity extends AppCompatActivity {
                     .subscribeOn(Schedulers.io())
                     .toList();
 
-            Observable.combineLatest(countObservable, itemsObservable, new Func2<Long, List<Todo>, Pair<Long, List<Todo>>>() {
+            Observable.combineLatest(countObservable, itemsObservable, new Func2<Integer, List<Todo>, Pair<Integer, List<Todo>>>() {
                 @Override
-                public Pair<Long, List<Todo>> call(Long aLong, List<Todo> todos) {
-                    return Pair.create(aLong, todos);
+                public Pair<Integer, List<Todo>> call(Integer count, List<Todo> todos) {
+                    return Pair.create(count, todos);
                 }
             })
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Pair<Long, List<Todo>>>() {
+                    .subscribe(new Action1<Pair<Integer, List<Todo>>>() {
                         @Override
-                        public void call(Pair<Long, List<Todo>> pair) {
-                            count = pair.first.intValue();
+                        public void call(Pair<Integer, List<Todo>> pair) {
+                            count = pair.first;
                             items = new ArrayList<>(pair.second);
                             notifyDataSetChanged();
                         }
@@ -118,22 +120,23 @@ public class TodoActivity extends AppCompatActivity {
 
             count++;
 
-            notifyDataSetChanged();
+            notifyItemInserted(count);
         }
 
-        public void removeItem(int position) {
+        public void removeItem(Todo todo) {
             orma.deleteFromTodo()
-                    .where("id = ?", items.get(position).id)
+                    .where("id = ?", todo.id)
                     .observable()
                     .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe();
 
-            items.remove(position);
-
+            int position = items.indexOf(todo);
+            if (position == -1) {
+                throw new AssertionError("something is wrong");
+            }
+            items.remove(todo);
             count--;
-
-            notifyDataSetChanged();
+            notifyItemRemoved(position);
         }
 
         @Override
@@ -142,19 +145,17 @@ public class TodoActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(VH holder, final int position) {
+        public void onBindViewHolder(VH holder, int position) {
             CardTodoBinding binding = holder.binding;
-            Todo todo = items.get(position);
+            final Todo todo = items.get(position);
 
             binding.title.setText(todo.title);
             binding.content.setText(todo.content);
 
-            binding.getRoot().setOnLongClickListener(new View.OnLongClickListener() {
+            binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
-                public boolean onLongClick(View v) {
-                    removeItem(position);
-
-                    return false;
+                public void onClick(View v) {
+                    removeItem(todo);
                 }
             });
         }
