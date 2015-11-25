@@ -28,6 +28,7 @@ public class Updater<T, C extends Updater<?, ?>> extends OrmaConditionBase<T, C>
         return conn.update(schema.getTableName(), contents, getWhereClause(), getWhereArgs());
     }
 
+    @NonNull
     public Single<Integer> observable() {
         return Single.create(new Single.OnSubscribe<Integer>() {
             @Override

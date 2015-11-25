@@ -2,7 +2,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
-import com.github.gfx.android.orma.exception.TransactionAbortException;
+import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.NamedDdl;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
@@ -17,12 +17,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Build;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 
 public class OrmaConnection extends SQLiteOpenHelper {
 
@@ -36,6 +40,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean trace;
 
+    final boolean checkDbAccessOnMainThread;
+
     final TypeAdapterRegistry typeAdapters = new TypeAdapterRegistry();
 
     public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
@@ -47,7 +53,9 @@ public class OrmaConnection extends SQLiteOpenHelper {
         super(context.getApplicationContext(), filename, null, migration.getVersion());
         this.schemas = schemas;
         this.migration = migration;
-        this.trace = extractDebug(context);
+        boolean debug = extractDebug(context);
+        this.trace = debug;
+        this.checkDbAccessOnMainThread = debug;
         enableWal();
     }
 
@@ -63,6 +71,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public SQLiteDatabase getDatabase() {
+        if (checkDbAccessOnMainThread) {
+            if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+                throw new DatabaseAccessOnMainThreadException("You have to access database in background");
+            }
+        }
         return getWritableDatabase();
     }
 
@@ -70,7 +83,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return typeAdapters;
     }
 
-    public void addTypeAdapters(TypeAdapter<?> ...adapters) {
+    public void addTypeAdapters(TypeAdapter<?>... adapters) {
         for (TypeAdapter<?> typeAdapter : adapters) {
             typeAdapters.add(typeAdapter);
         }
@@ -109,12 +122,12 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return db.rawQueryWithFactory(null, sql, whereArgs, table);
     }
 
-    public long count(String table, String whereClause, String[] whereArgs) {
+    public int count(String table, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getDatabase();
         Cursor cursor = db.query(table, countSelections, whereClause, whereArgs, null, null, null);
         try {
             cursor.moveToFirst();
-            return cursor.getLong(0);
+            return cursor.getInt(0);
         } finally {
             cursor.close();
         }
@@ -142,7 +155,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return db.delete(table, whereClause, whereArgs);
     }
 
-    public void transaction(@NonNull TransactionTask task) {
+    public void transactionSync(@NonNull TransactionTask task) {
         SQLiteDatabase db = getDatabase();
         db.beginTransaction();
 
@@ -150,17 +163,28 @@ public class OrmaConnection extends SQLiteOpenHelper {
             task.execute();
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            throw new TransactionAbortException(e);
+            task.onError(e);
         } finally {
             db.endTransaction();
         }
+    }
+
+    public void transactionAsync(@NonNull final TransactionTask task) {
+        Schedulers.io()
+                .createWorker()
+                .schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        transactionSync(task);
+                    }
+                });
     }
 
     /**
      * Drops and creates all the tables. This is provided for testing.
      */
     public void resetDatabase() {
-        transaction(new TransactionTask() {
+        transactionSync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
                 SQLiteDatabase db = getDatabase();

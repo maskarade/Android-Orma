@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.example.activity;
 
 import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
+import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
@@ -52,7 +53,7 @@ public class TodoActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 Todo todo = new Todo();
-                long count = orma.selectFromTodo().count();
+                long count = adapter.getItemCount();
                 todo.title = "todo #" + count;
                 todo.content = "content #" + count;
                 todo.createdTimeMillis = System.currentTimeMillis();
@@ -104,12 +105,16 @@ public class TodoActivity extends AppCompatActivity {
                     });
         }
 
-        public void addItem(Todo todo) {
+        public void addItem(final Todo todo) {
             items.add(todo);
 
-            // TODO: do it in background
-            orma.prepareInsertIntoTodo()
-                    .execute(todo);
+            orma.transactionAsync(new TransactionTask() {
+                @Override
+                public void execute() throws Exception {
+                    orma.prepareInsertIntoTodo()
+                            .execute(todo);
+                }
+            });
 
             count++;
 
@@ -119,7 +124,11 @@ public class TodoActivity extends AppCompatActivity {
         public void removeItem(int position) {
             orma.deleteFromTodo()
                     .where("id = ?", items.get(position).id)
-                    .execute();
+                    .observable()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe();
+
             items.remove(position);
 
             count--;

@@ -2,6 +2,8 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
+import android.support.annotation.NonNull;
+
 import rx.Single;
 import rx.SingleSubscriber;
 
@@ -18,6 +20,7 @@ public class Deleter<T, C extends Deleter<?, ?>> extends OrmaConditionBase<T, C>
         return conn.delete(schema.getTableName(), getWhereClause(), getWhereArgs());
     }
 
+    @NonNull
     public Single<Integer> observable() {
         return Single.create(new Single.OnSubscribe<Integer>() {
             @Override

@@ -19,7 +19,7 @@ public class Todo {
     @Nullable
     public String content;
 
-    @Column
+    @Column(defaultExpr = "0")
     public boolean done;
 
     @Column

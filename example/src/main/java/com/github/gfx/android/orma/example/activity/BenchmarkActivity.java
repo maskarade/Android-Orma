@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.example.activity;
 
+import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
@@ -24,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,8 +34,10 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import rx.Single;
 import rx.SingleSubscriber;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class BenchmarkActivity extends AppCompatActivity {
 
@@ -80,13 +84,18 @@ public class BenchmarkActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        orma = new OrmaDatabase(this, "benchmark.db");
-        orma.getConnection().resetDatabase();
-
-        RealmConfiguration realmConf = new RealmConfiguration.Builder(this)
+        RealmConfiguration realmConf = new RealmConfiguration.Builder(BenchmarkActivity.this)
                 .build();
         Realm.deleteRealm(realmConf);
         realm = Realm.getInstance(realmConf);
+
+        Schedulers.io().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                orma = new OrmaDatabase(BenchmarkActivity.this, "benchmark.db");
+                orma.getConnection().resetDatabase();
+            }
+        });
     }
 
     @Override
@@ -99,7 +108,6 @@ public class BenchmarkActivity extends AppCompatActivity {
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
 
-        orma.deleteFromTodo().execute();
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -107,47 +115,69 @@ public class BenchmarkActivity extends AppCompatActivity {
             }
         });
         new Delete().from(FlowTodo.class).query();
+        orma.deleteFromTodo()
+                .observable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(new Func1<Integer, Single<Result>>() {
+                    @Override
+                    public Single<Result> call(Integer integer) {
+                        return startInsertWithOrma()
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread());
+                    }
+                })
+                .flatMap(new Func1<Result, Single<Result>>() {
+                    @Override
+                    public Single<Result> call(Result result) {
+                        adapter.add(result);
+                        return startInsertWithRealm(); // Realm objects can only be accessed on the thread they were created.
+                    }
+                })
+                .flatMap(new Func1<Result, Single<Result>>() {
+                    @Override
+                    public Single<Result> call(Result result) {
+                        adapter.add(result);
+                        return startInsertWithDBFlow()
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread());
+                    }
+                })
+                .flatMap(new Func1<Result, Single<Result>>() {
+                    @Override
+                    public Single<Result> call(Result result) {
+                        adapter.add(result);
+                        return startSelectAllWithOrma()
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread());
+                    }
+                })
+                .flatMap(new Func1<Result, Single<Result>>() {
+                    @Override
+                    public Single<Result> call(Result result) {
+                        adapter.add(result);
+                        return startSelectAllWithRealm(); // Realm objects can only be accessed on the thread they were created.
+                    }
+                })
+                .flatMap(new Func1<Result, Single<Result>>() {
+                    @Override
+                    public Single<Result> call(Result result) {
+                        adapter.add(result);
+                        return startSelectAllWithDBFlow()
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread());
+                    }
+                })
+                .subscribe(new SingleSubscriber<Result>() {
+                    @Override
+                    public void onSuccess(Result result) {
+                        adapter.add(result);
+                    }
 
-        startInsertWithOrma()
-                .flatMap(new Func1<Result, Single<Result>>() {
                     @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startInsertWithRealm();
-                    }
-                })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startInsertWithDBFlow();
-                    }
-                })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startSelectAllWithOrma();
-                    }
-                })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startSelectAllWithRealm();
-                    }
-                })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startSelectAllWithDBFlow();
-                    }
-                })
-                .subscribe(new Action1<Result>() {
-                    @Override
-                    public void call(Result result) {
-                        adapter.add(result);
+                    public void onError(Throwable error) {
+                        Log.wtf(TAG, error);
+                        Toast.makeText(BenchmarkActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -155,10 +185,10 @@ public class BenchmarkActivity extends AppCompatActivity {
     Single<Result> startInsertWithOrma() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
-            public void call(SingleSubscriber<? super Result> singleSubscriber) {
+            public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
 
-                orma.transaction(new TransactionTask() {
+                orma.transactionSync(new TransactionTask() {
                     @Override
                     public void execute() throws Exception {
                         long now = System.currentTimeMillis();
@@ -177,7 +207,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     }
                 });
 
-                singleSubscriber.onSuccess(new Result("Orma/insert", System.currentTimeMillis() - t0));
+                subscriber.onSuccess(new Result("Orma/insert", System.currentTimeMillis() - t0));
             }
         });
     }
@@ -185,7 +215,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     Single<Result> startInsertWithRealm() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
-            public void call(SingleSubscriber<? super Result> singleSubscriber) {
+            public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
 
                 realm.executeTransaction(new Realm.Transaction() {
@@ -203,7 +233,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     }
                 });
 
-                singleSubscriber.onSuccess(new Result("Realm/insert", System.currentTimeMillis() - t0));
+                subscriber.onSuccess(new Result("Realm/insert", System.currentTimeMillis() - t0));
             }
         });
     }
@@ -211,7 +241,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     Single<Result> startInsertWithDBFlow() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
-            public void call(SingleSubscriber<? super Result> singleSubscriber) {
+            public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
 
                 TransactionManager.transact(BenchmarkDatabase.NAME, new Runnable() {
@@ -229,7 +259,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     }
                 });
 
-                singleSubscriber.onSuccess(new Result("DBFlow/insert", System.currentTimeMillis() - t0));
+                subscriber.onSuccess(new Result("DBFlow/insert", System.currentTimeMillis() - t0));
             }
         });
     }
@@ -237,7 +267,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     Single<Result> startSelectAllWithOrma() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
-            public void call(SingleSubscriber<? super Result> singleSubscriber) {
+            public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
                 final AtomicInteger count = new AtomicInteger();
 
@@ -249,7 +279,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 });
 
                 Log.d(TAG, "Orma/selectAll count: " + count);
-                singleSubscriber.onSuccess(new Result("Orma/forEachAll", System.currentTimeMillis() - t0));
+                subscriber.onSuccess(new Result("Orma/forEachAll", System.currentTimeMillis() - t0));
             }
         });
     }
@@ -257,7 +287,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     Single<Result> startSelectAllWithRealm() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
-            public void call(SingleSubscriber<? super Result> singleSubscriber) {
+            public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
                 AtomicInteger count = new AtomicInteger();
 
@@ -265,7 +295,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     count.incrementAndGet();
                 }
                 Log.d(TAG, "Realm/selectAll count: " + count);
-                singleSubscriber.onSuccess(new Result("Realm/forEachAll", System.currentTimeMillis() - t0));
+                subscriber.onSuccess(new Result("Realm/forEachAll", System.currentTimeMillis() - t0));
             }
         });
     }
@@ -273,7 +303,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     Single<Result> startSelectAllWithDBFlow() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
-            public void call(SingleSubscriber<? super Result> singleSubscriber) {
+            public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
                 AtomicInteger count = new AtomicInteger();
 
@@ -284,7 +314,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 }
 
                 Log.d(TAG, "DBFlow/selectAll count: " + count);
-                singleSubscriber.onSuccess(new Result("DBFlow/forEachAll", System.currentTimeMillis() - t0));
+                subscriber.onSuccess(new Result("DBFlow/forEachAll", System.currentTimeMillis() - t0));
             }
         });
     }

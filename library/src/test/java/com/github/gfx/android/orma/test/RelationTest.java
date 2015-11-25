@@ -232,7 +232,7 @@ public class RelationTest {
 
     @Test
     public void transactionSuccess() throws Exception {
-        db.transaction(new TransactionTask() {
+        db.transactionSync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
                 Publisher publisher = db.selectFromPublisher().value();
@@ -253,7 +253,7 @@ public class RelationTest {
     @Test
     public void transactionAbort() throws Exception {
         try {
-            db.transaction(new TransactionTask() {
+            db.transactionSync(new TransactionTask() {
                 @Override
                 public void execute() throws Exception {
                     for (int i = 0; i < 5; i++) {

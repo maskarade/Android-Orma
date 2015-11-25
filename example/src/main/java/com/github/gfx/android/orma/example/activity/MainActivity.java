@@ -26,6 +26,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -82,7 +85,15 @@ public class MainActivity extends AppCompatActivity
                 super.execSQL(db, statement);
             }
         });
-        simpleCRUD();
+
+        Schedulers.io()
+                .createWorker()
+                .schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        simpleCRUD();
+                    }
+                });
     }
 
     /**
