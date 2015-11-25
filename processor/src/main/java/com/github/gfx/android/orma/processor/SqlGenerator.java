@@ -53,6 +53,10 @@ public class SqlGenerator {
             }
         }
 
+        if (!Strings.isEmpty(column.defaultExpr)) {
+            constraints.add("DEFAULT (" + column.defaultExpr + ")");
+        }
+
         if (!Strings.isEmpty(column.collate)) {
             constraints.add("COLLATE " + column.collate);
         }

@@ -148,16 +148,28 @@ public class DatabaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("transaction")
+                MethodSpec.methodBuilder("transactionSync")
                         .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                         .build())
-                        .addStatement("$L.transaction(task)", connection)
+                        .addStatement("$L.transactionSync(task)", connection)
                         .build()
         );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("transactionAsync")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Types.TransactionTask, "task")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addStatement("$L.transactionAsync(task)", connection)
+                        .build()
+        );
+
 
         schemas.forEach(schema -> {
             String simpleModelName = schema.getModelClassName().simpleName();

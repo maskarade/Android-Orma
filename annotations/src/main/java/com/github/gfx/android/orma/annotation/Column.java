@@ -25,6 +25,11 @@ public @interface Column {
     boolean unique() default false;
 
     /**
+     * @return Specifies the DEFAULT expression in terms of DDL.
+     */
+    String defaultExpr() default "";
+
+    /**
      * @return Specifies how the column is compared. Must be one of {@code "BINARY"}, {@code "NOCASE"} or {@code "RTRIM"}
      */
     String collate() default "";

@@ -36,6 +36,8 @@ public class ColumnDefinition {
 
     public final boolean unique;
 
+    public final String defaultExpr;
+
     public final String collate;
 
     public Element getter;
@@ -56,13 +58,15 @@ public class ColumnDefinition {
         type = ClassName.get(element.asType());
 
         if (column != null) {
-            collate = column.collate();
             indexed = column.indexed();
             unique = column.unique();
+            collate = column.collate();
+            defaultExpr = column.defaultExpr();
         } else {
-            collate = null;
             indexed = false;
             unique = false;
+            defaultExpr = null;
+            collate = null;
         }
 
         if (primaryKeyAnnotation != null) {
