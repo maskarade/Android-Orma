@@ -16,6 +16,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,8 +30,18 @@ import static org.hamcrest.Matchers.*;
 public class SchemaDiffTest {
 
     static final List<NamedDdl> namedDdls = Arrays.asList(
-          new NamedDdl("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)", Collections.<String>emptyList()),
-          new NamedDdl("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)", Collections.<String>emptyList())
+            new NamedDdl("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)", Collections.<String>emptyList()),
+            new NamedDdl("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)", Collections.<String>emptyList())
+    );
+
+    static final List<NamedDdl> namedDdlsWithIndexes = Arrays.asList(
+            new NamedDdl("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
+                    Arrays.asList(
+                            "CREATE INDEX \"index_field01_on_foo\" (\"field01\")",
+                            "CREATE INDEX \"index_field02_on_foo\" (\"field02\")"
+                    )),
+            new NamedDdl("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)",
+                    Collections.<String>emptyList())
     );
 
     static class OpenHelper extends SQLiteOpenHelper {
@@ -85,10 +96,36 @@ public class SchemaDiffTest {
 
     @Test
     public void diffAll_createTable() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db,  namedDdls.subList(0, 1));
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls.subList(0, 1));
 
         List<String> statements = migration.diffAll(namedDdls, metadata);
 
-        assertThat(statements, contains(namedDdls.get(1).getCreateTableStatement()));
+        assertThat(statements, is(Collections.singletonList(namedDdls.get(1).getCreateTableStatement())));
     }
+
+    @Test
+    public void diffAll_createTableAndCreateIndexes() throws Exception {
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdlsWithIndexes.subList(1, 2));
+
+        List<String> statements = migration.diffAll(namedDdlsWithIndexes, metadata);
+
+        List<String> expectedStatements = new ArrayList<>();
+        NamedDdl ddl = namedDdlsWithIndexes.get(0);
+        expectedStatements.add(ddl.getCreateTableStatement());
+        expectedStatements.addAll(ddl.getCreateIndexStatements());
+
+        assertThat(statements, is(expectedStatements));
+    }
+
+    @Test
+    public void diffAll_createIndexes() throws Exception {
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls);
+
+        List<String> statements = migration.diffAll(namedDdlsWithIndexes, metadata);
+
+        System.out.println(statements.toString());
+
+        assertThat(statements, is(namedDdlsWithIndexes.get(0).getCreateIndexStatements()));
+    }
+
 }

@@ -17,6 +17,7 @@ public class SchemaDiffMigrationTest {
     @Test
     public void testBuildConfig() throws Exception {
         assertThat(BuildConfig.VERSION_NAME, not(isEmptyString()));
-
     }
+
+
 }

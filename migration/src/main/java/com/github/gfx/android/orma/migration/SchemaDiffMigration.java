@@ -94,6 +94,7 @@ public class SchemaDiffMigration implements MigrationEngine {
             SQLiteMaster table = dbTables.get(schema.getTableName());
             if (table == null) {
                 statements.add(schema.getCreateTableStatement());
+                statements.addAll(schema.getCreateIndexStatements());
             } else {
                 if (!table.sql.equals(schema.getCreateTableStatement())) {
                     statements.addAll(tableDiff(table.sql, schema.getCreateTableStatement()));
