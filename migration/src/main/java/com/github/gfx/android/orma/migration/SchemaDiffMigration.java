@@ -36,7 +36,7 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     final SqliteDdlBuilder builder = new SqliteDdlBuilder();
 
-    public SchemaDiffMigration(Context context) {
+    public SchemaDiffMigration(@NonNull Context context) {
         version = extractVersion(context);
         debug = extractDebug(context);
     }
@@ -69,7 +69,7 @@ public class SchemaDiffMigration implements MigrationEngine {
         start(db, schemas);
     }
 
-    public void start(SQLiteDatabase db, List<NamedDdl> schemas) {
+    public void start(@NonNull SQLiteDatabase db, @NonNull List<NamedDdl> schemas) {
         if (debug) {
             Log.v(TAG, "migration start");
         }
@@ -77,7 +77,7 @@ public class SchemaDiffMigration implements MigrationEngine {
         long t0 = System.currentTimeMillis();
 
         Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
-        List<String> statements = diffAll(schemas, metadata);
+        List<String> statements = diffAll(metadata, schemas);
         executeStatements(db, statements);
 
         if (debug) {
@@ -86,7 +86,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @NonNull
-    public List<String> diffAll(List<NamedDdl> schemas, Map<String, SQLiteMaster> dbTables) {
+    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables, @NonNull List<NamedDdl> schemas) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database

@@ -89,7 +89,7 @@ public class SchemaDiffTest {
     public void diffAll_doNothing() throws Exception {
         Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls);
 
-        List<String> statements = migration.diffAll(namedDdls, metadata);
+        List<String> statements = migration.diffAll(metadata, namedDdls);
 
         assertThat(statements, is(empty()));
     }
@@ -98,7 +98,7 @@ public class SchemaDiffTest {
     public void diffAll_createTable() throws Exception {
         Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls.subList(0, 1));
 
-        List<String> statements = migration.diffAll(namedDdls, metadata);
+        List<String> statements = migration.diffAll(metadata, namedDdls);
 
         assertThat(statements, is(Collections.singletonList(namedDdls.get(1).getCreateTableStatement())));
     }
@@ -107,7 +107,7 @@ public class SchemaDiffTest {
     public void diffAll_createTableAndCreateIndexes() throws Exception {
         Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdlsWithIndexes.subList(1, 2));
 
-        List<String> statements = migration.diffAll(namedDdlsWithIndexes, metadata);
+        List<String> statements = migration.diffAll(metadata, namedDdlsWithIndexes);
 
         List<String> expectedStatements = new ArrayList<>();
         NamedDdl ddl = namedDdlsWithIndexes.get(0);
@@ -121,7 +121,7 @@ public class SchemaDiffTest {
     public void diffAll_createIndexes() throws Exception {
         Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls);
 
-        List<String> statements = migration.diffAll(namedDdlsWithIndexes, metadata);
+        List<String> statements = migration.diffAll(metadata, namedDdlsWithIndexes);
 
         System.out.println(statements.toString());
 
