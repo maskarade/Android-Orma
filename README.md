@@ -70,6 +70,8 @@ orma.addTypeAdapters(TypeAdapterRegistry.defaultTypeAdapters());
 
 Then, you can create, read, update and delete models.
 
+Note that **Orma prohibit DB access on main thread**. Use background threads explicitly or RxJava interfaces.
+
 ```java
 Todo todo = ...;
 
@@ -77,7 +79,7 @@ Todo todo = ...;
 orma.insertIntoTodo(todo);
 
 // prepared statements with transaction
-orma.transaction( -> {
+orma.transactionSync( -> { // or transactionAsync() to execute tasks in background
     Inserter<Todo> inserter = orma.prepareInsertIntoTodo();
     inserter.execute(todo);
 });
