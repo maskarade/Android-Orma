@@ -118,13 +118,12 @@ public class OrmaConnection extends SQLiteOpenHelper {
         SQLiteDatabase db = getDatabase();
         String sql = SQLiteQueryBuilder.buildQueryString(
                 false, table, columns, whereClause, groupBy, having, orderBy, limit);
-
+        trace(sql);
         return db.rawQueryWithFactory(null, sql, whereArgs, table);
     }
 
     public int count(String table, String whereClause, String[] whereArgs) {
-        SQLiteDatabase db = getDatabase();
-        Cursor cursor = db.query(table, countSelections, whereClause, whereArgs, null, null, null);
+        Cursor cursor = query(table, countSelections, whereClause, whereArgs, null, null, null, null);
         try {
             cursor.moveToFirst();
             return cursor.getInt(0);
@@ -135,9 +134,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
             String having, String orderBy) {
-        SQLiteDatabase db = getDatabase();
-        Cursor cursor = db.query(schema.getTableName(), columns, whereClause, whereArgs, groupBy,
-                having, orderBy, "1");
+        Cursor cursor = query(schema.getTableName(), columns, whereClause, whereArgs, groupBy, having, orderBy, "1");
 
         try {
             if (cursor.moveToFirst()) {
@@ -213,9 +210,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     private void execSQL(SQLiteDatabase db, String sql) {
-        if (trace) {
-            Log.v(TAG, sql);
-        }
+        trace(sql);
         db.execSQL(sql);
     }
 
@@ -230,6 +225,12 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
 
         return list;
+    }
+
+    private void trace(String sql) {
+        if (trace) {
+            Log.v(TAG, sql);
+        }
     }
 
     // SQLiteOpenHelper
