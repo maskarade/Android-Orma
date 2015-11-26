@@ -69,7 +69,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     private String getLimitClause() {
         if (limit != -1) {
             if (offset != -1) {
-                return limit + "," + offset;
+                return offset + "," + limit;
             } else {
                 return String.valueOf(limit);
             }

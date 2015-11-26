@@ -37,6 +37,8 @@ public class RelationTest {
 
     OrmaDatabase db;
 
+    Publisher publisher;
+
     Context getContext() {
         return RuntimeEnvironment.application;
     }
@@ -45,7 +47,7 @@ public class RelationTest {
     public void setUp() throws Exception {
         db = new OrmaDatabase(getContext(), null);
 
-        final Publisher publisher = db.createPublisher(new ModelBuilder<Publisher>() {
+        publisher = db.createPublisher(new ModelBuilder<Publisher>() {
             @Override
             public Publisher build() {
                 Publisher publisher = new Publisher();
@@ -220,10 +222,22 @@ public class RelationTest {
 
     @Test
     public void limitAndOffset() throws Exception {
-        List<Book> books = db.selectFromBook().limit(1).offset(1).toList();
-        assertThat(books, hasSize(1));
-        assertThat(books.get(0).title, is("friday"));
-        assertThat(books.get(0).content, is("apple"));
+        for (int i = 0; i < 10; i++) {
+            Book book = new Book();
+            book.title = "title #" + i;
+            book.content = "blah blah blah #" + i;
+            book.publisher = SingleRelation.id(publisher.id);
+
+            db.insertIntoBook(book);
+        }
+
+        List<Book> books = db.selectFromBook().limit(2).offset(0).toList();
+        assertThat(books, hasSize(2));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
+
+        assertThat(books.get(1).title, is("friday"));
+        assertThat(books.get(1).content, is("apple"));
     }
 
     @Test
