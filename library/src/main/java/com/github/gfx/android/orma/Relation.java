@@ -83,7 +83,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     }
 
     public int count() {
-        return conn.count(schema.getTableName(), getWhereClause(), getWhereArgs());
+        return conn.count(schema, getWhereClause(), getWhereArgs());
     }
 
     @NonNull
@@ -116,7 +116,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
 
     @NonNull
     public Cursor query() {
-        return conn.query(schema.getTableName(), schema.getEscapedColumnNames(), getWhereClause(),
+        return conn.query(schema, schema.getEscapedColumnNames(), getWhereClause(),
                 getWhereArgs(), groupBy, having, orderBy, getLimitClause());
     }
 

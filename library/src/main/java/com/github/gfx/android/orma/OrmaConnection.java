@@ -108,22 +108,23 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return sth.execute(model);
     }
 
-    public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
+    public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getDatabase();
-        return db.updateWithOnConflict(table, values, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
+        return db.updateWithOnConflict(schema.getTableName(), values, whereClause, whereArgs,
+                SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
-    public Cursor query(String table, String[] columns, String whereClause, String[] whereArgs,
+    public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] whereArgs,
             String groupBy, String having, String orderBy, String limit) {
         SQLiteDatabase db = getDatabase();
         String sql = SQLiteQueryBuilder.buildQueryString(
-                false, table, columns, whereClause, groupBy, having, orderBy, limit);
+                false, schema.getTableName(), columns, whereClause, groupBy, having, orderBy, limit);
         trace(sql);
-        return db.rawQueryWithFactory(null, sql, whereArgs, table);
+        return db.rawQueryWithFactory(null, sql, whereArgs, schema.getTableName());
     }
 
-    public int count(String table, String whereClause, String[] whereArgs) {
-        Cursor cursor = query(table, countSelections, whereClause, whereArgs, null, null, null, null);
+    public int count(Schema<?> schema, String whereClause, String[] whereArgs) {
+        Cursor cursor = query(schema, countSelections, whereClause, whereArgs, null, null, null, null);
         try {
             cursor.moveToFirst();
             return cursor.getInt(0);
@@ -134,7 +135,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
             String having, String orderBy) {
-        Cursor cursor = query(schema.getTableName(), columns, whereClause, whereArgs, groupBy, having, orderBy, "1");
+        Cursor cursor = query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy, "1");
 
         try {
             if (cursor.moveToFirst()) {
@@ -147,10 +148,36 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
-    public int delete(@NonNull String table, @Nullable String whereClause, @Nullable String[] whereArgs) {
+    public int delete(@NonNull Schema<?> schema, @Nullable String whereClause, @Nullable String[] whereArgs) {
         SQLiteDatabase db = getDatabase();
-        return db.delete(table, whereClause, whereArgs);
+        return db.delete(schema.getTableName(), whereClause, whereArgs);
     }
+
+    public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
+        SQLiteDatabase db = getDatabase();
+        db.beginTransactionNonExclusive();
+
+        try {
+            task.execute();
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            task.onError(e);
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public void transactionNonExclusiveAsync(@NonNull final TransactionTask task) {
+        Schedulers.io()
+                .createWorker()
+                .schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        transactionNonExclusiveSync(task);
+                    }
+                });
+    }
+
 
     public void transactionSync(@NonNull TransactionTask task) {
         SQLiteDatabase db = getDatabase();
@@ -181,15 +208,17 @@ public class OrmaConnection extends SQLiteOpenHelper {
      * Drops and creates all the tables. This is provided for testing.
      */
     public void resetDatabase() {
-        transactionSync(new TransactionTask() {
-            @Override
-            public void execute() throws Exception {
-                SQLiteDatabase db = getDatabase();
+        SQLiteDatabase db = getDatabase();
+        try {
+            db.beginTransaction();
 
-                dropAllTables(db);
-                createAllTables(db);
-            }
-        });
+            dropAllTables(db);
+            createAllTables(db);
+
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
     }
 
 

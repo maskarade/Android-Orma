@@ -25,7 +25,7 @@ public class Updater<T, C extends Updater<?, ?>> extends OrmaConditionBase<T, C>
      * @return The number of rows updated.
      */
     public int execute() {
-        return conn.update(schema.getTableName(), contents, getWhereClause(), getWhereArgs());
+        return conn.update(schema, contents, getWhereClause(), getWhereArgs());
     }
 
     @NonNull

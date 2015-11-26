@@ -9,6 +9,9 @@ import java.util.List;
 public interface Schema<T> {
 
     @NonNull
+    Class<T> getModelClass();
+
+    @NonNull
     String getTableName();
 
     @NonNull

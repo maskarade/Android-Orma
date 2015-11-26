@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -202,6 +203,15 @@ public class SchemaWriter {
         List<AnnotationSpec> overrideAndNullable = Arrays.asList(
                 Specs.buildNullableAnnotationSpec(),
                 Specs.buildOverrideAnnotationSpec()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getModelClass")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(ParameterizedTypeName.get(ClassName.get(Class.class), schema.getModelClassName()))
+                        .addStatement("return $T.class", schema.getModelClassName())
+                        .build()
         );
 
         methodSpecs.add(
