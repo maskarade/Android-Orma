@@ -6,15 +6,15 @@ import android.support.annotation.NonNull;
 /**
  * Represents a prepared statement to insert models in batch.
  */
-public class Inserter<T> {
+public class Inserter<Model> {
 
     final OrmaConnection conn;
 
-    final Schema<T> schema;
+    final Schema<Model> schema;
 
     final SQLiteStatement statement;
 
-    public Inserter(OrmaConnection conn, Schema<T> schema, SQLiteStatement statement) {
+    public Inserter(OrmaConnection conn, Schema<Model> schema, SQLiteStatement statement) {
         this.conn = conn;
         this.schema = schema;
         this.statement = statement;
@@ -29,7 +29,7 @@ public class Inserter<T> {
      * @param model a model object to insert
      * @return The last inserted row id.
      */
-    public long execute(@NonNull T model) {
+    public long execute(@NonNull Model model) {
         schema.bindArgs(conn, statement, model);
         return statement.executeInsert();
     }

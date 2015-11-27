@@ -17,7 +17,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
 
-public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditionBase<T, R> {
+public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaConditionBase<Model, R> {
 
     @Nullable
     protected String groupBy;
@@ -34,7 +34,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
 
     protected long page = -1;
 
-    public Relation(@NonNull OrmaConnection connection, @NonNull Schema<T> schema) {
+    public Relation(@NonNull OrmaConnection connection, @NonNull Schema<Model> schema) {
         super(connection, schema);
     }
 
@@ -83,7 +83,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     @Nullable
     private String getLimitClause() {
         if (page != -1 && offset != -1) {
-            throw new IllegalArgumentException("page() and offset() are exclusive. Use either.");
+            throw new InvalidStatementException("page() and offset() are exclusive. Use either.");
         }
 
         if (limit != -1) {
@@ -96,7 +96,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
             }
         } else { // when limit == -1, offset and page must be -1
             if (offset != -1 || page != -1) {
-                throw new InvalidStatementException("Missing limit() where offset() or page() is specified.");
+                throw new InvalidStatementException("Missing limit() when offset() or page() is specified.");
             } else {
                 return null;
             }
@@ -120,14 +120,14 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     }
 
     @Nullable
-    public T valueOrNull() {
+    public Model valueOrNull() {
         return conn.querySingle(schema, schema.getEscapedColumnNames(),
                 getWhereClause(), getWhereArgs(), groupBy, having, orderBy);
     }
 
     @NonNull
-    public T value() throws NoValueException {
-        T model = valueOrNull();
+    public Model value() throws NoValueException {
+        Model model = valueOrNull();
 
         if (model == null) {
             throw new NoValueException("Expected single value but nothing for " + schema.getTableName());
@@ -143,12 +143,12 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     }
 
     @NonNull
-    public List<T> toList() {
-        final ArrayList<T> list = new ArrayList<>();
+    public List<Model> toList() {
+        final ArrayList<Model> list = new ArrayList<>();
 
-        forEach(new Action1<T>() {
+        forEach(new Action1<Model>() {
             @Override
-            public void call(T item) {
+            public void call(Model item) {
                 list.add(item);
             }
         });
@@ -156,7 +156,7 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
         return list;
     }
 
-    public void forEach(@NonNull Action1<T> action) {
+    public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = query();
 
         if (cursor.moveToFirst()) {
@@ -168,13 +168,13 @@ public abstract class Relation<T, R extends Relation<?, ?>> extends OrmaConditio
     }
 
     @NonNull
-    public Observable<T> observable() {
-        return Observable.create(new Observable.OnSubscribe<T>() {
+    public Observable<Model> observable() {
+        return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
-            public void call(final Subscriber<? super T> subscriber) {
-                forEach(new Action1<T>() {
+            public void call(final Subscriber<? super Model> subscriber) {
+                forEach(new Action1<Model>() {
                     @Override
-                    public void call(T item) {
+                    public void call(Model item) {
                         subscriber.onNext(item);
                     }
                 });

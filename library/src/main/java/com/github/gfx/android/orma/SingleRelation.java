@@ -7,36 +7,39 @@ import android.support.annotation.NonNull;
 import rx.Single;
 import rx.SingleSubscriber;
 
-public class SingleRelation<T> {
+/**
+ * Represents a has-one relation with lazy loading.
+ * @param <Model> The type of a model to relate.
+ */
+public class SingleRelation<Model> {
 
     final long id;
 
-    final Single<T> single;
+    final Single<Model> single;
 
-    public SingleRelation(long id, T model) {
+    public SingleRelation(long id, Model model) {
         this.id = id;
         this.single = Single.just(model);
     }
 
-    public SingleRelation(long id, Single<T> single) {
+    public SingleRelation(long id, Single<Model> single) {
         this.id = id;
         this.single = single;
     }
 
-    public SingleRelation(@NonNull final OrmaConnection conn, @NonNull final Schema<T> schema, final long id) {
+    public SingleRelation(@NonNull final OrmaConnection conn, @NonNull final Schema<Model> schema, final long id) {
         this.id = id;
-        single = Single.create(new Single.OnSubscribe<T>() {
+        single = Single.create(new Single.OnSubscribe<Model>() {
             @Override
-            public void call(SingleSubscriber<? super T> singleSubscriber) {
+            public void call(SingleSubscriber<? super Model> subscriber) {
                 ColumnDef<?> primaryKey = schema.getPrimaryKey();
-                assert primaryKey != null;
                 String whereClause = "\"" + primaryKey.name + "\" = ?";
                 String[] whereArgs = {String.valueOf(id)};
-                T model = conn.querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null);
+                Model model = conn.querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null);
                 if (model != null) {
-                    singleSubscriber.onSuccess(model);
+                    subscriber.onSuccess(model);
                 } else {
-                    singleSubscriber.onError(new NoValueException("No value found for "
+                    subscriber.onError(new NoValueException("No value found for "
                             + schema.getTableName() + "." + primaryKey.name + " = " + id));
                 }
             }
@@ -61,7 +64,7 @@ public class SingleRelation<T> {
     }
 
     @NonNull
-    public Single<T> single() {
+    public Single<Model> single() {
         return single;
     }
 }

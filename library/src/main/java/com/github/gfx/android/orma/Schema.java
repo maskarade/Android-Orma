@@ -6,10 +6,10 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-public interface Schema<T> {
+public interface Schema<Model> {
 
     @NonNull
-    Class<T> getModelClass();
+    Class<Model> getModelClass();
 
     @NonNull
     String getTableName();
@@ -35,10 +35,10 @@ public interface Schema<T> {
     @NonNull
     String getInsertStatement();
 
-    void populateValuesIntoModel(@NonNull OrmaConnection conn, @NonNull Cursor cursor, @NonNull T model);
+    void populateValuesIntoModel(@NonNull OrmaConnection conn, @NonNull Cursor cursor, @NonNull Model model);
 
-    void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull T model);
+    void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model);
 
     @NonNull
-    T createModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor);
+    Model createModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor);
 }
