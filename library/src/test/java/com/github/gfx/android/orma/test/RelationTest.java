@@ -241,6 +241,31 @@ public class RelationTest {
     }
 
     @Test
+    public void pageAndPer() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            Book book = new Book();
+            book.title = "title #" + i;
+            book.content = "blah blah blah #" + i;
+            book.publisher = SingleRelation.id(publisher.id);
+
+            db.insertIntoBook(book);
+        }
+
+        List<Book> books = db.selectFromBook().page(1).per(2).toList();
+        assertThat(books, hasSize(2));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
+
+        assertThat(books.get(1).title, is("friday"));
+        assertThat(books.get(1).content, is("apple"));
+
+        books = db.selectFromBook().page(2).per(2).toList();
+        assertThat(books, hasSize(2));
+        assertThat(books.get(0).title, is("title #0"));
+        assertThat(books.get(1).title, is("title #1"));
+    }
+
+    @Test
     public void offset() throws Exception {
         try {
             db.selectFromBook().offset(1).toList();
