@@ -2,7 +2,6 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.adapter.StringListAdapter;
-import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.TypeAdapterNotFoundException;
 import com.github.gfx.android.orma.internal.ParameterizedTypes;
@@ -38,9 +37,7 @@ public class TypeAdaptersTest {
     TypeAdapterRegistry registry = new TypeAdapterRegistry();
 
     {
-        for (TypeAdapter<?> typeAdapter : TypeAdapterRegistry.defaultTypeAdapters()) {
-            registry.add(typeAdapter);
-        }
+        registry.addAll(TypeAdapterRegistry.defaultTypeAdapters());
     }
 
     @Test

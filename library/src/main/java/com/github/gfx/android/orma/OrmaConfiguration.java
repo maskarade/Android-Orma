@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
@@ -16,7 +17,8 @@ public class OrmaConfiguration {
     @Nullable
     String name;
 
-    @NonNull
+    TypeAdapterRegistry typeAdapterRegistry;
+
     MigrationEngine migrationEngine;
 
     boolean wal = true;
@@ -33,7 +35,8 @@ public class OrmaConfiguration {
         this.context = context.getApplicationContext();
         this.debug = extractDebuggable(context);
         this.name = context.getPackageName() + ".orma.db";
-        this.migrationEngine = new SchemaDiffMigration(context, debug);
+
+        // debug flags
 
         trace = debug;
 
@@ -45,6 +48,12 @@ public class OrmaConfiguration {
             writeOnMainThread = AccessThreadConstraint.NONE;
         }
     }
+
+    static boolean extractDebuggable(Context context) {
+        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
+                == ApplicationInfo.FLAG_DEBUGGABLE;
+    }
+
 
     public OrmaConfiguration name(@Nullable String name) {
         this.name = name;
@@ -76,8 +85,17 @@ public class OrmaConfiguration {
         return this;
     }
 
-    static boolean extractDebuggable(Context context) {
-        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
-                == ApplicationInfo.FLAG_DEBUGGABLE;
+    public OrmaConfiguration fillDefaults() {
+
+        if (migrationEngine == null) {
+            migrationEngine = new SchemaDiffMigration(context, debug);
+        }
+
+        if (typeAdapterRegistry == null) {
+            typeAdapterRegistry = new TypeAdapterRegistry();
+            typeAdapterRegistry.addAll(TypeAdapterRegistry.defaultTypeAdapters());
+        }
+
+        return this;
     }
 }

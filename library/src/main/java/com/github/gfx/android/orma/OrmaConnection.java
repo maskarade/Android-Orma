@@ -100,9 +100,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public void addTypeAdapters(TypeAdapter<?>... adapters) {
-        for (TypeAdapter<?> typeAdapter : adapters) {
-            typeAdapters.add(typeAdapter);
-        }
+        typeAdapters.addAll(adapters);
     }
 
     public <T> T createModel(Schema<T> schema, ModelBuilder<T> builder) {

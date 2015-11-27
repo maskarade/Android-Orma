@@ -22,8 +22,14 @@ public class TypeAdapterRegistry {
         };
     }
 
-    public <SourceType> void add(TypeAdapter<SourceType> adapter) {
+    public <SourceType> void add(@NonNull TypeAdapter<SourceType> adapter) {
         adapters.put(adapter.getSourceType(), adapter);
+    }
+
+    public void addAll(@NonNull TypeAdapter<?>... adapters) {
+        for (TypeAdapter<?> typeAdapter : adapters) {
+            add(typeAdapter);
+        }
     }
 
     @NonNull

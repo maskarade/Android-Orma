@@ -34,7 +34,7 @@ public class MigrationEngineTest {
     }
 
     @Test
-    public void start() throws Exception {
+    public void startEmpty() throws Exception {
         migration.start(conn.getWritableDatabase(), conn.getNamedDdls());
     }
 
