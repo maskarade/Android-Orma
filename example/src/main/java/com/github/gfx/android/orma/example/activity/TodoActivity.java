@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.example.activity;
 
+import com.github.gfx.android.orma.OrmaConfiguration;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
@@ -44,7 +45,7 @@ public class TodoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_todo);
 
-        orma = new OrmaDatabase(this, "main.db");
+        orma = new OrmaDatabase(new OrmaConfiguration(this));
 
         adapter = new Adapter();
         binding.list.setAdapter(adapter);

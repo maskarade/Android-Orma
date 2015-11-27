@@ -274,6 +274,7 @@ public class DatabaseWriter {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
         methodSpecs.add(MethodSpec.constructorBuilder()
+                .addAnnotation(Deprecated.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(
                         ParameterSpec.builder(Types.Context, "context")
@@ -283,26 +284,18 @@ public class DatabaseWriter {
                         ParameterSpec.builder(Types.String, "name")
                                 .addAnnotation(Specs.buildNullableAnnotationSpec())
                                 .build())
-                .addStatement("this(new $T(context, name, $L))", Types.OrmaConnection, SCHEMAS)
+                .addStatement("this(new $T(new $T(context).name(name), $L))",
+                        Types.OrmaConnection, Types.OrmaConfiguration, SCHEMAS)
                 .addJavadoc("Create a database context that handles $L.\n", getListOfModelClassesForJavadoc())
                 .build());
 
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(
-                        ParameterSpec.builder(Types.Context, "context")
+                        ParameterSpec.builder(Types.OrmaConfiguration, "configuration")
                                 .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                 .build())
-                .addParameter(
-                        ParameterSpec.builder(Types.String, "name")
-                                .addAnnotation(Specs.buildNullableAnnotationSpec())
-                                .build())
-                .addParameter(
-                        ParameterSpec.builder(Types.MigrationEngine, "migration")
-                                .addAnnotation(Specs.buildNullableAnnotationSpec())
-                                .build())
-                .addStatement("this(new $T(context, name, $L, migration))", Types.OrmaConnection, SCHEMAS)
-                .addJavadoc("Create a database context that handles $L.\n", getListOfModelClassesForJavadoc())
+                .addStatement("this(new $T(configuration, $L))", Types.OrmaConnection, SCHEMAS)
                 .build());
 
         methodSpecs.add(MethodSpec.constructorBuilder()

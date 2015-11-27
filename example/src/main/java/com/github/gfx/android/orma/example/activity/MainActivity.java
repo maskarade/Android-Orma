@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.example.activity;
 
+import com.github.gfx.android.orma.OrmaConfiguration;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
@@ -80,14 +81,17 @@ public class MainActivity extends AppCompatActivity
         final ArrayAdapter<String> logsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         activityMain.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
 
-        orma = new OrmaDatabase(this, "main.db", new SchemaDiffMigration(this) {
-            @Override
-            public void executeStatements(SQLiteDatabase db, List<String> statements) {
-                logsAdapter.addAll(statements);
+        OrmaConfiguration conf = new OrmaConfiguration(this)
+                .migrationEngine(new SchemaDiffMigration(this) {
+                    @Override
+                    public void executeStatements(SQLiteDatabase db, List<String> statements) {
+                        logsAdapter.addAll(statements);
 
-                super.executeStatements(db, statements);
-            }
-        });
+                        super.executeStatements(db, statements);
+                    }
+                });
+
+        orma = new OrmaDatabase(conf);
 
         Schedulers.io()
                 .createWorker()

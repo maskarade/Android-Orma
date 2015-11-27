@@ -5,12 +5,9 @@ import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.NamedDdl;
-import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -38,29 +35,29 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final MigrationEngine migration;
 
-    final boolean trace;
+    final boolean wal;
 
-    final boolean checkDbAccessOnMainThread;
+    final boolean trace;
 
     final TypeAdapterRegistry typeAdapters = new TypeAdapterRegistry();
 
-    public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas) {
-        this(context, filename, schemas, new SchemaDiffMigration(context));
-    }
+    final AccessThreadConstraint readOnMainThread;
 
-    public OrmaConnection(@NonNull Context context, @Nullable String filename, List<Schema<?>> schemas,
-            @NonNull MigrationEngine migration) {
-        super(context.getApplicationContext(), filename, null, migration.getVersion());
+    final AccessThreadConstraint writeOnMainThread;
+
+    public OrmaConnection(@NonNull OrmaConfiguration configuration, List<Schema<?>> schemas) {
+        super(configuration.context, configuration.name, null, configuration.migrationEngine.getVersion());
         this.schemas = schemas;
-        this.migration = migration;
-        boolean debug = extractDebug(context);
-        this.trace = debug;
-        this.checkDbAccessOnMainThread = debug;
-        enableWal();
-    }
+        this.migration = configuration.migrationEngine;
+        this.wal = configuration.wal;
 
-    static boolean extractDebug(Context context) {
-        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) == ApplicationInfo.FLAG_DEBUGGABLE;
+        this.trace = configuration.debug;
+        this.readOnMainThread = configuration.readOnMainThread;
+        this.writeOnMainThread = configuration.readOnMainThread;
+
+        if (wal) {
+            enableWal();
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -70,13 +67,32 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
-    public SQLiteDatabase getDatabase() {
-        if (checkDbAccessOnMainThread) {
+    @Override
+    public SQLiteDatabase getWritableDatabase() {
+        if (writeOnMainThread != AccessThreadConstraint.NONE) {
             if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-                throw new DatabaseAccessOnMainThreadException("You have to access database in background");
+                if (writeOnMainThread == AccessThreadConstraint.FATAL) {
+                    throw new DatabaseAccessOnMainThreadException("Writing things must run in background");
+                } else {
+                    Log.w(TAG, "Writing things must run in background");
+                }
             }
         }
-        return getWritableDatabase();
+        return super.getWritableDatabase();
+    }
+
+    @Override
+    public SQLiteDatabase getReadableDatabase() {
+        if (readOnMainThread != AccessThreadConstraint.NONE) {
+            if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+                if (readOnMainThread == AccessThreadConstraint.FATAL) {
+                    throw new DatabaseAccessOnMainThreadException("Reading things must run in background");
+                } else {
+                    Log.w(TAG, "Reading things must run in background");
+                }
+            }
+        }
+        return super.getReadableDatabase();
     }
 
     public TypeAdapterRegistry getTypeAdapters() {
@@ -98,7 +114,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public <T> Inserter<T> prepareInsert(Schema<T> schema) {
-        SQLiteDatabase db = getDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         SQLiteStatement statement = db.compileStatement(schema.getInsertStatement());
         return new Inserter<>(this, schema, statement);
     }
@@ -109,14 +125,14 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
-        SQLiteDatabase db = getDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         return db.updateWithOnConflict(schema.getTableName(), values, whereClause, whereArgs,
                 SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
     public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] whereArgs,
             String groupBy, String having, String orderBy, String limit) {
-        SQLiteDatabase db = getDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         String sql = SQLiteQueryBuilder.buildQueryString(
                 false, schema.getTableName(), columns, whereClause, groupBy, having, orderBy, limit);
         trace(sql);
@@ -149,12 +165,12 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public int delete(@NonNull Schema<?> schema, @Nullable String whereClause, @Nullable String[] whereArgs) {
-        SQLiteDatabase db = getDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         return db.delete(schema.getTableName(), whereClause, whereArgs);
     }
 
     public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
-        SQLiteDatabase db = getDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         db.beginTransactionNonExclusive();
 
         try {
@@ -180,7 +196,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
 
     public void transactionSync(@NonNull TransactionTask task) {
-        SQLiteDatabase db = getDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
 
         try {
@@ -208,7 +224,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
      * Drops and creates all the tables. This is provided for testing.
      */
     public void resetDatabase() {
-        SQLiteDatabase db = getDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         try {
             db.beginTransaction();
 
@@ -267,7 +283,9 @@ public class OrmaConnection extends SQLiteOpenHelper {
     @Override
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
-        db.enableWriteAheadLogging();
+        if (wal) {
+            db.enableWriteAheadLogging();
+        }
     }
 
     @Override

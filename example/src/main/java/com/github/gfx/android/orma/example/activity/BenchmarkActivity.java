@@ -2,6 +2,7 @@ package com.github.gfx.android.orma.example.activity;
 
 import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
 import com.github.gfx.android.orma.Inserter;
+import com.github.gfx.android.orma.OrmaConfiguration;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityBenchmarkBinding;
@@ -92,7 +93,7 @@ public class BenchmarkActivity extends AppCompatActivity {
         Schedulers.io().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-                orma = new OrmaDatabase(BenchmarkActivity.this, "benchmark.db");
+                orma = new OrmaDatabase(new OrmaConfiguration(BenchmarkActivity.this).name("orma-benchmark.db"));
                 orma.getConnection().resetDatabase();
             }
         });
