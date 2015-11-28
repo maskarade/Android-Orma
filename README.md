@@ -67,10 +67,11 @@ To make it:
 
 ```java
 // see OrmaConfiguration for options
+// each value is the default value.
 OrmaDatabase orma = OrmaDatabase.builder(context)
-    .name("main.db") // optional
+    .name(context.getPackageName() + ".orma.db") // optional
     .migrationEngine(new SchemaDiffMigration(context, BuildConfig.DEBUG)) // optional
-    .typeAdapters(...) // optional
+    .typeAdapters(TypeAdapterRegistry.defaultTypeAdapters()) // optional
     .writeAheadLogging(true) // optional
     .trace(BuildConfig.DEBUG) // optional
     .readOnMainThread(AccessThreadConstraint.WARNING) // optional
