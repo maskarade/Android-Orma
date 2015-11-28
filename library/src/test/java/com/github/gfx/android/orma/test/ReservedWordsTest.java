@@ -29,8 +29,7 @@ public class ReservedWordsTest {
 
     @Before
     public void setUp() throws Exception {
-        db = new OrmaDatabase(getContext(), "test.db");
-        db.getConnection().resetDatabase();
+        db = OrmaDatabase.builder(getContext()).name(null).build();
     }
 
     @Test

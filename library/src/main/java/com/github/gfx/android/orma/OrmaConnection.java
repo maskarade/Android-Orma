@@ -1,6 +1,5 @@
 package com.github.gfx.android.orma;
 
-import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
@@ -39,17 +38,18 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean trace;
 
-    final TypeAdapterRegistry typeAdapters = new TypeAdapterRegistry();
+    final TypeAdapterRegistry typeAdapterRegistry;
 
     final AccessThreadConstraint readOnMainThread;
 
     final AccessThreadConstraint writeOnMainThread;
 
-    public OrmaConnection(@NonNull OrmaConfiguration configuration, List<Schema<?>> schemas) {
+    public OrmaConnection(@NonNull OrmaConfiguration<?> configuration, List<Schema<?>> schemas) {
         super(configuration.context, configuration.name, null, configuration.migrationEngine.getVersion());
         this.schemas = schemas;
         this.migration = configuration.migrationEngine;
         this.wal = configuration.wal;
+        this.typeAdapterRegistry = configuration.typeAdapterRegistry;
 
         this.trace = configuration.debug;
         this.readOnMainThread = configuration.readOnMainThread;
@@ -95,12 +95,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return super.getReadableDatabase();
     }
 
-    public TypeAdapterRegistry getTypeAdapters() {
-        return typeAdapters;
-    }
-
-    public void addTypeAdapters(TypeAdapter<?>... adapters) {
-        typeAdapters.addAll(adapters);
+    public TypeAdapterRegistry getTypeAdapterRegistry() {
+        return typeAdapterRegistry;
     }
 
     public <T> T createModel(Schema<T> schema, ModelBuilder<T> builder) {

@@ -2,7 +2,6 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelBuilder;
-import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.test.model.ModelWithBlob;
 import com.github.gfx.android.orma.test.model.ModelWithCollation;
 import com.github.gfx.android.orma.test.model.ModelWithDefaults;
@@ -18,6 +17,7 @@ import org.robolectric.annotation.Config;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -38,8 +38,9 @@ public class ModelSpecTest {
 
     @Before
     public void setUp() throws Exception {
-        db = new OrmaDatabase(getContext(), null);
-        db.addTypeAdapters(TypeAdapterRegistry.defaultTypeAdapters());
+        db = OrmaDatabase.builder(getContext())
+                .name(null)
+                .build();
     }
 
     @Test
@@ -98,7 +99,9 @@ public class ModelSpecTest {
     public void testObjectMapping() throws Exception {
         final long now = new Date().getTime();
 
+        System.out.println(db.getConnection().getTypeAdapterRegistry().toString());
         ModelWithTypeAdapters model = db.createModelWithTypeAdapters(new ModelBuilder<ModelWithTypeAdapters>() {
+            @NonNull
             @Override
             public ModelWithTypeAdapters build() {
                 ModelWithTypeAdapters model = new ModelWithTypeAdapters();

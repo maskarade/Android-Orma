@@ -33,7 +33,7 @@ public class RxObservableTest {
 
     @Before
     public void setUp() throws Exception {
-        db = new OrmaDatabase(getContext(), null);
+        db  = OrmaDatabase.builder(getContext()).name(null).build();
 
         final Publisher publisher = db.createPublisher(new ModelBuilder<Publisher>() {
             @Override

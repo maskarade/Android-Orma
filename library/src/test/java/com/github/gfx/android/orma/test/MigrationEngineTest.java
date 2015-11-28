@@ -1,7 +1,6 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
-import com.github.gfx.android.orma.OrmaConfiguration;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -29,7 +28,10 @@ public class MigrationEngineTest {
 
     @Before
     public void setUp() throws Exception {
-        conn = new OrmaDatabase(new OrmaConfiguration(getContext()).name(null)).getConnection();
+        conn = OrmaDatabase.builder(getContext())
+                .name(null)
+                .build()
+                .getConnection();
         migration = new SchemaDiffMigration(getContext(), false);
     }
 

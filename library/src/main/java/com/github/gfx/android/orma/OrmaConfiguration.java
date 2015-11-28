@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
@@ -9,7 +10,11 @@ import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public class OrmaConfiguration {
+/**
+ * This represents Orma options, and it is the base class of {@code OrmaDatabase.Builder}.
+ */
+@SuppressWarnings("unchecked")
+public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     @NonNull
     final Context context;
@@ -55,37 +60,46 @@ public class OrmaConfiguration {
     }
 
 
-    public OrmaConfiguration name(@Nullable String name) {
+    public T name(@Nullable String name) {
         this.name = name;
-        return this;
+        return (T)this;
     }
 
-    public OrmaConfiguration migrationEngine(@NonNull MigrationEngine migrationEngine) {
+    public T typeAdapters(@NonNull TypeAdapter<?> ...typeAdapters) {
+        if (typeAdapterRegistry == null) {
+            typeAdapterRegistry = new TypeAdapterRegistry();
+            typeAdapterRegistry.addAll(TypeAdapterRegistry.defaultTypeAdapters());
+        }
+        typeAdapterRegistry.addAll(typeAdapters);
+        return (T) this;
+    }
+
+    public T migrationEngine(@NonNull MigrationEngine migrationEngine) {
         this.migrationEngine = migrationEngine;
-        return this;
+        return (T)this;
     }
 
-    public OrmaConfiguration writeAheadLogging(boolean wal) {
+    public T writeAheadLogging(boolean wal) {
         this.wal = wal;
-        return this;
+        return (T) this;
     }
 
-    public OrmaConfiguration trace(boolean trace) {
+    public T trace(boolean trace) {
         this.trace = trace;
-        return this;
+        return (T) this;
     }
 
-    public OrmaConfiguration readConstraint(AccessThreadConstraint readOnMainThread) {
+    public T readOnMainThread(AccessThreadConstraint readOnMainThread) {
         this.readOnMainThread = readOnMainThread;
-        return this;
+        return (T) this;
     }
 
-    public OrmaConfiguration writeConstraint(AccessThreadConstraint writeOnMainThread) {
+    public T writeOnMainThread(AccessThreadConstraint writeOnMainThread) {
         this.writeOnMainThread = writeOnMainThread;
-        return this;
+        return (T) this;
     }
 
-    public OrmaConfiguration fillDefaults() {
+    protected T fillDefaults() {
 
         if (migrationEngine == null) {
             migrationEngine = new SchemaDiffMigration(context, debug);
@@ -96,6 +110,6 @@ public class OrmaConfiguration {
             typeAdapterRegistry.addAll(TypeAdapterRegistry.defaultTypeAdapters());
         }
 
-        return this;
+        return (T) this;
     }
 }
