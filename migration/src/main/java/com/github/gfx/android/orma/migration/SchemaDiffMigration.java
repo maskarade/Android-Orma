@@ -31,21 +31,21 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     final boolean trace;
 
-    final int version;
+    final int revision;
 
     final SqliteDdlBuilder builder = new SqliteDdlBuilder();
 
     public SchemaDiffMigration(@NonNull Context context, boolean trace) {
-        this.version = extractVersion(context);
+        this.revision = extractRevision(context);
         this.trace = trace;
     }
 
     public SchemaDiffMigration(@NonNull Context context) {
-        this.version = extractVersion(context);
-        this.trace = true;
+        this.revision = extractRevision(context);
+        this.trace = BuildConfig.DEBUG;
     }
 
-    static int extractVersion(Context context) {
+    static int extractRevision(Context context) {
         PackageManager pm = context.getPackageManager();
         long t;
         try {
@@ -61,7 +61,7 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     @Override
     public int getVersion() {
-        return version;
+        return revision;
     }
 
     @Override
