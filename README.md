@@ -81,7 +81,7 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
 
 Then, you can create, read, update and delete models.
 
-Note that **Orma checks DB access on main thread** in debug build by default.
+Note that **Orma checks DB access on main thread** in trace build by default.
 Use background threads explicitly or RxJava interfaces with `Schedulers.io()`.
 
 ```java

@@ -29,20 +29,20 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     static final String TAG = SchemaDiffMigration.class.getSimpleName();
 
-    final boolean debug;
+    final boolean trace;
 
     final int version;
 
     final SqliteDdlBuilder builder = new SqliteDdlBuilder();
 
-    public SchemaDiffMigration(@NonNull Context context, boolean debug) {
+    public SchemaDiffMigration(@NonNull Context context, boolean trace) {
         this.version = extractVersion(context);
-        this.debug = debug;
+        this.trace = trace;
     }
 
     public SchemaDiffMigration(@NonNull Context context) {
         this.version = extractVersion(context);
-        this.debug = true;
+        this.trace = true;
     }
 
     static int extractVersion(Context context) {
@@ -70,7 +70,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public void start(@NonNull SQLiteDatabase db, @NonNull List<NamedDdl> schemas) {
-        if (debug) {
+        if (trace) {
             Log.v(TAG, "migration start");
         }
 
@@ -80,7 +80,7 @@ public class SchemaDiffMigration implements MigrationEngine {
         List<String> statements = diffAll(metadata, schemas);
         executeStatements(db, statements);
 
-        if (debug) {
+        if (trace) {
             Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
         }
     }
@@ -234,7 +234,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public void executeStatements(SQLiteDatabase db, List<String> statements) {
-        if (debug) {
+        if (trace) {
             for (String statement : statements) {
                 Log.v(TAG, statement);
             }
