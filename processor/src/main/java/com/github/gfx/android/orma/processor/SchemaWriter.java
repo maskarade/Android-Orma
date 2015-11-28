@@ -444,7 +444,7 @@ public class SchemaWriter {
     private String cursorGetter(ColumnDefinition column, int position) {
         TypeName type = column.getType();
         if (type.equals(TypeName.BOOLEAN)) {
-            return "cursor.getInt(" + position + ") != 0";
+            return "cursor.getLong(" + position + ") != 0";
         } else if (type.equals(TypeName.BYTE)) {
             return "(byte)cursor.getShort(" + position + ")";
         } else if (type.isPrimitive()) {
