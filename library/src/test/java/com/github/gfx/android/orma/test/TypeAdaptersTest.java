@@ -2,11 +2,11 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.adapter.StringListAdapter;
-import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.TypeAdapterNotFoundException;
 import com.github.gfx.android.orma.internal.ParameterizedTypes;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -27,20 +27,20 @@ import static org.junit.Assert.*;
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class TypeAdaptersTest {
 
-    Type stringListType = ParameterizedTypes.getType(new ParameterizedTypes.TypeHolder<List<String>>() {
+    static final Type stringListType = ParameterizedTypes.getType(new ParameterizedTypes.TypeHolder<List<String>>() {
     });
 
-    Type stringSetType = ParameterizedTypes.getType(new ParameterizedTypes.TypeHolder<Set<String>>() {
+    static final Type stringSetType = ParameterizedTypes.getType(new ParameterizedTypes.TypeHolder<Set<String>>() {
     });
 
-    StringListAdapter stringListAdapter = new StringListAdapter();
+    static final StringListAdapter stringListAdapter = new StringListAdapter();
 
-    TypeAdapterRegistry registry = new TypeAdapterRegistry();
+    TypeAdapterRegistry registry;
 
-    {
-        for (TypeAdapter<?> typeAdapter : TypeAdapterRegistry.defaultTypeAdapters()) {
-            registry.add(typeAdapter);
-        }
+    @Before
+    public void setUp() throws Exception {
+        registry = new TypeAdapterRegistry();
+        registry.addAll(TypeAdapterRegistry.defaultTypeAdapters());
     }
 
     @Test

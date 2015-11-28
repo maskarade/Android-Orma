@@ -92,7 +92,7 @@ public class BenchmarkActivity extends AppCompatActivity {
         Schedulers.io().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-                orma = new OrmaDatabase(BenchmarkActivity.this, "benchmark.db");
+                orma = OrmaDatabase.builder(BenchmarkActivity.this).name("orma-benchmark.db").build();
                 orma.getConnection().resetDatabase();
             }
         });

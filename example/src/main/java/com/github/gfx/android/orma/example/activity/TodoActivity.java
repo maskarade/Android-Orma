@@ -44,7 +44,7 @@ public class TodoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_todo);
 
-        orma = new OrmaDatabase(this, "main.db");
+        orma = OrmaDatabase.builder(this).build();
 
         adapter = new Adapter();
         binding.list.setAdapter(adapter);

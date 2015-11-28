@@ -4,8 +4,10 @@ import com.github.gfx.android.orma.exception.TypeAdapterNotFoundException;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,8 +24,14 @@ public class TypeAdapterRegistry {
         };
     }
 
-    public <SourceType> void add(TypeAdapter<SourceType> adapter) {
+    public <SourceType> void add(@NonNull TypeAdapter<SourceType> adapter) {
         adapters.put(adapter.getSourceType(), adapter);
+    }
+
+    public void addAll(@NonNull TypeAdapter<?>... adapters) {
+        for (TypeAdapter<?> typeAdapter : adapters) {
+            add(typeAdapter);
+        }
     }
 
     @NonNull
@@ -58,4 +66,17 @@ public class TypeAdapterRegistry {
         return serialized == null ? null : (SourceType) deserialize(sourceType, serialized);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append("{");
+        ArrayList<String> pairs = new ArrayList<>();
+        for (Map.Entry<Type, TypeAdapter<?>> entry : adapters.entrySet()) {
+            pairs.add(entry.getKey() + ": " + entry.getValue());
+        }
+        sb.append(TextUtils.join(", ", pairs));
+        sb.append("}");
+        return sb.toString();
+    }
 }

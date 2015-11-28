@@ -7,9 +7,9 @@ import android.support.annotation.NonNull;
 import rx.Single;
 import rx.SingleSubscriber;
 
-public class Deleter<T, C extends Deleter<?, ?>> extends OrmaConditionBase<T, C> {
+public class Deleter<Model, D extends Deleter<?, ?>> extends OrmaConditionBase<Model, D> {
 
-    public Deleter(OrmaConnection connection, Schema<T> schema) {
+    public Deleter(OrmaConnection connection, Schema<Model> schema) {
         super(connection, schema);
     }
 

@@ -376,7 +376,7 @@ public class SchemaWriter {
             } else if (r != null && r.relationType.equals(Types.SingleRelation)) {
                 builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.getColumnGetterExpr());
             } else {
-                builder.addStatement("statement.bindString($L, conn.getTypeAdapters().serialize($T.$L.type, model.$L))",
+                builder.addStatement("statement.bindString($L, conn.getTypeAdapterRegistry().serialize($T.$L.type, model.$L))",
                         n, schema.getSchemaClassName(), c.name, c.getColumnGetterExpr());
             }
 
@@ -402,7 +402,7 @@ public class SchemaWriter {
                 CodeBlock.Builder getCursorExpr = CodeBlock.builder();
 
                 if (Types.needsTypeAdapter(c.type)) {
-                    getCursorExpr.add("conn.getTypeAdapters().$L($T.$L.type, $L)",
+                    getCursorExpr.add("conn.getTypeAdapterRegistry().$L($T.$L.type, $L)",
                             c.nullable ? "deserializeNullable" : "deserialize",
                             schema.getSchemaClassName(), c.name,
                             cursorGetter(c, i));

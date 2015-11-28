@@ -85,6 +85,8 @@ public class Types {
     public static final ClassName TransactionAbortException = ClassName
             .get(ormaPackageName + ".exception", "TransactionAbortException");
 
+    public static final ClassName OrmaConfiguration = ClassName.get(ormaPackageName, "OrmaConfiguration");
+
     public static ParameterizedTypeName getSchema(TypeName modelType) {
         return ParameterizedTypeName.get(Schema, modelType);
     }

@@ -28,13 +28,16 @@ public class MigrationEngineTest {
 
     @Before
     public void setUp() throws Exception {
-        conn = new OrmaDatabase(getContext(), null).getConnection();
-        migration = new SchemaDiffMigration(getContext());
+        conn = OrmaDatabase.builder(getContext())
+                .name(null)
+                .build()
+                .getConnection();
+        migration = new SchemaDiffMigration(getContext(), false);
     }
 
     @Test
-    public void start() throws Exception {
-        migration.start(conn.getDatabase(), conn.getNamedDdls());
+    public void startEmpty() throws Exception {
+        migration.start(conn.getWritableDatabase(), conn.getNamedDdls());
     }
 
 }

@@ -8,11 +8,11 @@ import android.support.annotation.NonNull;
 import rx.Single;
 import rx.SingleSubscriber;
 
-public class Updater<T, C extends Updater<?, ?>> extends OrmaConditionBase<T, C> {
+public class Updater<Model, U extends Updater<?, ?>> extends OrmaConditionBase<Model, U> {
 
     final protected ContentValues contents = new ContentValues();
 
-    public Updater(OrmaConnection conn, Schema<T> schema) {
+    public Updater(@NonNull OrmaConnection conn, @NonNull Schema<Model> schema) {
         super(conn, schema);
     }
 

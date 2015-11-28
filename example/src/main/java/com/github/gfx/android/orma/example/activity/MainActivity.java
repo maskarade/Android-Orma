@@ -80,14 +80,16 @@ public class MainActivity extends AppCompatActivity
         final ArrayAdapter<String> logsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         activityMain.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
 
-        orma = new OrmaDatabase(this, "main.db", new SchemaDiffMigration(this) {
-            @Override
-            public void executeStatements(SQLiteDatabase db, List<String> statements) {
-                logsAdapter.addAll(statements);
+        orma = OrmaDatabase.builder(this)
+                .migrationEngine(new SchemaDiffMigration(this) {
+                    @Override
+                    public void executeStatements(SQLiteDatabase db, List<String> statements) {
+                        logsAdapter.addAll(statements);
 
-                super.executeStatements(db, statements);
-            }
-        });
+                        super.executeStatements(db, statements);
+                    }
+                })
+                .build();
 
         Schedulers.io()
                 .createWorker()

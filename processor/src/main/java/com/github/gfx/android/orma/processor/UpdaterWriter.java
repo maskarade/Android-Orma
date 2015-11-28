@@ -56,7 +56,7 @@ public class UpdaterWriter {
                 CodeBlock.Builder valueExpr = CodeBlock.builder();
 
                 if (Types.needsTypeAdapter(column.type)) {
-                    valueExpr.add("conn.getTypeAdapters().serialize($T.$L.type, value)",
+                    valueExpr.add("conn.getTypeAdapterRegistry().serialize($T.$L.type, value)",
                             schema.getSchemaClassName(), column.name);
                 } else {
                     valueExpr.add("value");

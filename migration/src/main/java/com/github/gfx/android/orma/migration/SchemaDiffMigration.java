@@ -5,7 +5,6 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -36,13 +35,14 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     final SqliteDdlBuilder builder = new SqliteDdlBuilder();
 
-    public SchemaDiffMigration(@NonNull Context context) {
-        version = extractVersion(context);
-        debug = extractDebug(context);
+    public SchemaDiffMigration(@NonNull Context context, boolean debug) {
+        this.version = extractVersion(context);
+        this.debug = debug;
     }
 
-    static boolean extractDebug(Context context) {
-        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) == ApplicationInfo.FLAG_DEBUGGABLE;
+    public SchemaDiffMigration(@NonNull Context context) {
+        this.version = extractVersion(context);
+        this.debug = true;
     }
 
     static int extractVersion(Context context) {
