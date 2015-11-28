@@ -124,13 +124,17 @@ public class OrmaConnection extends SQLiteOpenHelper {
                 SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
+    public Cursor rawQuery(String sql, String[] bindArgs) {
+        trace(sql);
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery(sql, bindArgs);
+    }
+
     public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] whereArgs,
             String groupBy, String having, String orderBy, String limit) {
-        SQLiteDatabase db = getReadableDatabase();
         String sql = SQLiteQueryBuilder.buildQueryString(
                 false, schema.getTableName(), columns, whereClause, groupBy, having, orderBy, limit);
-        trace(sql);
-        return db.rawQueryWithFactory(null, sql, whereArgs, schema.getTableName());
+        return rawQuery(sql, whereArgs);
     }
 
     public int count(Schema<?> schema, String whereClause, String[] whereArgs) {
@@ -187,7 +191,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
                     }
                 });
     }
-
 
     public void transactionSync(@NonNull TransactionTask task) {
         SQLiteDatabase db = getWritableDatabase();

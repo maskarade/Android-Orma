@@ -19,6 +19,8 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
-public class RelationTest {
+public class QueryTest {
 
     OrmaDatabase db;
 
@@ -384,7 +386,7 @@ public class RelationTest {
             }
 
             @Override
-            public void onError(Exception exception) {
+            public void onError(@NonNull Exception exception) {
                 assertThat(exception, is(instanceOf(RuntimeException.class)));
                 latch.countDown();
             }
@@ -443,6 +445,13 @@ public class RelationTest {
         assertThat(publisher.name, is("The Fire"));
         assertThat(publisher.startedYear, is(1998));
         assertThat(publisher.startedMonth, is(12));
+    }
+
+    @Test
+    public void testRawQuery() throws Exception {
+        Cursor cursor = db.getConnection().rawQuery("select count (*) from sqlite_master", null);
+        assertThat(cursor.getCount(), greaterThan(0));
+        cursor.close();
     }
 
     @Test
