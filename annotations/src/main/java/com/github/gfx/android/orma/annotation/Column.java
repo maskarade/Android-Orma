@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface Column {
 
     /**
-     * @return Indicates the column name representation for SQLite tables.
+     * @return The column name in SQLite tables. It is case-insensitive.
      */
     String value() default "";
 
@@ -25,7 +25,7 @@ public @interface Column {
     boolean unique() default false;
 
     /**
-     * @return Specifies the DEFAULT expression in terms of DDL.
+     * @return Specifies the DEFAULT expression in terms of DDL. This is useful to fill values in migration.
      */
     String defaultExpr() default "";
 

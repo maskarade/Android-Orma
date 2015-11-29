@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface Setter {
 
     /**
-     * @return The name of the column for the specified setter
+     * @return The name of the column for the specified column.
      */
     String value();
 }

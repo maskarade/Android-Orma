@@ -11,6 +11,11 @@ import java.lang.annotation.Target;
 public @interface PrimaryKey {
 
     /**
+     * @return The column name of the primary key in SQLite tables. It is case-insensitive.
+     */
+    String value() default "";
+
+    /**
      * Corresponds the {@code AUTOINCREMENT} keyword.
      * Note that this is slower than {@code auto = true}.
      * See https://www.sqlite.org/autoinc.html for details.

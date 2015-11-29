@@ -4,9 +4,9 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -40,29 +40,19 @@ public class SchemaValidator {
 
         if (elements.size() > 1) {
             elements.forEach(element -> {
-                error("Multiple @PrimaryKey found", element);
+                error("Multiple @PrimaryKey found, but it must be once", element);
             });
         }
     }
 
-
     private void validateNames(TypeElement typeElement) {
-        Map<String, List<Element>> unique = new HashMap<>();
+        Map<String, List<Element>> unique = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         typeElement.getEnclosedElements().stream()
                 .filter(element -> element.getAnnotation(Column.class) != null
                         || element.getAnnotation(PrimaryKey.class) != null)
                 .forEach(element -> {
-                    Column column = element.getAnnotation(Column.class);
-                    String name = null;
-                    if (column != null) {
-                        if (!Strings.isEmpty(column.value())) {
-                            name = column.value();
-                        }
-                    }
-                    if (name == null) {
-                        name = element.getSimpleName().toString();
-                    }
+                    String name = ColumnDefinition.getColumnName(element);
 
                     List<Element> elements = unique.get(name);
                     if (elements == null) {
@@ -75,7 +65,7 @@ public class SchemaValidator {
         unique.forEach((name, elements) -> {
             if (elements.size() > 1) {
                 elements.forEach(element -> {
-                    error("Duplicated column name \"" + name + "\" found", element);
+                    error("Duplicate column names \"" + name + "\" found", element);
                 });
             }
         });

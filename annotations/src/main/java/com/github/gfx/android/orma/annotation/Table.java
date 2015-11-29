@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface Table {
 
     /**
-     * @return The SQLite table name in the database
+     * @return The table name in SQLite. It is case-insensitive.
      */
     String value() default "";
 
