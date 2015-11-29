@@ -10,10 +10,13 @@ import com.github.gfx.android.orma.example.dbflow.BenchmarkDatabase;
 import com.github.gfx.android.orma.example.dbflow.FlowTodo;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
+import com.github.gfx.android.orma.example.orma.Todo_Relation;
 import com.github.gfx.android.orma.example.realm.RealmTodo;
+import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.list.FlowCursorList;
 import com.raizlabs.android.dbflow.runtime.TransactionManager;
 import com.raizlabs.android.dbflow.sql.language.Delete;
+import com.raizlabs.android.dbflow.sql.language.From;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import android.content.Context;
@@ -32,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Action0;
@@ -88,7 +92,6 @@ public class BenchmarkActivity extends AppCompatActivity {
                 .build();
         Realm.deleteRealm(realmConf);
         realm = Realm.getInstance(realmConf);
-
         Schedulers.io().createWorker().schedule(new Action0() {
             @Override
             public void call() {
@@ -96,6 +99,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 orma.getConnection().resetDatabase();
             }
         });
+        FlowManager.getDatabase("Benchmark").reset(this);
     }
 
     @Override
@@ -115,6 +119,7 @@ public class BenchmarkActivity extends AppCompatActivity {
             }
         });
         new Delete().from(FlowTodo.class).query();
+
         orma.deleteFromTodo()
                 .observable()
                 .subscribeOn(Schedulers.io())
@@ -267,13 +272,17 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 final AtomicInteger count = new AtomicInteger();
 
-                orma.selectFromTodo().forEach(new Action1<Todo>() {
+                Todo_Relation todos = orma.selectFromTodo();
+                todos.forEach(new Action1<Todo>() {
                     @Override
                     public void call(Todo todo) {
                         count.incrementAndGet();
                     }
                 });
 
+                if (todos.count() != count.get()) {
+                    throw new AssertionError("unexpected value: " + count.get());
+                }
                 Log.d(TAG, "Orma/forEachAll count: " + count);
                 subscriber.onSuccess(new Result("Orma/forEachAll", System.currentTimeMillis() - t0));
             }
@@ -289,9 +298,14 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 AtomicInteger count = new AtomicInteger();
 
-                for (@SuppressWarnings("unused") RealmTodo todo : realm.allObjects(RealmTodo.class)) {
+                RealmResults<RealmTodo> results = realm.allObjects(RealmTodo.class);
+                for (@SuppressWarnings("unused") RealmTodo todo : results) {
                     count.incrementAndGet();
                 }
+                if (results.size() != count.get()) {
+                    throw new AssertionError("unexpected value: " + count.get());
+                }
+
                 Log.d(TAG, "Realm/forEachAll count: " + count);
                 subscriber.onSuccess(new Result("Realm/forEachAll", System.currentTimeMillis() - t0));
             }
@@ -305,10 +319,15 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 AtomicInteger count = new AtomicInteger();
 
-                FlowCursorList<FlowTodo> list = new Select().from(FlowTodo.class).queryCursorList();
+                From<FlowTodo> rel = new Select().from(FlowTodo.class);
+                FlowCursorList<FlowTodo> list = rel.queryCursorList();
                 for (int i = 0, size = list.getCount(); i < size; i++) {
                     list.getItem(i);
                     count.incrementAndGet();
+                }
+                long dbCount = new Select().count().from(FlowTodo.class).count();
+                if (dbCount != count.get()) {
+                    throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
                 }
 
                 Log.d(TAG, "DBFlow/forEachAll count: " + count);
