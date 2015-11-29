@@ -105,7 +105,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 orma.getConnection().resetDatabase();
             }
         });
-        FlowManager.getDatabase("Benchmark").reset(this);
+        FlowManager.getDatabase(BenchmarkDatabase.NAME).reset(this);
     }
 
     @Override
