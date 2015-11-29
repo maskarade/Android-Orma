@@ -10,17 +10,16 @@ import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
-public class RelationWriter {
+public class RelationWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final ProcessingEnvironment processingEnv;
-
     public RelationWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
+        super(processingEnv);
         this.schema = schema;
-        this.processingEnv = processingEnv;
     }
 
+    @Override
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getRelationClassName().simpleName());
         classBuilder.addModifiers(Modifier.PUBLIC);

@@ -20,7 +20,7 @@ import javax.lang.model.element.Modifier;
 /**
  * {@code Schema<T>} represents how a model is connected to an SQLite table.
  */
-public class SchemaWriter {
+public class SchemaWriter extends BaseWriter {
 
     static final String TABLE_NAME = "$TABLE_NAME";
 
@@ -36,17 +36,16 @@ public class SchemaWriter {
 
     private final SchemaDefinition schema;
 
-    private final ProcessingEnvironment processingEnv;
-
     private final SqlGenerator sql = new SqlGenerator();
 
     FieldSpec primaryKey;
 
     public SchemaWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
+        super(processingEnv);
         this.schema = schema;
-        this.processingEnv = processingEnv;
     }
 
+    @Override
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getSchemaClassName().simpleName());
         classBuilder.addModifiers(Modifier.PUBLIC);

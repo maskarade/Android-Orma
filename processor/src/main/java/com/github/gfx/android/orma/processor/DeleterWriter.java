@@ -1,6 +1,5 @@
 package com.github.gfx.android.orma.processor;
 
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
@@ -10,31 +9,24 @@ import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
-public class DeleterWriter {
+public class DeleterWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final ProcessingEnvironment processingEnv;
-
     public DeleterWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
+        super(processingEnv);
         this.schema = schema;
-        this.processingEnv = processingEnv;
     }
 
+    @Override
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getDeleterClassName().simpleName());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getDeleter(schema.getModelClassName(), schema.getDeleterClassName()));
 
-        classBuilder.addFields(buildFieldSpecs());
         classBuilder.addMethods(buildMethodSpecs());
 
         return classBuilder.build();
-    }
-
-    public List<FieldSpec> buildFieldSpecs() {
-        List<FieldSpec> fieldSpecs = new ArrayList<>();
-        return fieldSpecs;
     }
 
     public List<MethodSpec> buildMethodSpecs() {

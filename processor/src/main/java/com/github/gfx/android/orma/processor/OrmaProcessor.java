@@ -3,7 +3,6 @@ package com.github.gfx.android.orma.processor;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
 import java.util.Set;
@@ -35,10 +34,10 @@ public class OrmaProcessor extends AbstractProcessor {
             DatabaseWriter databaseWriter = new DatabaseWriter(processingEnv);
 
             buildTableSchemas(roundEnv)
-                    .peek(this::writeSchema)
-                    .peek(this::writeRelation)
-                    .peek(this::writeUpdater)
-                    .peek(this::writeDeleter)
+                    .peek(schema -> writeCodeForEachModel(schema, new SchemaWriter(schema, processingEnv)))
+                    .peek(schema -> writeCodeForEachModel(schema, new RelationWriter(schema, processingEnv)))
+                    .peek(schema -> writeCodeForEachModel(schema, new UpdaterWriter(schema, processingEnv)))
+                    .peek(schema -> writeCodeForEachModel(schema, new DeleterWriter(schema, processingEnv)))
                     .forEach(databaseWriter::add);
 
             buildVirtualTableSchemas(roundEnv)
@@ -77,29 +76,9 @@ public class OrmaProcessor extends AbstractProcessor {
                 .map(element -> new SchemaDefinition(validator.validate(element)));
     }
 
-    public void writeSchema(SchemaDefinition schema) {
-        SchemaWriter writer = new SchemaWriter(schema, processingEnv);
-        writeToFilerForEachModel(schema, writer.buildTypeSpec());
-    }
-
-    public void writeRelation(SchemaDefinition schema) {
-        RelationWriter writer = new RelationWriter(schema, processingEnv);
-        writeToFilerForEachModel(schema, writer.buildTypeSpec());
-    }
-
-    private void writeUpdater(SchemaDefinition schema) {
-        UpdaterWriter writer = new UpdaterWriter(schema, processingEnv);
-        writeToFilerForEachModel(schema, writer.buildTypeSpec());
-    }
-
-    private void writeDeleter(SchemaDefinition schema) {
-        DeleterWriter writer = new DeleterWriter(schema, processingEnv);
-        writeToFilerForEachModel(schema, writer.buildTypeSpec());
-    }
-
-    public void writeToFilerForEachModel(SchemaDefinition schema, TypeSpec typeSpec) {
+    public void writeCodeForEachModel(SchemaDefinition schema, BaseWriter writer) {
         writeToFiler(schema.getElement(),
-                JavaFile.builder(schema.getPackageName(), typeSpec)
+                JavaFile.builder(schema.getPackageName(), writer.buildTypeSpec())
                         .build());
     }
 

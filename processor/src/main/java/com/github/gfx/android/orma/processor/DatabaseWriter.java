@@ -14,7 +14,7 @@ import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
-public class DatabaseWriter {
+public class DatabaseWriter extends BaseWriter {
 
     static final String kClassName = "OrmaDatabase"; // TODO: let it customizable
 
@@ -30,12 +30,10 @@ public class DatabaseWriter {
 
     static final String SCHEMAS = "SCHEMAS";
 
-    final ProcessingEnvironment processingEnv;
-
     List<SchemaDefinition> schemas = new ArrayList<>();
 
     public DatabaseWriter(ProcessingEnvironment processingEnv) {
-        this.processingEnv = processingEnv;
+        super(processingEnv);
     }
 
     public void add(SchemaDefinition schema) {
@@ -52,6 +50,7 @@ public class DatabaseWriter {
         return schemas.get(0).getPackageName();
     }
 
+    @Override
     public TypeSpec buildTypeSpec() {
         assert isRequired();
 
