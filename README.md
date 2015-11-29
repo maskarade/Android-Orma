@@ -24,6 +24,23 @@ not a singleton, and has `SchemaDiffMigration`, which detects `add column` and `
 # Install
 
 ```groovy
+// To use "apt" in dependencies
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    }
+}
+
+apply plugin: 'com.neenbedankt.android-apt'
+```
+
+```groovy
+// To use orma in your Android applications or libraries
+
 dependencies {
     apt 'com.github.gfx.android.orma:orma-processor:0.8.0'
     compile 'com.github.gfx.android.orma:orma:0.8.0'
