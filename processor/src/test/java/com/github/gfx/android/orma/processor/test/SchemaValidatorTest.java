@@ -70,4 +70,23 @@ public class SchemaValidatorTest {
                 .withErrorContaining("Duplicate column names \"foo\" found");
     }
 
+    @Test
+    public void testNoColumnInTable() throws Exception {
+        JavaFileObject classModelWithDuplicateColumnNames = JavaFileObjects
+                .forSourceString("NoColumnInTable",
+                        "import com.github.gfx.android.orma.annotation.*;\n"
+                                + "@Table\n"
+                                + "public class NoColumnInTable {\n"
+                                + "String foo;\n"
+                                + "String bar;\n"
+                                + "}\n");
+
+        assert_().about(javaSource())
+                .that(classModelWithDuplicateColumnNames)
+                .processedWith(new OrmaProcessor())
+                .failsToCompile()
+                .withErrorCount(1)
+                .withErrorContaining("No @Column nor @PrimaryKey is defined in NoColumnInTable");
+    }
+
 }

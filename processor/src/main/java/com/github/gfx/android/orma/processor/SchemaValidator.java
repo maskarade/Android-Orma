@@ -6,6 +6,7 @@ import com.github.gfx.android.orma.annotation.PrimaryKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -29,8 +30,20 @@ public class SchemaValidator {
     }
 
     private void validateTypeElement(TypeElement typeElement) {
+        validateAtLeastOneColumn(typeElement);
         validatePrimaryKey(typeElement);
         validateNames(typeElement);
+    }
+
+    private void validateAtLeastOneColumn(TypeElement typeElement) {
+        Optional<? extends Element> any = typeElement.getEnclosedElements().stream()
+                .filter(element -> element.getAnnotation(Column.class) != null
+                        || element.getAnnotation(PrimaryKey.class) != null)
+                .findAny();
+
+        if (!any.isPresent()) {
+            error("No @Column nor @PrimaryKey is defined in " + typeElement.getSimpleName(), typeElement);
+        }
     }
 
     private void validatePrimaryKey(TypeElement typeElement) {
