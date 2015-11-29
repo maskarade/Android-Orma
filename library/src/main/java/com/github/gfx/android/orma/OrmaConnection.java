@@ -2,12 +2,14 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
+import com.github.gfx.android.orma.exception.OverflowException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.NamedDdl;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -124,10 +126,17 @@ public class OrmaConnection extends SQLiteOpenHelper {
                 SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
-    public Cursor rawQuery(String sql, String[] bindArgs) {
+    @NonNull
+    public Cursor rawQuery(@NonNull String sql, @NonNull String... bindArgs) {
         trace(sql);
         SQLiteDatabase db = getReadableDatabase();
         return db.rawQuery(sql, bindArgs);
+    }
+
+    public long rawQueryForLong(@NonNull String sql, @NonNull String... bindArgs) {
+        trace(sql);
+        SQLiteDatabase db = getReadableDatabase();
+        return DatabaseUtils.longForQuery(db, sql, bindArgs);
     }
 
     public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] whereArgs,
@@ -138,13 +147,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public int count(Schema<?> schema, String whereClause, String[] whereArgs) {
-        Cursor cursor = query(schema, countSelections, whereClause, whereArgs, null, null, null, null);
-        try {
-            cursor.moveToFirst();
-            return cursor.getInt(0);
-        } finally {
-            cursor.close();
+        String sql = SQLiteQueryBuilder.buildQueryString(
+                false, schema.getTableName(), countSelections, whereClause, null, null, null, null);
+        long count = rawQueryForLong(sql, whereArgs);
+        if (count > Integer.MAX_VALUE) {
+            throw new OverflowException("Integer overflow for COUNT(*):" + count); // unlikely
         }
+        return (int) count;
     }
 
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
@@ -234,6 +243,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
+    public void execSQL(@NonNull String sql, @NonNull Object... bindArgs) {
+        trace(sql);
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL(sql, bindArgs);
+    }
 
     void dropAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {

@@ -448,10 +448,24 @@ public class QueryTest {
     }
 
     @Test
-    public void testRawQuery() throws Exception {
-        Cursor cursor = db.getConnection().rawQuery("select count (*) from sqlite_master", null);
+    public void rawQuery() throws Exception {
+        Cursor cursor = db.getConnection().rawQuery("select count (*) from sqlite_master");
         assertThat(cursor.getCount(), greaterThan(0));
         cursor.close();
+    }
+
+    @Test
+    public void rawQueryForSingleLong() throws Exception {
+        long count = db.getConnection().rawQueryForLong("select count (*) from sqlite_master");
+        assertThat(count, greaterThan(0L));
+    }
+
+    @Test
+    public void execSQL() throws Exception {
+        String name = "orma_test_executeSql";
+        db.getConnection().execSQL("CREATE TABLE " + name + " (id integer primary key)");
+        long value = db .getConnection().rawQueryForLong("select count(*) from sqlite_master where name = ?", name);
+        assertThat(value, is(1L));
     }
 
     @Test
