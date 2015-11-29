@@ -282,6 +282,8 @@ public class BenchmarkActivity extends AppCompatActivity {
                 todos.forEach(new Action1<Todo>() {
                     @Override
                     public void call(Todo todo) {
+                        String title = todo.title;
+                        String content = todo.content;
                         count.incrementAndGet();
                     }
                 });
@@ -306,6 +308,8 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                 RealmResults<RealmTodo> results = realm.allObjects(RealmTodo.class);
                 for (@SuppressWarnings("unused") RealmTodo todo : results) {
+                    String title = todo.getTitle();
+                    String content = todo.getContent();
                     count.incrementAndGet();
                 }
                 if (results.size() != count.get()) {
@@ -328,9 +332,13 @@ public class BenchmarkActivity extends AppCompatActivity {
                 From<FlowTodo> rel = new Select().from(FlowTodo.class);
                 FlowCursorList<FlowTodo> list = rel.queryCursorList();
                 for (int i = 0, size = list.getCount(); i < size; i++) {
-                    list.getItem(i);
+                    FlowTodo todo = list.getItem(i);
+                    String title = todo.title;
+                    String content = todo.content;
                     count.incrementAndGet();
                 }
+                list.close();
+
                 long dbCount = new Select().count().from(FlowTodo.class).count();
                 if (dbCount != count.get()) {
                     throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
