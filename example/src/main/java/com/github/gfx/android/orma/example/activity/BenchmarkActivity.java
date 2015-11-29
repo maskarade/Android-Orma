@@ -7,21 +7,18 @@ import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityBenchmarkBinding;
 import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
-import com.github.gfx.android.orma.example.dbflow.BenchmarkDatabase;
-import com.github.gfx.android.orma.example.dbflow.FlowTodo;
+import com.github.gfx.android.orma.example.handwritten.HandWrittenOpenHelper;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.orma.Todo_Relation;
 import com.github.gfx.android.orma.example.realm.RealmTodo;
-import com.raizlabs.android.dbflow.config.FlowManager;
-import com.raizlabs.android.dbflow.list.FlowCursorList;
-import com.raizlabs.android.dbflow.runtime.TransactionManager;
-import com.raizlabs.android.dbflow.sql.language.Delete;
-import com.raizlabs.android.dbflow.sql.language.From;
-import com.raizlabs.android.dbflow.sql.language.Select;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -60,6 +57,8 @@ public class BenchmarkActivity extends AppCompatActivity {
     OrmaDatabase orma;
 
     Realm realm;
+
+    HandWrittenOpenHelper hw;
 
     ActivityBenchmarkBinding binding;
 
@@ -105,7 +104,9 @@ public class BenchmarkActivity extends AppCompatActivity {
                 orma.getConnection().resetDatabase();
             }
         });
-        FlowManager.getDatabase(BenchmarkDatabase.NAME).reset(this);
+
+        deleteDatabase("hand-written.db");
+        hw = new HandWrittenOpenHelper(this, "hand-written.db");
     }
 
     @Override
@@ -124,7 +125,8 @@ public class BenchmarkActivity extends AppCompatActivity {
                 realm.clear(RealmTodo.class);
             }
         });
-        new Delete().from(FlowTodo.class).query();
+
+        hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
         orma.deleteFromTodo()
                 .observable()
@@ -147,7 +149,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     @Override
                     public Single<Result> call(Result result) {
                         adapter.add(result);
-                        return startInsertWithDBFlow();
+                        return startInsertWithHandWritten();
                     }
                 })
                 .flatMap(new Func1<Result, Single<Result>>() {
@@ -168,7 +170,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     @Override
                     public Single<Result> call(Result result) {
                         adapter.add(result);
-                        return startSelectAllWithDBFlow();
+                        return startSelectAllWithHandWritten();
                     }
                 })
                 .subscribe(new SingleSubscriber<Result>() {
@@ -243,28 +245,34 @@ public class BenchmarkActivity extends AppCompatActivity {
         });
     }
 
-    Single<Result> startInsertWithDBFlow() {
+    Single<Result> startInsertWithHandWritten() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
             public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
 
-                TransactionManager.transact(BenchmarkDatabase.NAME, new Runnable() {
-                    @Override
-                    public void run() {
-                        long now = System.currentTimeMillis();
+                SQLiteDatabase db = hw.getWritableDatabase();
+                db.beginTransaction();
 
-                        for (int i = 1; i <= N; i++) {
-                            FlowTodo todo = new FlowTodo();
-                            todo.title = titlePrefix + i;
-                            todo.content = contentPrefix + i;
-                            todo.createdTimeMillis = now;
-                            todo.insert();
-                        }
-                    }
-                });
+                SQLiteStatement inserter = db.compileStatement(
+                        "INSERT INTO todo (title, content, done, createdTimeMillis) VALUES (?, ?, ?, ?)");
 
-                subscriber.onSuccess(new Result("DBFlow/insert", System.currentTimeMillis() - t0));
+                long now = System.currentTimeMillis();
+
+                for (int i = 1; i <= N; i++) {
+                    inserter.bindAllArgsAsStrings(new String[]{
+                            titlePrefix + i, // title
+                            contentPrefix + i, // content
+                            "0", // done
+                            String.valueOf(now), // createdTimeMillis
+                    });
+                    inserter.executeInsert();
+                }
+
+                db.setTransactionSuccessful();
+                db.endTransaction();
+
+                subscriber.onSuccess(new Result("HandWritten/insert", System.currentTimeMillis() - t0));
             }
         })
                 .subscribeOn(Schedulers.io())
@@ -322,30 +330,36 @@ public class BenchmarkActivity extends AppCompatActivity {
         });
     }
 
-    Single<Result> startSelectAllWithDBFlow() {
+    Single<Result> startSelectAllWithHandWritten() {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
             public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
                 AtomicInteger count = new AtomicInteger();
 
-                From<FlowTodo> rel = new Select().from(FlowTodo.class);
-                FlowCursorList<FlowTodo> list = rel.queryCursorList();
-                for (int i = 0, size = list.getCount(); i < size; i++) {
-                    FlowTodo todo = list.getItem(i);
-                    String title = todo.title;
-                    String content = todo.content;
-                    count.incrementAndGet();
-                }
-                list.close();
+                SQLiteDatabase db = hw.getReadableDatabase();
+                Cursor cursor = db.query(
+                        "todo",
+                        new String[]{"id, title, content, done, createdTimeMillis"},
+                        null, null, null, null, null // whereClause, whereArgs, groupBy, having, orderBy
+                );
 
-                long dbCount = new Select().count().from(FlowTodo.class).count();
+                if (cursor.moveToFirst()) {
+                    do {
+                        String title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
+                        String content = cursor.getString(cursor.getColumnIndexOrThrow("content"));
+                        count.incrementAndGet();
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
+
+                long dbCount = DatabaseUtils.longForQuery(db, "SELECT COUNT(*) FROM todo", null);
                 if (dbCount != count.get()) {
                     throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
                 }
 
-                Log.d(TAG, "DBFlow/forEachAll count: " + count);
-                subscriber.onSuccess(new Result("DBFlow/forEachAll", System.currentTimeMillis() - t0));
+                Log.d(TAG, "HandWritten/forEachAll count: " + count);
+                subscriber.onSuccess(new Result("HandWritten/forEachAll", System.currentTimeMillis() - t0));
             }
         })
                 .subscribeOn(Schedulers.io())
