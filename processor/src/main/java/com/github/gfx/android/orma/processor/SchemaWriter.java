@@ -355,7 +355,7 @@ public class SchemaWriter {
         for (int i = 0; i < columns.size(); i++) {
             int n = i + 1; // bind index starts 1
             ColumnDefinition c = columns.get(i);
-            TypeName type = c.getType();
+            TypeName type = c.getUnboxType();
             RelationDefinition r = c.getRelation();
             boolean nullable = !type.isPrimitive() && c.nullable;
 
@@ -398,10 +398,11 @@ public class SchemaWriter {
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
             RelationDefinition r = c.getRelation();
+            TypeName type = c.getUnboxType();
             if (r == null) {
                 CodeBlock.Builder getCursorExpr = CodeBlock.builder();
 
-                if (Types.needsTypeAdapter(c.type)) {
+                if (Types.needsTypeAdapter(type)) {
                     getCursorExpr.add("conn.getTypeAdapterRegistry().$L($T.$L.type, $L)",
                             c.nullable ? "deserializeNullable" : "deserialize",
                             schema.getSchemaClassName(), c.name,
@@ -442,7 +443,7 @@ public class SchemaWriter {
     }
 
     private String cursorGetter(ColumnDefinition column, int position) {
-        TypeName type = column.getType();
+        TypeName type = column.getUnboxType();
         if (type.equals(TypeName.BOOLEAN)) {
             return "cursor.getLong(" + position + ") != 0";
         } else if (type.equals(TypeName.BYTE)) {

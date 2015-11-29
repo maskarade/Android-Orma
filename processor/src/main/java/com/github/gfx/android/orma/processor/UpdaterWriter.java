@@ -54,8 +54,7 @@ public class UpdaterWriter {
             RelationDefinition r = column.getRelation();
             if (r == null) {
                 CodeBlock.Builder valueExpr = CodeBlock.builder();
-
-                if (Types.needsTypeAdapter(column.type)) {
+                if (Types.needsTypeAdapter(column.getUnboxType())) {
                     valueExpr.add("conn.getTypeAdapterRegistry().serialize($T.$L.type, value)",
                             schema.getSchemaClassName(), column.name);
                 } else {

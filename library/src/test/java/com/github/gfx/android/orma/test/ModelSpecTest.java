@@ -3,8 +3,10 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelBuilder;
 import com.github.gfx.android.orma.test.model.ModelWithBlob;
+import com.github.gfx.android.orma.test.model.ModelWithBoxTypes;
 import com.github.gfx.android.orma.test.model.ModelWithCollation;
 import com.github.gfx.android.orma.test.model.ModelWithDefaults;
+import com.github.gfx.android.orma.test.model.ModelWithPrimitives;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
@@ -121,4 +123,63 @@ public class ModelSpecTest {
         assertThat(model.uri, is(Uri.parse("http://example.com")));
         assertThat(model.date, is(new Date(now)));
     }
+
+    @Test
+    public void testPrimitives() throws Exception {
+        ModelWithPrimitives model = db.createModelWithPrimitives(new ModelBuilder<ModelWithPrimitives>() {
+            @NonNull
+            @Override
+            public ModelWithPrimitives build() {
+                ModelWithPrimitives model = new ModelWithPrimitives();
+
+                model.booleanValue = true;
+                model.byteValue = 1;
+                model.shortValue = 2;
+                model.intValue = 3;
+                model.longValue = 4L;
+                model.floatValue = 1.14f;
+                model.doubleValue = 3.14;
+
+                return model;
+            }
+        });
+
+        assertThat(model.booleanValue, is(true));
+        assertThat(model.byteValue, is((byte)1));
+        assertThat(model.shortValue, is((short) 2));
+        assertThat(model.intValue, is(3));
+        assertThat(model.longValue, is(4L));
+        assertThat(model.floatValue, is(1.14f));
+        assertThat(model.doubleValue, is(3.14));
+    }
+
+    @Test
+    public void testBoxTypes() throws Exception {
+        ModelWithBoxTypes model = db.createModelWithBoxTypes(new ModelBuilder<ModelWithBoxTypes>() {
+            @NonNull
+            @Override
+            public ModelWithBoxTypes build() {
+                ModelWithBoxTypes model = new ModelWithBoxTypes();
+
+                model.booleanValue = true;
+                model.byteValue = 1;
+                model.shortValue = 2;
+                model.intValue = 3;
+                model.longValue = 4L;
+                model.floatValue = 1.14f;
+                model.doubleValue = 3.14;
+
+                return model;
+            }
+        });
+
+        assertThat(model.booleanValue, is(true));
+        assertThat(model.byteValue, is((byte)1));
+        assertThat(model.shortValue, is((short)2));
+        assertThat(model.intValue, is(3));
+        assertThat(model.longValue, is(4L));
+        assertThat(model.floatValue, is(1.14f));
+        assertThat(model.doubleValue, is(3.14));
+    }
+
 }
