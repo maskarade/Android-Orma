@@ -1,7 +1,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
-import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.test.model.Book;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -35,9 +35,9 @@ public class RxObservableTest {
     public void setUp() throws Exception {
         db  = OrmaDatabase.builder(getContext()).name(null).build();
 
-        final Publisher publisher = db.createPublisher(new ModelBuilder<Publisher>() {
+        final Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @Override
-            public Publisher build() {
+            public Publisher create() {
                 Publisher publisher = new Publisher();
                 publisher.name = "foo bar";
                 publisher.startedYear = 2015;
@@ -47,9 +47,9 @@ public class RxObservableTest {
             }
         });
 
-        db.createBook(new ModelBuilder<Book>() {
+        db.createBook(new ModelFactory<Book>() {
             @Override
-            public Book build() {
+            public Book create() {
                 Book book = new Book();
                 book.title = "today";
                 book.content = "milk, banana";
@@ -59,9 +59,9 @@ public class RxObservableTest {
             }
         });
 
-        db.createBook(new ModelBuilder<Book>() {
+        db.createBook(new ModelFactory<Book>() {
             @Override
-            public Book build() {
+            public Book create() {
                 Book book = new Book();
                 book.title = "friday";
                 book.content = "apple";

@@ -223,17 +223,17 @@ public class DatabaseWriter extends BaseWriter {
 
             methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
                     .addJavadoc(
-                            "Creates and inserts a model built by {@code Modelbuilder<T>}.\n"
-                                    + "The return value has a newly created row id\n")
+                            "Inserts a model created by {@code ModelFactory<T>},"
+                                    + " and retrieve a model which is very inserted. The return value has a correct id.\n")
                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
                     .addParameter(
-                            ParameterSpec.builder(Types.getModelBuilder(schema.getModelClassName()), "builder")
+                            ParameterSpec.builder(Types.getModelFactory(schema.getModelClassName()), "factory")
                                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                     .build()
                     )
-                    .addStatement("return $L.createModel($L, builder)", connection, schemaInstance)
+                    .addStatement("return $L.createModel($L, factory)", connection, schemaInstance)
                     .build());
 
             methodSpecs.add(

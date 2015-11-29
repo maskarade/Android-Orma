@@ -1,7 +1,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
-import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
@@ -49,9 +49,9 @@ public class QueryTest {
     public void setUp() throws Exception {
         db = OrmaDatabase.builder(getContext()).name(null).build();
 
-        publisher = db.createPublisher(new ModelBuilder<Publisher>() {
+        publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @Override
-            public Publisher build() {
+            public Publisher create() {
                 Publisher publisher = new Publisher();
                 publisher.name = "foo bar";
                 publisher.startedYear = 2015;
@@ -61,9 +61,9 @@ public class QueryTest {
             }
         });
 
-        db.createBook(new ModelBuilder<Book>() {
+        db.createBook(new ModelFactory<Book>() {
             @Override
-            public Book build() {
+            public Book create() {
                 Book book = new Book();
                 book.title = "today";
                 book.content = "milk, banana";
@@ -73,9 +73,9 @@ public class QueryTest {
             }
         });
 
-        db.createBook(new ModelBuilder<Book>() {
+        db.createBook(new ModelFactory<Book>() {
             @Override
-            public Book build() {
+            public Book create() {
                 Book book = new Book();
                 book.title = "friday";
                 book.content = "apple";
@@ -478,18 +478,18 @@ public class QueryTest {
 
     @Test
     public void testHasManyRelation() throws Exception {
-        final Publisher a = db.createPublisher(new ModelBuilder<Publisher>() {
+        final Publisher a = db.createPublisher(new ModelFactory<Publisher>() {
             @Override
-            public Publisher build() {
+            public Publisher create() {
                 Publisher publisher = new Publisher();
                 publisher.name = "A";
                 return publisher;
             }
         });
 
-        final Publisher b = db.createPublisher(new ModelBuilder<Publisher>() {
+        final Publisher b = db.createPublisher(new ModelFactory<Publisher>() {
             @Override
-            public Publisher build() {
+            public Publisher create() {
                 Publisher publisher = new Publisher();
                 publisher.name = "B";
                 return publisher;
@@ -498,9 +498,9 @@ public class QueryTest {
 
         for (int i = 0; i < 2; i++) {
             final int x = i;
-            db.createBook(new ModelBuilder<Book>() {
+            db.createBook(new ModelFactory<Book>() {
                 @Override
-                public Book build() {
+                public Book create() {
                     Book book = new Book();
                     book.publisher = SingleRelation.id(a.id);
                     book.title = "a " + x;
@@ -511,9 +511,9 @@ public class QueryTest {
         for (int i = 0; i < 3; i++) {
             final int x = i;
 
-            db.createBook(new ModelBuilder<Book>() {
+            db.createBook(new ModelFactory<Book>() {
                 @Override
-                public Book build() {
+                public Book create() {
                     Book book = new Book();
                     book.publisher = SingleRelation.id(b.id);
                     book.title = "b " + x;

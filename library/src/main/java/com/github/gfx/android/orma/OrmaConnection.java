@@ -103,8 +103,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return typeAdapterRegistry;
     }
 
-    public <T> T createModel(Schema<T> schema, ModelBuilder<T> builder) {
-        long id = insert(schema, builder.build());
+    public <T> T createModel(Schema<T> schema, ModelFactory<T> builder) {
+        long id = insert(schema, builder.create());
         ColumnDef<?> primaryKey = schema.getPrimaryKey();
         String whereClause = '"' + primaryKey.name + '"' + " = ?";
         String[] whereArgs = {String.valueOf(id)};

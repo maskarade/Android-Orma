@@ -68,7 +68,7 @@ public class Types {
 
     public static final ClassName SingleRelation = ClassName.get(ormaPackageName, "SingleRelation");
 
-    public static final ClassName ModelBuilder = ClassName.get(ormaPackageName, "ModelBuilder");
+    public static final ClassName ModelFactory = ClassName.get(ormaPackageName, "ModelFactory");
 
     public static final ClassName MigrationEngine = ClassName.get(ormaPackageName + ".migration", "MigrationEngine");
 
@@ -123,8 +123,8 @@ public class Types {
         return ParameterizedTypeName.get(Observable, typeName);
     }
 
-    public static ParameterizedTypeName getModelBuilder(TypeName typeName) {
-        return ParameterizedTypeName.get(ModelBuilder, typeName);
+    public static ParameterizedTypeName getModelFactory(TypeName typeName) {
+        return ParameterizedTypeName.get(ModelFactory, typeName);
     }
 
     public static boolean looksLikeIntegerType(TypeName type) {

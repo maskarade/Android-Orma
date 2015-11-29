@@ -2,8 +2,8 @@ package com.github.gfx.android.orma;
 
 import android.support.annotation.NonNull;
 
-public interface ModelBuilder<T> {
+public interface ModelFactory<T> {
 
     @NonNull
-    T build();
+    T create();
 }

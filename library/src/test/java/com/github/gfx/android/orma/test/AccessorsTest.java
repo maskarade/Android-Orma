@@ -1,7 +1,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
-import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.ModelWithAccessors;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
@@ -36,9 +36,9 @@ public class AccessorsTest {
 
     @Test
     public void testAccessors() throws Exception {
-        ModelWithAccessors model = db.createModelWithAccessors(new ModelBuilder<ModelWithAccessors>() {
+        ModelWithAccessors model = db.createModelWithAccessors(new ModelFactory<ModelWithAccessors>() {
             @Override
-            public ModelWithAccessors build() {
+            public ModelWithAccessors create() {
                 ModelWithAccessors model = new ModelWithAccessors();
                 model.setKey("key");
                 model.setValue("value");

@@ -1,7 +1,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
-import com.github.gfx.android.orma.ModelBuilder;
+import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.ModelWithBlob;
 import com.github.gfx.android.orma.test.model.ModelWithBoxTypes;
 import com.github.gfx.android.orma.test.model.ModelWithCollation;
@@ -47,9 +47,9 @@ public class ModelSpecTest {
 
     @Test
     public void testDefaultValue() throws Exception {
-        ModelWithDefaults model = db.createModelWithDefaults(new ModelBuilder<ModelWithDefaults>() {
+        ModelWithDefaults model = db.createModelWithDefaults(new ModelFactory<ModelWithDefaults>() {
             @Override
-            public ModelWithDefaults build() {
+            public ModelWithDefaults create() {
                 return new ModelWithDefaults();
             }
         });
@@ -85,9 +85,9 @@ public class ModelSpecTest {
 
     @Test
     public void testBlob() throws Exception {
-        ModelWithBlob model = db.createModelWithBlob(new ModelBuilder<ModelWithBlob>() {
+        ModelWithBlob model = db.createModelWithBlob(new ModelFactory<ModelWithBlob>() {
             @Override
-            public ModelWithBlob build() {
+            public ModelWithBlob create() {
                 ModelWithBlob model = new ModelWithBlob();
                 model.blob = new byte[]{0, 1, 2, 3};
                 return model;
@@ -102,10 +102,10 @@ public class ModelSpecTest {
         final long now = new Date().getTime();
 
         System.out.println(db.getConnection().getTypeAdapterRegistry().toString());
-        ModelWithTypeAdapters model = db.createModelWithTypeAdapters(new ModelBuilder<ModelWithTypeAdapters>() {
+        ModelWithTypeAdapters model = db.createModelWithTypeAdapters(new ModelFactory<ModelWithTypeAdapters>() {
             @NonNull
             @Override
-            public ModelWithTypeAdapters build() {
+            public ModelWithTypeAdapters create() {
                 ModelWithTypeAdapters model = new ModelWithTypeAdapters();
                 model.list = Arrays.asList("foo", "bar", "baz");
                 model.set = new HashSet<>();
@@ -126,10 +126,10 @@ public class ModelSpecTest {
 
     @Test
     public void testPrimitives() throws Exception {
-        ModelWithPrimitives model = db.createModelWithPrimitives(new ModelBuilder<ModelWithPrimitives>() {
+        ModelWithPrimitives model = db.createModelWithPrimitives(new ModelFactory<ModelWithPrimitives>() {
             @NonNull
             @Override
-            public ModelWithPrimitives build() {
+            public ModelWithPrimitives create() {
                 ModelWithPrimitives model = new ModelWithPrimitives();
 
                 model.booleanValue = true;
@@ -155,10 +155,10 @@ public class ModelSpecTest {
 
     @Test
     public void testBoxTypes() throws Exception {
-        ModelWithBoxTypes model = db.createModelWithBoxTypes(new ModelBuilder<ModelWithBoxTypes>() {
+        ModelWithBoxTypes model = db.createModelWithBoxTypes(new ModelFactory<ModelWithBoxTypes>() {
             @NonNull
             @Override
-            public ModelWithBoxTypes build() {
+            public ModelWithBoxTypes create() {
                 ModelWithBoxTypes model = new ModelWithBoxTypes();
 
                 model.booleanValue = true;
