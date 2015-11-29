@@ -2,7 +2,6 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
-import com.github.gfx.android.orma.exception.OverflowException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.NamedDdl;
 
@@ -26,6 +25,9 @@ import java.util.List;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
+/**
+ * Low-level interface to Orma database connection.
+ */
 public class OrmaConnection extends SQLiteOpenHelper {
 
     static final String TAG = OrmaConnection.class.getSimpleName();
@@ -149,11 +151,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public int count(Schema<?> schema, String whereClause, String[] whereArgs) {
         String sql = SQLiteQueryBuilder.buildQueryString(
                 false, schema.getTableName(), countSelections, whereClause, null, null, null, null);
-        long count = rawQueryForLong(sql, whereArgs);
-        if (count > Integer.MAX_VALUE) {
-            throw new OverflowException("Integer overflow for COUNT(*):" + count); // unlikely
-        }
-        return (int) count;
+        return (int) rawQueryForLong(sql, whereArgs);
     }
 
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
