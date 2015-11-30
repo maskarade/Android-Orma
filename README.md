@@ -8,12 +8,12 @@ There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I hav
 
 The answer is that I need ORM that have the following features:
 
-* Fast
+* As fast as hand-written code is
 * Model classes must have no restriction
   * They might be POJO, Parcelable and/or even models that are managed by another ORM
   * They should be passed to another thread
 * Database handles must be instances
-  * Not a singleton nor static-method based
+  * Not a singleton nor static-method based class
 * Automatic migration
   * For what can be detected logically
   * i.e. simple `add column` and `drop column`
@@ -70,7 +70,7 @@ public class Todo {
     public String title;
 
     @Column
-    @Nullable
+    @Nullable // indicates NOT NULL constraints
     public String content;
 
     @Column
