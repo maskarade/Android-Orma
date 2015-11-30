@@ -58,7 +58,7 @@ public class SchemaValidatorTest {
                         "import com.github.gfx.android.orma.annotation.*;\n"
                                 + "@Table\n"
                                 + "public class ModelWithDuplicateColumnNames {\n"
-                                + "@PrimaryKey(\"foo\") String foo;\n"
+                                + "@PrimaryKey String foo;\n"
                                 + "@Column(\"foo\") String bar;\n"
                                 + "}\n");
 

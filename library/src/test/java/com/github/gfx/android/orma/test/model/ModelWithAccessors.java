@@ -8,12 +8,16 @@ import com.github.gfx.android.orma.annotation.Table;
 
 @Table
 public class ModelWithAccessors {
-     static final String kId = "id";
+
+    static final String kId = "id";
+
     static final String kKey = "key";
+
     static final String kValue = "value";
 
 
-    @PrimaryKey(kId)
+    @PrimaryKey
+    @Column(kId)
     private long id;
 
     @Column(kKey)

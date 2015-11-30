@@ -53,7 +53,7 @@ public class ColumnDefinition {
         PrimaryKey primaryKeyAnnotation = element.getAnnotation(PrimaryKey.class);
 
         name = element.getSimpleName().toString();
-        columnName = getColumnName(column, primaryKeyAnnotation, element);
+        columnName = getColumnName(column, element);
 
         type = ClassName.get(element.asType());
 
@@ -84,15 +84,12 @@ public class ColumnDefinition {
 
     public static String getColumnName(Element element) {
         Column column = element.getAnnotation(Column.class);
-        PrimaryKey primaryKey = element.getAnnotation(PrimaryKey.class);
-        return getColumnName(column, primaryKey, element);
+        return getColumnName(column, element);
     }
 
-    static String getColumnName(Column column, PrimaryKey primaryKey, Element element) {
+    static String getColumnName(Column column, Element element) {
         if (column != null && !column.value().equals("")) {
             return column.value();
-        } else if (primaryKey != null && !primaryKey.value().equals("")) {
-            return primaryKey.value();
         } else {
             for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
                 Name annotationName = annotation.getAnnotationType().asElement().getSimpleName();
