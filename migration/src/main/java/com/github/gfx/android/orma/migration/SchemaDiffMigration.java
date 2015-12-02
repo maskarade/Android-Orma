@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 public class SchemaDiffMigration implements MigrationEngine {
 
-    static final String TAG = SchemaDiffMigration.class.getSimpleName();
+    static final String TAG = "SchemaDiffMigration";
 
     final boolean trace;
 
@@ -41,8 +41,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public SchemaDiffMigration(@NonNull Context context) {
-        this.revision = extractRevision(context);
-        this.trace = BuildConfig.DEBUG;
+        this(context, BuildConfig.DEBUG);
     }
 
     static int extractRevision(Context context) {
@@ -65,24 +64,10 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @Override
-    public void onMigrate(SQLiteDatabase db, List<NamedDdl> schemas, int oldVersion, int newVersion) {
-        start(db, schemas);
-    }
-
     public void start(@NonNull SQLiteDatabase db, @NonNull List<NamedDdl> schemas) {
-        if (trace) {
-            Log.v(TAG, "migration start");
-        }
-
-        long t0 = System.currentTimeMillis();
-
         Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
         List<String> statements = diffAll(metadata, schemas);
         executeStatements(db, statements);
-
-        if (trace) {
-            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
-        }
     }
 
     @NonNull

@@ -18,6 +18,4 @@ public class SchemaDiffMigrationTest {
     public void testBuildConfig() throws Exception {
         assertThat(BuildConfig.VERSION_NAME, not(isEmptyString()));
     }
-
-
 }

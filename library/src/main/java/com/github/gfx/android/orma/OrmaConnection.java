@@ -304,11 +304,29 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        migration.onMigrate(db, getNamedDdls(), oldVersion, newVersion);
+        long t0 = System.currentTimeMillis();
+        if (trace) {
+            Log.v(TAG, "migration start from=" + oldVersion + " to " + newVersion);
+        }
+
+        migration.start(db, getNamedDdls());
+
+        if (trace) {
+            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+        }
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        migration.onMigrate(db, getNamedDdls(), oldVersion, newVersion);
+        long t0 = System.currentTimeMillis();
+        if (trace) {
+            Log.v(TAG, "migration start from=" + oldVersion + " to " + newVersion);
+        }
+
+        migration.start(db, getNamedDdls());
+
+        if (trace) {
+            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+        }
     }
 }
