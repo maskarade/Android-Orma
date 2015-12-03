@@ -100,6 +100,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                         .readOnMainThread(AccessThreadConstraint.NONE)
                         .writeOnMainThread(AccessThreadConstraint.NONE)
                         .writeAheadLogging(false)
+                        .trace(false)
                         .build();
                 orma.getConnection().resetDatabase();
             }

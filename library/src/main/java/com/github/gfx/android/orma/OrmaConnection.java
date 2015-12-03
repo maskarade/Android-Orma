@@ -55,7 +55,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         this.wal = configuration.wal;
         this.typeAdapterRegistry = configuration.typeAdapterRegistry;
 
-        this.trace = configuration.debug;
+        this.trace = configuration.trace;
         this.readOnMainThread = configuration.readOnMainThread;
         this.writeOnMainThread = configuration.readOnMainThread;
 
