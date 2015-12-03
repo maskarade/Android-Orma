@@ -306,27 +306,6 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("populateValuesIntoModel")
-                        .addAnnotations(overrideAndNonNull)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(TypeName.VOID)
-                        .addParameter(
-                                ParameterSpec.builder(Types.OrmaConnection, "conn")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                                        .build())
-                        .addParameter(
-                                ParameterSpec.builder(Types.Cursor, "cursor")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                                        .build())
-                        .addParameter(
-                                ParameterSpec.builder(schema.getModelClassName(), "model")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                                        .build())
-                        .addCode(buildPopulateValuesIntoCursor())
-                        .build()
-        );
-
-        methodSpecs.add(
                 MethodSpec.methodBuilder("createModelFromCursor")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
@@ -436,7 +415,7 @@ public class SchemaWriter extends BaseWriter {
     private CodeBlock buildCreateModelFromCursor() {
         CodeBlock.Builder builder = CodeBlock.builder();
         builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName()); // FIXME
-        builder.addStatement("populateValuesIntoModel(conn, cursor, model)");
+        builder.add(buildPopulateValuesIntoCursor());
         builder.addStatement("return model");
         return builder.build();
     }

@@ -35,8 +35,6 @@ public interface Schema<Model> {
     @NonNull
     String getInsertStatement();
 
-    void populateValuesIntoModel(@NonNull OrmaConnection conn, @NonNull Cursor cursor, @NonNull Model model);
-
     void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model);
 
     @NonNull
