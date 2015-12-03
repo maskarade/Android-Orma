@@ -159,10 +159,8 @@ public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaCond
     public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = query();
 
-        if (cursor.moveToFirst()) {
-            do {
-                action.call(schema.createModelFromCursor(conn, cursor));
-            } while (cursor.moveToNext());
+        for (int pos = 0; cursor.moveToPosition(pos); pos++) {
+            action.call(schema.createModelFromCursor(conn, cursor));
         }
         cursor.close();
     }
