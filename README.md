@@ -234,7 +234,7 @@ See [example/](example/) for details
 # Support
 
 * Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
-* Feel free to ask for questions to the author [@_\_\gfx_\_\](https://twitter.com/__gfx__)
+* Feel free to ask for questions to the author [@\_\_gfx\_\_](https://twitter.com/__gfx__)
 
 # Licenses in Runtime Dependencies
 
