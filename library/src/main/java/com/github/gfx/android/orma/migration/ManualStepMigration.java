@@ -2,8 +2,6 @@ package com.github.gfx.android.orma.migration;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
@@ -35,27 +33,9 @@ public class ManualStepMigration implements MigrationEngine {
 
     final SparseArray<Step> steps = new SparseArray<>(0);
 
-    public ManualStepMigration(@NonNull Context context, boolean trace) {
-        this(extractVersion(context), trace);
-    }
-
     public ManualStepMigration(int version, boolean trace) {
         this.version = version;
         this.trace = trace;
-    }
-
-    static int extractVersion(Context context) {
-        PackageManager pm = context.getPackageManager();
-        int version;
-        try {
-            version = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).versionCode;
-            if (version == 0) {
-                version = 1; // robolectric
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new AssertionError(e);
-        }
-        return version;
     }
 
     public void addStep(int newVersion, @NonNull ManualStepMigration.Step step) {

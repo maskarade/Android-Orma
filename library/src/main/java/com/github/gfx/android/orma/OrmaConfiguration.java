@@ -59,7 +59,6 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
                 == ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
-
     public T name(@Nullable String name) {
         this.name = name;
         return (T)this;

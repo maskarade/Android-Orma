@@ -4,6 +4,7 @@ import com.github.gfx.android.orma.migration.BuildConfig;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.NamedDdl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,6 +78,11 @@ public class ManualStepMigrationTest {
         });
     }
 
+    @After
+    public void tearDown() throws Exception {
+        db.close();
+    }
+
     @Test
     public void testIdempotenceWithNop() throws Exception {
         engine.start(db, new ArrayList<NamedDdl>());
@@ -124,7 +130,7 @@ public class ManualStepMigrationTest {
     public void downgradeFull() throws Exception {
         engine.downgrade(db, 100, 1);
 
-        assertThat(engine.getDbVersion(db), lessThan(2));
+        assertThat(engine.getDbVersion(db), lessThan(4));
 
         assertThat(seq.size(), is(4));
 

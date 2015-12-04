@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.migration;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
@@ -12,9 +13,18 @@ public class OrmaMigration implements MigrationEngine {
 
     final SchemaDiffMigration schemaDiffMigration;
 
-    public OrmaMigration(@NonNull Context context, boolean trace) {
-        manualStepMigration = new ManualStepMigration(context, trace);
+    public OrmaMigration(@NonNull Context context, int version, boolean trace) {
+        manualStepMigration = new ManualStepMigration(version, trace);
         schemaDiffMigration = new SchemaDiffMigration(context, trace);
+    }
+
+    public OrmaMigration(@NonNull Context context, int version) {
+        this(context, version, extractDebuggable(context));
+    }
+
+    static boolean extractDebuggable(Context context) {
+        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
+                == ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
     public void addStep(int newVersion, @NonNull ManualStepMigration.Step step) {
