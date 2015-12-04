@@ -117,7 +117,7 @@ public class ManualStepMigration implements MigrationEngine {
                     Log.v(TAG, "upgrade step #" + version + " from " + oldVersion + " to " + newVersion);
                 }
                 Step step = steps.valueAt(i);
-                step.run(new Helper(db, version, true));
+                step.up(new Helper(db, version, true));
             }
         }
     }
@@ -132,7 +132,7 @@ public class ManualStepMigration implements MigrationEngine {
                     Log.v(TAG, "downgrade step #" + version + " from " + oldVersion + " to " + newVersion);
                 }
                 Step step = steps.valueAt(i);
-                step.run(new Helper(db, version, false));
+                step.down(new Helper(db, version, false));
             }
         }
     }
@@ -146,9 +146,17 @@ public class ManualStepMigration implements MigrationEngine {
         db.insertWithOnConflict(MIGRATION_HISTORY_NAME, null, values, SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
-    public interface Step {
+    public static abstract class Step {
 
-        void run(@NonNull ManualStepMigration.Helper helper);
+        public void up(@NonNull ManualStepMigration.Helper helper) {
+            change(helper);
+        }
+
+        public void down(@NonNull ManualStepMigration.Helper helper) {
+            change(helper);
+        }
+
+        public abstract void change(@NonNull ManualStepMigration.Helper helper);
     }
 
     public class Helper {

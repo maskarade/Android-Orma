@@ -44,7 +44,7 @@ public class ManualStepMigrationTest {
 
         engine.addStep(2, new ManualStepMigration.Step() {
             @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
+            public void change(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
 
                 helper.execSQL("CREATE TABLE step_2 (id INTEGER PRIMARY KEY)");
@@ -52,7 +52,7 @@ public class ManualStepMigrationTest {
         });
         engine.addStep(4, new ManualStepMigration.Step() {
             @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
+            public void change(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
 
                 helper.execSQL("CREATE TABLE step_4 (id INTEGER PRIMARY KEY)");
@@ -60,7 +60,7 @@ public class ManualStepMigrationTest {
         });
         engine.addStep(8, new ManualStepMigration.Step() {
             @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
+            public void change(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
 
                 helper.execSQL("CREATE TABLE step_8 (id INTEGER PRIMARY KEY)");
@@ -69,7 +69,7 @@ public class ManualStepMigrationTest {
 
         engine.addStep(16, new ManualStepMigration.Step() {
             @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
+            public void change(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
 
                 helper.execSQL("CREATE TABLE step_16 (id INTEGER PRIMARY KEY)");
