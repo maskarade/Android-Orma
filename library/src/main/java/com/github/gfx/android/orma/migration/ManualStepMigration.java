@@ -9,11 +9,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.Pair;
+import android.util.SparseArray;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @SuppressLint("Assert")
 public class ManualStepMigration implements MigrationEngine {
@@ -35,7 +33,7 @@ public class ManualStepMigration implements MigrationEngine {
 
     final boolean trace;
 
-    final Map<Pair<Integer, Integer>, Step> steps = new HashMap<>();
+    final SparseArray<Step> steps = new SparseArray<>(0);
 
     public ManualStepMigration(@NonNull Context context, boolean trace) {
         this(extractVersion(context), trace);
@@ -60,8 +58,8 @@ public class ManualStepMigration implements MigrationEngine {
         return version;
     }
 
-    public void addStep(int oldVersion, int newVersion, @NonNull ManualStepMigration.Step step) {
-        steps.put(Pair.create(oldVersion, newVersion), step);
+    public void addStep(int newVersion, @NonNull ManualStepMigration.Step step) {
+        steps.put(newVersion, step);
     }
 
     @Override
@@ -112,10 +110,14 @@ public class ManualStepMigration implements MigrationEngine {
     public void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         assert oldVersion < newVersion;
 
-        for (int version = oldVersion; version < newVersion; version++) {
-            Step step = steps.get(Pair.create(version, version + 1));
-            if (step != null) {
-                step.run(new Helper(db, version, version + 1));
+        for (int i = 0, size = steps.size(); i < size; i++) {
+            int version = steps.keyAt(i);
+            if (oldVersion < version && version <= newVersion) {
+                if (trace) {
+                    Log.v(TAG, "upgrade step #" + version + " from " + oldVersion + " to " + newVersion);
+                }
+                Step step = steps.valueAt(i);
+                step.run(new Helper(db, version, true));
             }
         }
     }
@@ -123,10 +125,14 @@ public class ManualStepMigration implements MigrationEngine {
     public void downgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         assert oldVersion > newVersion;
 
-        for (int version = oldVersion; version > newVersion; version--) {
-            Step step = steps.get(Pair.create(version - 1, version));
-            if (step != null) {
-                step.run(new Helper(db, version, version - 1));
+        for (int i = steps.size() - 1; i >= 0; i--) {
+            int version = steps.keyAt(i);
+            if (newVersion < version && version <= oldVersion) {
+                if (trace) {
+                    Log.v(TAG, "downgrade step #" + version + " from " + oldVersion + " to " + newVersion);
+                }
+                Step step = steps.valueAt(i);
+                step.run(new Helper(db, version, false));
             }
         }
     }
@@ -147,22 +153,22 @@ public class ManualStepMigration implements MigrationEngine {
 
     public class Helper {
 
-        public final int oldVersion;
+        public final int version;
 
-        public final int newVersion;
+        public final boolean upgrade;
 
         final SQLiteDatabase db;
 
         final SqliteDdlBuilder sqliteDdlBuilder = new SqliteDdlBuilder();
 
-        public Helper(SQLiteDatabase db, int oldVersion, int newVersion) {
+        public Helper(SQLiteDatabase db, int version, boolean upgrade) {
             this.db = db;
-            this.oldVersion = oldVersion;
-            this.newVersion = newVersion;
+            this.version = version;
+            this.upgrade = upgrade;
         }
 
         public void renameTable(@NonNull String fromTableName, @NonNull String toTableName) {
-            if (oldVersion < newVersion) { // upgrade
+            if (upgrade) {
                 String sql = sqliteDdlBuilder.buildRenameTable(fromTableName, toTableName);
                 execSQL(sql);
             } else {
@@ -173,7 +179,7 @@ public class ManualStepMigration implements MigrationEngine {
 
         public void execSQL(@NonNull String sql) {
             db.execSQL(sql);
-            imprintStep(db, newVersion, sql);
+            imprintStep(db, upgrade ? version  : version - 1, sql);
         }
     }
 }

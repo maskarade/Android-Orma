@@ -17,22 +17,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class ManualStepMigrationTest {
 
-    static int VERSION = 10;
+    static int VERSION = 100;
 
     SQLiteDatabase db;
 
     ManualStepMigration engine;
 
+    List<StepContext> seq;
+
+
     @Before
     public void setUp() throws Exception {
         db = SQLiteDatabase.create(null);
+
         engine = new ManualStepMigration(VERSION, BuildConfig.DEBUG);
+        engine.createMigrationHistoryTable(db);
+        engine.imprintStep(db, 1, null);
+
+        seq = new ArrayList<>();
+
+        engine.addStep(2, new ManualStepMigration.Step() {
+            @Override
+            public void run(@NonNull ManualStepMigration.Helper helper) {
+                seq.add(new StepContext(helper.version, helper.upgrade));
+
+                helper.execSQL("CREATE TABLE step_2 (id INTEGER PRIMARY KEY)");
+            }
+        });
+        engine.addStep(4, new ManualStepMigration.Step() {
+            @Override
+            public void run(@NonNull ManualStepMigration.Helper helper) {
+                seq.add(new StepContext(helper.version, helper.upgrade));
+
+                helper.execSQL("CREATE TABLE step_4 (id INTEGER PRIMARY KEY)");
+            }
+        });
+        engine.addStep(8, new ManualStepMigration.Step() {
+            @Override
+            public void run(@NonNull ManualStepMigration.Helper helper) {
+                seq.add(new StepContext(helper.version, helper.upgrade));
+
+                helper.execSQL("CREATE TABLE step_8 (id INTEGER PRIMARY KEY)");
+            }
+        });
+
+        engine.addStep(16, new ManualStepMigration.Step() {
+            @Override
+            public void run(@NonNull ManualStepMigration.Helper helper) {
+                seq.add(new StepContext(helper.version, helper.upgrade));
+
+                helper.execSQL("CREATE TABLE step_16 (id INTEGER PRIMARY KEY)");
+            }
+        });
     }
 
     @Test
@@ -43,104 +85,86 @@ public class ManualStepMigrationTest {
     }
 
     @Test
-    public void upgradeTwo() throws Exception {
-        final List<MigrationVersions> seq = new ArrayList<>();
+    public void upgradeFull() throws Exception {
+        engine.upgrade(db, 1, 100);
 
-        engine.addStep(1, 2, new ManualStepMigration.Step() {
-            @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
-                seq.add(new MigrationVersions(helper.oldVersion, helper.newVersion));
-            }
-        });
-        engine.addStep(2, 3, new ManualStepMigration.Step() {
-            @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
-                seq.add(new MigrationVersions(helper.oldVersion, helper.newVersion));
-            }
-        });
+        assertThat(engine.getDbVersion(db), is(16));
 
-        engine.upgrade(db, 1, 10);
+        assertThat(seq.size(), is(4));
 
-        assertThat(seq.get(0).oldVersion, is(1));
-        assertThat(seq.get(0).newVersion, is(2));
+        assertThat(seq.get(0).version, is(2));
+        assertThat(seq.get(0).upgrade, is(true));
 
-        assertThat(seq.get(1).oldVersion, is(2));
-        assertThat(seq.get(1).newVersion, is(3));
+        assertThat(seq.get(1).version, is(4));
+        assertThat(seq.get(1).upgrade, is(true));
+
+        assertThat(seq.get(2).version, is(8));
+        assertThat(seq.get(2).upgrade, is(true));
+
+        assertThat(seq.get(3).version, is(16));
+        assertThat(seq.get(3).upgrade, is(true));
     }
 
     @Test
-    public void downgradeTwo() throws Exception {
-        final List<MigrationVersions> seq = new ArrayList<>();
+    public void upgradeBoundary() throws Exception {
+        engine.upgrade(db, 2, 8);
 
-        engine.addStep(1, 2, new ManualStepMigration.Step() {
-            @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
-                seq.add(new MigrationVersions(helper.oldVersion, helper.newVersion));
-            }
-        });
-        engine.addStep(2, 3, new ManualStepMigration.Step() {
-            @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
-                seq.add(new MigrationVersions(helper.oldVersion, helper.newVersion));
-            }
-        });
+        assertThat(engine.getDbVersion(db), is(8));
 
-        engine.downgrade(db, 10, 1);
+        assertThat(seq.size(), is(2));
 
-        assertThat(seq.get(0).oldVersion, is(3));
-        assertThat(seq.get(0).newVersion, is(2));
+        assertThat(seq.get(0).version, is(4));
+        assertThat(seq.get(0).upgrade, is(true));
 
-        assertThat(seq.get(1).oldVersion, is(2));
-        assertThat(seq.get(1).newVersion, is(1));
+        assertThat(seq.get(1).version, is(8));
+        assertThat(seq.get(1).upgrade, is(true));
     }
 
     @Test
-    public void testStart_1_to_10() throws Exception {
-        final List<MigrationVersions> seq = new ArrayList<>();
+    public void downgradeFull() throws Exception {
+        engine.downgrade(db, 100, 1);
 
-        engine.addStep(1, 2, new ManualStepMigration.Step() {
-            @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
-                seq.add(new MigrationVersions(helper.oldVersion, helper.newVersion));
+        assertThat(engine.getDbVersion(db), lessThan(2));
 
-                helper.execSQL("CREATE TABLE step_1_2 (id INTEGER PRIMARY KEY)");
-            }
-        });
-        engine.addStep(2, 3, new ManualStepMigration.Step() {
-            @Override
-            public void run(@NonNull ManualStepMigration.Helper helper) {
-                seq.add(new MigrationVersions(helper.oldVersion, helper.newVersion));
+        assertThat(seq.size(), is(4));
 
-                helper.execSQL("CREATE TABLE step_2_3 (id INTEGER PRIMARY KEY)");
-            }
-        });
+        assertThat(seq.get(0).version, is(16));
+        assertThat(seq.get(0).upgrade, is(false));
 
-        engine.createMigrationHistoryTable(db);
+        assertThat(seq.get(1).version, is(8));
+        assertThat(seq.get(1).upgrade, is(false));
 
-        engine.imprintStep(db, 1, null);
+        assertThat(seq.get(2).version, is(4));
+        assertThat(seq.get(2).upgrade, is(false));
 
-        assertThat(engine.getDbVersion(db), is(1));
-
-        engine.start(db, new ArrayList<NamedDdl>());
-
-        assertThat(seq.get(0).oldVersion, is(1));
-        assertThat(seq.get(0).newVersion, is(2));
-
-        assertThat(seq.get(1).oldVersion, is(2));
-        assertThat(seq.get(1).newVersion, is(3));
-
-        assertThat(engine.getDbVersion(db), is(3));
+        assertThat(seq.get(3).version, is(2));
+        assertThat(seq.get(3).upgrade, is(false));
     }
 
-    static class MigrationVersions {
+    @Test
+    public void downgradeBoundary() throws Exception {
+        engine.downgrade(db, 8, 2);
 
-        int oldVersion;
+        assertThat(engine.getDbVersion(db), lessThan(4));
 
-        int newVersion;
+        assertThat(seq.size(), is(2));
 
-        public MigrationVersions(int oldVersion, int newVersion) {
-            this.oldVersion = oldVersion;
-            this.newVersion = newVersion;
+        assertThat(seq.get(0).version, is(8));
+        assertThat(seq.get(0).upgrade, is(false));
+
+        assertThat(seq.get(1).version, is(4));
+        assertThat(seq.get(1).upgrade, is(false));
+    }
+
+    static class StepContext {
+
+        final int version;
+
+        final boolean upgrade;
+
+        public StepContext(int version, boolean upgrade) {
+            this.version = version;
+            this.upgrade = upgrade;
         }
     }
 }

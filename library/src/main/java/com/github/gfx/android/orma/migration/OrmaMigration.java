@@ -17,8 +17,8 @@ public class OrmaMigration implements MigrationEngine {
         schemaDiffMigration = new SchemaDiffMigration(context, trace);
     }
 
-    public void addStep(int oldVersion, int newVersion, @NonNull ManualStepMigration.Step step) {
-        manualStepMigration.addStep(oldVersion, newVersion, step);
+    public void addStep(int newVersion, @NonNull ManualStepMigration.Step step) {
+        manualStepMigration.addStep(newVersion, step);
     }
 
     @Override
