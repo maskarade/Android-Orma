@@ -79,7 +79,9 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
     }
 
     /**
-     * @see <a href="http://sqlite.org/wal.html>Write-Ahead Logging in SQLite</a>
+     * @param wal
+     * @return
+     * @see <a href="http://sqlite.org/wal.html">Write-Ahead Logging in SQLite</a>
      */
     public T writeAheadLogging(boolean wal) {
         this.wal = wal;
@@ -88,6 +90,8 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     /**
      * If true, SQL executions are logged to console.
+     * @param trace
+     * @return
      */
     public T trace(boolean trace) {
         this.trace = trace;
@@ -96,6 +100,8 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     /**
      * Sets {@link AccessThreadConstraint} for reading.
+     * @param readOnMainThread
+     * @return
      */
     public T readOnMainThread(AccessThreadConstraint readOnMainThread) {
         this.readOnMainThread = readOnMainThread;
@@ -104,6 +110,8 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     /**
      * Sets {@link AccessThreadConstraint} for writing.
+     * @param writeOnMainThread
+     * @return
      */
     public T writeOnMainThread(AccessThreadConstraint writeOnMainThread) {
         this.writeOnMainThread = writeOnMainThread;

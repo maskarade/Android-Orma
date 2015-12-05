@@ -265,6 +265,7 @@ make publish # does release engineering
 
 * [SQLite](http://sqlite.org/)
 * [SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html)
+* [Version of SQLite used in Android? - Stack Overflow](http://stackoverflow.com/questions/2421189/version-of-sqlite-used-in-android)
 
 # Author
 
