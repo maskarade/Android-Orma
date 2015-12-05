@@ -16,7 +16,7 @@ public class ManualStepMigration implements MigrationEngine {
 
     public static final String TAG = "ManualStepMigration";
 
-    static final String MIGRATION_HISTORY_NAME = "orma_manual_migrations";
+    static final String MIGRATION_HISTORY_NAME = "orma_migration_steps";
 
     static final String MIGRATION_HISTORY_DDL = "CREATE TABLE IF NOT EXISTS "
             + MIGRATION_HISTORY_NAME + " (version INTEGER NOT NULL, sql TEXT NULL, created_time_millis INTEGER NOT NULL)";
@@ -31,15 +31,18 @@ public class ManualStepMigration implements MigrationEngine {
 
     final boolean trace;
 
-    final SparseArray<Step> steps = new SparseArray<>(0);
+    final SparseArray<Step> steps;
+
+    boolean tableCreated = false;
 
     public ManualStepMigration(int version, boolean trace) {
         this.version = version;
         this.trace = trace;
+        this.steps = new SparseArray<>(0);
     }
 
-    public void addStep(int newVersion, @NonNull ManualStepMigration.Step step) {
-        steps.put(newVersion, step);
+    public void addStep(int version, @NonNull ManualStepMigration.Step step) {
+        steps.put(version, step);
     }
 
     @Override
@@ -67,6 +70,8 @@ public class ManualStepMigration implements MigrationEngine {
 
         int oldVersion = getDbVersion(db);
 
+        Log.v(TAG, "Migration from " + oldVersion + " to " + version);
+
         if (oldVersion == 0) {
             Log.v(TAG, "Skip migration because there is no manual migration history");
             return;
@@ -74,6 +79,7 @@ public class ManualStepMigration implements MigrationEngine {
 
         if (oldVersion == version) {
             Log.v(TAG, "No need to run migration");
+            return;
         }
 
         if (oldVersion < version) {
@@ -83,12 +89,17 @@ public class ManualStepMigration implements MigrationEngine {
         }
     }
 
-    public void createMigrationHistoryTable(SQLiteDatabase db) {
-        db.execSQL(MIGRATION_HISTORY_DDL);
+    void createMigrationHistoryTable(SQLiteDatabase db) {
+        if (!tableCreated) {
+            db.execSQL(MIGRATION_HISTORY_DDL);
+            tableCreated = true;
+        }
     }
 
     public void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         assert oldVersion < newVersion;
+
+        createMigrationHistoryTable(db);
 
         for (int i = 0, size = steps.size(); i < size; i++) {
             int version = steps.keyAt(i);
@@ -105,6 +116,8 @@ public class ManualStepMigration implements MigrationEngine {
     public void downgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         assert oldVersion > newVersion;
 
+        createMigrationHistoryTable(db);
+
         for (int i = steps.size() - 1; i >= 0; i--) {
             int version = steps.keyAt(i);
             if (newVersion < version && version <= oldVersion) {
@@ -118,20 +131,38 @@ public class ManualStepMigration implements MigrationEngine {
     }
 
     public void imprintStep(SQLiteDatabase db, int version, @Nullable String sql) {
+        createMigrationHistoryTable(db);
+
         ContentValues values = new ContentValues();
         values.put(kVersion, version);
         values.put(kSql, sql);
         values.put(kCreatedTimeMillis, System.currentTimeMillis());
 
-        db.insertWithOnConflict(MIGRATION_HISTORY_NAME, null, values, SQLiteDatabase.CONFLICT_ROLLBACK);
+        db.insertOrThrow(MIGRATION_HISTORY_NAME, null, values);
     }
 
-    public static abstract class Step {
+    /**
+     * A migration step which handles {@code down()}, and {@code change()}.
+     */
+    public interface Step {
 
+        void up(@NonNull ManualStepMigration.Helper helper);
+
+        void down(@NonNull ManualStepMigration.Helper helper);
+
+    }
+
+    /**
+     * A migration step which handles {@code change()}.
+     */
+    public static abstract class ChangeStep implements Step {
+
+        @Override
         public void up(@NonNull ManualStepMigration.Helper helper) {
             change(helper);
         }
 
+        @Override
         public void down(@NonNull ManualStepMigration.Helper helper) {
             change(helper);
         }
@@ -166,8 +197,11 @@ public class ManualStepMigration implements MigrationEngine {
         }
 
         public void execSQL(@NonNull String sql) {
+            if (trace) {
+                Log.v(TAG, sql);
+            }
             db.execSQL(sql);
-            imprintStep(db, upgrade ? version  : version - 1, sql);
+            imprintStep(db, upgrade ? version : version - 1, sql);
         }
     }
 }

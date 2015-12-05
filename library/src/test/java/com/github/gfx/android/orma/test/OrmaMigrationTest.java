@@ -37,27 +37,26 @@ public class OrmaMigrationTest {
         db = SQLiteDatabase.create(null);
 
         engine = new OrmaMigration(getContext(), VERSION, BuildConfig.DEBUG);
-
-        engine.addStep(2, new ManualStepMigration.Step() {
+        engine.addStep(2, new ManualStepMigration.ChangeStep() {
             @Override
             public void change(@NonNull ManualStepMigration.Helper helper) {
                 helper.execSQL("CREATE TABLE step_2 (id INTEGER PRIMARY KEY)");
             }
         });
-        engine.addStep(4, new ManualStepMigration.Step() {
+        engine.addStep(4, new ManualStepMigration.ChangeStep() {
             @Override
             public void change(@NonNull ManualStepMigration.Helper helper) {
                 helper.execSQL("CREATE TABLE step_4 (id INTEGER PRIMARY KEY)");
             }
         });
-        engine.addStep(8, new ManualStepMigration.Step() {
+        engine.addStep(8, new ManualStepMigration.ChangeStep() {
             @Override
             public void change(@NonNull ManualStepMigration.Helper helper) {
                 helper.execSQL("CREATE TABLE step_8 (id INTEGER PRIMARY KEY)");
             }
         });
 
-        engine.addStep(16, new ManualStepMigration.Step() {
+        engine.addStep(16, new ManualStepMigration.ChangeStep() {
             @Override
             public void change(@NonNull ManualStepMigration.Helper helper) {
                 helper.execSQL("CREATE TABLE step_16 (id INTEGER PRIMARY KEY)");

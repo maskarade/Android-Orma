@@ -7,6 +7,9 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
+/**
+ * A migration engine that uses both {@link ManualStepMigration} and {@link SchemaDiffMigration}.
+ */
 public class OrmaMigration implements MigrationEngine {
 
     final ManualStepMigration manualStepMigration;

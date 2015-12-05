@@ -32,48 +32,89 @@ public class ManualStepMigrationTest {
 
     List<StepContext> seq;
 
+    static {
+        System.setProperty("robolectric.logging", "stdout");
+    }
 
     @Before
     public void setUp() throws Exception {
         db = SQLiteDatabase.create(null);
 
-        engine = new ManualStepMigration(VERSION, BuildConfig.DEBUG);
-        engine.createMigrationHistoryTable(db);
+        engine = new ManualStepMigration(VERSION, true);
         engine.imprintStep(db, 1, null);
 
         seq = new ArrayList<>();
+        setupSteps();
+    }
 
+    void setupSteps() {
         engine.addStep(2, new ManualStepMigration.Step() {
             @Override
-            public void change(@NonNull ManualStepMigration.Helper helper) {
+            public void up(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
 
-                helper.execSQL("CREATE TABLE step_2 (id INTEGER PRIMARY KEY)");
+                helper.execSQL("CREATE TABLE step_2_0 (id INTEGER PRIMARY KEY)");
+                helper.execSQL("CREATE TABLE step_2_1 (id INTEGER PRIMARY KEY)");
+            }
+
+            @Override
+            public void down(@NonNull ManualStepMigration.Helper helper) {
+                seq.add(new StepContext(helper.version, helper.upgrade));
+
+                helper.execSQL("DROP TABLE step_2_0");
+                helper.execSQL("DROP TABLE step_2_1");
             }
         });
         engine.addStep(4, new ManualStepMigration.Step() {
             @Override
-            public void change(@NonNull ManualStepMigration.Helper helper) {
+            public void up(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
 
-                helper.execSQL("CREATE TABLE step_4 (id INTEGER PRIMARY KEY)");
+                helper.execSQL("CREATE TABLE step_4_0 (id INTEGER PRIMARY KEY)");
+                helper.execSQL("CREATE TABLE step_4_1 (id INTEGER PRIMARY KEY)");
+            }
+
+            @Override
+            public void down(@NonNull ManualStepMigration.Helper helper) {
+                seq.add(new StepContext(helper.version, helper.upgrade));
+
+                helper.execSQL("DROP TABLE step_4_0");
+                helper.execSQL("DROP TABLE step_4_1");
             }
         });
         engine.addStep(8, new ManualStepMigration.Step() {
             @Override
-            public void change(@NonNull ManualStepMigration.Helper helper) {
+            public void up(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
 
-                helper.execSQL("CREATE TABLE step_8 (id INTEGER PRIMARY KEY)");
+                helper.execSQL("CREATE TABLE step_8_0 (id INTEGER PRIMARY KEY)");
+                helper.execSQL("CREATE TABLE step_8_1 (id INTEGER PRIMARY KEY)");
+            }
+
+            @Override
+            public void down(@NonNull ManualStepMigration.Helper helper) {
+                seq.add(new StepContext(helper.version, helper.upgrade));
+
+                helper.execSQL("DROP TABLE step_8_0");
+                helper.execSQL("DROP TABLE step_8_1");
             }
         });
 
         engine.addStep(16, new ManualStepMigration.Step() {
             @Override
-            public void change(@NonNull ManualStepMigration.Helper helper) {
+            public void up(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
 
-                helper.execSQL("CREATE TABLE step_16 (id INTEGER PRIMARY KEY)");
+                helper.execSQL("CREATE TABLE step_16_0 (id INTEGER PRIMARY KEY)");
+                helper.execSQL("CREATE TABLE step_16_1 (id INTEGER PRIMARY KEY)");
+            }
+
+            @Override
+            public void down(@NonNull ManualStepMigration.Helper helper) {
+                seq.add(new StepContext(helper.version, helper.upgrade));
+
+                helper.execSQL("DROP TABLE step_16_0");
+                helper.execSQL("DROP TABLE step_16_1");
             }
         });
     }
@@ -128,6 +169,9 @@ public class ManualStepMigrationTest {
 
     @Test
     public void downgradeFull() throws Exception {
+        engine.upgrade(db, 1, 100);
+        seq.clear();
+
         engine.downgrade(db, 100, 1);
 
         assertThat(engine.getDbVersion(db), lessThan(4));
@@ -149,6 +193,9 @@ public class ManualStepMigrationTest {
 
     @Test
     public void downgradeBoundary() throws Exception {
+        engine.upgrade(db, 1, 100);
+        seq.clear();
+
         engine.downgrade(db, 8, 2);
 
         assertThat(engine.getDbVersion(db), lessThan(4));
@@ -160,6 +207,52 @@ public class ManualStepMigrationTest {
 
         assertThat(seq.get(1).version, is(4));
         assertThat(seq.get(1).upgrade, is(false));
+    }
+
+    @Test
+    public void upgradeAndDowngrade() throws Exception {
+        {
+            engine = new ManualStepMigration(100, true);
+            setupSteps();
+            engine.imprintStep(db, 1, null);
+            engine.start(db, new ArrayList<NamedDdl>());
+
+            assertThat(seq.size(), is(4));
+
+            assertThat(seq.get(0).version, is(2));
+            assertThat(seq.get(0).upgrade, is(true));
+
+            assertThat(seq.get(1).version, is(4));
+            assertThat(seq.get(1).upgrade, is(true));
+
+            assertThat(seq.get(2).version, is(8));
+            assertThat(seq.get(2).upgrade, is(true));
+
+            assertThat(seq.get(3).version, is(16));
+            assertThat(seq.get(3).upgrade, is(true));
+        }
+
+        seq.clear();
+
+        {
+            engine = new ManualStepMigration(1, true);
+            setupSteps();
+            engine.start(db, new ArrayList<NamedDdl>());
+
+            assertThat(seq.size(), is(4));
+
+            assertThat(seq.get(0).version, is(16));
+            assertThat(seq.get(0).upgrade, is(false));
+
+            assertThat(seq.get(1).version, is(8));
+            assertThat(seq.get(1).upgrade, is(false));
+
+            assertThat(seq.get(2).version, is(4));
+            assertThat(seq.get(2).upgrade, is(false));
+
+            assertThat(seq.get(3).version, is(2));
+            assertThat(seq.get(3).upgrade, is(false));
+        }
     }
 
     static class StepContext {
