@@ -126,6 +126,22 @@ public class QueryTest {
         assertThat(books.get(1).content, is("apple"));
     }
 
+    @Test
+    public void iterable() throws Exception {
+        final List<Book> books = new ArrayList<>();
+
+        for (Book book : db.selectFromBook()) {
+            books.add(book);
+        }
+
+        assertThat(books, hasSize(2));
+        assertThat(books.get(0).title, is("today"));
+        assertThat(books.get(0).content, is("milk, banana"));
+
+        assertThat(books.get(1).title, is("friday"));
+        assertThat(books.get(1).content, is("apple"));
+    }
+
 
     @Test
     public void single() throws Exception {

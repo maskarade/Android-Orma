@@ -11,13 +11,15 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
 
-public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaConditionBase<Model, R> {
+public abstract class Relation<Model, R extends Relation<?, ?>>
+        extends OrmaConditionBase<Model, R> implements Iterable<Model> {
 
     @Nullable
     protected String groupBy;
@@ -176,9 +178,13 @@ public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaCond
                         subscriber.onNext(item);
                     }
                 });
-
                 subscriber.onCompleted();
             }
         });
+    }
+
+    @Override
+    public Iterator<Model> iterator() {
+        return observable().toBlocking().getIterator();
     }
 }
