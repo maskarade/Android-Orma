@@ -2,7 +2,7 @@
 
 * Note that this is an **alpha** software and the interface will change until v1.0.0.
 
-Orma is a lightning-fast ORM (Object-Relation Mapper) for []Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
+Orma is a lightning-fast ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
 generating helper classes at compile time with annotation processing.
 
 There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I have to add another?
@@ -237,9 +237,12 @@ There are a few built-in type adapter provided by default:
 
 # Example
 
-There is an example app to show how to use Orma.
+There is an example app to demonstrate what Orma is.
 
-See [example/](example/) for details
+It is also including a simple benchmark with Realm and hand-written SQLiteDatabase
+operations.
+
+See [example/](example/) for details.
 
 # Support
 
@@ -257,6 +260,11 @@ See [example/](example/) for details
 ./gradlew bumpMajor # or bumpMinor / bumpPatch
 make publish # does release engineering
 ```
+
+# See Also
+
+* [SQLite](http://sqlite.org/)
+* [SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html)
 
 # Author
 
