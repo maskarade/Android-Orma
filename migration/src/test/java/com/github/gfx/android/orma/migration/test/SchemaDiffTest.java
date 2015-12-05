@@ -1,7 +1,6 @@
 package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.BuildConfig;
-import com.github.gfx.android.orma.migration.NamedDdl;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
@@ -29,18 +28,18 @@ import static org.hamcrest.Matchers.*;
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class SchemaDiffTest {
 
-    static final List<NamedDdl> namedDdls = Arrays.asList(
-            new NamedDdl("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)", Collections.<String>emptyList()),
-            new NamedDdl("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)", Collections.<String>emptyList())
+    static final List<SchemaData> schemas = Arrays.asList(
+            new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)", Collections.<String>emptyList()),
+            new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)", Collections.<String>emptyList())
     );
 
-    static final List<NamedDdl> namedDdlsWithIndexes = Arrays.asList(
-            new NamedDdl("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
+    static final List<SchemaData> schemasWithIndexes = Arrays.asList(
+            new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
                     Arrays.asList(
                             "CREATE INDEX \"index_field01_on_foo\" (\"field01\")",
                             "CREATE INDEX \"index_field02_on_foo\" (\"field02\")"
                     )),
-            new NamedDdl("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)",
+            new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)",
                     Collections.<String>emptyList())
     );
 
@@ -63,35 +62,35 @@ public class SchemaDiffTest {
 
     @Test
     public void start() throws Exception {
-        migration.start(db, namedDdls);
+        migration.start(db, schemas);
     }
 
     @Test
     public void diffAll_doNothing() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls);
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemas);
 
-        List<String> statements = migration.diffAll(metadata, namedDdls);
+        List<String> statements = migration.diffAll(metadata, schemas);
 
         assertThat(statements, is(empty()));
     }
 
     @Test
     public void diffAll_createTable() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls.subList(0, 1));
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemas.subList(0, 1));
 
-        List<String> statements = migration.diffAll(metadata, namedDdls);
+        List<String> statements = migration.diffAll(metadata, schemas);
 
-        assertThat(statements, is(Collections.singletonList(namedDdls.get(1).getCreateTableStatement())));
+        assertThat(statements, is(Collections.singletonList(schemas.get(1).getCreateTableStatement())));
     }
 
     @Test
     public void diffAll_createTableAndCreateIndexes() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdlsWithIndexes.subList(1, 2));
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemasWithIndexes.subList(1, 2));
 
-        List<String> statements = migration.diffAll(metadata, namedDdlsWithIndexes);
+        List<String> statements = migration.diffAll(metadata, schemasWithIndexes);
 
         List<String> expectedStatements = new ArrayList<>();
-        NamedDdl ddl = namedDdlsWithIndexes.get(0);
+        SchemaData ddl = schemasWithIndexes.get(0);
         expectedStatements.add(ddl.getCreateTableStatement());
         expectedStatements.addAll(ddl.getCreateIndexStatements());
 
@@ -100,13 +99,13 @@ public class SchemaDiffTest {
 
     @Test
     public void diffAll_createIndexes() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, namedDdls);
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemas);
 
-        List<String> statements = migration.diffAll(metadata, namedDdlsWithIndexes);
+        List<String> statements = migration.diffAll(metadata, schemasWithIndexes);
 
         System.out.println(statements.toString());
 
-        assertThat(statements, is(namedDdlsWithIndexes.get(0).getCreateIndexStatements()));
+        assertThat(statements, is(schemasWithIndexes.get(0).getCreateIndexStatements()));
     }
 
     static class OpenHelper extends SQLiteOpenHelper {
@@ -117,7 +116,7 @@ public class SchemaDiffTest {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            for (NamedDdl ddl : namedDdls) {
+            for (SchemaData ddl : schemas) {
                 db.execSQL(ddl.getCreateTableStatement());
             }
         }

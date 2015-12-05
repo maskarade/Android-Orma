@@ -3,7 +3,6 @@ package com.github.gfx.android.orma;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
-import com.github.gfx.android.orma.migration.NamedDdl;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
@@ -19,7 +18,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import rx.functions.Action0;
@@ -69,6 +67,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             setWriteAheadLoggingEnabled(true);
         }
+    }
+
+    @NonNull
+    public List<Schema<?>> getSchemas() {
+        return schemas;
     }
 
     @Override
@@ -268,19 +271,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
-    public List<NamedDdl> getNamedDdls() {
-        List<NamedDdl> list = new ArrayList<>();
-
-        for (Schema<?> schema : schemas) {
-            NamedDdl namedDDL = new NamedDdl(schema.getTableName(),
-                    schema.getCreateTableStatement(),
-                    schema.getCreateIndexStatements());
-            list.add(namedDDL);
-        }
-
-        return list;
-    }
-
     private void trace(String sql) {
         if (trace) {
             Log.v(TAG, sql);
@@ -304,11 +294,29 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        migration.onMigrate(db, getNamedDdls(), oldVersion, newVersion);
+        long t0 = System.currentTimeMillis();
+        if (trace) {
+            Log.v(TAG, "migration start from=" + oldVersion + " to " + newVersion);
+        }
+
+        migration.start(db, schemas);
+
+        if (trace) {
+            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+        }
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        migration.onMigrate(db, getNamedDdls(), oldVersion, newVersion);
+        long t0 = System.currentTimeMillis();
+        if (trace) {
+            Log.v(TAG, "migration start from=" + oldVersion + " to " + newVersion);
+        }
+
+        migration.start(db, schemas);
+
+        if (trace) {
+            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+        }
     }
 }

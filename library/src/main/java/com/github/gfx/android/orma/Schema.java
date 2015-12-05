@@ -1,12 +1,14 @@
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.migration.MigrationSchema;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 
 import java.util.List;
 
-public interface Schema<Model> {
+public interface Schema<Model> extends MigrationSchema {
 
     @NonNull
     Class<Model> getModelClass();

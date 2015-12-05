@@ -2,7 +2,8 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.migration.SchemaDiffMigration;
+import com.github.gfx.android.orma.migration.MigrationEngine;
+import com.github.gfx.android.orma.migration.OrmaMigration;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.Before;
@@ -18,7 +19,7 @@ import android.content.Context;
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class MigrationEngineTest {
 
-    SchemaDiffMigration migration;
+    MigrationEngine migration;
 
     OrmaConnection conn;
 
@@ -28,16 +29,18 @@ public class MigrationEngineTest {
 
     @Before
     public void setUp() throws Exception {
+        migration = new OrmaMigration(getContext(), 1, false);
         conn = OrmaDatabase.builder(getContext())
                 .name(null)
+                .migrationEngine(migration)
                 .build()
                 .getConnection();
-        migration = new SchemaDiffMigration(getContext(), false);
     }
 
     @Test
     public void startEmpty() throws Exception {
-        migration.start(conn.getWritableDatabase(), conn.getNamedDdls());
+        migration.start(conn.getWritableDatabase(), conn.getSchemas());
+        migration.start(conn.getWritableDatabase(), conn.getSchemas());
+        migration.start(conn.getWritableDatabase(), conn.getSchemas());
     }
-
 }

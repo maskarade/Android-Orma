@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 public class SchemaDiffMigration implements MigrationEngine {
 
-    static final String TAG = SchemaDiffMigration.class.getSimpleName();
+    static final String TAG = "SchemaDiffMigration";
 
     final boolean trace;
 
@@ -41,8 +41,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public SchemaDiffMigration(@NonNull Context context) {
-        this.revision = extractRevision(context);
-        this.trace = BuildConfig.DEBUG;
+        this(context, BuildConfig.DEBUG);
     }
 
     static int extractRevision(Context context) {
@@ -65,32 +64,18 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @Override
-    public void onMigrate(SQLiteDatabase db, List<NamedDdl> schemas, int oldVersion, int newVersion) {
-        start(db, schemas);
-    }
-
-    public void start(@NonNull SQLiteDatabase db, @NonNull List<NamedDdl> schemas) {
-        if (trace) {
-            Log.v(TAG, "migration start");
-        }
-
-        long t0 = System.currentTimeMillis();
-
+    public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
         List<String> statements = diffAll(metadata, schemas);
         executeStatements(db, statements);
-
-        if (trace) {
-            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
-        }
     }
 
     @NonNull
-    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables, @NonNull List<NamedDdl> schemas) {
+    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables, @NonNull List<? extends MigrationSchema> schemas) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database
-        for (NamedDdl schema : schemas) {
+        for (MigrationSchema schema : schemas) {
             SQLiteMaster table = dbTables.get(schema.getTableName());
             if (table == null) {
                 statements.add(schema.getCreateTableStatement());
@@ -252,9 +237,9 @@ public class SchemaDiffMigration implements MigrationEngine {
         }
     }
 
-    public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<NamedDdl> schemas) {
+    public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<? extends MigrationSchema> schemas) {
         List<String> tableNames = new ArrayList<>();
-        for (NamedDdl schema : schemas) {
+        for (MigrationSchema schema : schemas) {
             tableNames.add(SqliteDdlBuilder.ensureQuoted(schema.getTableName()));
         }
         Cursor cursor = db.rawQuery(
