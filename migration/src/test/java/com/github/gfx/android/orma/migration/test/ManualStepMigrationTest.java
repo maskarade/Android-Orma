@@ -2,7 +2,6 @@ package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.BuildConfig;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
-import com.github.gfx.android.orma.migration.NamedDdl;
 
 import org.junit.After;
 import org.junit.Before;
@@ -126,9 +125,9 @@ public class ManualStepMigrationTest {
 
     @Test
     public void testIdempotenceWithNop() throws Exception {
-        engine.start(db, new ArrayList<NamedDdl>());
-        engine.start(db, new ArrayList<NamedDdl>());
-        engine.start(db, new ArrayList<NamedDdl>());
+        engine.start(db, new ArrayList<SchemaData>());
+        engine.start(db, new ArrayList<SchemaData>());
+        engine.start(db, new ArrayList<SchemaData>());
     }
 
     @Test
@@ -215,7 +214,7 @@ public class ManualStepMigrationTest {
             engine = new ManualStepMigration(100, true);
             setupSteps();
             engine.imprintStep(db, 1, null);
-            engine.start(db, new ArrayList<NamedDdl>());
+            engine.start(db, new ArrayList<SchemaData>());
 
             assertThat(seq.size(), is(4));
 
@@ -237,7 +236,7 @@ public class ManualStepMigrationTest {
         {
             engine = new ManualStepMigration(1, true);
             setupSteps();
-            engine.start(db, new ArrayList<NamedDdl>());
+            engine.start(db, new ArrayList<SchemaData>());
 
             assertThat(seq.size(), is(4));
 

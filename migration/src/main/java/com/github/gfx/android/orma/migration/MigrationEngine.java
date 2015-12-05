@@ -9,5 +9,5 @@ public interface MigrationEngine {
 
     int getVersion();
 
-    void start(@NonNull SQLiteDatabase db, @NonNull List<NamedDdl> schemas);
+    void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas);
 }

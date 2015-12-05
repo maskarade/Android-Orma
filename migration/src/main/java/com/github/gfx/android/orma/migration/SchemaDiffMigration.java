@@ -64,18 +64,18 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @Override
-    public void start(@NonNull SQLiteDatabase db, @NonNull List<NamedDdl> schemas) {
+    public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
         List<String> statements = diffAll(metadata, schemas);
         executeStatements(db, statements);
     }
 
     @NonNull
-    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables, @NonNull List<NamedDdl> schemas) {
+    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables, @NonNull List<? extends MigrationSchema> schemas) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database
-        for (NamedDdl schema : schemas) {
+        for (MigrationSchema schema : schemas) {
             SQLiteMaster table = dbTables.get(schema.getTableName());
             if (table == null) {
                 statements.add(schema.getCreateTableStatement());
@@ -237,9 +237,9 @@ public class SchemaDiffMigration implements MigrationEngine {
         }
     }
 
-    public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<NamedDdl> schemas) {
+    public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<? extends MigrationSchema> schemas) {
         List<String> tableNames = new ArrayList<>();
-        for (NamedDdl schema : schemas) {
+        for (MigrationSchema schema : schemas) {
             tableNames.add(SqliteDdlBuilder.ensureQuoted(schema.getTableName()));
         }
         Cursor cursor = db.rawQuery(

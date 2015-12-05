@@ -65,7 +65,7 @@ public class ManualStepMigration implements MigrationEngine {
     }
 
     @Override
-    public void start(@NonNull SQLiteDatabase db, @NonNull List<NamedDdl> schemas) {
+    public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         createMigrationHistoryTable(db);
 
         int oldVersion = getDbVersion(db);

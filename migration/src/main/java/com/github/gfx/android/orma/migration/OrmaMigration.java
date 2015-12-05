@@ -40,7 +40,7 @@ public class OrmaMigration implements MigrationEngine {
     }
 
     @Override
-    public void start(@NonNull SQLiteDatabase db, @NonNull List<NamedDdl> schemas) {
+    public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         manualStepMigration.start(db, schemas);
         schemaDiffMigration.start(db, schemas);
     }

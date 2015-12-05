@@ -2,7 +2,6 @@ package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.BuildConfig;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
-import com.github.gfx.android.orma.migration.NamedDdl;
 import com.github.gfx.android.orma.migration.OrmaMigration;
 
 import org.junit.Before;
@@ -66,8 +65,8 @@ public class OrmaMigrationTest {
 
     @Test
     public void testIdempotenceWithNop() throws Exception {
-        engine.start(db, new ArrayList<NamedDdl>());
-        engine.start(db, new ArrayList<NamedDdl>());
-        engine.start(db, new ArrayList<NamedDdl>());
+        engine.start(db, new ArrayList<SchemaData>());
+        engine.start(db, new ArrayList<SchemaData>());
+        engine.start(db, new ArrayList<SchemaData>());
     }
 }
