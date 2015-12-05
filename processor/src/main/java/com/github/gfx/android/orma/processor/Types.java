@@ -7,6 +7,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +23,8 @@ public class Types {
     public static final ArrayTypeName ByteArray = ArrayTypeName.of(byte.class);
 
     public static final ClassName List = ClassName.get(List.class);
+
+    public static final ClassName Collection = ClassName.get(Collection.class);
 
     public static final ClassName Arrays = ClassName.get(Arrays.class);
 
@@ -86,6 +89,10 @@ public class Types {
             .get(ormaPackageName + ".exception", "TransactionAbortException");
 
     public static final ClassName OrmaConfiguration = ClassName.get(ormaPackageName, "OrmaConfiguration");
+
+    public static ParameterizedTypeName getCollection(TypeName type) {
+        return ParameterizedTypeName.get(Collection, type);
+    }
 
     public static ParameterizedTypeName getSchema(TypeName modelType) {
         return ParameterizedTypeName.get(Schema, modelType);

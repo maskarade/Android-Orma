@@ -1,7 +1,6 @@
 package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -16,9 +15,12 @@ public class UpdaterWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
+    private final ConditionHelpers conditionHelpers;
+
     public UpdaterWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
         super(processingEnv);
         this.schema = schema;
+        conditionHelpers = new ConditionHelpers(schema, schema.getUpdaterClassName());
     }
 
     @Override
@@ -27,15 +29,9 @@ public class UpdaterWriter extends BaseWriter {
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getUpdater(schema.getModelClassName(), schema.getUpdaterClassName()));
 
-        classBuilder.addFields(buildFieldSpecs());
         classBuilder.addMethods(buildMethodSpecs());
 
         return classBuilder.build();
-    }
-
-    public List<FieldSpec> buildFieldSpecs() {
-        List<FieldSpec> fieldSpecs = new ArrayList<>();
-        return fieldSpecs;
     }
 
     public List<MethodSpec> buildMethodSpecs() {
@@ -76,6 +72,8 @@ public class UpdaterWriter extends BaseWriter {
                 // FIXME: in case the column represents a relationship
             }
         });
+
+        methodSpecs.addAll(conditionHelpers.buildConditionHelpers());
 
         return methodSpecs;
     }

@@ -157,4 +157,10 @@ public class SqlGenerator {
         sb.append('"');
     }
 
+
+    public String quoteIdentifier(String identifier) {
+        StringBuilder sb = new StringBuilder();
+        appendIdentifier(sb, identifier);
+        return sb.toString();
+    }
 }
