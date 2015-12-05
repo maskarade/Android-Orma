@@ -133,6 +133,10 @@ public class ColumnDefinition {
         return type;
     }
 
+    public TypeName getBoxType() {
+        return type.box();
+    }
+
     public TypeName getUnboxType() {
         if (type.equals(TypeName.VOID.box())) {
             return TypeName.VOID;
@@ -169,7 +173,7 @@ public class ColumnDefinition {
      * @return A representation of {@code ColumnDef<T>}
      */
     public ParameterizedTypeName getColumnDefType() {
-        return Types.getColumnDef(type.box());
+        return Types.getColumnDef(getBoxType());
     }
 
     public String getColumnGetterExpr() {

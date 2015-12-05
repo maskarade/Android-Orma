@@ -13,6 +13,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -37,6 +38,7 @@ public class AccessorsTest {
     @Test
     public void testAccessors() throws Exception {
         ModelWithAccessors model = db.createModelWithAccessors(new ModelFactory<ModelWithAccessors>() {
+            @NonNull
             @Override
             public ModelWithAccessors create() {
                 ModelWithAccessors model = new ModelWithAccessors();
