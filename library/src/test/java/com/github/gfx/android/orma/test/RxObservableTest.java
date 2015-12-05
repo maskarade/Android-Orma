@@ -15,6 +15,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class RxObservableTest {
         db  = OrmaDatabase.builder(getContext()).name(null).build();
 
         final Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
+            @NonNull
             @Override
             public Publisher create() {
                 Publisher publisher = new Publisher();
@@ -48,6 +50,7 @@ public class RxObservableTest {
         });
 
         db.createBook(new ModelFactory<Book>() {
+            @NonNull
             @Override
             public Book create() {
                 Book book = new Book();
@@ -60,6 +63,7 @@ public class RxObservableTest {
         });
 
         db.createBook(new ModelFactory<Book>() {
+            @NonNull
             @Override
             public Book create() {
                 Book book = new Book();

@@ -50,6 +50,7 @@ public class QueryTest {
         db = OrmaDatabase.builder(getContext()).name(null).build();
 
         publisher = db.createPublisher(new ModelFactory<Publisher>() {
+            @NonNull
             @Override
             public Publisher create() {
                 Publisher publisher = new Publisher();
@@ -62,6 +63,7 @@ public class QueryTest {
         });
 
         db.createBook(new ModelFactory<Book>() {
+            @NonNull
             @Override
             public Book create() {
                 Book book = new Book();
@@ -74,6 +76,7 @@ public class QueryTest {
         });
 
         db.createBook(new ModelFactory<Book>() {
+            @NonNull
             @Override
             public Book create() {
                 Book book = new Book();
@@ -495,6 +498,7 @@ public class QueryTest {
     @Test
     public void testHasManyRelation() throws Exception {
         final Publisher a = db.createPublisher(new ModelFactory<Publisher>() {
+            @NonNull
             @Override
             public Publisher create() {
                 Publisher publisher = new Publisher();
@@ -504,6 +508,7 @@ public class QueryTest {
         });
 
         final Publisher b = db.createPublisher(new ModelFactory<Publisher>() {
+            @NonNull
             @Override
             public Publisher create() {
                 Publisher publisher = new Publisher();
@@ -515,6 +520,7 @@ public class QueryTest {
         for (int i = 0; i < 2; i++) {
             final int x = i;
             db.createBook(new ModelFactory<Book>() {
+                @NonNull
                 @Override
                 public Book create() {
                     Book book = new Book();
@@ -528,6 +534,7 @@ public class QueryTest {
             final int x = i;
 
             db.createBook(new ModelFactory<Book>() {
+                @NonNull
                 @Override
                 public Book create() {
                     Book book = new Book();

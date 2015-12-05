@@ -48,6 +48,7 @@ public class ModelSpecTest {
     @Test
     public void testDefaultValue() throws Exception {
         ModelWithDefaults model = db.createModelWithDefaults(new ModelFactory<ModelWithDefaults>() {
+            @NonNull
             @Override
             public ModelWithDefaults create() {
                 return new ModelWithDefaults();
@@ -86,6 +87,7 @@ public class ModelSpecTest {
     @Test
     public void testBlob() throws Exception {
         ModelWithBlob model = db.createModelWithBlob(new ModelFactory<ModelWithBlob>() {
+            @NonNull
             @Override
             public ModelWithBlob create() {
                 ModelWithBlob model = new ModelWithBlob();
