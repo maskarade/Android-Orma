@@ -2,7 +2,8 @@
 
 * Note that this is an **alpha** software and the interface will change until v1.0.0.
 
-Orma is a lightning-fast ORM for Android, generating helper classes at compile time with annotation processing.
+Orma is a lightning-fast ORM (Object-Relation Mapper) for []Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
+generating helper classes at compile time with annotation processing.
 
 There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I have to add another?
 
@@ -19,7 +20,7 @@ The answer is that I need ORM that have the following features:
   * i.e. simple `add column` and `drop column`
 
 They are just what Orma has. This is as fast as Realm, its models have no restriction, database handle is
-not a singleton, and has `SchemaDiffMigration`, which detects `add column` and `drop column` automatically.
+not a singleton, and has `SchemaDiffMigration` for automatic migration.
 
 # Install
 
@@ -96,10 +97,7 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .build();
 ```
 
-Then, you can create, read, update and delete models.
-
-Note that **Orma checks DB access on main thread** in trace build by default.
-Use background threads explicitly or RxJava interfaces with `Schedulers.io()`.
+Then, you can create, read, update and delete models:
 
 ```java
 Todo todo = ...;
@@ -131,7 +129,8 @@ orma.deleteTodo()
   .execute();
 ```
 
-(this document is working in progress.)
+Note that **Orma checks DB access on main thread** in trace build by default.
+Use background threads explicitly or RxJava interfaces with `Schedulers.io()`.
 
 # Models
 

@@ -11,7 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * This represents Orma options, and it is the base class of {@code OrmaDatabase.Builder}.
+ * This class represents Orma options, and it is the base class of {@code OrmaDatabase.Builder}.
  */
 @SuppressWarnings("unchecked")
 public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
@@ -78,21 +78,33 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
         return (T)this;
     }
 
+    /**
+     * @see <a href="http://sqlite.org/wal.html>Write-Ahead Logging in SQLite</a>
+     */
     public T writeAheadLogging(boolean wal) {
         this.wal = wal;
         return (T) this;
     }
 
+    /**
+     * If true, SQL executions are logged to console.
+     */
     public T trace(boolean trace) {
         this.trace = trace;
         return (T) this;
     }
 
+    /**
+     * Sets {@link AccessThreadConstraint} for reading.
+     */
     public T readOnMainThread(AccessThreadConstraint readOnMainThread) {
         this.readOnMainThread = readOnMainThread;
         return (T) this;
     }
 
+    /**
+     * Sets {@link AccessThreadConstraint} for writing.
+     */
     public T writeOnMainThread(AccessThreadConstraint writeOnMainThread) {
         this.writeOnMainThread = writeOnMainThread;
         return (T) this;
