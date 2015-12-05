@@ -1,4 +1,4 @@
-package com.github.gfx.android.orma.test;
+package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.BuildConfig;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
