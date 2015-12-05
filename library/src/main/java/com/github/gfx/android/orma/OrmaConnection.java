@@ -62,9 +62,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
+    private boolean isRunningOnJellyBean() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void enableWal() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (isRunningOnJellyBean()) {
             setWriteAheadLoggingEnabled(true);
         }
     }
@@ -282,7 +286,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
     @Override
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
-        if (wal) {
+
+        if (wal && getDatabaseName() != null && !isRunningOnJellyBean()) {
             db.enableWriteAheadLogging();
         }
     }
