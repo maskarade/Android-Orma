@@ -65,6 +65,11 @@ public class ConditionHelpersTest {
     }
 
     @Test
+    public void testIsNull() throws Exception {
+        assertThat(rel().nullableTextIsNull().count(), is(0));
+    }
+
+    @Test
     public void testEq() throws Exception {
         assertThat(rel().nonNullTextEq("non-null text 1").count(), is(1));
         assertThat(rel().nullableTextEq("nullable text 1").count(), is(1));
@@ -154,5 +159,24 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueGe((long) 3).count(), is(7));
         assertThat(rel().floatValueGe((float) 3).count(), is(7));
         assertThat(rel().doubleValueGe((double) 3).count(), is(7));
+    }
+
+    @Test
+    public void testUpdater() throws Exception {
+        db.updateModelWithConditionHelpers()
+                .intValueEq(5)
+                .longValue(100)
+                .execute();
+
+        assertThat(rel().intValueEq(5).value().longValue, is(100L));
+    }
+
+    @Test
+    public void testDeleter() throws Exception {
+        db.deleteFromModelWithConditionHelpers()
+                .intValueEq(5)
+                .execute();
+
+        assertThat(rel().intValueEq(5).count(), is(0));
     }
 }
