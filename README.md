@@ -115,24 +115,32 @@ orma.transactionSync( -> { // or transactionAsync() to execute tasks in backgrou
 
 // read
 orma.selectFromTodo()
-  .where("title = ?", "foo")
-  .toList();
+  .titleEq("foo") // equivalent to `where("title = ?", "foo")`
+  .observable() // first-class RxJava interface
+  .subscribe(...);
 
 // update
 orma.updateTodo()
-  .where("title = ?", "foo")
+  .titleEq("foo")
   .content("a new content")
   .execute();
 
 // delete
 orma.deleteTodo()
-  .where("title = ?", "foo")
+  .titleEq("foo")
   .execute();
 ```
 
 (this document is working in progress.)
 
 # Models
+
+## Condition Helpers
+
+Condition Helpers, e.g. `titleEq()` shown above, are methods
+to make `WHERE` clauses.
+
+They are generated for `indexed` columns.
 
 ## Accessors
 
@@ -176,19 +184,22 @@ public class KeyValuePair {
 
 # Migration
 
-The default migration engine, `SchemaDiffMigration`, can handle column additions and removals.
+Orma has pluggable migration mechanism via `MigrationEngine`.
 
-You can also set a custom migration engine:
+The default migration engine is `SchemaDiffMigration`, which handles
+schema changes by making diff with old and new schemas.
+
+You can set a custom migration engine to OrmaDatabase builders:
 
 ```java
 class CustomMigrationEngine implements MigrationEngine { ... }
 
-OrmaDatabase orma = new OrmaDatabase(context, "orma.db", new CustomMigrationEngine());
+OrmaDatabase orma = OrmaDatabase.builder(context)
+  .migrationEngine(new CustomMigrationEngine())
+  .build();
 ```
 
-See [migration/](migration/) for details.
-
-(TODO: more concise description)
+See [migration/README.md](migration/README.md) for details.
 
 # Type Adapters
 
