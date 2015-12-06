@@ -124,7 +124,7 @@ orma.updateTodo()
   .execute();
 
 // delete
-orma.deleteTodo()
+orma.deleteFromTodo()
   .titleEq("foo")
   .execute();
 ```
