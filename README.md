@@ -18,6 +18,8 @@ The answer is that I need ORM that have the following features:
 * Automatic migration
   * For what can be detected logically
   * i.e. simple `add column` and `drop column`
+* Code completion friendly
+  * `selectFromModel()` is better than `selectFrom(Model.class)`
 
 They are just what Orma has. This is as fast as Realm, its models have no restriction, database handle is
 not a singleton, and has `SchemaDiffMigration` for automatic migration.
@@ -163,7 +165,7 @@ The following are generated for numeric columns
 
 You can define private columns with `@Getter` and `@Setter`, which tells `orma-processor` to use accessors.
 
-```
+```java
 @Table
 public class KeyValuePair {
 
