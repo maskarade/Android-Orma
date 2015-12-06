@@ -134,12 +134,30 @@ Use background threads explicitly or RxJava interfaces with `Schedulers.io()`.
 
 # Models
 
-## Condition Helpers
+## Condition Query Helpers
 
-Condition Helpers, e.g. `titleEq()` shown above, are methods
-to make `WHERE` clauses.
+Condition Query Helpers, e.g. `titleEq()` shown above, are methods
+to help make `WHERE` clauses, generated for columns with `indexed = true`.
 
-They are generated for `indexed` columns.
+Here is a list of Condition Query Helpers that are generated for all the `indexed`` columns:
+
+* `*Eq(value)` to make `WHERE * = ?`
+* `*NotEq(values)` to make `WHERE * <> ?`
+* `*In(values)` to make `WHERE * IN (?, ?, ?, ...)`
+* `*In(values)` to make `WHERE * NOT IN (?, ?, ?, ...)`
+
+The following are generated for `@Nullable` columns.
+
+* `*IsNull()` to make `WHERE * IS NULL`
+* `*IsNotNull()` to make `WHERE * IS NOT NULL`
+
+The following are generated for numeric columns
+ (i.e. `byte`, `short`, `int`, `long`, `float`, `double`, and their corresponding box types)
+
+* `*Lt(value)` to make `WHERE * < ?`
+* `*Le(value)` to make `WHERE * <= ?`
+* `*Gt(value)` to make `WHERE * > ?`
+* `*Ge(value)` to make `WHERE * >= ?`
 
 ## Accessors
 
@@ -183,7 +201,7 @@ public class KeyValuePair {
 
 # Migration
 
-Orma has pluggable migration mechanism via `MigrationEngine`.
+Orma has pluggable migration mechanism via the `MigrationEngine` interface.
 
 The default migration engine is `SchemaDiffMigration`, which handles
 schema changes by making diff with old and new schemas.
