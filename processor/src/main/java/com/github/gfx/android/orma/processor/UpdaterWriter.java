@@ -15,12 +15,14 @@ public class UpdaterWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final ConditionHelpers conditionHelpers;
+    private final ConditionQueryHelpers conditionQueryHelpers;
+
+    private final SqlGenerator sql = new SqlGenerator();
 
     public UpdaterWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
         super(processingEnv);
         this.schema = schema;
-        conditionHelpers = new ConditionHelpers(schema, schema.getUpdaterClassName());
+        conditionQueryHelpers = new ConditionQueryHelpers(schema, schema.getUpdaterClassName());
     }
 
     @Override
@@ -64,7 +66,7 @@ public class UpdaterWriter extends BaseWriter {
                                         ParameterSpec.builder(column.getType(), "value")
                                                 .build()
                                 )
-                                .addStatement("contents.put($S, $L)", column.columnName, valueExpr.build())
+                                .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName), valueExpr.build())
                                 .addStatement("return this")
                                 .build()
                 );
@@ -73,7 +75,7 @@ public class UpdaterWriter extends BaseWriter {
             }
         });
 
-        methodSpecs.addAll(conditionHelpers.buildConditionHelpers());
+        methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers());
 
         return methodSpecs;
     }

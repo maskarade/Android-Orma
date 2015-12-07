@@ -5,7 +5,6 @@ import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Where;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -42,9 +41,43 @@ public class ReservedWordsTest {
         assertThat(rowId, is(1L));
     }
 
-    @Ignore("the table name must be escaped.")
     @Test
     public void useReservedWordsInSelect() throws Exception {
-        assertThat(db.selectFromWhere().toList(), hasSize(0));
+        useReservedWordsInInsert();
+
+        assertThat(db.selectFromWhere().toList(), hasSize(1));
+    }
+
+    @Test
+    public void useReservedWordsInConditionQueryHelpers() throws Exception {
+        useReservedWordsInInsert();
+
+        assertThat(db.selectFromWhere()
+                        .whereEq("a")
+                        .tableEq("b")
+                        .onEq("c")
+                        .toList(),
+                hasSize(1));
+    }
+
+    @Test
+    public void useReservedWordsInUpdate() throws Exception {
+        useReservedWordsInInsert();
+
+        assertThat(db.updateWhere()
+                        .where("foo")
+                        .table("bar")
+                        .on("baz")
+                        .execute(),
+                is(1));
+    }
+
+    @Test
+    public void useReservedWordsInDelete() throws Exception {
+        useReservedWordsInInsert();
+
+        assertThat(db.deleteFromWhere()
+                        .execute(),
+                is(1));
     }
 }

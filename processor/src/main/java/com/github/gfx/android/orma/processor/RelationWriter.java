@@ -13,12 +13,12 @@ public class RelationWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final ConditionHelpers conditionHelpers;
+    private final ConditionQueryHelpers conditionQueryHelpers;
 
     public RelationWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
         super(processingEnv);
         this.schema = schema;
-        this.conditionHelpers = new ConditionHelpers(schema, schema.getRelationClassName());
+        this.conditionQueryHelpers = new ConditionQueryHelpers(schema, schema.getRelationClassName());
     }
 
     @Override
@@ -41,7 +41,7 @@ public class RelationWriter extends BaseWriter {
                 .addCode("super(orma, schema);\n")
                 .build());
 
-        methodSpecs.addAll(conditionHelpers.buildConditionHelpers());
+        methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers());
 
         return methodSpecs;
     }

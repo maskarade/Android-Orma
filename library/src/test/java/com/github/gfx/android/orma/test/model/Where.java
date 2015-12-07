@@ -9,13 +9,13 @@ import com.github.gfx.android.orma.annotation.Table;
 @Table
 public class Where {
 
-    @Column
+    @Column(indexed = true)
     public String table;
 
-    @Column
+    @Column(indexed = true)
     public String on;
 
-    @Column
+    @Column(indexed = true)
     public String where;
 
 }

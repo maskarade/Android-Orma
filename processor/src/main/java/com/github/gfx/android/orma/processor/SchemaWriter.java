@@ -223,6 +223,15 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("getEscapedTableName")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return '\"' + $L + '\"'", TABLE_NAME)
+                        .build()
+        );
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("getPrimaryKey")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
