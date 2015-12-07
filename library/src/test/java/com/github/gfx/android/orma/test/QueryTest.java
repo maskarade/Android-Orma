@@ -483,7 +483,7 @@ public class QueryTest {
     public void execSQL() throws Exception {
         String name = "orma_test_executeSql";
         db.getConnection().execSQL("CREATE TABLE " + name + " (id integer primary key)");
-        long value = db .getConnection().rawQueryForLong("select count(*) from sqlite_master where name = ?", name);
+        long value = db.getConnection().rawQueryForLong("select count(*) from sqlite_master where name = ?", name);
         assertThat(value, is(1L));
     }
 

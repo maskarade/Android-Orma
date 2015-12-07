@@ -66,7 +66,8 @@ public class UpdaterWriter extends BaseWriter {
                                         ParameterSpec.builder(column.getType(), "value")
                                                 .build()
                                 )
-                                .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName), valueExpr.build())
+                                .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
+                                        valueExpr.build())
                                 .addStatement("return this")
                                 .build()
                 );

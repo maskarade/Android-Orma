@@ -34,7 +34,7 @@ public class RxObservableTest {
 
     @Before
     public void setUp() throws Exception {
-        db  = OrmaDatabase.builder(getContext()).name(null).build();
+        db = OrmaDatabase.builder(getContext()).name(null).build();
 
         final Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull

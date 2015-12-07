@@ -1,8 +1,8 @@
 ext {
     metadata = [
-        groupId: 'com.github.gfx.android.orma',
-        website: 'https://github.com/gfx/Android-Orma',
-        repository: 'git@github.com:gfx/Android-Orma.git',
-        licences: ['MIT']
+            groupId   : 'com.github.gfx.android.orma',
+            website   : 'https://github.com/gfx/Android-Orma',
+            repository: 'git@github.com:gfx/Android-Orma.git',
+            licences  : ['MIT']
     ]
 }

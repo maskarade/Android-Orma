@@ -47,7 +47,7 @@ ext {
 def updateReadme(oldVersion, newVersion) {
     def template = file('README.md').text
     def result = template.replaceAll(Pattern.quote(oldVersion), newVersion)
-    file("README.md").withWriter{ it << result }
+    file("README.md").withWriter { it << result }
 }
 
 def Properties getVersionProps() {
@@ -91,9 +91,9 @@ task version << {
 }
 
 String shell(String command) {
-    def proc = ["sh",  "-c",  "cd ${project.rootDir} ; ${command}"].execute()
+    def proc = ["sh", "-c", "cd ${project.rootDir} ; ${command}"].execute()
     if (proc.waitFor() != 0) {
-        throw new RuntimeException("Failed to run: ${command}\n${proc.err.text}" )
+        throw new RuntimeException("Failed to run: ${command}\n${proc.err.text}")
     } else {
         def err = proc.err.text
         if (err) {
