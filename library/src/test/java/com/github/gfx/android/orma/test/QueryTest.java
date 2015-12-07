@@ -8,6 +8,7 @@ import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
 import com.github.gfx.android.orma.test.model.Book;
+import com.github.gfx.android.orma.test.model.Book_Relation;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 
@@ -162,15 +163,33 @@ public class QueryTest {
         assertThat(book, is(nullValue()));
     }
 
-    @Test
+    @Test(expected = NoValueException.class)
     public void singleIfNull() throws Exception {
         db.deleteFromBook().execute();
-        try {
-            db.selectFromBook().value();
-            fail("not reached");
-        } catch (Exception e) {
-            assertThat(e, is(instanceOf(NoValueException.class)));
-        }
+
+        db.selectFromBook().value();
+        fail("not reached");
+    }
+
+    @Test
+    public void testGet() throws Exception {
+        Book_Relation rel = db.selectFromBook();
+        List<Book> books = rel.toList();
+        assertThat(rel.get(0).id, is(books.get(0).id));
+        assertThat(rel.get(1).id, is(books.get(1).id));
+    }
+
+    @Test(expected = NoValueException.class)
+    public void testGetIfNoValue() throws Exception {
+        db.selectFromBook().get(10);
+    }
+
+    @Test(expected = NoValueException.class)
+    public void testGetOrNull() throws Exception {
+        Book book = db.selectFromBook().getOrNull(0);
+        assert book != null;
+        assertThat(book.id, is(db.selectFromBook().get(0).id));
+        assertThat(db.selectFromBook().get(10), is(nullValue()));
     }
 
     @Test

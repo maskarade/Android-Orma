@@ -1,5 +1,7 @@
 package com.github.gfx.android.orma.example.activity;
 
+import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
+import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
@@ -13,16 +15,10 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import rx.Observable;
 import rx.functions.Action1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 public class TodoActivity extends AppCompatActivity {
@@ -44,7 +40,9 @@ public class TodoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_todo);
 
-        orma = OrmaDatabase.builder(this).build();
+        orma = OrmaDatabase.builder(this)
+                .readOnMainThread(AccessThreadConstraint.NONE)
+                .build();
 
         adapter = new Adapter();
         binding.list.setAdapter(adapter);
@@ -77,68 +75,49 @@ public class TodoActivity extends AppCompatActivity {
 
         int totalCount = 0;
 
-        List<Todo> items;
-
         Adapter() {
-            Observable<Integer> countObservable = orma.selectFromTodo()
-                    .countAsObservable()
-                    .subscribeOn(Schedulers.io());
+            totalCount = orma.selectFromTodo().count();
+        }
 
-            Observable<List<Todo>> itemsObservable = orma.selectFromTodo()
-                    .observable()
+        public void addItem(final Todo todo) {
+            orma.prepareInsertIntoTodo()
+                    .observable(todo)
                     .subscribeOn(Schedulers.io())
-                    .toList();
-
-            Observable.combineLatest(countObservable, itemsObservable,
-                    new Func2<Integer, List<Todo>, Pair<Integer, List<Todo>>>() {
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Long>() {
                         @Override
-                        public Pair<Integer, List<Todo>> call(Integer count, List<Todo> todos) {
-                            return Pair.create(count, todos);
-                        }
-                    })
-                    .subscribe(new Action1<Pair<Integer, List<Todo>>>() {
-                        @Override
-                        public void call(Pair<Integer, List<Todo>> pair) {
-                            initialize(pair.first, pair.second);
+                        public void call(Long aLong) {
+                            totalCount++;
+                            notifyItemInserted(totalCount);
                         }
                     });
         }
 
-        public void initialize(int totalCount, List<Todo> items) {
-            this.totalCount = totalCount;
-            this.items = new ArrayList<>(items);
-            notifyDataSetChanged();
-        }
-
-        public void addItem(final Todo todo) {
+        public boolean removeItem(final Todo todo) {
             orma.transactionAsync(new TransactionTask() {
                 @Override
                 public void execute() throws Exception {
-                    orma.prepareInsertIntoTodo()
-                            .execute(todo);
+                    final int position = orma.selectFromTodo()
+                            .createdTimeMillisLt(todo.createdTimeMillis)
+                            .count();
+                    orma.deleteFromTodo()
+                            .where("id = ?", todo.id)
+                            .observable()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Action1<Integer>() {
+                                @Override
+                                public void call(Integer deletedRows) {
+                                    if (deletedRows > 0) {
+                                        totalCount--;
+                                        notifyItemRemoved(position);
+                                    }
+                                }
+                            });
+
                 }
             });
 
-            items.add(todo);
-            totalCount++;
-
-            notifyItemInserted(totalCount);
-        }
-
-        public boolean removeItem(Todo todo) {
-            int position = items.indexOf(todo);
-            if (position == -1) {
-                return false;
-            }
-            orma.deleteFromTodo()
-                    .where("id = ?", todo.id)
-                    .observable()
-                    .subscribeOn(Schedulers.io())
-                    .subscribe();
-
-            items.remove(todo);
-            totalCount--;
-            notifyItemRemoved(position);
             return true;
         }
 
@@ -148,9 +127,11 @@ public class TodoActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(VH holder, int position) {
+        public void onBindViewHolder(final VH holder, int position) {
             CardTodoBinding binding = holder.binding;
-            final Todo todo = items.get(position);
+            final Todo todo = orma.selectFromTodo()
+                    .orderByCreatedTimeMillisAsc()
+                    .get(position);
 
             binding.title.setText(todo.title);
             binding.content.setText(todo.content);

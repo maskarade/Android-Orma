@@ -29,14 +29,28 @@ public class ConditionQueryHelpers {
         List<MethodSpec> methodSpecs = new ArrayList<>();
         schema.getColumns()
                 .stream()
-                .filter(column -> column.indexed)
+                .filter(column -> column.indexed || column.primaryKey)
                 .forEach(column -> buildConditionHelpersForEachColumn(methodSpecs, column));
         return methodSpecs;
     }
 
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
 
-        ParameterSpec.Builder paramSpecBuilder = conditionParamSpecBuilder(column, "value");
+        ParameterSpec.Builder paramSpecBuilder = conditionParamSpecBuilder(column, column.name);
+
+        if (column.primaryKey) {
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("find")
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(paramSpecBuilder.build())
+                            .returns(targetClassName)
+                            .addStatement("return where($S, $L)",
+                                    sql.quoteIdentifier(column.columnName) + " = ?", column.name)
+                            .build()
+            );
+
+            return;
+        }
 
         if (column.nullable) {
             methodSpecs.add(
@@ -61,7 +75,7 @@ public class ConditionQueryHelpers {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(paramSpecBuilder.build())
                         .returns(targetClassName)
-                        .addStatement("return where($S, value)", sql.quoteIdentifier(column.columnName) + " = ?")
+                        .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " = ?", column.name)
                         .build()
         );
 
@@ -70,7 +84,7 @@ public class ConditionQueryHelpers {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(paramSpecBuilder.build())
                         .returns(targetClassName)
-                        .addStatement("return where($S, value)", sql.quoteIdentifier(column.columnName) + " <> ?")
+                        .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " <> ?", column.name)
                         .build()
         );
 
@@ -102,7 +116,8 @@ public class ConditionQueryHelpers {
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(paramSpecBuilder.build())
                             .returns(targetClassName)
-                            .addStatement("return where($S, value)", sql.quoteIdentifier(column.columnName) + " < ?")
+                            .addStatement("return where($S, $L)",
+                                    sql.quoteIdentifier(column.columnName) + " < ?", column.name)
                             .build()
             );
             methodSpecs.add(
@@ -110,7 +125,8 @@ public class ConditionQueryHelpers {
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(paramSpecBuilder.build())
                             .returns(targetClassName)
-                            .addStatement("return where($S, value)", sql.quoteIdentifier(column.columnName) + " <= ?")
+                            .addStatement("return where($S, $L)",
+                                    sql.quoteIdentifier(column.columnName) + " <= ?", column.name)
                             .build()
             );
             methodSpecs.add(
@@ -118,7 +134,8 @@ public class ConditionQueryHelpers {
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(paramSpecBuilder.build())
                             .returns(targetClassName)
-                            .addStatement("return where($S, value)", sql.quoteIdentifier(column.columnName) + " > ?")
+                            .addStatement("return where($S, $L)",
+                                    sql.quoteIdentifier(column.columnName) + " > ?", column.name)
                             .build()
             );
             methodSpecs.add(
@@ -126,13 +143,14 @@ public class ConditionQueryHelpers {
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(paramSpecBuilder.build())
                             .returns(targetClassName)
-                            .addStatement("return where($S, value)", sql.quoteIdentifier(column.columnName) + " >= ?")
+                            .addStatement("return where($S, $L)",
+                                    sql.quoteIdentifier(column.columnName) + " >= ?", column.name)
                             .build()
             );
         }
     }
 
-    boolean isNumberType(TypeName typeName) {
+    public boolean isNumberType(TypeName typeName) {
         return typeName.equals(TypeName.BYTE)
                 || typeName.equals(TypeName.SHORT)
                 || typeName.equals(TypeName.INT)
@@ -141,12 +159,12 @@ public class ConditionQueryHelpers {
                 || typeName.equals(TypeName.DOUBLE);
     }
 
-    ParameterSpec.Builder conditionParamSpecBuilder(ColumnDefinition column, String name) {
+    public ParameterSpec.Builder conditionParamSpecBuilder(ColumnDefinition column, String name) {
         return ParameterSpec.builder(column.getType(), name)
                 .addAnnotations(nullabilityAnnotations(column));
     }
 
-    List<AnnotationSpec> nullabilityAnnotations(ColumnDefinition column) {
+    public List<AnnotationSpec> nullabilityAnnotations(ColumnDefinition column) {
         if (column.getType().isPrimitive()) {
             return Collections.emptyList();
         }
