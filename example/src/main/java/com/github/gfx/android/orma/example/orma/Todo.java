@@ -22,6 +22,6 @@ public class Todo {
     @Column(defaultExpr = "0")
     public boolean done;
 
-    @Column
+    @Column(indexed = true)
     public long createdTimeMillis;
 }

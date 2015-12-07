@@ -115,7 +115,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         ColumnDef<?> primaryKey = schema.getPrimaryKey();
         String whereClause = '"' + primaryKey.name + '"' + " = ?";
         String[] whereArgs = {String.valueOf(id)};
-        return querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null);
+        return querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null, 0);
     }
 
     public <T> Inserter<T> prepareInsert(Schema<T> schema) {
@@ -162,8 +162,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
-            String having, String orderBy) {
-        Cursor cursor = query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy, "1");
+            String having, String orderBy, long offset) {
+        Cursor cursor = query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy, offset + ",1");
 
         try {
             if (cursor.moveToFirst()) {
@@ -301,7 +301,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         long t0 = System.currentTimeMillis();
         if (trace) {
-            Log.v(TAG, "migration start from=" + oldVersion + " to " + newVersion);
+            Log.v(TAG, "migration start from " + oldVersion + " to " + newVersion);
         }
 
         migration.start(db, schemas);
@@ -315,7 +315,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         long t0 = System.currentTimeMillis();
         if (trace) {
-            Log.v(TAG, "migration start from=" + oldVersion + " to " + newVersion);
+            Log.v(TAG, "migration start from " + oldVersion + " to " + newVersion);
         }
 
         migration.start(db, schemas);

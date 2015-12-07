@@ -65,13 +65,13 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
     }
 
     @SuppressWarnings("unchecked")
-    public R offset(@IntRange(from = 0, to = Integer.MAX_VALUE) long offset) {
+    public R offset(@IntRange(from = 0) long offset) {
         this.offset = offset;
         return (R) this;
     }
 
     @SuppressWarnings("unchecked")
-    public R page(@IntRange(from = 1, to = Integer.MAX_VALUE) long page) {
+    public R page(@IntRange(from = 1) long page) {
         this.page = page;
         return (R) this;
     }
@@ -123,18 +123,30 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
 
     @Nullable
     public Model valueOrNull() {
-        return conn.querySingle(schema, schema.getEscapedColumnNames(),
-                getWhereClause(), getWhereArgs(), groupBy, having, orderBy);
+        return getOrNull(0);
     }
 
     @NonNull
     public Model value() throws NoValueException {
-        Model model = valueOrNull();
-
+        Model model = getOrNull(0);
         if (model == null) {
             throw new NoValueException("Expected single value but nothing for " + schema.getTableName());
         }
+        return model;
+    }
 
+    @Nullable
+    public Model getOrNull(@IntRange(from = 0) long position) {
+        return conn.querySingle(schema, schema.getEscapedColumnNames(),
+                getWhereClause(), getWhereArgs(), groupBy, having, orderBy, position);
+    }
+
+    @NonNull
+    public Model get(@IntRange(from = 0) long position) {
+        Model model = getOrNull(position);
+        if (model == null) {
+            throw new NoValueException("Expected single value for " + position + " but nothing for " + schema.getTableName());
+        }
         return model;
     }
 
@@ -147,20 +159,17 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
     @NonNull
     public List<Model> toList() {
         final ArrayList<Model> list = new ArrayList<>();
-
         forEach(new Action1<Model>() {
             @Override
             public void call(Model item) {
                 list.add(item);
             }
         });
-
         return list;
     }
 
     public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = query();
-
         for (int pos = 0; cursor.moveToPosition(pos); pos++) {
             action.call(schema.createModelFromCursor(conn, cursor));
         }

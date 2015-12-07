@@ -36,8 +36,8 @@ public class SingleRelation<Model> {
                 ColumnDef<?> primaryKey = schema.getPrimaryKey();
                 String whereClause = "\"" + primaryKey.name + "\" = ?";
                 String[] whereArgs = {String.valueOf(id)};
-                Model model = conn
-                        .querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null);
+                Model model = conn.querySingle(schema, schema.getEscapedColumnNames(),
+                        whereClause, whereArgs, null, null, null, 0);
                 if (model != null) {
                     subscriber.onSuccess(model);
                 } else {
