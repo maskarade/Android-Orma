@@ -14,10 +14,12 @@ import android.support.annotation.Nullable;
  * This class represents Orma options, and it is the base class of {@code OrmaDatabase.Builder}.
  */
 @SuppressWarnings("unchecked")
-public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
+public class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     @NonNull
     final Context context;
+
+    final boolean debug;
 
     @Nullable
     String name;
@@ -27,8 +29,6 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
     MigrationEngine migrationEngine;
 
     boolean wal = true;
-
-    final boolean debug;
 
     boolean trace;
 
@@ -61,10 +61,10 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     public T name(@Nullable String name) {
         this.name = name;
-        return (T)this;
+        return (T) this;
     }
 
-    public T typeAdapters(@NonNull TypeAdapter<?> ...typeAdapters) {
+    public T typeAdapters(@NonNull TypeAdapter<?>... typeAdapters) {
         if (typeAdapterRegistry == null) {
             typeAdapterRegistry = new TypeAdapterRegistry();
             typeAdapterRegistry.addAll(TypeAdapterRegistry.defaultTypeAdapters());
@@ -75,12 +75,10 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     public T migrationEngine(@NonNull MigrationEngine migrationEngine) {
         this.migrationEngine = migrationEngine;
-        return (T)this;
+        return (T) this;
     }
 
     /**
-     * @param wal
-     * @return
      * @see <a href="http://sqlite.org/wal.html">Write-Ahead Logging in SQLite</a>
      */
     public T writeAheadLogging(boolean wal) {
@@ -90,8 +88,6 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     /**
      * If true, SQL executions are logged to console.
-     * @param trace
-     * @return
      */
     public T trace(boolean trace) {
         this.trace = trace;
@@ -100,8 +96,6 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     /**
      * Sets {@link AccessThreadConstraint} for reading.
-     * @param readOnMainThread
-     * @return
      */
     public T readOnMainThread(AccessThreadConstraint readOnMainThread) {
         this.readOnMainThread = readOnMainThread;
@@ -110,8 +104,6 @@ public class OrmaConfiguration<T extends  OrmaConfiguration<?>> {
 
     /**
      * Sets {@link AccessThreadConstraint} for writing.
-     * @param writeOnMainThread
-     * @return
      */
     public T writeOnMainThread(AccessThreadConstraint writeOnMainThread) {
         this.writeOnMainThread = writeOnMainThread;

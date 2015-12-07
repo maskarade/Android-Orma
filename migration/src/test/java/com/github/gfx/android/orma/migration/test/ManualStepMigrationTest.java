@@ -25,15 +25,15 @@ public class ManualStepMigrationTest {
 
     static int VERSION = 100;
 
+    static {
+        System.setProperty("robolectric.logging", "stdout");
+    }
+
     SQLiteDatabase db;
 
     ManualStepMigration engine;
 
     List<StepContext> seq;
-
-    static {
-        System.setProperty("robolectric.logging", "stdout");
-    }
 
     @Before
     public void setUp() throws Exception {

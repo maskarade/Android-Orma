@@ -12,7 +12,7 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
-public class ConditionHelpers {
+public class ConditionQueryHelpers {
 
     private final SchemaDefinition schema;
 
@@ -20,7 +20,7 @@ public class ConditionHelpers {
 
     private final SqlGenerator sql = new SqlGenerator();
 
-    public ConditionHelpers(SchemaDefinition schema, ClassName targetClassName) {
+    public ConditionQueryHelpers(SchemaDefinition schema, ClassName targetClassName) {
         this.schema = schema;
         this.targetClassName = targetClassName;
     }

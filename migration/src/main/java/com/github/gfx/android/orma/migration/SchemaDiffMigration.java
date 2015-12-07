@@ -71,7 +71,8 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @NonNull
-    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables, @NonNull List<? extends MigrationSchema> schemas) {
+    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables,
+            @NonNull List<? extends MigrationSchema> schemas) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database

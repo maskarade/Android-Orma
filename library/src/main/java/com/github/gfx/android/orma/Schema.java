@@ -17,6 +17,9 @@ public interface Schema<Model> extends MigrationSchema {
     String getTableName();
 
     @NonNull
+    String getEscapedTableName();
+
+    @NonNull
     ColumnDef<?> getPrimaryKey();
 
     @NonNull

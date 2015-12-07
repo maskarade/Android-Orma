@@ -131,7 +131,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
-        return db.updateWithOnConflict(schema.getTableName(), values, whereClause, whereArgs,
+        return db.updateWithOnConflict(schema.getEscapedTableName(), values, whereClause, whereArgs,
                 SQLiteDatabase.CONFLICT_ROLLBACK);
     }
 
@@ -151,13 +151,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] whereArgs,
             String groupBy, String having, String orderBy, String limit) {
         String sql = SQLiteQueryBuilder.buildQueryString(
-                false, schema.getTableName(), columns, whereClause, groupBy, having, orderBy, limit);
+                false, schema.getEscapedTableName(), columns, whereClause, groupBy, having, orderBy, limit);
         return rawQuery(sql, whereArgs);
     }
 
     public int count(Schema<?> schema, String whereClause, String[] whereArgs) {
         String sql = SQLiteQueryBuilder.buildQueryString(
-                false, schema.getTableName(), countSelections, whereClause, null, null, null, null);
+                false, schema.getEscapedTableName(), countSelections, whereClause, null, null, null, null);
         return (int) rawQueryForLong(sql, whereArgs);
     }
 
@@ -178,7 +178,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public int delete(@NonNull Schema<?> schema, @Nullable String whereClause, @Nullable String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
-        return db.delete(schema.getTableName(), whereClause, whereArgs);
+        return db.delete(schema.getEscapedTableName(), whereClause, whereArgs);
     }
 
     public void transactionNonExclusiveSync(@NonNull TransactionTask task) {

@@ -29,7 +29,8 @@ import static org.hamcrest.Matchers.*;
 public class SchemaDiffTest {
 
     static final List<SchemaData> schemas = Arrays.asList(
-            new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)", Collections.<String>emptyList()),
+            new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
+                    Collections.<String>emptyList()),
             new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)", Collections.<String>emptyList())
     );
 

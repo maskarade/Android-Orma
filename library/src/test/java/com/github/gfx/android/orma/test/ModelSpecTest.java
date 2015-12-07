@@ -147,7 +147,7 @@ public class ModelSpecTest {
         });
 
         assertThat(model.booleanValue, is(true));
-        assertThat(model.byteValue, is((byte)1));
+        assertThat(model.byteValue, is((byte) 1));
         assertThat(model.shortValue, is((short) 2));
         assertThat(model.intValue, is(3));
         assertThat(model.longValue, is(4L));
@@ -176,8 +176,8 @@ public class ModelSpecTest {
         });
 
         assertThat(model.booleanValue, is(true));
-        assertThat(model.byteValue, is((byte)1));
-        assertThat(model.shortValue, is((short)2));
+        assertThat(model.byteValue, is((byte) 1));
+        assertThat(model.shortValue, is((short) 2));
         assertThat(model.intValue, is(3));
         assertThat(model.longValue, is(4L));
         assertThat(model.floatValue, is(1.14f));
