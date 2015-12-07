@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Action0;
@@ -287,7 +288,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 final AtomicInteger count = new AtomicInteger();
 
-                Todo_Relation todos = orma.selectFromTodo();
+                Todo_Relation todos = orma.selectFromTodo().orderByCreatedTimeMillisAsc();
                 todos.forEach(new Action1<Todo>() {
                     @Override
                     public void call(Todo todo) {
@@ -315,7 +316,8 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 AtomicInteger count = new AtomicInteger();
 
-                RealmResults<RealmTodo> results = realm.allObjects(RealmTodo.class);
+                RealmResults<RealmTodo> results = realm.allObjectsSorted(
+                        RealmTodo.class, "createdTimeMillis", Sort.ASCENDING);
                 for (@SuppressWarnings("unused") RealmTodo todo : results) {
                     String title = todo.getTitle();
                     String content = todo.getContent();
@@ -342,7 +344,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 Cursor cursor = db.query(
                         "todo",
                         new String[]{"id, title, content, done, createdTimeMillis"},
-                        null, null, null, null, null // whereClause, whereArgs, groupBy, having, orderBy
+                        null, null, null, null, "createdTimeMillis ASC" // whereClause, whereArgs, groupBy, having, orderBy
                 );
 
                 if (cursor.moveToFirst()) {
