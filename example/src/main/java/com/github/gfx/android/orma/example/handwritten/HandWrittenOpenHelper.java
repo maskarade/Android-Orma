@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class HandWrittenOpenHelper extends SQLiteOpenHelper {
 
     public HandWrittenOpenHelper(Context context, String name) {
-        super(context, name, null, 2);
+        super(context, name, null, 3);
     }
 
     @Override
@@ -20,6 +20,7 @@ public class HandWrittenOpenHelper extends SQLiteOpenHelper {
                 + "createdTimeMillis INTEGER NOT NULL"
                 + ")");
         db.execSQL("CREATE INDEX title_on_todo ON todo (title)");
+        db.execSQL("CREATE INDEX createdTimeMillis_on_todo ON todo (createdTimeMillis)");
     }
 
     @Override

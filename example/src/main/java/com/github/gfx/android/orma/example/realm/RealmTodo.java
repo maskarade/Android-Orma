@@ -1,17 +1,20 @@
 package com.github.gfx.android.orma.example.realm;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Index;
 
 public class RealmTodo extends RealmObject {
 
     private long id;
 
+    @Index
     private String title;
 
     private String content;
 
     private boolean done;
 
+    @Index
     private long createdTimeMillis;
 
     public RealmTodo() {
