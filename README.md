@@ -1,9 +1,9 @@
 # Orma for Android [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/)
 
-* Note that this is an **alpha** software and the interface will change until v1.0.0.
+This is an **alpha** software and the interface will change until v1.0.0.
 
 Orma is a lightning-fast ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
-generating helper classes at compile time with annotation processing.
+generating helper classes at compile time with **annotation processing**.
 
 There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I have to add another?
 
