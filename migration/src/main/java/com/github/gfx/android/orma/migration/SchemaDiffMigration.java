@@ -197,7 +197,7 @@ public class SchemaDiffMigration implements MigrationEngine {
         String tempTableName = "__temp_" + SqliteDdlBuilder.ensureNotQuoted(toTableName);
 
         statements.add(builder.buildCreateTable(tempTableName,
-                builder.map(toTable.getColumnDefinitions(), new SqliteDdlBuilder.Func1<ColumnDefinition, String>() {
+                builder.map(toTable.getColumnDefinitions(), new SqliteDdlBuilder.Func<ColumnDefinition, String>() {
                     @Override
                     public String call(ColumnDefinition arg) {
                         String columnSpec;

@@ -61,7 +61,7 @@ public class SqliteDdlBuilder {
         sb.append("INSERT INTO ");
         sb.append(ensureQuoted(toTable));
         sb.append(" (");
-        String quotedColumnNames = joinBy(", ", columns, new SqliteDdlBuilder.Func1<String, String>() {
+        String quotedColumnNames = joinBy(", ", columns, new Func<String, String>() {
             @Override
             public String call(String name) {
                 return SqliteDdlBuilder.ensureQuoted(name);
@@ -87,7 +87,7 @@ public class SqliteDdlBuilder {
     }
 
     @NonNull
-    public <T> List<String> map(Collection<T> collection, @NonNull Func1<T, String> func) {
+    public <T> List<String> map(Collection<T> collection, @NonNull Func<T, String> func) {
         List<String> result = new ArrayList<>(collection.size());
         for (T item : collection) {
             result.add(func.call(item));
@@ -109,7 +109,7 @@ public class SqliteDdlBuilder {
 
     @NonNull
     public <T> String joinBy(@NonNull String separator, @NonNull Collection<T> collection,
-            @NonNull Func1<T, String> func) {
+            @NonNull Func<T, String> func) {
         StringBuilder sb = new StringBuilder();
         int i = 0;
         int size = collection.size();
@@ -123,7 +123,7 @@ public class SqliteDdlBuilder {
         return sb.toString();
     }
 
-    public interface Func1<A, R> {
+    public interface Func<A, R> {
 
         R call(A arg);
     }
