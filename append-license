@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+use 5.12.0;
+use strict;
+use warnings;
+use autodie;
+
+my $license = do {
+    open my $fh, '<', 'README.md';
+
+    while (<$fh>) {
+        last if /\A \# \s+ license\b /xmsi;
+    }
+
+    local $/;
+    <$fh> =~ s/\A \s+ | \s+ \z//xmsgr;
+};
+
+say $license;
+
+my $java_license_set = ($license =~ s/^/ * /xmsgr) =~ s/[ ]+$//xmsgr;
+
+foreach my $file(@ARGV) {
+    my $content = do {
+        open my $fh, '<', $file;
+        local $/;
+        <$fh>;
+    };
+
+    next unless $file =~ /\.java/;
+
+    next if $content =~ /\Q$java_license_set\E/;
+
+    open my $fh, '>', $file;
+    say $fh  "/*";
+    say $fh $java_license_set;
+    say $fh " */";
+    print $fh $content;
+    close $fh;
+}
