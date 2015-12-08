@@ -116,7 +116,7 @@ public class TodoActivity extends AppCompatActivity {
                             .createdTimeMillisLt(todo.createdTimeMillis)
                             .count();
                     orma.deleteFromTodo()
-                            .where("id = ?", todo.id)
+                            .idEq(todo.id)
                             .observable()
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())

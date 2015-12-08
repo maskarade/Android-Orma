@@ -55,7 +55,7 @@ public class ConditionQueryHelpers {
 
         if (column.primaryKey) {
             methodSpecs.add(
-                    MethodSpec.methodBuilder("find")
+                    MethodSpec.methodBuilder(column.name + "Eq")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(paramSpecBuilder.build())
                             .returns(targetClassName)
