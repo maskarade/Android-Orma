@@ -23,7 +23,6 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
 public class UpdaterWriter extends BaseWriter {
@@ -34,8 +33,8 @@ public class UpdaterWriter extends BaseWriter {
 
     private final SqlGenerator sql = new SqlGenerator();
 
-    public UpdaterWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
-        super(processingEnv);
+    public UpdaterWriter(ProcessingContext context, SchemaDefinition schema) {
+        super(context);
         this.schema = schema;
         conditionQueryHelpers = new ConditionQueryHelpers(schema, schema.getUpdaterClassName());
     }
@@ -64,13 +63,16 @@ public class UpdaterWriter extends BaseWriter {
 
         schema.getColumnsWithoutAutoId().forEach(column -> {
             RelationDefinition r = column.getRelation();
+
             if (r == null) {
+                String paramName = column.name;
                 CodeBlock.Builder valueExpr = CodeBlock.builder();
+
                 if (Types.needsTypeAdapter(column.getUnboxType())) {
-                    valueExpr.add("conn.getTypeAdapterRegistry().serialize($T.$L.type, value)",
-                            schema.getSchemaClassName(), column.name);
+                    valueExpr.add("conn.getTypeAdapterRegistry().serialize($T.$L.type, $L)",
+                            schema.getSchemaClassName(), column.name, paramName);
                 } else {
-                    valueExpr.add("value");
+                    valueExpr.add(paramName);
                 }
 
                 methodSpecs.add(
@@ -78,7 +80,7 @@ public class UpdaterWriter extends BaseWriter {
                                 .addModifiers(Modifier.PUBLIC)
                                 .returns(schema.getUpdaterClassName())
                                 .addParameter(
-                                        ParameterSpec.builder(column.getType(), "value")
+                                        ParameterSpec.builder(column.getType(), paramName)
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
@@ -86,8 +88,28 @@ public class UpdaterWriter extends BaseWriter {
                                 .addStatement("return this")
                                 .build()
                 );
-            } else {
-                // FIXME: in case the column represents a relationship
+
+            } else { // SingleRelation<T>
+                String paramName;
+                CodeBlock.Builder valueExpr = CodeBlock.builder();
+
+
+                paramName = column.name + "Reference";
+                valueExpr.add("$L.getId()", paramName);
+
+                methodSpecs.add(
+                        MethodSpec.methodBuilder(column.name)
+                                .addModifiers(Modifier.PUBLIC)
+                                .returns(schema.getUpdaterClassName())
+                                .addParameter(
+                                        ParameterSpec.builder(column.getType(), paramName)
+                                                .build()
+                                )
+                                .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
+                                        valueExpr.build())
+                                .addStatement("return this")
+                                .build()
+                );
             }
         });
 

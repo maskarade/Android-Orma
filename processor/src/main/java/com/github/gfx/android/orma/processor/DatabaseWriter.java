@@ -26,7 +26,6 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
 public class DatabaseWriter extends BaseWriter {
@@ -45,24 +44,18 @@ public class DatabaseWriter extends BaseWriter {
 
     static final String SCHEMAS = "SCHEMAS";
 
-    List<SchemaDefinition> schemas = new ArrayList<>();
-
-    public DatabaseWriter(ProcessingEnvironment processingEnv) {
-        super(processingEnv);
-    }
-
-    public void add(SchemaDefinition schema) {
-        schemas.add(schema);
+    public DatabaseWriter(ProcessingContext context) {
+        super(context);
     }
 
     public boolean isRequired() {
-        return schemas.size() > 0;
+        return context.schemaMap.size() > 0;
     }
 
     public String getPackageName() {
         assert isRequired();
 
-        return schemas.get(0).getPackageName();
+        return context.getPackageName();
     }
 
     @Override
@@ -112,7 +105,7 @@ public class DatabaseWriter extends BaseWriter {
 
         List<FieldSpec> schemaFields = new ArrayList<>();
 
-        schemas.forEach(schema -> {
+        context.schemaMap.values().forEach((schema) -> {
             schemaFields.add(
                     FieldSpec.builder(schema.getSchemaClassName(),
                             "schema" + schema.getModelClassName().simpleName())
@@ -232,7 +225,7 @@ public class DatabaseWriter extends BaseWriter {
                         .build()
         );
 
-        schemas.forEach(schema -> {
+        context.schemaMap.values().forEach(schema -> {
             String simpleModelName = schema.getModelClassName().simpleName();
             String schemaInstance = "schema" + simpleModelName;
 
