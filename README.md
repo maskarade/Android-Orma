@@ -264,6 +264,18 @@ operations.
 
 See [example/](example/) for details.
 
+# Benchmark
+
+There is a simple benchmark with [Realm](https://github.com/realm/realm-java) and hand-written code:
+
+[example/BenchmarkActivity](example/src/main/java/com/github/gfx/android/orma/example/activity/BenchmarkActivity.java)
+
+Here is a result performed on Android 5.0.2 / Xperia Z4 as of Orma v0.9.0:
+
+![](benchmark_v0.9.0_2015-12-10.png)
+
+It shows that Orma is a little faster than Realm (v0.86.0) and as fast as hand-written code.
+
 # Support
 
 * Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
