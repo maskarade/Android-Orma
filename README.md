@@ -272,7 +272,7 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 
 Here is a result performed on Android 5.0.2 / Xperia Z4 as of Orma v0.9.0:
 
-![](benchmark_v0.9.0_2015-12-10.png)
+<img src="/gfx/Android-Orma/raw/master/benchmark_v0.9.0_2015-12-10.png" alt="" width="443"/>
 
 It shows that Orma is a little faster than Realm (v0.86.0) and as fast as hand-written code.
 
