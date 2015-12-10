@@ -344,6 +344,57 @@ public class QueryTest {
     }
 
     @Test
+    public void updateSingleRelation() throws Exception {
+        Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
+            @NonNull
+            @Override
+            public Publisher create() {
+                Publisher publisher = new Publisher();
+                publisher.name = "The Nova";
+                publisher.startedYear = 2015;
+                publisher.startedMonth = 12;
+                return publisher;
+            }
+        });
+
+        int count = db.updateBook()
+                .where("title = ?", "today")
+                .publisher(publisher)
+                .execute();
+
+        assertThat(count, is(1));
+
+        Book book = db.selectFromBook().where("title = ?", "today").value();
+        assertThat(book.publisher.single().toBlocking().value().name, is("The Nova"));
+    }
+
+    @Test
+    public void updateSingleRelationViaReference() throws Exception {
+        Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
+            @NonNull
+            @Override
+            public Publisher create() {
+                Publisher publisher = new Publisher();
+                publisher.name = "The Nova";
+                publisher.startedYear = 2015;
+                publisher.startedMonth = 12;
+                return publisher;
+            }
+        });
+
+        int count = db.updateBook()
+                .where("title = ?", "today")
+                .publisher(SingleRelation.<Publisher>id(publisher.id))
+                .execute();
+
+        assertThat(count, is(1));
+
+        Book book = db.selectFromBook().where("title = ?", "today").value();
+        assertThat(book.publisher.single().toBlocking().value().name, is("The Nova"));
+    }
+
+
+    @Test
     public void delete() throws Exception {
         int result = db.deleteFromBook()
                 .where("title = ?", "today")

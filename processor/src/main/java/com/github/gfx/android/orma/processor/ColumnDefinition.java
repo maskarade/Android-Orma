@@ -134,11 +134,8 @@ public class ColumnDefinition {
     }
 
     public RelationDefinition getRelation() {
-        if (type instanceof ParameterizedTypeName) {
-            ParameterizedTypeName pt = (ParameterizedTypeName) type;
-            if (pt.rawType.equals(Types.SingleRelation)) {
-                return new RelationDefinition(pt.rawType, pt.typeArguments.get(0));
-            }
+        if (RelationDefinition.isSingleRelation(type)) {
+            return RelationDefinition.create(type);
         }
         return null;
 

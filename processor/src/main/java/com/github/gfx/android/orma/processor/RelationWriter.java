@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
 public class RelationWriter extends BaseWriter {
@@ -33,8 +32,8 @@ public class RelationWriter extends BaseWriter {
 
     private final SqlGenerator sql = new SqlGenerator();
 
-    public RelationWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
-        super(processingEnv);
+    public RelationWriter(ProcessingContext context, SchemaDefinition schema) {
+        super(context);
         this.schema = schema;
         this.conditionQueryHelpers = new ConditionQueryHelpers(schema, schema.getRelationClassName());
     }

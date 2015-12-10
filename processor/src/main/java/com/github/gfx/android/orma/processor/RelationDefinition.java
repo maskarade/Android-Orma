@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
 public class RelationDefinition {
@@ -23,6 +24,20 @@ public class RelationDefinition {
     final ClassName relationType;
 
     final TypeName modelType;
+
+    public static boolean isSingleRelation(TypeName type) {
+        if (type instanceof ParameterizedTypeName) {
+            ParameterizedTypeName pt = (ParameterizedTypeName) type;
+            return pt.rawType.equals(Types.SingleRelation);
+        } else {
+            return false;
+        }
+    }
+
+    public static RelationDefinition create(TypeName type) {
+        ParameterizedTypeName pt = (ParameterizedTypeName) type;
+        return new RelationDefinition(pt.rawType, pt.typeArguments.get(0));
+    }
 
     public RelationDefinition(ClassName relationType, TypeName modelType) {
         this.relationType = relationType;

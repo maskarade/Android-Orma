@@ -17,14 +17,12 @@ package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.TypeSpec;
 
-import javax.annotation.processing.ProcessingEnvironment;
-
 public abstract class BaseWriter {
 
-    protected final ProcessingEnvironment processingEnv;
+    public final ProcessingContext context;
 
-    public BaseWriter(ProcessingEnvironment processingEnv) {
-        this.processingEnv = processingEnv;
+    public BaseWriter(ProcessingContext context) {
+        this.context = context;
     }
 
     public abstract TypeSpec buildTypeSpec();

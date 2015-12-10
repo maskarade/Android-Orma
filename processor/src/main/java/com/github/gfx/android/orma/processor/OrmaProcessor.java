@@ -18,8 +18,11 @@ package com.github.gfx.android.orma.processor;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeName;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -46,20 +49,28 @@ public class OrmaProcessor extends AbstractProcessor {
             return true;
         }
         try {
-            DatabaseWriter databaseWriter = new DatabaseWriter(processingEnv);
+            Map<TypeName, SchemaDefinition> schemaMap = new HashMap<>();
 
             buildTableSchemas(roundEnv)
-                    .peek(schema -> writeCodeForEachModel(schema, new SchemaWriter(schema, processingEnv)))
-                    .peek(schema -> writeCodeForEachModel(schema, new RelationWriter(schema, processingEnv)))
-                    .peek(schema -> writeCodeForEachModel(schema, new UpdaterWriter(schema, processingEnv)))
-                    .peek(schema -> writeCodeForEachModel(schema, new DeleterWriter(schema, processingEnv)))
-                    .forEach(databaseWriter::add);
+                    .forEach(schema -> schemaMap.put(schema.getModelClassName(), schema));
+
+            ProcessingContext context = new ProcessingContext(processingEnv, schemaMap);
+
+            schemaMap.values().forEach((schema) -> {
+
+                writeCodeForEachModel(schema, new SchemaWriter(context, schema));
+                writeCodeForEachModel(schema, new RelationWriter(context, schema));
+                writeCodeForEachModel(schema, new UpdaterWriter(context, schema));
+                writeCodeForEachModel(schema, new DeleterWriter(context, schema));
+
+            });
 
             buildVirtualTableSchemas(roundEnv)
                     .peek(schema -> {
                         throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
                     });
 
+            DatabaseWriter databaseWriter = new DatabaseWriter(context);
             if (databaseWriter.isRequired()) {
                 writeToFiler(null,
                         JavaFile.builder(databaseWriter.getPackageName(),

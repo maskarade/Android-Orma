@@ -103,5 +103,4 @@ public class SchemaValidatorTest {
                 .withErrorCount(1)
                 .withErrorContaining("No @Column nor @PrimaryKey is defined in NoColumnInTable");
     }
-
 }

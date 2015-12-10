@@ -21,7 +21,6 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
 public class DeleterWriter extends BaseWriter {
@@ -30,8 +29,8 @@ public class DeleterWriter extends BaseWriter {
 
     private final ConditionQueryHelpers conditionQueryHelpers;
 
-    public DeleterWriter(SchemaDefinition schema, ProcessingEnvironment processingEnv) {
-        super(processingEnv);
+    public DeleterWriter(ProcessingContext context, SchemaDefinition schema) {
+        super(context);
         this.schema = schema;
         conditionQueryHelpers = new ConditionQueryHelpers(schema, schema.getDeleterClassName());
     }
