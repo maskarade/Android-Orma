@@ -25,17 +25,15 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 
 public class SchemaValidator {
 
-    final ProcessingEnvironment processingEnv;
+    final ProcessingContext context;
 
-    public SchemaValidator(ProcessingEnvironment processingEnv) {
-        this.processingEnv = processingEnv;
+    public SchemaValidator(ProcessingContext context) {
+        this.context = context;
     }
 
     public TypeElement validate(Element element) {
@@ -100,10 +98,6 @@ public class SchemaValidator {
     }
 
     void error(String message, Element element) {
-        processingEnv.getMessager()
-                .printMessage(Diagnostic.Kind.ERROR,
-                        "[" + OrmaProcessor.TAG + "] " + message,
-                        element);
-
+        context.addError(message, element);
     }
 }

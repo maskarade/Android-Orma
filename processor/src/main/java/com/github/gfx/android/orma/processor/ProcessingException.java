@@ -23,12 +23,12 @@ public class ProcessingException extends RuntimeException {
     public final Element element;
 
     public ProcessingException(String message, Element element, Throwable throwable) {
-        super(message, throwable);
+        super("[" + OrmaProcessor.TAG + "] " + message, throwable);
         this.element = element;
     }
 
     public ProcessingException(String message, Element element) {
-        super(message);
+        super("[" + OrmaProcessor.TAG + "] " + message);
         this.element = element;
     }
 }
