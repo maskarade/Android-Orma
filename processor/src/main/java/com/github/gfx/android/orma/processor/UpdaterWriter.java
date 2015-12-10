@@ -90,23 +90,40 @@ public class UpdaterWriter extends BaseWriter {
                 );
 
             } else { // SingleRelation<T>
-                String paramName;
-                CodeBlock.Builder valueExpr = CodeBlock.builder();
+                methodSpecs.add(
+                        MethodSpec.methodBuilder(column.name)
+                                .addModifiers(Modifier.PUBLIC)
+                                .returns(schema.getUpdaterClassName())
+                                .addParameter(
+                                        ParameterSpec.builder(column.getType(), column.name + "Reference")
+                                                .build()
+                                )
+                                .addStatement("contents.put($S, $L.getId())",
+                                        sql.quoteIdentifier(column.columnName), column.name + "Reference")
+                                .addStatement("return this")
+                                .build()
+                );
 
-
-                paramName = column.name + "Reference";
-                valueExpr.add("$L.getId()", paramName);
+                SchemaDefinition modelSchema = context.getSchemaDef(r.modelType);
+                if (modelSchema == null) {
+                    // FIXME: just stack errors and return in order to continue processing
+                    throw new ProcessingException(Types.SingleRelation.simpleName() + "<T> can handle only Orma models",
+                            column.element
+                    );
+                }
 
                 methodSpecs.add(
                         MethodSpec.methodBuilder(column.name)
                                 .addModifiers(Modifier.PUBLIC)
                                 .returns(schema.getUpdaterClassName())
                                 .addParameter(
-                                        ParameterSpec.builder(column.getType(), paramName)
+                                        ParameterSpec.builder(r.modelType, column.name)
                                                 .build()
                                 )
-                                .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
-                                        valueExpr.build())
+                                .addStatement("contents.put($S, $L.$L)",
+                                        sql.quoteIdentifier(column.columnName),
+                                        column.name,
+                                        modelSchema.getPrimaryKey().getColumnGetterExpr())
                                 .addStatement("return this")
                                 .build()
                 );

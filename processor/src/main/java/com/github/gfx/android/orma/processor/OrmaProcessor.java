@@ -17,8 +17,8 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeName;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,7 +49,7 @@ public class OrmaProcessor extends AbstractProcessor {
             return true;
         }
         try {
-            Map<ClassName, SchemaDefinition> schemaMap = new HashMap<>();
+            Map<TypeName, SchemaDefinition> schemaMap = new HashMap<>();
 
             buildTableSchemas(roundEnv)
                     .forEach(schema -> schemaMap.put(schema.getModelClassName(), schema));
