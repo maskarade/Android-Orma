@@ -33,7 +33,6 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
@@ -48,27 +47,26 @@ public class OrmaProcessor extends AbstractProcessor {
         if (annotations.size() == 0) {
             return true;
         }
-        try {
-            Map<TypeName, SchemaDefinition> schemaMap = new HashMap<>();
 
-            buildTableSchemas(roundEnv)
+        Map<TypeName, SchemaDefinition> schemaMap = new HashMap<>();
+        ProcessingContext context = new ProcessingContext(processingEnv, schemaMap);
+
+        try {
+            buildTableSchemas(context, roundEnv)
                     .forEach(schema -> schemaMap.put(schema.getModelClassName(), schema));
 
-            ProcessingContext context = new ProcessingContext(processingEnv, schemaMap);
+            buildVirtualTableSchemas(context, roundEnv)
+                    .peek(schema -> {
+                        throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
+                    });
 
             schemaMap.values().forEach((schema) -> {
-
                 writeCodeForEachModel(schema, new SchemaWriter(context, schema));
                 writeCodeForEachModel(schema, new RelationWriter(context, schema));
                 writeCodeForEachModel(schema, new UpdaterWriter(context, schema));
                 writeCodeForEachModel(schema, new DeleterWriter(context, schema));
 
             });
-
-            buildVirtualTableSchemas(roundEnv)
-                    .peek(schema -> {
-                        throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
-                    });
 
             DatabaseWriter databaseWriter = new DatabaseWriter(context);
             if (databaseWriter.isRequired()) {
@@ -79,23 +77,24 @@ public class OrmaProcessor extends AbstractProcessor {
             }
 
         } catch (ProcessingException e) {
-            error(e.getMessage(), e.element);
-            throw e;
+            context.addError(e);
         }
+
+        context.printErrors();
 
         return false;
     }
 
-    public Stream<SchemaDefinition> buildTableSchemas(RoundEnvironment roundEnv) {
-        SchemaValidator validator = new SchemaValidator(processingEnv);
+    public Stream<SchemaDefinition> buildTableSchemas(ProcessingContext context, RoundEnvironment roundEnv) {
+        SchemaValidator validator = new SchemaValidator(context);
         return roundEnv
                 .getElementsAnnotatedWith(Table.class)
                 .stream()
                 .map(element -> new SchemaDefinition(validator.validate(element)));
     }
 
-    public Stream<SchemaDefinition> buildVirtualTableSchemas(RoundEnvironment roundEnv) {
-        SchemaValidator validator = new SchemaValidator(processingEnv);
+    public Stream<SchemaDefinition> buildVirtualTableSchemas(ProcessingContext context, RoundEnvironment roundEnv) {
+        SchemaValidator validator = new SchemaValidator(context);
         return roundEnv
                 .getElementsAnnotatedWith(VirtualTable.class)
                 .stream()
@@ -112,19 +111,7 @@ public class OrmaProcessor extends AbstractProcessor {
         try {
             javaFile.writeTo(processingEnv.getFiler());
         } catch (IOException e) {
-            error("Failed to write " + javaFile.typeSpec.name + ": " + e, element);
+            throw new ProcessingException("Failed to write " + javaFile.typeSpec.name + ": " + e, element);
         }
-    }
-
-    void note(CharSequence message, Element element) {
-        printMessage(Diagnostic.Kind.NOTE, message, element);
-    }
-
-    void error(CharSequence message, Element element) {
-        printMessage(Diagnostic.Kind.ERROR, message, element);
-    }
-
-    void printMessage(Diagnostic.Kind kind, CharSequence message, Element element) {
-        processingEnv.getMessager().printMessage(kind, "[" + TAG + "] " + message, element);
     }
 }
