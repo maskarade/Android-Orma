@@ -62,8 +62,9 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
     }
 
     @SuppressWarnings("unchecked")
-    public R having(@NonNull String having) {
+    public R having(@NonNull String having, @NonNull Object... args) {
         this.having = having;
+        bindArgs(args);
         return (R) this;
     }
 
@@ -122,7 +123,7 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
 
     @IntRange(from = 0)
     public int count() {
-        return conn.count(schema, getWhereClause(), getWhereArgs());
+        return conn.count(schema, getWhereClause(), getBindArgs());
     }
 
     @NonNull
@@ -153,7 +154,7 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
     @Nullable
     public Model getOrNull(@IntRange(from = 0) long position) {
         return conn.querySingle(schema, schema.getEscapedColumnNames(),
-                getWhereClause(), getWhereArgs(), groupBy, having, orderBy, position);
+                getWhereClause(), getBindArgs(), groupBy, having, orderBy, position);
     }
 
     @NonNull
@@ -168,7 +169,7 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
     @NonNull
     public Cursor query() {
         return conn.query(schema, schema.getEscapedColumnNames(), getWhereClause(),
-                getWhereArgs(), groupBy, having, orderBy, getLimitClause());
+                getBindArgs(), groupBy, having, orderBy, getLimitClause());
     }
 
     @NonNull

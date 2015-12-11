@@ -37,13 +37,28 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     protected StringBuilder whereClause;
 
     @Nullable
-    protected List<String> whereArgs;
+    protected List<String> bindArgs;
 
     public OrmaConditionBase(OrmaConnection conn, Schema<T> schema) {
         this.conn = conn;
         this.schema = schema;
     }
 
+    protected void bindArgs(@NonNull Object... args) {
+        if (bindArgs == null) {
+            bindArgs = new ArrayList<>(args.length);
+        }
+
+        for (Object arg : args) {
+            if (arg == null) {
+                bindArgs.add(null);
+            } else if (arg instanceof Boolean) {
+                bindArgs.add((Boolean) arg ? "1" : "0");
+            } else {
+                bindArgs.add(arg.toString());
+            }
+        }
+    }
 
     /**
      * Builds general `where` clause with arguments.
@@ -57,7 +72,6 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     public C where(@NonNull String conditions, @NonNull Object... args) {
         if (whereClause == null) {
             whereClause = new StringBuilder(conditions.length() + 2);
-            whereArgs = new ArrayList<>(args.length);
         } else {
             whereClause.append(whereConjunction);
         }
@@ -66,15 +80,7 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
         whereClause.append(conditions);
         whereClause.append(')');
 
-        for (Object arg : args) {
-            if (arg == null) {
-                whereArgs.add(null);
-            } else if (arg instanceof Boolean) {
-                whereArgs.add((Boolean) arg ? "1" : "0");
-            } else {
-                whereArgs.add(arg.toString());
-            }
-        }
+        bindArgs(args);
         return (C) this;
     }
 
@@ -122,10 +128,10 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     }
 
     @Nullable
-    protected String[] getWhereArgs() {
-        if (whereArgs != null) {
-            String[] array = new String[whereArgs.size()];
-            return whereArgs.toArray(array);
+    protected String[] getBindArgs() {
+        if (bindArgs != null) {
+            String[] array = new String[bindArgs.size()];
+            return bindArgs.toArray(array);
         } else {
             return null;
         }

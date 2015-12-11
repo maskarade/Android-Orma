@@ -163,11 +163,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return DatabaseUtils.longForQuery(db, sql, bindArgs);
     }
 
-    public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] whereArgs,
+    public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] bindArgs,
             String groupBy, String having, String orderBy, String limit) {
         String sql = SQLiteQueryBuilder.buildQueryString(
                 false, schema.getEscapedTableName(), columns, whereClause, groupBy, having, orderBy, limit);
-        return rawQuery(sql, whereArgs);
+        return rawQuery(sql, bindArgs);
     }
 
     public int count(Schema<?> schema, String whereClause, String[] whereArgs) {

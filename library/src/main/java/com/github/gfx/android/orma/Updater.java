@@ -40,7 +40,7 @@ public class Updater<Model, U extends Updater<?, ?>> extends OrmaConditionBase<M
      * @return The number of rows updated.
      */
     public int execute() {
-        return conn.update(schema, contents, getWhereClause(), getWhereArgs());
+        return conn.update(schema, contents, getWhereClause(), getBindArgs());
     }
 
     @NonNull

@@ -331,6 +331,52 @@ public class QueryTest {
     }
 
     @Test
+    public void groupByAndHaving() throws Exception {
+        publisher = db.createPublisher(new ModelFactory<Publisher>() {
+            @NonNull
+            @Override
+            public Publisher create() {
+                Publisher publisher = new Publisher();
+                publisher.name = "foo bar baz";
+                publisher.startedYear = 2009;
+                publisher.startedMonth = 12;
+
+                return publisher;
+            }
+        });
+
+        db.createBook(new ModelFactory<Book>() {
+            @NonNull
+            @Override
+            public Book create() {
+                Book book = new Book();
+                book.title = "today";
+                book.content = "avocado";
+                book.inPrint = true;
+                book.publisher = SingleRelation.id(publisher.id);
+                return book;
+            }
+        });
+
+        db.createBook(new ModelFactory<Book>() {
+            @NonNull
+            @Override
+            public Book create() {
+                Book book = new Book();
+                book.title = "friday";
+                book.content = "fig";
+                book.inPrint = false;
+                book.publisher = SingleRelation.id(publisher.id);
+                return book;
+            }
+        });
+
+        List<Book> books = db.selectFromBook().groupBy("title").having("title = ?", "today").toList();
+        assertThat(books, hasSize(1));
+        assertThat(books.get(0).title, is("today"));
+    }
+
+    @Test
     public void update() throws Exception {
         int count = db.updateBook()
                 .where("title = ?", "today")

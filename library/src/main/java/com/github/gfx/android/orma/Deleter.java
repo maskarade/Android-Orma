@@ -32,7 +32,7 @@ public class Deleter<Model, D extends Deleter<?, ?>> extends OrmaConditionBase<M
      * @return Number of rows deleted.
      */
     public int execute() {
-        return conn.delete(schema, getWhereClause(), getWhereArgs());
+        return conn.delete(schema, getWhereClause(), getBindArgs());
     }
 
     @NonNull
