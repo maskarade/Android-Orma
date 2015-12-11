@@ -33,6 +33,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
@@ -115,21 +116,20 @@ public class TodoActivity extends AppCompatActivity {
                     final int position = orma.selectFromTodo()
                             .createdTimeMillisLt(todo.createdTimeMillis)
                             .count();
-                    orma.deleteFromTodo()
+                    final int deletedRows = orma.deleteFromTodo()
                             .idEq(todo.id)
-                            .observable()
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Action1<Integer>() {
-                                @Override
-                                public void call(Integer deletedRows) {
-                                    if (deletedRows > 0) {
-                                        totalCount--;
-                                        notifyItemRemoved(position);
-                                    }
-                                }
-                            });
+                            .execute();
 
+                    AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                        @Override
+                        public void call() {
+                            if (deletedRows > 0) {
+                                totalCount--;
+                                notifyItemRemoved(position);
+                            }
+
+                        }
+                    });
                 }
             });
 
