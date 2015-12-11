@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleRelation;
+import com.github.gfx.android.orma.TransactionContext;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
@@ -40,8 +41,6 @@ import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import rx.functions.Action1;
 
@@ -407,7 +406,7 @@ public class QueryTest {
 
     @Test
     public void transactionSyncSuccess() throws Exception {
-        db.transactionSync(new TransactionTask() {
+        db.transaction(new TransactionTask() {
             @Override
             public void execute() throws Exception {
                 Publisher publisher = db.selectFromPublisher().value();
@@ -428,7 +427,7 @@ public class QueryTest {
     @Test
     public void transactionSyncAbort() throws Exception {
         try {
-            db.transactionSync(new TransactionTask() {
+            db.transaction(new TransactionTask() {
                 @Override
                 public void execute() throws Exception {
                     for (int i = 0; i < 5; i++) {
@@ -449,54 +448,43 @@ public class QueryTest {
     }
 
     @Test
-    public void transactionAsyncSuccess() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
+    public void transactionContextSuccess() throws Exception {
+        TransactionContext txn = db.beginTransaction();
+        Publisher publisher = db.selectFromPublisher().value();
 
-        db.transactionAsync(new TransactionTask() {
-            @Override
-            public void execute() throws Exception {
-                Publisher publisher = db.selectFromPublisher().value();
+        for (int i = 0; i < 5; i++) {
+            Book book = new Book();
+            book.title = "friday";
+            book.content = "apple" + i;
+            book.publisher = SingleRelation.id(publisher.id);
+            db.insertIntoBook(book);
+        }
 
-                for (int i = 0; i < 5; i++) {
-                    Book book = new Book();
-                    book.title = "friday";
-                    book.content = "apple" + i;
-                    book.publisher = SingleRelation.id(publisher.id);
-                    db.insertIntoBook(book);
-                }
+        txn.setTransactionSuccessful();
+        txn.endTransaction();
 
-                latch.countDown();
-            }
-        });
-
-        assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
         assertThat(db.selectFromBook().count(), is(7));
     }
 
     @Test
-    public void transactionAsyncAbort() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
+    public void transactionContextAbort() throws Exception {
+        TransactionContext txn = db.beginTransaction();
 
-        db.transactionAsync(new TransactionTask() {
-            @Override
-            public void execute() throws Exception {
-                for (int i = 0; i < 5; i++) {
-                    Book book = new Book();
-                    book.title = "friday";
-                    book.content = "apple" + i;
-                    db.insertIntoBook(book);
-                }
-                throw new Exception("abort!");
+        try {
+
+            for (int i = 0; i < 5; i++) {
+                Book book = new Book();
+                book.title = "friday";
+                book.content = "apple" + i;
+                db.insertIntoBook(book);
             }
+            throw new Exception("abort!");
+        } catch (Exception e) {
+            assertThat(e, is(instanceOf(Exception.class)));
+        } finally {
+            txn.endTransaction();
+        }
 
-            @Override
-            public void onError(@NonNull Exception exception) {
-                assertThat(exception, is(instanceOf(RuntimeException.class)));
-                latch.countDown();
-            }
-        });
-
-        assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
         assertThat(db.selectFromBook().count(), is(2));
     }
 

@@ -210,7 +210,7 @@ public class BenchmarkActivity extends AppCompatActivity {
             public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
 
-                orma.transactionSync(new TransactionTask() {
+                orma.transaction(new TransactionTask() {
                     @Override
                     public void execute() throws Exception {
                         long now = System.currentTimeMillis();

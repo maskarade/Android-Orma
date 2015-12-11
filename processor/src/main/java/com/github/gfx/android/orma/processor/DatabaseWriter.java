@@ -180,7 +180,7 @@ public class DatabaseWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("transactionSync")
+                MethodSpec.methodBuilder("transaction")
                         .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
@@ -192,13 +192,28 @@ public class DatabaseWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("transactionAsync")
+                MethodSpec.methodBuilder("transactionSync")
+                        .addAnnotation(Deprecated.class)
+                        .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                         .build())
-                        .addStatement("$L.transactionAsync(task)", connection)
+                        .addStatement("$L.transactionSync(task)", connection)
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("transactionNonExclusive")
+                        .addAnnotation(Deprecated.class)
+                        .addException(Types.TransactionAbortException)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Types.TransactionTask, "task")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addStatement("$L.transactionNonExclusiveSync(task)", connection)
                         .build()
         );
 
@@ -214,14 +229,21 @@ public class DatabaseWriter extends BaseWriter {
                         .build()
         );
 
+        // low-level transaction methods
+
         methodSpecs.add(
-                MethodSpec.methodBuilder("transactionNonExclusiveAsync")
+                MethodSpec.methodBuilder("beginTransaction")
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(
-                                ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                                        .build())
-                        .addStatement("$L.transactionNonExclusiveAsync(task)", connection)
+                        .returns(Types.TransactionContext)
+                        .addStatement("return $L.beginTransaction()", connection)
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("beginTransactionNonExclusive")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.TransactionContext)
+                        .addStatement("return $L.beginTransactionNonExclusive()", connection)
                         .build()
         );
 
