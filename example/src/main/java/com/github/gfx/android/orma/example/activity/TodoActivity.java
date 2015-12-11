@@ -17,7 +17,7 @@ package com.github.gfx.android.orma.example.activity;
 
 import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
 import com.github.gfx.android.orma.AccessThreadConstraint;
-import com.github.gfx.android.orma.TransactionTask;
+import com.github.gfx.android.orma.TransactionContext;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
@@ -28,11 +28,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
@@ -109,30 +112,34 @@ public class TodoActivity extends AppCompatActivity {
         }
 
         public boolean removeItem(final Todo todo) {
-            orma.transactionAsync(new TransactionTask() {
+            Schedulers.io().createWorker().schedule(new Action0() {
                 @Override
-                public void execute() throws Exception {
+                public void call() {
+                    final TransactionContext txn = orma.beginTransaction();
+
                     final int position = orma.selectFromTodo()
                             .createdTimeMillisLt(todo.createdTimeMillis)
                             .count();
-                    orma.deleteFromTodo()
-                            .idEq(todo.id)
-                            .observable()
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Action1<Integer>() {
-                                @Override
-                                public void call(Integer deletedRows) {
-                                    if (deletedRows > 0) {
-                                        totalCount--;
-                                        notifyItemRemoved(position);
-                                    }
-                                }
-                            });
 
+                    int deletedRows = orma.deleteFromTodo()
+                            .idEq(todo.id)
+                            .execute();
+
+                    if (deletedRows > 0) {
+                        totalCount--;
+
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyItemRemoved(position);
+                            }
+                        });
+                    }
+
+                    txn.setTransactionSuccessful();
+                    txn.endTransaction();
                 }
             });
-
             return true;
         }
 

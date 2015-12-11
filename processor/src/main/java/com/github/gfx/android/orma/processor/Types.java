@@ -105,6 +105,8 @@ public class Types {
 
     public static final ClassName OrmaConfiguration = ClassName.get(ormaPackageName, "OrmaConfiguration");
 
+    public static final ClassName TransactionContext = ClassName.get(ormaPackageName, "TransactionContext");
+
     public static ParameterizedTypeName getCollection(TypeName type) {
         return ParameterizedTypeName.get(Collection, type);
     }

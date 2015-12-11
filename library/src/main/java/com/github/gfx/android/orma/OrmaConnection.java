@@ -35,9 +35,6 @@ import android.util.Log;
 
 import java.util.List;
 
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
-
 /**
  * Low-level interface to Orma database connection.
  */
@@ -50,6 +47,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
     final List<Schema<?>> schemas;
 
     final MigrationEngine migration;
+
+    final boolean debug;
 
     final boolean wal;
 
@@ -68,6 +67,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         this.wal = configuration.wal;
         this.typeAdapterRegistry = configuration.typeAdapterRegistry;
 
+        this.debug = configuration.debug;
         this.trace = configuration.trace;
         this.readOnMainThread = configuration.readOnMainThread;
         this.writeOnMainThread = configuration.readOnMainThread;
@@ -196,54 +196,45 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return db.delete(schema.getEscapedTableName(), whereClause, whereArgs);
     }
 
-    public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
+    @NonNull
+    public TransactionContext beginTransaction() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        return new TransactionContext(db);
+    }
+
+    @NonNull
+    public TransactionContext beginTransactionNonExclusive() {
         SQLiteDatabase db = getReadableDatabase();
         db.beginTransactionNonExclusive();
+        return new TransactionContext(db);
+    }
+
+
+    public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
+        TransactionContext txn = beginTransactionNonExclusive();
 
         try {
             task.execute();
-            db.setTransactionSuccessful();
+            txn.setTransactionSuccessful();
         } catch (Exception e) {
             task.onError(e);
         } finally {
-            db.endTransaction();
+            txn.endTransaction();
         }
-    }
-
-    public void transactionNonExclusiveAsync(@NonNull final TransactionTask task) {
-        Schedulers.io()
-                .createWorker()
-                .schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        transactionNonExclusiveSync(task);
-                    }
-                });
     }
 
     public void transactionSync(@NonNull TransactionTask task) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
+        TransactionContext txn = beginTransaction();
 
         try {
             task.execute();
-            db.setTransactionSuccessful();
+            txn.setTransactionSuccessful();
         } catch (Exception e) {
             task.onError(e);
         } finally {
-            db.endTransaction();
+            txn.endTransaction();
         }
-    }
-
-    public void transactionAsync(@NonNull final TransactionTask task) {
-        Schedulers.io()
-                .createWorker()
-                .schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        transactionSync(task);
-                    }
-                });
     }
 
     /**
