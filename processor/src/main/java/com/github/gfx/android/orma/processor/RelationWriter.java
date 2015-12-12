@@ -70,7 +70,7 @@ public class RelationWriter extends BaseWriter {
     }
 
     boolean needsOrderByHelpers(ColumnDefinition column) {
-        return (column.indexed || column.primaryKey) && conditionQueryHelpers.isNumberType(column.getUnboxType());
+        return (column.indexed || (column.primaryKey && column.autoincrement));
     }
 
     Stream<MethodSpec> buildOrderByHelpers(ColumnDefinition column) {
