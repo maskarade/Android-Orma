@@ -50,6 +50,12 @@ public class Inserter<Model> {
         return statement.executeInsert();
     }
 
+    public void executeAll(@NonNull Iterable<Model> models) {
+        for (Model model : models) {
+            execute(model);
+        }
+    }
+
     public Single<Long> observable(@NonNull final Model model) {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
