@@ -280,7 +280,7 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 Here is a result performed on Android 5.0.2 / Xperia Z4
 as of Orma v0.10.0 and Realm 0.86.0:
 
-<img src="benchmark_v0.10.0_2015-12-10.png" alt="" width="443"/>
+<img src="benchmark_v0.9.0_2015-12-10.png" alt="" width="443"/>
 
 # Support
 
