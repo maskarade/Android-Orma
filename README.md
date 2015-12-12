@@ -47,8 +47,8 @@ apply plugin: 'com.neenbedankt.android-apt'
 // To use orma in your Android applications or libraries
 
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:0.10.0'
-    compile 'com.github.gfx.android.orma:orma:0.10.0'
+    apt 'com.github.gfx.android.orma:orma-processor:0.11.0'
+    compile 'com.github.gfx.android.orma:orma:0.11.0'
 }
 ```
 
@@ -278,7 +278,7 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 [example/BenchmarkActivity](example/src/main/java/com/github/gfx/android/orma/example/activity/BenchmarkActivity.java)
 
 Here is a result performed on Android 5.0.2 / Xperia Z4
-as of Orma v0.10.0 and Realm 0.86.0:
+as of Orma v0.9.0 and Realm 0.86.0:
 
 <img src="benchmark_v0.9.0_2015-12-10.png" alt="" width="443"/>
 
