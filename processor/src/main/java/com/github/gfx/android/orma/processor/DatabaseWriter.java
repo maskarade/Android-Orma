@@ -183,6 +183,7 @@ public class DatabaseWriter extends BaseWriter {
                 MethodSpec.methodBuilder("transactionSync")
                         .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Specs.buildWorkerThreadSpec())
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
