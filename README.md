@@ -1,6 +1,6 @@
 # Orma for Android [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/)
 
-This is an **alpha** software and the interface will change until v1.0.0.
+This is an **alpha** software and the interface will change until v1.0.0, which will be released Jan 2016.
 
 Orma is a lightning-fast ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
 generating helper classes at compile time with **annotation processing**.
@@ -9,9 +9,10 @@ There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I hav
 
 The answer is that I need ORM that have the following features:
 
-* As fast as hand-written code is
-* Model classes must have no restriction
-  * They might be POJO, Parcelable and/or even models that are managed by another ORM
+* As fast as hand-written code
+* POJO models
+  * That is, model classes must have no restriction
+  * Might implement `Parcelable` and/or extend any classes
   * They should be passed to another thread
 * Database handles must be instances
   * Not a singleton nor static-method based class
@@ -20,8 +21,9 @@ The answer is that I need ORM that have the following features:
   * i.e. simple `add column` and `drop column`
 * Code completion friendly
   * `selectFromModel()` is better than `selectFrom(Model.class)`
+* Custom queries like `GROUP BY ... HAVING`
 
-They are just what Orma has. This is as fast as Realm, its models have no restriction, database handle is
+They are just what Orma has. This is as fast as hand-written code, its models have no restriction, database handle is
 not a singleton, and has `SchemaDiffMigration` for automatic migration.
 
 # Install
@@ -87,7 +89,7 @@ To make it:
 
 ```java
 // see OrmaConfiguration for options
-// each value is the default value.
+// each value is the default.
 OrmaDatabase orma = OrmaDatabase.builder(context)
     .name(context.getPackageName() + ".orma.db") // optional
     .migrationEngine(new SchemaDiffMigration(context, BuildConfig.DEBUG)) // optional
@@ -141,9 +143,9 @@ Use background threads explicitly or RxJava interfaces with `Schedulers.io()`.
 Condition Query Helpers, e.g. `titleEq()` shown above, are methods
 to help make `WHERE` clauses, generated for columns with `indexed = true`.
 
-Here is a list of Condition Query Helpers that are generated for all the `indexed`` columns:
+Here is a list of Condition Query Helpers that are generated for all the `indexed` columns:
 
-* `*Eq(value)` to make `WHERE * = ?`
+* `*Eq(value)` to make `WHERE * = ?`, which is also generated for `@PrimaryKey`
 * `*NotEq(values)` to make `WHERE * <> ?`
 * `*In(values)` to make `WHERE * IN (?, ?, ?, ...)`
 * `*In(values)` to make `WHERE * NOT IN (?, ?, ?, ...)`
@@ -160,6 +162,11 @@ The following are generated for numeric columns
 * `*Le(value)` to make `WHERE * <= ?`
 * `*Gt(value)` to make `WHERE * > ?`
 * `*Ge(value)` to make `WHERE * >= ?`
+
+And `ORDER BY` helpers:
+
+* `orderBy*Asc()` to make `ORDER BY * ASC`
+* `orderBy*Desc()` to make `ORDER BY * DESC`
 
 ## Accessors
 
@@ -206,9 +213,9 @@ public class KeyValuePair {
 Orma has pluggable migration mechanism via the `MigrationEngine` interface.
 
 The default migration engine is `SchemaDiffMigration`, which handles
-schema changes by making diff with old and new schemas.
+schema changes by making diff with old and new table definitions.
 
-You can set a custom migration engine to OrmaDatabase builders:
+You can set a custom migration engine to `OrmaDatabase` builders:
 
 ```java
 class CustomMigrationEngine implements MigrationEngine { ... }
@@ -270,11 +277,10 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 
 [example/BenchmarkActivity](example/src/main/java/com/github/gfx/android/orma/example/activity/BenchmarkActivity.java)
 
-Here is a result performed on Android 5.0.2 / Xperia Z4 as of Orma v0.10.0:
+Here is a result performed on Android 5.0.2 / Xperia Z4
+as of Orma v0.10.0 and Realm 0.86.0:
 
 <img src="benchmark_v0.10.0_2015-12-10.png" alt="" width="443"/>
-
-It shows that Orma is a little faster than Realm (v0.86.0) and as fast as hand-written code.
 
 # Support
 
@@ -301,7 +307,7 @@ make publish # does release engineering
 
 # Author
 
-FUJI Goro (gfx).
+FUJI Goro ([gfx](https://github.com/gfx)).
 
 # License
 
