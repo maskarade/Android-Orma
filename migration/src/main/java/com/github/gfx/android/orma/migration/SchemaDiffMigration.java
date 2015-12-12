@@ -18,12 +18,14 @@ package com.github.gfx.android.orma.migration;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.create.table.Index;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -179,15 +181,36 @@ public class SchemaDiffMigration implements MigrationEngine {
         }
 
         if (intersectionColumns.size() != toTable.getColumnDefinitions().size() ||
-                intersectionColumns.size() != fromTable.getColumnDefinitions().size()) {
+                intersectionColumns.size() != fromTable.getColumnDefinitions().size() ||
+                !constraintsEqual(fromTable.getIndexes(), toTable.getIndexes())) {
             return buildRecreateTable(fromTable, toTable, intersectionColumnNameAndTypes.values());
         } else {
             return Collections.emptyList();
         }
     }
 
-    private List<String> buildRecreateTable(CreateTable fromTable, CreateTable toTable,
-            Collection<String> intersectionColumns) {
+    private boolean constraintsEqual(@Nullable List<Index> a, @Nullable List<Index> b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        else if (a == null && b != null) {
+            return false;
+        }
+        else if (a != null && b == null) {
+            return false;
+        } else if (a.size() == b.size()) {
+            for (int i = 0; i < a.size(); i++) {
+                if (!a.get(i).toString().equals(b.get(i).toString())) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private List<String> buildRecreateTable(CreateTable fromTable, CreateTable toTable, Collection<String> columns) {
 
         String fromTableName = fromTable.getTable().getName();
         String toTableName = toTable.getTable().getName();
@@ -210,7 +233,7 @@ public class SchemaDiffMigration implements MigrationEngine {
                     }
                 })));
 
-        statements.add(builder.buildInsertFromSelect(tempTableName, fromTableName, intersectionColumns));
+        statements.add(builder.buildInsertFromSelect(tempTableName, fromTableName, columns));
         statements.add(builder.buildDropTable(fromTableName));
         statements.add(builder.buildRenameTable(tempTableName, toTableName));
 

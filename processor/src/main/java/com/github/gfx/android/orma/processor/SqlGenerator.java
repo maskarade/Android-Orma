@@ -40,6 +40,14 @@ public class SqlGenerator {
             }
         }
 
+        for (String constraint : schema.constraints) {
+            if (Strings.isEmpty(constraint)) {
+                throw new ProcessingException("Empty constraint found", schema.getElement());
+            }
+            sb.append(", ");
+            sb.append(constraint);
+        }
+
         sb.append(')');
 
         return sb.toString();

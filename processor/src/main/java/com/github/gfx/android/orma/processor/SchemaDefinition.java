@@ -46,13 +46,18 @@ public class SchemaDefinition {
 
     final String tableName;
 
+    final String[] constraints;
+
     final List<ColumnDefinition> columns;
+
+
 
     public SchemaDefinition(TypeElement typeElement) {
         this.typeElement = typeElement;
         this.modelClassName = ClassName.get(typeElement);
 
         Table table = typeElement.getAnnotation(Table.class);
+        this.constraints = table.constraints();
         this.schemaClassName = helperClassName(table.schemaClassName(), modelClassName, "_Schema");
         this.relationClassName = helperClassName(table.relationClassName(), modelClassName, "_Relation");
         this.updaterClassName = helperClassName(table.updaterClassName(), modelClassName, "_Updater");

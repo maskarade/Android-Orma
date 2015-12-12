@@ -173,4 +173,18 @@ public class TableDiffTest {
                 "DROP TABLE \"todo\"",
                 "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
     }
+
+    @Test
+    public void tableDiff_addConstraints() throws Exception {
+        String from = "CREATE TABLE todo (title TEXT, content TEXT)";
+        String to = "CREATE TABLE todo (title TEXT, content TEXT, UNIQUE(title))";
+        List<String> statements = migration.tableDiff(from, to);
+
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
+                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
+                "DROP TABLE \"todo\"",
+                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""
+        ));
+    }
 }

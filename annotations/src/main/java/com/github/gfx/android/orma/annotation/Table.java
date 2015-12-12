@@ -29,6 +29,12 @@ public @interface Table {
      */
     String value() default "";
 
+    /**
+     * @return Table constraints added to {@code CREATE TABLE}.
+     * @see <a href="https://www.sqlite.org/lang_createtable.html">CREATE TABLE</a> in the SQLite reference.
+     */
+    String[] constraints() default {};
+
     String schemaClassName() default "";
 
     String relationClassName() default "";

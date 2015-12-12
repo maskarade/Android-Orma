@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.ModelWithBlob;
 import com.github.gfx.android.orma.test.model.ModelWithBoxTypes;
 import com.github.gfx.android.orma.test.model.ModelWithCollation;
+import com.github.gfx.android.orma.test.model.ModelWithConstraints;
 import com.github.gfx.android.orma.test.model.ModelWithDefaults;
 import com.github.gfx.android.orma.test.model.ModelWithPrimitives;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters;
@@ -33,6 +34,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
@@ -197,6 +199,83 @@ public class ModelSpecTest {
         assertThat(model.longValue, is(4L));
         assertThat(model.floatValue, is(1.14f));
         assertThat(model.doubleValue, is(3.14));
+    }
+
+    @Test
+    public void testTableConstraintsSuccess() throws Exception {
+        ModelWithConstraints model = db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
+            @NonNull
+            @Override
+            public ModelWithConstraints create() {
+                ModelWithConstraints model = new ModelWithConstraints();
+                model.foo = "foo";
+                model.bar = "bar";
+                return model;
+            }
+        });
+        assertThat(model.foo, is("foo"));
+        assertThat(model.bar, is("bar"));
+    }
+
+    @Test(expected = SQLiteException.class)
+    public void testTableConstraintsViolateUniqueConstraint() throws Exception {
+        db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
+            @NonNull
+            @Override
+            public ModelWithConstraints create() {
+                ModelWithConstraints model = new ModelWithConstraints();
+                model.foo = "foo";
+                model.bar = "bar";
+                return model;
+            }
+        });
+
+        db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
+            @NonNull
+            @Override
+            public ModelWithConstraints create() {
+                ModelWithConstraints model = new ModelWithConstraints();
+                model.foo = "foo";
+                model.bar = "bar";
+                return model;
+            }
+        });
+    }
+
+    @Test(expected = SQLiteException.class)
+    public void testTableConstraintsViolateCheckConstraint1() throws Exception {
+        db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
+            @NonNull
+            @Override
+            public ModelWithConstraints create() {
+                ModelWithConstraints model = new ModelWithConstraints();
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < 100; i++) {
+                    sb.append('.');
+                }
+                model.foo = "foo" + sb;
+                model.bar = "bar";
+                return model;
+            }
+        });
+    }
+
+    @Test(expected = SQLiteException.class)
+    public void testTableConstraintsViolateCheckConstraint2() throws Exception {
+        db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
+            @NonNull
+            @Override
+            public ModelWithConstraints create() {
+                ModelWithConstraints model = new ModelWithConstraints();
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < 100; i++) {
+                    sb.append('.');
+                }
+                model.foo = "foo";
+                model.bar = "bar" + sb;
+                return model;
+            }
+        });
     }
 
 }
