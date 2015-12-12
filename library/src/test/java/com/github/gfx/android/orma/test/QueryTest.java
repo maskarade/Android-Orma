@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
+import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleRelation;
 import com.github.gfx.android.orma.TransactionTask;
@@ -451,18 +452,24 @@ public class QueryTest {
         assertThat(db.selectFromBook().value().title, is("friday"));
     }
 
+    public List<Book> someBooks() {
+        List<Book> books = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Book book = new Book();
+            book.title = "friday";
+            book.content = "apple" + i;
+            book.publisher = SingleRelation.id(publisher.id);
+            books.add(book);
+        }
+        return books;
+    }
+
     @Test
     public void transactionSyncSuccess() throws Exception {
         db.transactionSync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
-                Publisher publisher = db.selectFromPublisher().value();
-
-                for (int i = 0; i < 5; i++) {
-                    Book book = new Book();
-                    book.title = "friday";
-                    book.content = "apple" + i;
-                    book.publisher = SingleRelation.id(publisher.id);
+                for (Book book : someBooks()) {
                     db.insertIntoBook(book);
                 }
             }
@@ -477,18 +484,16 @@ public class QueryTest {
             db.transactionSync(new TransactionTask() {
                 @Override
                 public void execute() throws Exception {
-                    for (int i = 0; i < 5; i++) {
-                        Book book = new Book();
-                        book.title = "friday";
-                        book.content = "apple" + i;
+                    for (Book book : someBooks()) {
                         db.insertIntoBook(book);
                     }
-                    throw new Exception("abort!");
+                    throw new RuntimeException("abort!");
                 }
             });
             fail("not reached");
         } catch (TransactionAbortException e) {
             assertThat(e.getCause(), instanceOf(RuntimeException.class));
+            assertThat(e.getCause().getMessage(), is("abort!"));
         }
 
         assertThat(db.selectFromBook().count(), is(2));
@@ -501,13 +506,7 @@ public class QueryTest {
         db.transactionAsync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
-                Publisher publisher = db.selectFromPublisher().value();
-
-                for (int i = 0; i < 5; i++) {
-                    Book book = new Book();
-                    book.title = "friday";
-                    book.content = "apple" + i;
-                    book.publisher = SingleRelation.id(publisher.id);
+                for (Book book : someBooks()) {
                     db.insertIntoBook(book);
                 }
 
@@ -526,24 +525,30 @@ public class QueryTest {
         db.transactionAsync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
-                for (int i = 0; i < 5; i++) {
-                    Book book = new Book();
-                    book.title = "friday";
-                    book.content = "apple" + i;
+                for (Book book : someBooks()) {
                     db.insertIntoBook(book);
                 }
-                throw new Exception("abort!");
+                throw new RuntimeException("abort!");
             }
 
             @Override
             public void onError(@NonNull Exception exception) {
                 assertThat(exception, is(instanceOf(RuntimeException.class)));
+                assertThat(exception.getMessage(), is("abort!"));
                 latch.countDown();
             }
         });
 
         assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
         assertThat(db.selectFromBook().count(), is(2));
+    }
+
+    @Test
+    public void inserterExecuteAll() throws Exception {
+        Inserter<Book> inserter = db.prepareInsertIntoBook();
+        inserter.executeAll(someBooks());
+
+        assertThat(db.selectFromBook().count(), is(7));
     }
 
     @Test
