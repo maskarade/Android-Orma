@@ -34,4 +34,8 @@ public class Specs {
                 .build();
     }
 
+    public static AnnotationSpec buildWorkerThreadSpec() {
+        return AnnotationSpec.builder(Types.WorkerThread)
+                .build();
+    }
 }

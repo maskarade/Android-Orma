@@ -57,6 +57,8 @@ public class Types {
 
     public static final ClassName Nullable = ClassName.get("android.support.annotation", "Nullable");
 
+    public static final ClassName WorkerThread = ClassName.get("android.support.annotation", "WorkerThread");
+
     public static final ClassName Single = ClassName.get("rx", "Single");
 
     public static final ClassName Observable = ClassName.get("rx", "Observable");
