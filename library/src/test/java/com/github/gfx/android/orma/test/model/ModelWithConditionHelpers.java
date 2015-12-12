@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.test.model;
 
 import com.github.gfx.android.orma.annotation.Column;
+import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
 import android.support.annotation.NonNull;
@@ -23,6 +24,9 @@ import android.support.annotation.Nullable;
 
 @Table
 public class ModelWithConditionHelpers {
+
+    @PrimaryKey
+    public long id;
 
     @Column(indexed = true)
     @Nullable

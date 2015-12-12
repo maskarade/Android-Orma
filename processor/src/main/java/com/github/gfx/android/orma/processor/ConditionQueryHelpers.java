@@ -53,20 +53,6 @@ public class ConditionQueryHelpers {
 
         ParameterSpec.Builder paramSpecBuilder = conditionParamSpecBuilder(column, column.name);
 
-        if (column.primaryKey) {
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "Eq")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(paramSpecBuilder.build())
-                            .returns(targetClassName)
-                            .addStatement("return where($S, $L)",
-                                    sql.quoteIdentifier(column.columnName) + " = ?", column.name)
-                            .build()
-            );
-
-            return;
-        }
-
         if (column.nullable) {
             methodSpecs.add(
                     MethodSpec.methodBuilder(column.name + "IsNull")
@@ -125,7 +111,7 @@ public class ConditionQueryHelpers {
                         .build()
         );
 
-        if (isNumberType(column.getUnboxType())) {
+        if (isNumberType(column.getUnboxType()) && (!column.primaryKey || column.autoincrement)) {
             methodSpecs.add(
                     MethodSpec.methodBuilder(column.name + "Lt")
                             .addModifiers(Modifier.PUBLIC)

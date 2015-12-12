@@ -86,6 +86,7 @@ public class ConditionHelpersTest {
 
     @Test
     public void testEq() throws Exception {
+        assertThat(rel().idEq(1).count(), is(1));
         assertThat(rel().nonNullTextEq("non-null text 1").count(), is(1));
         assertThat(rel().nullableTextEq("nullable text 1").count(), is(1));
         assertThat(rel().booleanValueEq(true).count(), is(1));
@@ -112,6 +113,7 @@ public class ConditionHelpersTest {
 
     @Test
     public void testIn() throws Exception {
+        assertThat(rel().idIn(Arrays.asList(1L, 2L)).count(), is(2));
         assertThat(rel().nonNullTextIn(Arrays.asList("non-null text 1", "non-null text 4")).count(), is(2));
         assertThat(rel().nullableTextIn(Arrays.asList("nullable text 1", "nullable text 2")).count(), is(2));
         assertThat(rel().booleanValueIn(Collections.singleton(true)).count(), is(1));
