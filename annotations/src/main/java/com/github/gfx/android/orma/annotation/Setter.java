@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 public @interface Setter {
 
     /**
-     * @return The name of the column for the specified column.
+     * @return The name of the column.
      */
-    String value();
+    String value() default "";
 }
