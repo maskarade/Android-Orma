@@ -152,10 +152,10 @@ A **model** in Orma is a Java class that is annotated with `@Table`, which
 has at least one field annotated with `@Column` or `@PrimaryKey`.
 
 `orma-processor` generates a `OrmaDatabase` class and helper classes for
- each model: `Schema`, `Relation`, `Inserter`, `Updater`, and `Deleter`.
+ each model: `Schema`, `Relation`, `Updater`, and `Deleter`.
 
- Because these helper classes are generated at the compile time, you
- can use Orma as a type-safe ORM.
+Because these helper classes are generated at the compile time, you
+can use Orma as a type-safe ORM.
 
 ## Schema Helper
 
@@ -172,20 +172,6 @@ Todo_Relation relation = orma.selectFromTodo();
 ```
 
 This is a query builder for `SELECT` statements.
-
-## Inserter Helper
-
-Inserter Helper, e.g. `Todo_Inserter`, is created by the database handle:
-
-```java
-# for a normal INSERT statement
-Todo_Inserter inserter = orma.prepateInsertIntoTodo();
-
-# for an INSERT OR REPLACE statement (a.k.a. "upsert")
-Todo_Inserter upserter = orma.prepateInsertOrReplaceIntoTodo();
-```
-
-This is a prepared statement for `INSERT` statements.
 
 ## Updater Helper
 

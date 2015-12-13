@@ -51,7 +51,6 @@ public class SchemaDefinition {
     final List<ColumnDefinition> columns;
 
 
-
     public SchemaDefinition(TypeElement typeElement) {
         this.typeElement = typeElement;
         this.modelClassName = ClassName.get(typeElement);
