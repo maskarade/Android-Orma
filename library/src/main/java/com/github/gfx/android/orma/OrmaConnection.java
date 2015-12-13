@@ -127,22 +127,19 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public <T> T createModel(Schema<T> schema, ModelFactory<T> builder) {
-        long id = insert(schema, builder.create());
+        Inserter<T> sth = prepareInsert(schema, schema.getInsertStatement());
+        long id = sth.execute(builder.create());
+
         ColumnDef<?> primaryKey = schema.getPrimaryKey();
         String whereClause = '"' + primaryKey.name + '"' + " = ?";
         String[] whereArgs = {String.valueOf(id)};
         return querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null, 0);
     }
 
-    public <T> Inserter<T> prepareInsert(Schema<T> schema) {
+    public <T> Inserter<T> prepareInsert(Schema<T> schema, String insertStatement) {
         SQLiteDatabase db = getWritableDatabase();
-        SQLiteStatement statement = db.compileStatement(schema.getInsertStatement());
+        SQLiteStatement statement = db.compileStatement(insertStatement);
         return new Inserter<>(this, schema, statement);
-    }
-
-    public <T> long insert(Schema<T> schema, T model) {
-        Inserter<T> sth = prepareInsert(schema);
-        return sth.execute(model);
     }
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {

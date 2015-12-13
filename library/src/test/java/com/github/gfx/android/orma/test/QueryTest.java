@@ -23,6 +23,8 @@ import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
+import com.github.gfx.android.orma.test.model.Author;
+import com.github.gfx.android.orma.test.model.Author_Relation;
 import com.github.gfx.android.orma.test.model.Book;
 import com.github.gfx.android.orma.test.model.Book_Relation;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -37,6 +39,7 @@ import org.robolectric.annotation.Config;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -586,6 +589,33 @@ public class QueryTest {
 
         assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
         assertThat(db.selectFromBook().count(), is(2));
+    }
+
+    @Test(expected = SQLiteException.class)
+    public void insertOnConflict() throws Exception {
+        Author author = new Author();
+        author.name = "山田太郎";
+        db.insertIntoAuthor(author);
+        db.insertIntoAuthor(author);
+    }
+
+    @Test
+    public void insertOrReplace() throws Exception {
+        Author author1 = new Author();
+        author1.name = "山田太郎";
+        author1.note = "foo";
+        long id1 = db.prepareInsertOrReplaceIntoAuthor().execute(author1);
+
+        Author author2 = new Author();
+        author2.name = "山田太郎";
+        author2.note = "bar";
+        long id2 = db.prepareInsertOrReplaceIntoAuthor().execute(author2);
+
+        assertThat("The row id changes by INSERT OR REPLACE", id1, is(not(id2)));
+
+        Author_Relation authors = db.selectFromAuthor().nameEq("山田太郎");
+        assertThat(authors.count(), is(1));
+        assertThat(authors.value().note, is("bar"));
     }
 
     @Test
