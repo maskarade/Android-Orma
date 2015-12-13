@@ -304,7 +304,16 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return $S", sql.buildInsertStatement(schema))
+                        .addStatement("return $S", sql.buildInsertStatement(schema, null))
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getInsertOrReplaceStatement")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return $S", sql.buildInsertStatement(schema, "REPLACE"))
                         .build()
         );
 

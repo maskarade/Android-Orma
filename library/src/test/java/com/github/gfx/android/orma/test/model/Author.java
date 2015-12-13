@@ -15,13 +15,20 @@
  */
 package com.github.gfx.android.orma.test.model;
 
+import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
+
+import android.support.annotation.Nullable;
 
 @Table
 public class Author {
 
     @PrimaryKey(auto = false)
     public String name;
+
+    @Column
+    @Nullable
+    public String note;
 
 }

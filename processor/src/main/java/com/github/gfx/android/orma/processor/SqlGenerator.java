@@ -137,10 +137,15 @@ public class SqlGenerator {
     }
 
 
-    public String buildInsertStatement(SchemaDefinition schema) {
+    public String buildInsertStatement(SchemaDefinition schema, String onConflictAlgorithm) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("INSERT INTO ");
+        sb.append("INSERT");
+        if (!Strings.isEmpty(onConflictAlgorithm)) {
+            sb.append(" OR ");
+            sb.append(onConflictAlgorithm);
+        }
+        sb.append(" INTO ");
         appendIdentifier(sb, schema.getTableName());
         sb.append(" (");
 

@@ -233,7 +233,7 @@ public class DatabaseWriter extends BaseWriter {
             methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
                     .addJavadoc(
                             "Inserts a model created by {@code ModelFactory<T>},"
-                                    + " and retrieve a model which is very inserted. The return value has a correct id.\n")
+                                    + " and retrieve the model which is very inserted. The return value has the row ID.\n")
                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
@@ -247,7 +247,7 @@ public class DatabaseWriter extends BaseWriter {
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("selectFrom" + simpleModelName)
-                            .addJavadoc("Starts building query {@code SELECT * FROM $T ...}.\n", schema.getModelClassName())
+                            .addJavadoc("Starts building a query: {@code SELECT * FROM $T ...}.\n", schema.getModelClassName())
                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getRelationClassName())
@@ -259,7 +259,7 @@ public class DatabaseWriter extends BaseWriter {
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("update" + simpleModelName)
-                            .addJavadoc("Starts building query {@code UPDAT $T ...}.\n", schema.getModelClassName())
+                            .addJavadoc("Starts building a query: {@code UPDATE $T ...}.\n", schema.getModelClassName())
                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getUpdaterClassName())
@@ -271,7 +271,7 @@ public class DatabaseWriter extends BaseWriter {
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("deleteFrom" + simpleModelName)
-                            .addJavadoc("Starts building query {@code DELETE FROM $T ...}.\n", schema.getModelClassName())
+                            .addJavadoc("Starts building a query: {@code DELETE FROM $T ...}.\n", schema.getModelClassName())
                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getDeleterClassName())
@@ -283,7 +283,7 @@ public class DatabaseWriter extends BaseWriter {
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("insertInto" + simpleModelName)
-                            .addJavadoc("Starts building query {@code INSERT INTO $T ...}.\n", schema.getModelClassName())
+                            .addJavadoc("Executes a query: {@code INSERT INTO $T ...}.\n", schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(long.class)
                             .addParameter(
@@ -291,20 +291,33 @@ public class DatabaseWriter extends BaseWriter {
                                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                             .build()
                             )
-                            .addStatement("return $L.insert($L, model)",
-                                    connection,
-                                    schemaInstance
+                            .addStatement("return prepareInsertInto$L().execute(model)",
+                                    simpleModelName
                             )
                             .build());
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
-                            .addJavadoc("Starts building a prepared statement for {@code INSERT INTO $T ...}.\n",
+                            .addJavadoc("Create a prepared statement for {@code INSERT INTO $T ...}.\n",
                                     schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(Types.getInserter(schema.getModelClassName()))
-                            .addStatement("return $L.prepareInsert($L)",
+                            .addStatement("return $L.prepareInsert($L, $L.getInsertStatement())",
                                     connection,
+                                    schemaInstance,
+                                    schemaInstance
+                            )
+                            .build());
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertOrReplaceInto" + simpleModelName)
+                            .addJavadoc("Create a prepared statement for {@code INSERT OR REPLACE INTO $T ...}.\n",
+                                    schema.getModelClassName())
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .addStatement("return $L.prepareInsert($L, $L.getInsertOrReplaceStatement())",
+                                    connection,
+                                    schemaInstance,
                                     schemaInstance
                             )
                             .build());

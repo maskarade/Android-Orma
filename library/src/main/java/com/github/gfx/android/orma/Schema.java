@@ -55,6 +55,9 @@ public interface Schema<Model> extends MigrationSchema {
     @NonNull
     String getInsertStatement();
 
+    @NonNull
+    String getInsertOrReplaceStatement();
+
     void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model);
 
     @NonNull
