@@ -33,7 +33,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
@@ -120,14 +119,13 @@ public class TodoActivity extends AppCompatActivity {
                             .idEq(todo.id)
                             .execute();
 
-                    AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                    runOnUiThread(new Runnable() {
                         @Override
-                        public void call() {
+                        public void run() {
                             if (deletedRows > 0) {
                                 totalCount--;
                                 notifyItemRemoved(position);
                             }
-
                         }
                     });
                 }
