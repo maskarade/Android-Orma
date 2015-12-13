@@ -56,7 +56,6 @@ public class OrmaDatabaseTest {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
                 .name(NAME)
                 .typeAdapters(new UriAdapter(), new DateAdapter())
-                .writeAheadLogging(false)
                 .readOnMainThread(AccessThreadConstraint.NONE)
                 .writeOnMainThread(AccessThreadConstraint.NONE)
                 .trace(true)
@@ -64,17 +63,29 @@ public class OrmaDatabaseTest {
 
         assertThat(db.getConnection(), is(not(nullValue())));
         assertThat(db.getSchemas(), is(not(nullValue())));
-
-        assertThat(db.getConnection().getReadableDatabase().isWriteAheadLoggingEnabled(), is(false));
+        assertThat(db.getConnection().getDatabaseName(), is(NAME));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Test
     public void testCreateInstanceWithWriteAheadLogging() throws Exception {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
+                .name(NAME)
                 .writeAheadLogging(true)
                 .build();
 
         assertThat(db.getConnection().getReadableDatabase().isWriteAheadLoggingEnabled(), is(true));
     }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Test
+    public void testCreateInstanceWithoutWriteAheadLogging() throws Exception {
+        OrmaDatabase db = OrmaDatabase.builder(getContext())
+                .name(NAME)
+                .writeAheadLogging(false)
+                .build();
+
+        assertThat(db.getConnection().getReadableDatabase().isWriteAheadLoggingEnabled(), is(false));
+    }
+
 }
