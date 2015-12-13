@@ -147,8 +147,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
-        return db.updateWithOnConflict(schema.getEscapedTableName(), values, whereClause, whereArgs,
-                SQLiteDatabase.CONFLICT_ROLLBACK);
+        return db.update(schema.getEscapedTableName(), values, whereClause, whereArgs);
     }
 
     @NonNull

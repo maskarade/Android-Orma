@@ -140,7 +140,7 @@ public class SqlGenerator {
     public String buildInsertStatement(SchemaDefinition schema) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("INSERT OR ROLLBACK INTO ");
+        sb.append("INSERT INTO ");
         appendIdentifier(sb, schema.getTableName());
         sb.append(" (");
 
