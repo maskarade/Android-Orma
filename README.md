@@ -241,7 +241,10 @@ And `ORDER BY` helpers:
 ## Accessors
 
 You can define private columns with `@Getter` and `@Setter`,
- which tells `orma-processor` to use accessors.
+which tells `orma-processor` to use accessors.
+
+Each accessor name can specify a column name in SQLite database,
+which is inferred from its method name if omitted.
 
 ```java
 @Table
@@ -249,12 +252,10 @@ public class KeyValuePair {
 
     static final String kKey = "key";
 
-    static final String kValue = "value";
-
-    @Column(kKey)
+    @Column(kKey) // specifies the name
     private String key;
 
-    @Column(kValue)
+    @Column // omits the name
     private String value;
 
     @Getter(kKey)
@@ -267,12 +268,12 @@ public class KeyValuePair {
         this.key = key;
     }
 
-    @Getter(kValue)
+    @Getter // getter for the "value" column
     public String getValue() {
         return value;
     }
 
-    @Setter(kValue)
+    @Setter // setter for the "value" colum
     public void setValue(String value) {
         this.value = value;
     }

@@ -22,9 +22,9 @@ import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 import com.squareup.javapoet.ClassName;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
@@ -82,18 +82,22 @@ public class SchemaDefinition {
     }
 
     static List<ColumnDefinition> collectColumns(TypeElement typeElement) {
-        Map<String, Element> getters = new HashMap<>();
-        Map<String, Element> setters = new HashMap<>();
+        Map<String, Element> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, Element> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         typeElement.getEnclosedElements()
                 .stream()
-                .filter(element -> element.getAnnotation(Getter.class) != null)
-                .forEach(element -> getters.put(element.getAnnotation(Getter.class).value(), element));
+                .forEach(element -> {
+                    Getter getter = element.getAnnotation(Getter.class);
+                    Setter setter = element.getAnnotation(Setter.class);
 
-        typeElement.getEnclosedElements()
-                .stream()
-                .filter(element -> element.getAnnotation(Setter.class) != null)
-                .forEach(element -> setters.put(element.getAnnotation(Setter.class).value(), element));
+                    if (getter != null) {
+                        getters.put( extractNameFromGetter(getter, element), element);
+                    } else if (setter != null) {
+                        setters.put(extractNameFromSetter(setter, element), element);
+                    }
+
+                });
 
         return typeElement.getEnclosedElements()
                 .stream()
@@ -106,6 +110,32 @@ public class SchemaDefinition {
                     return column;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private static String extractNameFromGetter(Getter getter, Element element) {
+        if (!Strings.isEmpty(getter.value())) {
+            return getter.value();
+        } else {
+            String name = element.getSimpleName().toString();
+            if (name.startsWith("get")) {
+                return name.substring("get".length());
+            } else {
+                return name;
+            }
+        }
+    }
+
+    private static String extractNameFromSetter(Setter getter, Element element) {
+        if (!Strings.isEmpty(getter.value())) {
+            return getter.value();
+        } else {
+            String name = element.getSimpleName().toString();
+            if (name.startsWith("set")) {
+                return name.substring("set".length());
+            } else {
+                return name;
+            }
+        }
     }
 
     public TypeElement getElement() {

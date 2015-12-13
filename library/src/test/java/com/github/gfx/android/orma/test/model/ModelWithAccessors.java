@@ -28,9 +28,6 @@ public class ModelWithAccessors {
 
     static final String kKey = "key";
 
-    static final String kValue = "value";
-
-
     @PrimaryKey
     @Column(kId)
     private long id;
@@ -38,7 +35,7 @@ public class ModelWithAccessors {
     @Column(kKey)
     private String key;
 
-    @Column(kValue)
+    @Column // omit the name
     private String value;
 
 
@@ -62,12 +59,12 @@ public class ModelWithAccessors {
         this.key = key;
     }
 
-    @Getter(kValue)
+    @Getter // omit the name
     public String getValue() {
         return value;
     }
 
-    @Setter(kValue)
+    @Setter // omit the name
     public void setValue(String value) {
         this.value = value;
     }
