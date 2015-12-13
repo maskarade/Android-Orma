@@ -163,7 +163,7 @@ public class QueryTest {
     }
 
     @Test
-    public void single() throws Exception {
+    public void value() throws Exception {
         Book book = db.selectFromBook().value();
 
         assertThat(book.title, is("today"));
@@ -171,7 +171,7 @@ public class QueryTest {
     }
 
     @Test
-    public void singleOrNull() throws Exception {
+    public void valueOrNull() throws Exception {
         db.deleteFromBook().execute();
         Book book = db.selectFromBook().valueOrNull();
 
@@ -179,7 +179,7 @@ public class QueryTest {
     }
 
     @Test(expected = NoValueException.class)
-    public void singleIfNull() throws Exception {
+    public void valueIfNull() throws Exception {
         db.deleteFromBook().execute();
 
         db.selectFromBook().value();
@@ -205,6 +205,30 @@ public class QueryTest {
         assert book != null;
         assertThat(book.id, is(db.selectFromBook().get(0).id));
         assertThat(db.selectFromBook().get(10), is(nullValue()));
+    }
+
+    @Test
+    public void execute() throws Exception {
+        Cursor cursor = db.selectFromBook().execute();
+        cursor.moveToFirst();
+
+        assertThat(cursor.getCount(), is(2));
+        assertThat(cursor.getString(cursor.getColumnIndexOrThrow("title")), is("today"));
+        assertThat(cursor.getString(cursor.getColumnIndexOrThrow("content")), is("milk, banana"));
+
+        cursor.close();
+    }
+
+    @Test
+    public void executeWithColumns() throws Exception {
+        Cursor cursor = db.selectFromBook().executeWithColumns("max(id) as max_id, min(id) as min_id");
+        cursor.moveToFirst();
+
+        assertThat(cursor.getCount(), is(1));
+        assertThat(cursor.getLong(cursor.getColumnIndexOrThrow("max_id")), is(2L));
+        assertThat(cursor.getLong(cursor.getColumnIndexOrThrow("min_id")), is(1L));
+
+        cursor.close();
     }
 
     @Test
