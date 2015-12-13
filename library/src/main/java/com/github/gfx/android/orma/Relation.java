@@ -172,8 +172,14 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
     }
 
     @NonNull
-    public Cursor query() {
+    public Cursor execute() {
         return conn.query(schema, schema.getEscapedColumnNames(),
+                getWhereClause(), getBindArgs(), groupBy, having, orderBy, getLimitClause());
+    }
+
+    @NonNull
+    public Cursor executeWithColumns(@NonNull String... columns) {
+        return conn.query(schema, columns,
                 getWhereClause(), getBindArgs(), groupBy, having, orderBy, getLimitClause());
     }
 
@@ -198,7 +204,7 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
      * Executes a query and calls {@code Action1<Model>#call} for each model}.
      */
     public void forEach(@NonNull Action1<Model> action) {
-        Cursor cursor = query();
+        Cursor cursor = execute();
         for (int pos = 0; cursor.moveToPosition(pos); pos++) {
             action.call(schema.createModelFromCursor(conn, cursor));
         }
