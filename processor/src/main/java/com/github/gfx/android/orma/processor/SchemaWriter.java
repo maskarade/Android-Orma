@@ -445,6 +445,11 @@ public class SchemaWriter extends BaseWriter {
             builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.builder().add("model.").build()));
             builder.addStatement("return model");
         } else {
+            if (schema.getColumns().size() != schema.constructorElement.getParameters().size()) {
+                // FIXME: check the parameters more strictly
+                context.addError("The @Setter constructor parameters must satisfy @Column fields", schema.constructorElement);
+            }
+
             builder.add(buildPopulateValuesIntoCursor(
                     column -> CodeBlock.builder().add("$T ", column.getType()).build()));
 
