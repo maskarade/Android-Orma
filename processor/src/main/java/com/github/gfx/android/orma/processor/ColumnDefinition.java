@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.processor;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
@@ -188,7 +189,19 @@ public class ColumnDefinition {
         return Types.getColumnDef(getBoxType());
     }
 
-    public String getColumnGetterExpr() {
+    public CodeBlock buildSetColumnExpr(CodeBlock rhsExpr) {
+        if (setter != null) {
+            return CodeBlock.builder()
+                    .add("$L($L)", setter.getSimpleName(), rhsExpr)
+                    .build();
+        } else {
+            return CodeBlock.builder()
+                    .add("$L = $L", name, rhsExpr)
+                    .build();
+        }
+    }
+
+    public String buildGetColumnExpr() {
         if (getter != null) {
             return getter.getSimpleName() + "()";
         } else {

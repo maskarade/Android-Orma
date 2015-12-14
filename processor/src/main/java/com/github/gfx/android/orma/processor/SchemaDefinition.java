@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 public class SchemaDefinition {
@@ -50,6 +51,7 @@ public class SchemaDefinition {
 
     final List<ColumnDefinition> columns;
 
+    final ExecutableElement constructorElement; // null if it has a default constructor
 
     public SchemaDefinition(TypeElement typeElement) {
         this.typeElement = typeElement;
@@ -64,6 +66,50 @@ public class SchemaDefinition {
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
         this.columns = collectColumns(typeElement);
+        this.constructorElement = findConstructor(typeElement);
+    }
+
+    /**
+     * @param typeElement the target class element
+     * @return null if it has the default constructor
+     */
+    static ExecutableElement findConstructor(TypeElement typeElement) {
+        List<ExecutableElement> constructors = findConstructors(typeElement);
+
+        if (constructors.isEmpty()) {
+            return null;
+        } else if (constructors.stream().anyMatch(element -> element.getParameters().isEmpty())) {
+            return null;
+        } else if (constructors.size() == 1) {
+            return constructors.get(0);
+        } else {
+            return constructors.stream()
+                    .filter(executableElement -> executableElement.getAnnotation(Setter.class) != null)
+                    .findFirst()
+                    .orElseGet(() -> constructors.stream()
+                            .filter(executableElement -> executableElement.getParameters()
+                                    .stream()
+                                    .anyMatch(variableElement -> variableElement.getAnnotation(Setter.class) != null))
+                            .findFirst()
+                            .orElse(null));
+        }
+    }
+
+    static List<ExecutableElement> findConstructors(TypeElement typeElement) {
+        return typeElement.getEnclosedElements()
+                .stream()
+                .filter(SchemaDefinition::isConstructor)
+                .map(element -> (ExecutableElement) element)
+                .collect(Collectors.toList());
+    }
+
+    static boolean isConstructor(Element element) {
+        if (element instanceof ExecutableElement) {
+            ExecutableElement method = (ExecutableElement) element;
+            return method.getSimpleName().contentEquals("<init>");
+        } else {
+            return false;
+        }
     }
 
     private static ClassName helperClassName(String specifiedName, ClassName modelClassName, String helperSuffix) {
@@ -85,14 +131,13 @@ public class SchemaDefinition {
         Map<String, Element> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         typeElement.getEnclosedElements()
-                .stream()
                 .forEach(element -> {
                     Getter getter = element.getAnnotation(Getter.class);
                     Setter setter = element.getAnnotation(Setter.class);
 
                     if (getter != null) {
-                        getters.put( extractNameFromGetter(getter, element), element);
-                    } else if (setter != null) {
+                        getters.put(extractNameFromGetter(getter, element), element);
+                    } else if (setter != null && !isConstructor(element)) {
                         setters.put(extractNameFromSetter(setter, element), element);
                     }
 
@@ -135,6 +180,10 @@ public class SchemaDefinition {
                 return name;
             }
         }
+    }
+
+    public boolean hasDefaultConstructor() {
+        return constructorElement == null;
     }
 
     public TypeElement getElement() {

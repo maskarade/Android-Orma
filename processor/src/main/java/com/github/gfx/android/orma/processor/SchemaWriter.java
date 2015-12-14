@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.github.gfx.android.orma.annotation.Setter;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -28,8 +29,11 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.VariableElement;
 
 /**
  * {@code Schema<T>} represents how a model is connected to an SQLite table.
@@ -374,20 +378,20 @@ public class SchemaWriter extends BaseWriter {
             }
 
             if (type.equals(TypeName.BOOLEAN)) {
-                builder.addStatement("statement.bindLong($L, model.$L ? 1 : 0)", n, c.getColumnGetterExpr());
+                builder.addStatement("statement.bindLong($L, model.$L ? 1 : 0)", n, c.buildGetColumnExpr());
             } else if (Types.looksLikeIntegerType(type)) {
-                builder.addStatement("statement.bindLong($L, model.$L)", n, c.getColumnGetterExpr());
+                builder.addStatement("statement.bindLong($L, model.$L)", n, c.buildGetColumnExpr());
             } else if (Types.looksLikeFloatType(type)) {
-                builder.addStatement("statement.bindDouble($L, model.$L)", n, c.getColumnGetterExpr());
+                builder.addStatement("statement.bindDouble($L, model.$L)", n, c.buildGetColumnExpr());
             } else if (type.equals(Types.ByteArray)) {
-                builder.addStatement("statement.bindBlob($L, model.$L)", n, c.getColumnGetterExpr());
+                builder.addStatement("statement.bindBlob($L, model.$L)", n, c.buildGetColumnExpr());
             } else if (type.equals(Types.String)) {
-                builder.addStatement("statement.bindString($L, model.$L)", n, c.getColumnGetterExpr());
+                builder.addStatement("statement.bindString($L, model.$L)", n, c.buildGetColumnExpr());
             } else if (r != null && r.relationType.equals(Types.SingleRelation)) {
-                builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.getColumnGetterExpr());
+                builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.buildGetColumnExpr());
             } else {
                 builder.addStatement("statement.bindString($L, conn.getTypeAdapterRegistry().serialize($T.$L.type, model.$L))",
-                        n, schema.getSchemaClassName(), c.name, c.getColumnGetterExpr());
+                        n, schema.getSchemaClassName(), c.name, c.buildGetColumnExpr());
             }
 
             if (nullable) {
@@ -401,7 +405,7 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    private CodeBlock buildPopulateValuesIntoCursor() {
+    private CodeBlock buildPopulateValuesIntoCursor(Function<ColumnDefinition, CodeBlock> lhsBaseGen) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         List<ColumnDefinition> columns = schema.getColumns();
@@ -422,23 +426,13 @@ public class SchemaWriter extends BaseWriter {
                             cursorGetter(c, i));
                 }
 
-                if (c.setter != null) {
-                    builder.addStatement("model.$L($L)",
-                            c.setter.getSimpleName(), getCursorExpr.build());
-
-                } else {
-                    builder.addStatement("model.$L = $L",
-                            c.name, getCursorExpr.build());
-                }
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getCursorExpr.build()));
             } else { // SingleRelation
-                if (c.setter != null) {
-                    builder.addStatement("model.$L(new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L)))",
-                            c.setter.getSimpleName(), r.relationType, r.modelType, i);
-
-                } else {
-                    builder.addStatement("model.$L = new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
-                            c.name, r.relationType, r.modelType, i);
-                }
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(CodeBlock.builder()
+                                .add("new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
+                                        r.relationType, r.modelType, i)
+                                .build()
+                ));
             }
         }
         return builder.build();
@@ -446,10 +440,34 @@ public class SchemaWriter extends BaseWriter {
 
     private CodeBlock buildCreateModelFromCursor() {
         CodeBlock.Builder builder = CodeBlock.builder();
-        builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName()); // FIXME
-        builder.add(buildPopulateValuesIntoCursor());
-        builder.addStatement("return model");
+        if (schema.hasDefaultConstructor()) {
+            builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
+            builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.builder().add("model.").build()));
+            builder.addStatement("return model");
+        } else {
+            if (schema.getColumns().size() != schema.constructorElement.getParameters().size()) {
+                // FIXME: check the parameters more strictly
+                context.addError("The @Setter constructor parameters must satisfy @Column fields", schema.constructorElement);
+            }
+
+            builder.add(buildPopulateValuesIntoCursor(
+                    column -> CodeBlock.builder().add("$T ", column.getType()).build()));
+
+            builder.addStatement("return new $T($L)", schema.getModelClassName(),
+                    schema.constructorElement.getParameters()
+                            .stream()
+                            .map(this::extractColumnNameFromParameterElement)
+                            .collect(Collectors.joining(", ")));
+        }
         return builder.build();
+    }
+
+    private String extractColumnNameFromParameterElement(VariableElement parameterElement) {
+        Setter setter = parameterElement.getAnnotation(Setter.class);
+        if (setter != null && Strings.isEmpty(setter.value())) {
+            return setter.value();
+        }
+        return parameterElement.getSimpleName().toString();
     }
 
     private String cursorGetter(ColumnDefinition column, int position) {

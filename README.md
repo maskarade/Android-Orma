@@ -224,7 +224,7 @@ And `ORDER BY` helpers:
 * `orderBy*Asc()` to make `ORDER BY * ASC`
 * `orderBy*Desc()` to make `ORDER BY * DESC`
 
-## Accessors
+## Setters and Getters
 
 You can define private columns with `@Getter` and `@Setter`,
 which tells `orma-processor` to use accessors.
@@ -261,6 +261,29 @@ public class KeyValuePair {
 
     @Setter // setter for the "value" colum
     public void setValue(String value) {
+        this.value = value;
+    }
+}
+```
+
+## Immutable Models
+
+Immutable models, where all the fields are declared with `final`, are supported
+by annotating a constructor with `@Setter`.
+
+```java
+@Table
+public class KeyValuePair {
+
+    @Column
+    public final String key;
+
+    @Column
+    public final String value;
+
+    @Setter
+    KeyVakuePair(String key, String value) {
+        this.key = key;
         this.value = value;
     }
 }

@@ -124,7 +124,7 @@ public class UpdaterWriter extends BaseWriter {
                                 .addStatement("contents.put($S, $L.$L)",
                                         sql.quoteIdentifier(column.columnName),
                                         column.name,
-                                        modelSchema.getPrimaryKey().getColumnGetterExpr())
+                                        modelSchema.getPrimaryKey().buildGetColumnExpr())
                                 .addStatement("return this")
                                 .build()
                 );
