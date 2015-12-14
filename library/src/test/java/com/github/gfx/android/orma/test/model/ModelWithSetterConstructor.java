@@ -21,24 +21,24 @@ import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 
 @Table
-public class ModelWithConstructorSetter {
+public class ModelWithSetterConstructor {
 
     static final String kId = "id";
 
     static final String kKey = "key";
 
     @PrimaryKey
-    @Column(kId)
+    @Column
     public final long id;
 
-    @Column(kKey)
+    @Column
     public final String key;
 
-    @Column // omit the name
+    @Column
     public final String value;
 
     @Setter
-    public ModelWithConstructorSetter(long id, String key, String value) {
+    public ModelWithSetterConstructor(long id, String key, String value) {
         this.id = id;
         this.key = key;
         this.value = value;

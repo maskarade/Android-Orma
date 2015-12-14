@@ -18,7 +18,8 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.ModelWithAccessors;
-import com.github.gfx.android.orma.test.model.ModelWithConstructorSetter;
+import com.github.gfx.android.orma.test.model.ModelWithNamedSetterConstructor;
+import com.github.gfx.android.orma.test.model.ModelWithSetterConstructor;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.Before;
@@ -70,14 +71,30 @@ public class SetterAndGetterTest {
     }
 
     @Test
-    public void testConstructorSetter() throws Exception {
-        ModelWithConstructorSetter model = db.createModelWithConstructorSetter(new ModelFactory<ModelWithConstructorSetter>() {
+    public void testSetterConstructor() throws Exception {
+        ModelWithSetterConstructor model = db.createModelWithSetterConstructor(new ModelFactory<ModelWithSetterConstructor>() {
             @NonNull
             @Override
-            public ModelWithConstructorSetter create() {
-                return new ModelWithConstructorSetter(0, "key", "value");
+            public ModelWithSetterConstructor create() {
+                return new ModelWithSetterConstructor(0, "key", "value");
             }
         });
+
+        assertThat(model.id, is(not(0L)));
+        assertThat(model.key, is("key"));
+        assertThat(model.value, is("value"));
+    }
+
+    @Test
+    public void testNamedSetterConstructor() throws Exception {
+        ModelWithNamedSetterConstructor model = db.createModelWithNamedSetterConstructor(
+                new ModelFactory<ModelWithNamedSetterConstructor>() {
+                    @NonNull
+                    @Override
+                    public ModelWithNamedSetterConstructor create() {
+                        return new ModelWithNamedSetterConstructor(0, "key", "value");
+                    }
+                });
 
         assertThat(model.id, is(not(0L)));
         assertThat(model.key, is("key"));
