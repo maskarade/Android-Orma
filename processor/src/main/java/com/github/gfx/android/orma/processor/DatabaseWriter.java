@@ -85,6 +85,7 @@ public class DatabaseWriter extends BaseWriter {
         builder.superclass(ParameterizedTypeName.get(Types.OrmaConfiguration, builderClass));
 
         builder.addMethod(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(Types.Context, "context")
                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
                         .build())

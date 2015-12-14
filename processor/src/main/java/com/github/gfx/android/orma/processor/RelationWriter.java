@@ -53,6 +53,7 @@ public class RelationWriter extends BaseWriter {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
         methodSpecs.add(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
                 .addParameter(Types.OrmaConnection, "orma")
                 .addParameter(schema.getSchemaClassName(), "schema")
                 .addCode("super(orma, schema);\n")

@@ -55,6 +55,7 @@ public class UpdaterWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
                         .addParameter(Types.OrmaConnection, "conn")
                         .addParameter(schema.getSchemaClassName(), "schema")
                         .addStatement("super(conn, schema)")
