@@ -441,7 +441,7 @@ public class SchemaWriter extends BaseWriter {
     private CodeBlock buildCreateModelFromCursor() {
         CodeBlock.Builder builder = CodeBlock.builder();
         if (schema.hasDefaultConstructor()) {
-            builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName()); // FIXME
+            builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
             builder.add(buildPopulateValuesIntoCursor(column -> "model."));
             builder.addStatement("return model");
         } else {
