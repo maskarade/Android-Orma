@@ -405,7 +405,7 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    private CodeBlock buildPopulateValuesIntoCursor(Function<ColumnDefinition, String> lhsBaseGen) {
+    private CodeBlock buildPopulateValuesIntoCursor(Function<ColumnDefinition, CodeBlock> lhsBaseGen) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         List<ColumnDefinition> columns = schema.getColumns();
@@ -442,11 +442,11 @@ public class SchemaWriter extends BaseWriter {
         CodeBlock.Builder builder = CodeBlock.builder();
         if (schema.hasDefaultConstructor()) {
             builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
-            builder.add(buildPopulateValuesIntoCursor(column -> "model."));
+            builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.builder().add("model.").build()));
             builder.addStatement("return model");
         } else {
             builder.add(buildPopulateValuesIntoCursor(
-                    column -> CodeBlock.builder().add("$T ", column.getType()).build().toString()));
+                    column -> CodeBlock.builder().add("$T ", column.getType()).build()));
 
             builder.addStatement("return new $T($L)", schema.getModelClassName(),
                     schema.constructorElement.getParameters()
