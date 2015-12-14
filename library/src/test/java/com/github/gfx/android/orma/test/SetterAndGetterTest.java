@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.ModelWithAccessors;
+import com.github.gfx.android.orma.test.model.ModelWithConstructorSetter;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.Before;
@@ -35,7 +36,7 @@ import static org.hamcrest.Matchers.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
-public class AccessorsTest {
+public class SetterAndGetterTest {
 
     OrmaDatabase db;
 
@@ -51,7 +52,7 @@ public class AccessorsTest {
     }
 
     @Test
-    public void testAccessors() throws Exception {
+    public void testSetterAndGetter() throws Exception {
         ModelWithAccessors model = db.createModelWithAccessors(new ModelFactory<ModelWithAccessors>() {
             @NonNull
             @Override
@@ -67,4 +68,20 @@ public class AccessorsTest {
         assertThat(model.getKey(), is("key"));
         assertThat(model.getValue(), is("value"));
     }
+
+    @Test
+    public void testConstructorSetter() throws Exception {
+        ModelWithConstructorSetter model = db.createModelWithConstructorSetter(new ModelFactory<ModelWithConstructorSetter>() {
+            @NonNull
+            @Override
+            public ModelWithConstructorSetter create() {
+                return new ModelWithConstructorSetter(0, "key", "value");
+            }
+        });
+
+        assertThat(model.id, is(not(0L)));
+        assertThat(model.key, is("key"));
+        assertThat(model.value, is("value"));
+    }
+
 }
