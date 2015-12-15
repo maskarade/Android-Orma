@@ -517,9 +517,7 @@ public class QueryTest {
         db.transactionSync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
-                for (Book book : someBooks()) {
-                    db.insertIntoBook(book);
-                }
+                db.prepareInsertIntoBook().executeAll(someBooks());
             }
         });
 
@@ -532,9 +530,7 @@ public class QueryTest {
             db.transactionSync(new TransactionTask() {
                 @Override
                 public void execute() throws Exception {
-                    for (Book book : someBooks()) {
-                        db.insertIntoBook(book);
-                    }
+                    db.prepareInsertIntoBook().executeAll(someBooks());
                     throw new RuntimeException("abort!");
                 }
             });
@@ -554,10 +550,7 @@ public class QueryTest {
         db.transactionAsync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
-                for (Book book : someBooks()) {
-                    db.insertIntoBook(book);
-                }
-
+                db.prepareInsertIntoBook().executeAll(someBooks());
                 latch.countDown();
             }
         });
@@ -573,9 +566,7 @@ public class QueryTest {
         db.transactionAsync(new TransactionTask() {
             @Override
             public void execute() throws Exception {
-                for (Book book : someBooks()) {
-                    db.insertIntoBook(book);
-                }
+                db.prepareInsertIntoBook().executeAll(someBooks());
                 throw new RuntimeException("abort!");
             }
 
@@ -627,6 +618,25 @@ public class QueryTest {
     }
 
     @Test
+    public void inserterExecuteModelFactory() throws Exception {
+        Inserter<Book> inserter = db.prepareInsertIntoBook();
+        inserter.execute(new ModelFactory<Book>() {
+            @NonNull
+            @Override
+            public Book create() {
+                Book book = new Book();
+                book.title = "monday";
+                book.content = "apple";
+                book.publisher = SingleRelation.id(publisher.id);
+                return book;
+            }
+        });
+
+        assertThat(db.selectFromBook().count(), is(3));
+    }
+
+
+    @Test
     public void reuseCursor() throws Exception {
         List<Book> books = db.selectFromBook().where("title = ?", "today").toList();
         assertThat(books, hasSize(1));
@@ -653,21 +663,31 @@ public class QueryTest {
     public void initAndInsertForSecondTable() throws Exception {
         db.deleteFromPublisher().execute();
 
-        {
-            Publisher publisher = new Publisher();
-            publisher.name = "The Fire";
-            publisher.startedYear = 1998;
-            publisher.startedMonth = 12;
-            db.insertIntoPublisher(publisher);
-        }
+        Inserter<Publisher> inserter = db.prepareInsertIntoPublisher();
 
-        {
-            Publisher publisher = new Publisher();
-            publisher.name = "The Ice";
-            publisher.startedYear = 2012;
-            publisher.startedMonth = 6;
-            db.insertIntoPublisher(publisher);
-        }
+        inserter.execute(new ModelFactory<Publisher>() {
+            @NonNull
+            @Override
+            public Publisher create() {
+                Publisher publisher = new Publisher();
+                publisher.name = "The Fire";
+                publisher.startedYear = 1998;
+                publisher.startedMonth = 12;
+                return publisher;
+            }
+        });
+
+        inserter.execute(new ModelFactory<Publisher>() {
+            @NonNull
+            @Override
+            public Publisher create() {
+                Publisher publisher = new Publisher();
+                publisher.name = "The Ice";
+                publisher.startedYear = 2012;
+                publisher.startedMonth = 6;
+                return publisher;
+            }
+        });
 
         assertThat(db.selectFromPublisher().count(), is(2));
 
