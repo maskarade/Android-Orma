@@ -23,6 +23,7 @@ import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -175,7 +176,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
             String having, String orderBy, long offset) {
-        Cursor cursor = query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy, offset + ",1");
+        SQLiteCursor cursor = (SQLiteCursor) query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy, offset + ",1");
 
         try {
             if (cursor.moveToFirst()) {

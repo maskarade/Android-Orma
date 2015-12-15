@@ -43,10 +43,20 @@ public class Inserter<Model> {
      * it.</p>
      *
      * @param model a model object to insert
-     * @return The last inserted row id.
+     * @return The last inserted row id
      */
     public long execute(@NonNull Model model) {
         schema.bindArgs(conn, statement, model);
+        return statement.executeInsert();
+    }
+
+    /**
+     *
+     * @param modelFactory A mode factory to create a model object to insert
+     * @return The last inserted row id
+     */
+    public long execute(@NonNull ModelFactory<Model> modelFactory) {
+        schema.bindArgs(conn, statement, modelFactory.create());
         return statement.executeInsert();
     }
 
@@ -56,11 +66,32 @@ public class Inserter<Model> {
         }
     }
 
+    /**
+     * {@link Single<Model>} wrapper to {@code execute(Model)}
+     * @param model A model object to insert
+     * @return A cold observable for the last inserted row id
+     */
     public Single<Long> observable(@NonNull final Model model) {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
             public void call(SingleSubscriber<? super Long> subscriber) {
                 subscriber.onSuccess(execute(model));
+            }
+        });
+    }
+
+    /**
+     * {@link Single<Model>} wrapper to {@code execute(ModelFactory<Model>)}.
+     * {@link ModelFactory<Model>#create()} is called in {@link rx.Single.OnSubscribe<Long>#call()}.
+     *
+     * @param modelFactory A model factory
+     * @return A cold observable for the last inserted row id
+     */
+    public Single<Long> observable(@NonNull final ModelFactory<Model> modelFactory) {
+        return Single.create(new Single.OnSubscribe<Long>() {
+            @Override
+            public void call(SingleSubscriber<? super Long> subscriber) {
+                subscriber.onSuccess(execute(modelFactory.create()));
             }
         });
     }
