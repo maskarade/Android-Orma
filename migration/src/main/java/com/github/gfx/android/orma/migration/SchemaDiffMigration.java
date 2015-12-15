@@ -192,11 +192,7 @@ public class SchemaDiffMigration implements MigrationEngine {
     private boolean constraintsEqual(@Nullable List<Index> a, @Nullable List<Index> b) {
         if (a == null && b == null) {
             return true;
-        }
-        else if (a == null && b != null) {
-            return false;
-        }
-        else if (a != null && b == null) {
+        } else if (a == null || b == null) {
             return false;
         } else if (a.size() == b.size()) {
             for (int i = 0; i < a.size(); i++) {
