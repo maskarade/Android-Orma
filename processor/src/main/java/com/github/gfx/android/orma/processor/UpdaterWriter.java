@@ -63,7 +63,7 @@ public class UpdaterWriter extends BaseWriter {
         );
 
         schema.getColumnsWithoutAutoId().forEach(column -> {
-            RelationDefinition r = column.getRelation();
+            AssociationDefinition r = column.getRelation();
 
             if (r == null) {
                 String paramName = column.name;
@@ -90,7 +90,7 @@ public class UpdaterWriter extends BaseWriter {
                                 .build()
                 );
 
-            } else { // SingleRelation<T>
+            } else { // SingleAssociation<T>
                 methodSpecs.add(
                         MethodSpec.methodBuilder(column.name)
                                 .addModifiers(Modifier.PUBLIC)
@@ -108,7 +108,7 @@ public class UpdaterWriter extends BaseWriter {
                 SchemaDefinition modelSchema = context.getSchemaDef(r.modelType);
                 if (modelSchema == null) {
                     // FIXME: just stack errors and return in order to continue processing
-                    throw new ProcessingException(Types.SingleRelation.simpleName() + "<T> can handle only Orma models",
+                    throw new ProcessingException(Types.SingleAssociation.simpleName() + "<T> can handle only Orma models",
                             column.element
                     );
                 }

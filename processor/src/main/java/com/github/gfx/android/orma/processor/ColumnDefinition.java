@@ -134,9 +134,9 @@ public class ColumnDefinition {
         return false;
     }
 
-    public RelationDefinition getRelation() {
-        if (RelationDefinition.isSingleRelation(type)) {
-            return RelationDefinition.create(type);
+    public AssociationDefinition getRelation() {
+        if (AssociationDefinition.isSingleAssociation(type)) {
+            return AssociationDefinition.create(type);
         }
         return null;
 
