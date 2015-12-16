@@ -19,27 +19,27 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
-public class RelationDefinition {
+public class AssociationDefinition {
 
     final ClassName relationType;
 
     final TypeName modelType;
 
-    public static boolean isSingleRelation(TypeName type) {
+    public static boolean isSingleAssociation(TypeName type) {
         if (type instanceof ParameterizedTypeName) {
             ParameterizedTypeName pt = (ParameterizedTypeName) type;
-            return pt.rawType.equals(Types.SingleRelation);
+            return pt.rawType.equals(Types.SingleAssociation);
         } else {
             return false;
         }
     }
 
-    public static RelationDefinition create(TypeName type) {
+    public static AssociationDefinition create(TypeName type) {
         ParameterizedTypeName pt = (ParameterizedTypeName) type;
-        return new RelationDefinition(pt.rawType, pt.typeArguments.get(0));
+        return new AssociationDefinition(pt.rawType, pt.typeArguments.get(0));
     }
 
-    public RelationDefinition(ClassName relationType, TypeName modelType) {
+    public AssociationDefinition(ClassName relationType, TypeName modelType) {
         this.relationType = relationType;
         this.modelType = modelType;
     }

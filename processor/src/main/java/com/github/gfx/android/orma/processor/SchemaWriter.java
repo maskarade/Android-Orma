@@ -370,7 +370,7 @@ public class SchemaWriter extends BaseWriter {
             int n = i + 1; // bind index starts 1
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getUnboxType();
-            RelationDefinition r = c.getRelation();
+            AssociationDefinition r = c.getRelation();
             boolean nullable = !type.isPrimitive() && c.nullable;
 
             if (nullable) {
@@ -387,7 +387,7 @@ public class SchemaWriter extends BaseWriter {
                 builder.addStatement("statement.bindBlob($L, model.$L)", n, c.buildGetColumnExpr());
             } else if (type.equals(Types.String)) {
                 builder.addStatement("statement.bindString($L, model.$L)", n, c.buildGetColumnExpr());
-            } else if (r != null && r.relationType.equals(Types.SingleRelation)) {
+            } else if (r != null && r.relationType.equals(Types.SingleAssociation)) {
                 builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.buildGetColumnExpr());
             } else {
                 builder.addStatement("statement.bindString($L, conn.getTypeAdapterRegistry().serialize($T.$L.type, model.$L))",
@@ -411,7 +411,7 @@ public class SchemaWriter extends BaseWriter {
         List<ColumnDefinition> columns = schema.getColumns();
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
-            RelationDefinition r = c.getRelation();
+            AssociationDefinition r = c.getRelation();
             TypeName type = c.getUnboxType();
             if (r == null) {
                 CodeBlock.Builder getCursorExpr = CodeBlock.builder();
@@ -427,7 +427,7 @@ public class SchemaWriter extends BaseWriter {
                 }
 
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getCursorExpr.build()));
-            } else { // SingleRelation
+            } else { // SingleAssociation
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(CodeBlock.builder()
                                 .add("new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
                                         r.relationType, r.modelType, i)

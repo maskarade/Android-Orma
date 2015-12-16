@@ -17,7 +17,7 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.SingleRelation;
+import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.test.model.Book;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
@@ -72,7 +72,7 @@ public class RxObservableTest {
                 book.title = "today";
                 book.content = "milk, banana";
                 book.inPrint = true;
-                book.publisher = SingleRelation.id(publisher.id);
+                book.publisher = SingleAssociation.id(publisher.id);
                 return book;
             }
         });
@@ -85,7 +85,7 @@ public class RxObservableTest {
                 book.title = "friday";
                 book.content = "apple";
                 book.inPrint = false;
-                book.publisher = SingleRelation.id(publisher.id);
+                book.publisher = SingleAssociation.id(publisher.id);
                 return book;
             }
         });

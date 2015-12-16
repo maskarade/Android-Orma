@@ -18,7 +18,7 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.SingleRelation;
+import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
@@ -90,7 +90,7 @@ public class QueryTest {
                 book.title = "today";
                 book.content = "milk, banana";
                 book.inPrint = true;
-                book.publisher = SingleRelation.id(publisher.id);
+                book.publisher = SingleAssociation.id(publisher.id);
                 return book;
             }
         });
@@ -103,7 +103,7 @@ public class QueryTest {
                 book.title = "friday";
                 book.content = "apple";
                 book.inPrint = false;
-                book.publisher = SingleRelation.id(publisher.id);
+                book.publisher = SingleAssociation.id(publisher.id);
                 return book;
             }
         });
@@ -330,7 +330,7 @@ public class QueryTest {
             Book book = new Book();
             book.title = "title #" + i;
             book.content = "blah blah blah #" + i;
-            book.publisher = SingleRelation.id(publisher.id);
+            book.publisher = SingleAssociation.id(publisher.id);
 
             db.insertIntoBook(book);
         }
@@ -350,7 +350,7 @@ public class QueryTest {
             Book book = new Book();
             book.title = "title #" + i;
             book.content = "blah blah blah #" + i;
-            book.publisher = SingleRelation.id(publisher.id);
+            book.publisher = SingleAssociation.id(publisher.id);
 
             db.insertIntoBook(book);
         }
@@ -402,7 +402,7 @@ public class QueryTest {
                 book.title = "today";
                 book.content = "avocado";
                 book.inPrint = true;
-                book.publisher = SingleRelation.id(publisher.id);
+                book.publisher = SingleAssociation.id(publisher.id);
                 return book;
             }
         });
@@ -415,7 +415,7 @@ public class QueryTest {
                 book.title = "friday";
                 book.content = "fig";
                 book.inPrint = false;
-                book.publisher = SingleRelation.id(publisher.id);
+                book.publisher = SingleAssociation.id(publisher.id);
                 return book;
             }
         });
@@ -439,7 +439,7 @@ public class QueryTest {
     }
 
     @Test
-    public void updateSingleRelation() throws Exception {
+    public void updateSingleAssociation() throws Exception {
         Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
@@ -464,7 +464,7 @@ public class QueryTest {
     }
 
     @Test
-    public void updateSingleRelationViaReference() throws Exception {
+    public void updateSingleAssociationReference() throws Exception {
         Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
@@ -479,7 +479,7 @@ public class QueryTest {
 
         int count = db.updateBook()
                 .where("title = ?", "today")
-                .publisher(SingleRelation.<Publisher>id(publisher.id))
+                .publisher(SingleAssociation.<Publisher>id(publisher.id))
                 .execute();
 
         assertThat(count, is(1));
@@ -506,7 +506,7 @@ public class QueryTest {
             Book book = new Book();
             book.title = "friday";
             book.content = "apple" + i;
-            book.publisher = SingleRelation.id(publisher.id);
+            book.publisher = SingleAssociation.id(publisher.id);
             books.add(book);
         }
         return books;
@@ -627,7 +627,7 @@ public class QueryTest {
                 Book book = new Book();
                 book.title = "monday";
                 book.content = "apple";
-                book.publisher = SingleRelation.id(publisher.id);
+                book.publisher = SingleAssociation.id(publisher.id);
                 return book;
             }
         });
@@ -755,7 +755,7 @@ public class QueryTest {
                 @Override
                 public Book create() {
                     Book book = new Book();
-                    book.publisher = SingleRelation.id(a.id);
+                    book.publisher = SingleAssociation.id(a.id);
                     book.title = "a " + x;
                     return book;
                 }
@@ -769,7 +769,7 @@ public class QueryTest {
                 @Override
                 public Book create() {
                     Book book = new Book();
-                    book.publisher = SingleRelation.id(b.id);
+                    book.publisher = SingleAssociation.id(b.id);
                     book.title = "b " + x;
                     return book;
                 }

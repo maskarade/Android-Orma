@@ -27,23 +27,23 @@ import rx.SingleSubscriber;
  *
  * @param <Model> The type of a model to relate.
  */
-public class SingleRelation<Model> {
+public class SingleAssociation<Model> {
 
     final long id;
 
     final Single<Model> single;
 
-    public SingleRelation(long id, Model model) {
+    public SingleAssociation(long id, Model model) {
         this.id = id;
         this.single = Single.just(model);
     }
 
-    public SingleRelation(long id, Single<Model> single) {
+    public SingleAssociation(long id, Single<Model> single) {
         this.id = id;
         this.single = single;
     }
 
-    public SingleRelation(@NonNull final OrmaConnection conn, @NonNull final Schema<Model> schema, final long id) {
+    public SingleAssociation(@NonNull final OrmaConnection conn, @NonNull final Schema<Model> schema, final long id) {
         this.id = id;
         single = Single.create(new Single.OnSubscribe<Model>() {
             @Override
@@ -63,12 +63,12 @@ public class SingleRelation<Model> {
         });
     }
 
-    public static <T> SingleRelation<T> just(long id, T model) {
-        return new SingleRelation<>(id, model);
+    public static <T> SingleAssociation<T> just(long id, T model) {
+        return new SingleAssociation<>(id, model);
     }
 
-    public static <T> SingleRelation<T> id(final long id) {
-        return new SingleRelation<>(id, Single.create(new Single.OnSubscribe<T>() {
+    public static <T> SingleAssociation<T> id(final long id) {
+        return new SingleAssociation<>(id, Single.create(new Single.OnSubscribe<T>() {
             @Override
             public void call(SingleSubscriber<? super T> singleSubscriber) {
                 singleSubscriber.onError(new NoValueException("No value set for id=" + id));

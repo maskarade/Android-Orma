@@ -86,7 +86,7 @@ public class Types {
 
     public static final ClassName Inserter = ClassName.get(ormaPackageName, "Inserter");
 
-    public static final ClassName SingleRelation = ClassName.get(ormaPackageName, "SingleRelation");
+    public static final ClassName SingleAssociation = ClassName.get(ormaPackageName, "SingleAssociation");
 
     public static final ClassName ModelFactory = ClassName.get(ormaPackageName, "ModelFactory");
 
