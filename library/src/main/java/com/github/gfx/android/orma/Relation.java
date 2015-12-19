@@ -227,6 +227,10 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @NonNull
     @Override
     public Iterator<Model> iterator() {
         return observable().toBlocking().getIterator();
