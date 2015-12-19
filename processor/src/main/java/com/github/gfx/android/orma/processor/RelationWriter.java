@@ -55,7 +55,7 @@ public class RelationWriter extends BaseWriter {
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(Types.OrmaConnection, "orma")
-                .addParameter(schema.getSchemaClassName(), "schema")
+                .addParameter(Types.getSchema(schema.getModelClassName()), "schema")
                 .addCode("super(orma, schema);\n")
                 .build());
 
@@ -66,6 +66,24 @@ public class RelationWriter extends BaseWriter {
                 .filter(this::needsOrderByHelpers)
                 .flatMap(this::buildOrderByHelpers)
                 .forEach(methodSpecs::add);
+
+        methodSpecs.add(MethodSpec.methodBuilder("updater")
+                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getUpdaterClassName())
+                .addStatement("assert groupBy == null && having == null")
+                .addStatement("return new $T(this)", schema.getUpdaterClassName())
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("deleter")
+                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getDeleterClassName())
+                .addStatement("assert groupBy == null && having == null")
+                .addStatement("return new $T(this)", schema.getDeleterClassName())
+                .build());
 
         return methodSpecs;
     }

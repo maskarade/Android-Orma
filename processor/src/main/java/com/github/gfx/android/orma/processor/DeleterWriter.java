@@ -52,9 +52,17 @@ public class DeleterWriter extends BaseWriter {
         methodSpecs.add(
                 MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(Types.OrmaConnection, "connection")
-                        .addParameter(schema.getSchemaClassName(), "schema")
-                        .addStatement("super(connection, schema)")
+                        .addParameter(Types.OrmaConnection, "conn")
+                        .addParameter(Types.getSchema(schema.getModelClassName()), "schema")
+                        .addStatement("super(conn, schema)")
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(schema.getRelationClassName(), "relation")
+                        .addStatement("super(relation)")
                         .build()
         );
 
