@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import rx.Single;
+import rx.SingleSubscriber;
 import rx.functions.Action1;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -580,6 +582,40 @@ public class QueryTest {
 
         assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
         assertThat(db.selectFromBook().count(), is(2));
+    }
+
+    @Test
+    public void transactionNonExclusiveSync() throws Exception {
+        Single<Integer> countObservable = Single.create(new Single.OnSubscribe<Integer>() {
+            @Override
+            public void call(final SingleSubscriber<? super Integer> subscriber) {
+                db.transactionNonExclusiveSync(new TransactionTask() {
+                    @Override
+                    public void execute() throws Exception {
+                        subscriber.onSuccess(db.selectFromBook().count());
+                    }
+                });
+            }
+        });
+
+        assertThat(countObservable.toBlocking().value(), is(2));
+    }
+
+    @Test
+    public void transactionNonExclusiveAsync() throws Exception {
+        Single<Integer> countObservable = Single.create(new Single.OnSubscribe<Integer>() {
+            @Override
+            public void call(final SingleSubscriber<? super Integer> subscriber) {
+                db.transactionNonExclusiveAsync(new TransactionTask() {
+                    @Override
+                    public void execute() throws Exception {
+                        subscriber.onSuccess(db.selectFromBook().count());
+                    }
+                });
+            }
+        });
+
+        assertThat(countObservable.toBlocking().value(), is(2));
     }
 
     @Test(expected = SQLiteException.class)
