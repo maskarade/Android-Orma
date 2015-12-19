@@ -38,9 +38,13 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -119,6 +123,9 @@ public class ModelSpecTest {
     @Test
     public void testObjectMapping() throws Exception {
         final long now = new Date().getTime();
+        final UUID uuid = UUID.randomUUID();
+        final BigDecimal bd = BigDecimal.valueOf(Long.MAX_VALUE).add(BigDecimal.ONE);
+        final BigInteger bi = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.TEN);
 
         System.out.println(db.getConnection().getTypeAdapterRegistry().toString());
         ModelWithTypeAdapters model = db.createModelWithTypeAdapters(new ModelFactory<ModelWithTypeAdapters>() {
@@ -133,6 +140,10 @@ public class ModelSpecTest {
                 model.set.add("baz");
                 model.uri = Uri.parse("http://example.com");
                 model.date = new Date(now);
+                model.uuid = uuid;
+                model.bigDecimal = bd;
+                model.bigInteger = bi;
+                model.currency = Currency.getInstance("JPY");
                 return model;
             }
         });
@@ -141,6 +152,10 @@ public class ModelSpecTest {
         assertThat(model.set, containsInAnyOrder("foo", "bar", "baz"));
         assertThat(model.uri, is(Uri.parse("http://example.com")));
         assertThat(model.date, is(new Date(now)));
+        assertThat(model.uuid, is(uuid));
+        assertThat(model.bigDecimal, is(bd));
+        assertThat(model.bigInteger, is(bi));
+        assertThat(model.currency, is(Currency.getInstance("JPY")));
     }
 
     @Test
