@@ -36,6 +36,10 @@ public class TypeAdapterRegistry {
                 new StringSetAdapter(),
                 new UriAdapter(),
                 new DateAdapter(),
+                new UUIDAdapter(),
+                new BigDecimalAdapter(),
+                new BigIntegerAdapter(),
+                new CurrencyAdapter(),
         };
     }
 

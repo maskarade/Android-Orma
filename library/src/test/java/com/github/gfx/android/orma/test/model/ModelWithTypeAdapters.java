@@ -22,9 +22,13 @@ import com.github.gfx.android.orma.annotation.Table;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Table
 public class ModelWithTypeAdapters {
@@ -44,6 +48,18 @@ public class ModelWithTypeAdapters {
     @Column
     public Date date;
 
+    @Column
+    public BigDecimal bigDecimal;
+
+    @Column
+    public BigInteger bigInteger;
+
+    @Column
+    public UUID uuid;
+
+    @Column
+    public Currency currency;
+
     @Nullable
     @Column
     public List<String> nullableList;
@@ -59,5 +75,7 @@ public class ModelWithTypeAdapters {
     @Nullable
     @Column
     public Date nullableDate;
+
+
 
 }
