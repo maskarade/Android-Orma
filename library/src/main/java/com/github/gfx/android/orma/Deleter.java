@@ -24,8 +24,12 @@ import rx.SingleSubscriber;
 
 public class Deleter<Model, D extends Deleter<?, ?>> extends OrmaConditionBase<Model, D> {
 
-    public Deleter(OrmaConnection connection, Schema<Model> schema) {
+    public Deleter(@NonNull OrmaConnection connection, @NonNull Schema<Model> schema) {
         super(connection, schema);
+    }
+
+    public Deleter(@NonNull Relation<Model, ?> relation) {
+        super(relation);
     }
 
     /**

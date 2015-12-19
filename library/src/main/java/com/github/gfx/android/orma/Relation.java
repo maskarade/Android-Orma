@@ -35,8 +35,9 @@ import rx.functions.Action1;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
+ *
  * @param <Model> An Orma model
- * @param <R> The derived class itself. e.g {@code class Foo_Schema extends Relation<Foo, Foo_Schema>}
+ * @param <R>     The derived class itself. e.g {@code class Foo_Schema extends Relation<Foo, Foo_Schema>}
  */
 public abstract class Relation<Model, R extends Relation<?, ?>>
         extends OrmaConditionBase<Model, R> implements Iterable<Model> {
@@ -226,6 +227,21 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
             }
         });
     }
+
+    // Other operation helpers
+
+    @NonNull
+    public Inserter<Model> inserter() {
+        return conn.prepareInsert(schema, schema.getInsertStatement());
+    }
+
+    @NonNull
+    public abstract Updater<Model, ?> updater();
+
+    @NonNull
+    public abstract Deleter<Model, ?> deleter();
+
+    // implements Iterable<Model>
 
     /**
      * {@inheritDoc}

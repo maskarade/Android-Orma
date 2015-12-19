@@ -31,6 +31,10 @@ public class Updater<Model, U extends Updater<?, ?>> extends OrmaConditionBase<M
         super(conn, schema);
     }
 
+    public Updater(@NonNull Relation<Model, ?> relation) {
+        super(relation);
+    }
+
     @NonNull
     public ContentValues getContentValues() {
         return contents;

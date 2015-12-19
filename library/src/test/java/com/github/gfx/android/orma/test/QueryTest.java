@@ -441,6 +441,20 @@ public class QueryTest {
     }
 
     @Test
+    public void updateViaRelation() throws Exception {
+        int count = db.selectFromBook()
+                .titleEq("today")
+                .updater()
+                .content("modified")
+                .execute();
+
+        assertThat(count, is(1));
+
+        Book book = db.selectFromBook().titleEq("today").value();
+        assertThat(book.content, is("modified"));
+    }
+
+    @Test
     public void updateSingleAssociation() throws Exception {
         Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
@@ -490,11 +504,22 @@ public class QueryTest {
         assertThat(book.publisher.single().toBlocking().value().name, is("The Nova"));
     }
 
-
     @Test
     public void delete() throws Exception {
         int result = db.deleteFromBook()
                 .where("title = ?", "today")
+                .execute();
+
+        assertThat(result, is(1));
+        assertThat(db.selectFromBook().count(), is(1));
+        assertThat(db.selectFromBook().value().title, is("friday"));
+    }
+
+    @Test
+    public void deleteViaRelation() throws Exception {
+        int result = db.selectFromBook()
+                .titleEq("today")
+                .deleter()
                 .execute();
 
         assertThat(result, is(1));

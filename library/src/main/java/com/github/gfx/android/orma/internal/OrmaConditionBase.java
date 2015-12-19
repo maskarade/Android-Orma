@@ -23,7 +23,6 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
 
@@ -37,11 +36,17 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     protected StringBuilder whereClause;
 
     @Nullable
-    protected List<String> bindArgs;
+    protected ArrayList<String> bindArgs;
 
-    public OrmaConditionBase(OrmaConnection conn, Schema<T> schema) {
+    public OrmaConditionBase(@NonNull OrmaConnection conn, @NonNull Schema<T> schema) {
         this.conn = conn;
         this.schema = schema;
+    }
+
+    public OrmaConditionBase(@NonNull OrmaConditionBase<T, ?> condition) {
+        this.conn = condition.conn;
+        this.schema = condition.schema;
+        where(condition);
     }
 
     protected void bindArgs(@NonNull Object... args) {
@@ -119,6 +124,14 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     @SuppressWarnings("unchecked")
     public C or() {
         whereConjunction = " OR ";
+        return (C) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public C where(@NonNull OrmaConditionBase<T, ?> condition) {
+        if (condition.whereClause != null && condition.bindArgs != null) {
+            this.where(condition.whereClause.toString(), condition.bindArgs);
+        }
         return (C) this;
     }
 

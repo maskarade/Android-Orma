@@ -57,8 +57,16 @@ public class UpdaterWriter extends BaseWriter {
                 MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(Types.OrmaConnection, "conn")
-                        .addParameter(schema.getSchemaClassName(), "schema")
+                        .addParameter(Types.getSchema(schema.getModelClassName()), "schema")
                         .addStatement("super(conn, schema)")
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(schema.getRelationClassName(), "relation")
+                        .addStatement("super(relation)")
                         .build()
         );
 
@@ -82,6 +90,7 @@ public class UpdaterWriter extends BaseWriter {
                                 .returns(schema.getUpdaterClassName())
                                 .addParameter(
                                         ParameterSpec.builder(column.getType(), paramName)
+                                                .addAnnotations(conditionQueryHelpers.nullabilityAnnotations(column))
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
@@ -97,6 +106,7 @@ public class UpdaterWriter extends BaseWriter {
                                 .returns(schema.getUpdaterClassName())
                                 .addParameter(
                                         ParameterSpec.builder(column.getType(), column.name + "Reference")
+                                                .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L.getId())",
