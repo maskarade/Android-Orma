@@ -17,12 +17,14 @@ package com.github.gfx.android.orma.internal;
 
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
+import com.github.gfx.android.orma.adapter.TypeAdapter;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
 
@@ -74,7 +76,7 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
      * @return The receiver itself.
      */
     @SuppressWarnings("unchecked")
-    public C where(@NonNull String conditions, @NonNull Object... args) {
+    public C where(@NonNull CharSequence conditions, @NonNull Object... args) {
         if (whereClause == null) {
             whereClause = new StringBuilder(conditions.length() + 2);
         } else {
@@ -84,13 +86,12 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
         whereClause.append('(');
         whereClause.append(conditions);
         whereClause.append(')');
-
         bindArgs(args);
         return (C) this;
     }
 
     @SuppressWarnings("unchecked")
-    public C where(@NonNull String conditions, @NonNull Collection<?> args) {
+    public C where(@NonNull CharSequence conditions, @NonNull Collection<?> args) {
         return where(conditions, args.toArray());
     }
 
@@ -100,20 +101,31 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
 
         clause.append(columnName);
         if (not) {
-            clause.append(" NOT ");
+            clause.append(" NOT");
         }
         clause.append(" IN (");
         for (int i = 0, size = values.size(); i < size; i++) {
             clause.append('?');
 
-            if ((i + 1) != values.size()) {
+            if ((i + 1) != size) {
                 clause.append(", ");
             }
         }
         clause.append(')');
 
-        return where(clause.toString(), values);
+        return where(clause, values);
     }
+
+    @SuppressWarnings("unchecked")
+    protected <ColumnType> C in(boolean not, @NonNull String columnName, @NonNull Collection<ColumnType> values,
+            TypeAdapter<ColumnType> typeAdapter) {
+        List<String> serializedValues = new ArrayList<>(values.size());
+        for (ColumnType value : values) {
+            serializedValues.add(typeAdapter.serializeNullable(value));
+        }
+        return in(not, columnName, serializedValues);
+    }
+
 
     @SuppressWarnings("unchecked")
     public C and() {
@@ -130,7 +142,7 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     @SuppressWarnings("unchecked")
     public C where(@NonNull OrmaConditionBase<T, ?> condition) {
         if (condition.whereClause != null && condition.bindArgs != null) {
-            this.where(condition.whereClause.toString(), condition.bindArgs);
+            this.where(condition.whereClause, condition.bindArgs);
         }
         return (C) this;
     }

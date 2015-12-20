@@ -67,8 +67,8 @@ public class TypeAdaptersTest {
     public void testStringListAdapter() throws Exception {
         List<String> a = Arrays.asList("foo", "bar");
 
-        String serialized = registry.serialize(stringListType, a);
-        List<String> b = registry.deserialize(stringListType, serialized);
+        String serialized = registry.get(stringListType).serialize(a);
+        List<String> b = registry.<List<String>>get(stringListType).deserialize(serialized);
 
         assertThat(b, is(a));
     }
@@ -79,8 +79,8 @@ public class TypeAdaptersTest {
         a.add("foo");
         a.add("bar");
 
-        String serialized = registry.serialize(stringSetType, a);
-        Set<String> b = registry.deserialize(stringSetType, serialized);
+        String serialized = registry.get(stringSetType).serialize(a);
+        Set<String> b = registry.<Set<String>>get(stringSetType).deserialize(serialized);
 
         assertThat(b, is(a));
     }
@@ -90,30 +90,24 @@ public class TypeAdaptersTest {
     public void testUriAdapter() throws Exception {
         Uri a = Uri.parse("http://example.com/foo?bar#baz");
 
-        String serialized = registry.serialize(Uri.class, a);
-        Uri b = registry.deserialize(Uri.class, serialized);
+        String serialized = registry.get(Uri.class).serialize(a);
+        Uri b = registry.get(Uri.class).deserialize(serialized);
 
         assertThat(b, is(a));
     }
 
     @Test
     public void serializeNullable() throws Exception {
-        assertThat(registry.serializeNullable(Uri.class, null), is(nullValue()));
+        assertThat(registry.get(Uri.class).serializeNullable(null), is(nullValue()));
     }
 
     @Test
     public void deserializeNullable() throws Exception {
-        assertThat(registry.deserializeNullable(Uri.class, null), is(nullValue()));
+        assertThat(registry.get(Uri.class).deserializeNullable(null), is(nullValue()));
     }
 
     @Test(expected = TypeAdapterNotFoundException.class)
     public void serializeNonRegisteredType() throws Exception {
-        registry.serialize(TypeAdaptersTest.class, this);
+        registry.get(TypeAdaptersTest.class);
     }
-
-    @Test(expected = TypeAdapterNotFoundException.class)
-    public void deserializeNonRegisteredType() throws Exception {
-        registry.deserialize(TypeAdaptersTest.class, "");
-    }
-
 }

@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.adapter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -27,5 +28,17 @@ public abstract class AbstractTypeAdapter<SourceType> implements TypeAdapter<Sou
     public Type getSourceType() {
         ParameterizedType superClass = (ParameterizedType) getClass().getGenericSuperclass();
         return superClass.getActualTypeArguments()[0];
+    }
+
+    @Nullable
+    @Override
+    public String serializeNullable(@Nullable SourceType source) {
+        return source == null ? null : serialize(source);
+    }
+
+    @Nullable
+    @Override
+    public SourceType deserializeNullable(@Nullable String serialized) {
+        return serialized == null ? null : deserialize(serialized);
     }
 }

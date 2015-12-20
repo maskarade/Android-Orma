@@ -15,9 +15,12 @@
  */
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
+
+import org.json.JSONArray;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
@@ -35,6 +38,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
+import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.List;
 
 import rx.functions.Action0;
@@ -123,6 +128,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return super.getReadableDatabase();
     }
 
+    @NonNull
+    public <SourceType> TypeAdapter<SourceType> getTypeAdapter(Type sourceType) {
+        return typeAdapterRegistry.get(sourceType);
+    }
+
     public TypeAdapterRegistry getTypeAdapterRegistry() {
         return typeAdapterRegistry;
     }
@@ -150,13 +160,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     @NonNull
     public Cursor rawQuery(@NonNull String sql, @NonNull String... bindArgs) {
-        trace(sql);
+        trace(sql, bindArgs);
         SQLiteDatabase db = getReadableDatabase();
         return db.rawQuery(sql, bindArgs);
     }
 
     public long rawQueryForLong(@NonNull String sql, @NonNull String... bindArgs) {
-        trace(sql);
+        trace(sql, bindArgs);
         SQLiteDatabase db = getReadableDatabase();
         return DatabaseUtils.longForQuery(db, sql, bindArgs);
     }
@@ -263,7 +273,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public void execSQL(@NonNull String sql, @NonNull Object... bindArgs) {
-        trace(sql);
+        trace(sql, bindArgs);
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(sql, bindArgs);
     }
@@ -289,9 +299,9 @@ public class OrmaConnection extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
-    private void trace(String sql) {
+    private void trace(String sql, Object... bindArgs) {
         if (trace) {
-            Log.v(TAG, sql);
+            Log.v(TAG, sql + " - " + new JSONArray(Arrays.asList(bindArgs)));
         }
     }
 

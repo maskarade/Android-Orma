@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.adapter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.lang.reflect.Type;
 
@@ -26,6 +27,13 @@ public interface TypeAdapter<SourceType> {
     @NonNull
     String serialize(@NonNull SourceType source);
 
+    @Nullable
+    String serializeNullable(@Nullable SourceType source);
+
     @NonNull
     SourceType deserialize(@NonNull String serialized);
+
+    @Nullable
+    SourceType deserializeNullable(@Nullable String serialized);
+
 }

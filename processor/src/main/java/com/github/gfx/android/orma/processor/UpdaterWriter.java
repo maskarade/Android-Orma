@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.processor;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -75,15 +74,6 @@ public class UpdaterWriter extends BaseWriter {
 
             if (r == null) {
                 String paramName = column.name;
-                CodeBlock.Builder valueExpr = CodeBlock.builder();
-
-                if (Types.needsTypeAdapter(column.getUnboxType())) {
-                    valueExpr.add("conn.getTypeAdapterRegistry().serialize($T.$L.type, $L)",
-                            schema.getSchemaClassName(), column.name, paramName);
-                } else {
-                    valueExpr.add(paramName);
-                }
-
                 methodSpecs.add(
                         MethodSpec.methodBuilder(column.name)
                                 .addModifiers(Modifier.PUBLIC)
@@ -94,7 +84,7 @@ public class UpdaterWriter extends BaseWriter {
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
-                                        valueExpr.build())
+                                        column.buildSerializeExpr("conn", paramName))
                                 .addStatement("return this")
                                 .build()
                 );
