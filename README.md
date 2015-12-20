@@ -26,8 +26,8 @@ apply plugin: 'com.neenbedankt.android-apt'
 // To use orma in your Android applications or libraries
 
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:0.14.0'
-    compile 'com.github.gfx.android.orma:orma:0.14.0'
+    apt 'com.github.gfx.android.orma:orma-processor:0.15.0'
+    compile 'com.github.gfx.android.orma:orma:0.15.0'
 }
 ```
 
