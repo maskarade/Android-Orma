@@ -337,7 +337,7 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("createModelFromCursor")
+                MethodSpec.methodBuilder("newModelFromCursor")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(schema.getModelClassName())
@@ -349,7 +349,7 @@ public class SchemaWriter extends BaseWriter {
                                 ParameterSpec.builder(Types.Cursor, "cursor")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                         .build())
-                        .addCode(buildCreateModelFromCursor())
+                        .addCode(buildNewModelFromCursor())
                         .build()
         );
 
@@ -433,7 +433,7 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    private CodeBlock buildCreateModelFromCursor() {
+    private CodeBlock buildNewModelFromCursor() {
         CodeBlock.Builder builder = CodeBlock.builder();
         if (schema.hasDefaultConstructor()) {
             builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());

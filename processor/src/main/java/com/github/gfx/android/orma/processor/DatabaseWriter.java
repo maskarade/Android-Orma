@@ -231,10 +231,23 @@ public class DatabaseWriter extends BaseWriter {
             String simpleModelName = schema.getModelClassName().simpleName();
             String schemaInstance = "schema" + simpleModelName;
 
+            methodSpecs.add(MethodSpec.methodBuilder("load" + simpleModelName + "fromCursor")
+                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(schema.getModelClassName())
+                    .addParameter(
+                            ParameterSpec.builder(Types.Cursor, "cursor")
+                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .build()
+                    )
+                    .addStatement("return $L.newModelFromCursor($L, cursor)", schemaInstance, connection)
+                    .build());
+
             methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
                     .addJavadoc(
                             "Inserts a model created by {@code ModelFactory<T>},"
-                                    + " and retrieve the model which is very inserted. The return value has the row ID.\n")
+                                    + " and retrieves it which is just inserted.\n"
+                                    + " The return value has the row ID.\n")
                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())

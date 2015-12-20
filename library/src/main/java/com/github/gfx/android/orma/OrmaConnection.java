@@ -190,7 +190,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
         try {
             if (cursor.moveToFirst()) {
-                return schema.createModelFromCursor(this, cursor);
+                return schema.newModelFromCursor(this, cursor);
             } else {
                 return null;
             }
