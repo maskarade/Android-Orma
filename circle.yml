@@ -3,9 +3,30 @@ machine:
         - docker
 
 dependencies:
+    cache_directories:
+        - "~/cache"
     override:
-        - docker build -t test .
+        - docker --version
+        - docker info
+        - |
+            set -xe
+            if [ -e ~/cache/docker-image.tar ] && [ $(md5sum Dockerfile | cut -d' ' -f1) = $(cat ~/cache/dockerfile.digest) ]
+            then
+              docker load < ~/cache/docker-image.tar
+            else
+              mkdir -p ~/cache
+              docker build -t test .
+              md5sum Dockerfile | cut -d' ' -f1 > ~/cache/dockerfile.digest
+              docker save test > ~/cache/docker-image.tar
+            fi
 
 test:
     override:
-        - docker run test
+        - docker run --name runner test
+    post:
+        - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+        - |
+            set -xe
+            for module in processor library migration example ; do
+                docker cp runner:/project/$module/build/test-results $CIRCLE_TEST_REPORTS/junit/$module || true
+            done
