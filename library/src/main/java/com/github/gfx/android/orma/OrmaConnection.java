@@ -20,8 +20,6 @@ import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 
-import org.json.JSONArray;
-
 import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -295,15 +293,20 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     private void execSQL(SQLiteDatabase db, String sql) {
-        trace(sql);
+        trace(sql, null);
         db.execSQL(sql);
     }
 
-    private void trace(String sql, Object... bindArgs) {
+    private void trace(@NonNull String sql, @Nullable Object[] bindArgs) {
         if (trace) {
-            Log.v(TAG, sql + " - " + new JSONArray(Arrays.asList(bindArgs)));
+            if (bindArgs == null) {
+                Log.v(TAG, sql);
+            } else {
+                Log.v(TAG, sql + " - " + Arrays.deepToString(bindArgs));
+            }
         }
     }
+
 
     // SQLiteOpenHelper
 
