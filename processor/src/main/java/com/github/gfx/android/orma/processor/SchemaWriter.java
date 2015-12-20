@@ -217,11 +217,6 @@ public class SchemaWriter extends BaseWriter {
                 Specs.buildOverrideAnnotationSpec()
         );
 
-        List<AnnotationSpec> overrideAndNullable = Arrays.asList(
-                Specs.buildNullableAnnotationSpec(),
-                Specs.buildOverrideAnnotationSpec()
-        );
-
         methodSpecs.add(
                 MethodSpec.methodBuilder("getModelClass")
                         .addAnnotations(overrideAndNonNull)
