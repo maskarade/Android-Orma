@@ -32,6 +32,8 @@ import javax.lang.model.element.Name;
 
 public class ColumnDefinition {
 
+    public final SchemaDefinition schema;
+
     public final Element element;
 
     public final String name;
@@ -60,7 +62,8 @@ public class ColumnDefinition {
 
     public Element setter;
 
-    public ColumnDefinition(Element element) {
+    public ColumnDefinition(SchemaDefinition schema, Element element) {
+        this.schema = schema;
         this.element = element;
 
         // TODO: autoincrement, conflict clause, default value, etc...
@@ -207,5 +210,32 @@ public class ColumnDefinition {
         } else {
             return name;
         }
+    }
+
+    public CodeBlock buildGetTypeAdapter(String connectionExpr) {
+        return CodeBlock.builder()
+                .add("$L.<$T>getTypeAdapter($T.$L.type)",
+                        connectionExpr,
+                        type,
+                        schema.getSchemaClassName(),
+                        name)
+                .build();
+    }
+
+    public CodeBlock buildSerializeExpr(String connectionExpr, String paramnExpr) {
+        CodeBlock.Builder expr = CodeBlock.builder();
+        if (needsTypeAdapter()) {
+            expr.add("$L.$L($L)",
+                    buildGetTypeAdapter(connectionExpr),
+                    nullable ? "serializeNullable" : "serialize",
+                    paramnExpr);
+        } else {
+            expr.add(paramnExpr);
+        }
+        return expr.build();
+    }
+
+    public boolean needsTypeAdapter() {
+        return Types.needsTypeAdapter(getUnboxType());
     }
 }

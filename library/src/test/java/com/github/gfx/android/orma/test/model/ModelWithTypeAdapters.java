@@ -36,46 +36,43 @@ public class ModelWithTypeAdapters {
     @PrimaryKey
     public long id;
 
-    @Column
+    @Column(indexed = true)
     public List<String> list;
 
-    @Column
+    @Column(indexed = true)
     public Set<String> set;
 
-    @Column
+    @Column(indexed = true)
     public Uri uri;
 
-    @Column
+    @Column(indexed = true)
     public Date date;
 
-    @Column
+    @Column(indexed = true)
     public BigDecimal bigDecimal;
 
-    @Column
+    @Column(indexed = true)
     public BigInteger bigInteger;
 
-    @Column
+    @Column(indexed = true)
     public UUID uuid;
 
-    @Column
+    @Column(indexed = true)
     public Currency currency;
 
     @Nullable
-    @Column
+    @Column(indexed = true)
     public List<String> nullableList;
 
     @Nullable
-    @Column
+    @Column(indexed = true)
     public Set<String> nullableSet;
 
     @Nullable
-    @Column
+    @Column(indexed = true)
     public Uri nullableUri;
 
     @Nullable
-    @Column
+    @Column(indexed = true)
     public Date nullableDate;
-
-
-
 }

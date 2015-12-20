@@ -22,6 +22,8 @@ import com.github.gfx.android.orma.annotation.Table;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.Date;
+
 @Table
 public class ModelWithConditionHelpers {
 
@@ -57,4 +59,6 @@ public class ModelWithConditionHelpers {
     @Column(indexed = true)
     public double doubleValue;
 
+    @Column(indexed = true)
+    public Date dateValue;
 }

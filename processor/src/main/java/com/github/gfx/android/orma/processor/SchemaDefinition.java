@@ -126,7 +126,7 @@ public class SchemaDefinition {
         throw new AssertionError("No non-empty string found");
     }
 
-    static List<ColumnDefinition> collectColumns(TypeElement typeElement) {
+    List<ColumnDefinition> collectColumns(TypeElement typeElement) {
         Map<String, Element> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         Map<String, Element> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -148,7 +148,7 @@ public class SchemaDefinition {
                 .filter(element -> element.getAnnotation(Column.class) != null
                         || element.getAnnotation(PrimaryKey.class) != null)
                 .map((element) -> {
-                    ColumnDefinition column = new ColumnDefinition(element);
+                    ColumnDefinition column = new ColumnDefinition(this, element);
                     column.getter = getters.get(column.columnName);
                     column.setter = setters.get(column.columnName);
                     return column;

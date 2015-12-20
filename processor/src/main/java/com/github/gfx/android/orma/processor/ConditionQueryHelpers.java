@@ -76,7 +76,8 @@ public class ConditionQueryHelpers {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(paramSpecBuilder.build())
                         .returns(targetClassName)
-                        .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " = ?", column.name)
+                        .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " = ?",
+                                column.buildSerializeExpr("conn", column.name))
                         .build()
         );
 
@@ -85,70 +86,101 @@ public class ConditionQueryHelpers {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(paramSpecBuilder.build())
                         .returns(targetClassName)
-                        .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " <> ?", column.name)
+                        .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " <> ?",
+                                column.buildSerializeExpr("conn", column.name))
                         .build()
         );
 
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "In")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
-                                .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                                .build())
-                        .returns(targetClassName)
-                        .addStatement("return in(false, $S, values)", sql.quoteIdentifier(column.columnName))
-                        .build()
-        );
+        if (column.needsTypeAdapter()) {
+            methodSpecs.add(
+                    MethodSpec.methodBuilder(column.name + "In")
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
+                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .build())
+                            .returns(targetClassName)
+                            .addStatement("return in(false, $S, values, $L)",
+                                    sql.quoteIdentifier(column.columnName), column.buildGetTypeAdapter("conn"))
+                            .build()
+            );
 
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "NotIn")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
-                                .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                                .build())
-                        .returns(targetClassName)
-                        .addStatement("return in(true, $S, values)", sql.quoteIdentifier(column.columnName))
-                        .build()
-        );
+            methodSpecs.add(
+                    MethodSpec.methodBuilder(column.name + "NotIn")
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
+                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .build())
+                            .returns(targetClassName)
+                            .addStatement("return in(true, $S, values, $L)",
+                                    sql.quoteIdentifier(column.columnName), column.buildGetTypeAdapter("conn"))
+                            .build()
+            );
+        } else {
+            methodSpecs.add(
+                    MethodSpec.methodBuilder(column.name + "In")
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
+                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .build())
+                            .returns(targetClassName)
+                            .addStatement("return in(false, $S, values)",
+                                    sql.quoteIdentifier(column.columnName))
+                            .build()
+            );
 
-        if (isNumberType(column.getUnboxType()) && (!column.primaryKey || column.autoincrement)) {
             methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "Lt")
+                    MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
-                            .addParameter(paramSpecBuilder.build())
+                            .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
+                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .build())
                             .returns(targetClassName)
-                            .addStatement("return where($S, $L)",
-                                    sql.quoteIdentifier(column.columnName) + " < ?", column.name)
-                            .build()
-            );
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "Le")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(paramSpecBuilder.build())
-                            .returns(targetClassName)
-                            .addStatement("return where($S, $L)",
-                                    sql.quoteIdentifier(column.columnName) + " <= ?", column.name)
-                            .build()
-            );
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "Gt")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(paramSpecBuilder.build())
-                            .returns(targetClassName)
-                            .addStatement("return where($S, $L)",
-                                    sql.quoteIdentifier(column.columnName) + " > ?", column.name)
-                            .build()
-            );
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "Ge")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(paramSpecBuilder.build())
-                            .returns(targetClassName)
-                            .addStatement("return where($S, $L)",
-                                    sql.quoteIdentifier(column.columnName) + " >= ?", column.name)
+                            .addStatement("return in(true, $S, values)",
+                                    sql.quoteIdentifier(column.columnName))
                             .build()
             );
         }
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder(column.name + "Lt")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(paramSpecBuilder.build())
+                        .returns(targetClassName)
+                        .addStatement("return where($S, $L)",
+                                sql.quoteIdentifier(column.columnName) + " < ?",
+                                column.buildSerializeExpr("conn", column.name))
+                        .build()
+        );
+        methodSpecs.add(
+                MethodSpec.methodBuilder(column.name + "Le")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(paramSpecBuilder.build())
+                        .returns(targetClassName)
+                        .addStatement("return where($S, $L)",
+                                sql.quoteIdentifier(column.columnName) + " <= ?",
+                                column.buildSerializeExpr("conn", column.name))
+                        .build()
+        );
+        methodSpecs.add(
+                MethodSpec.methodBuilder(column.name + "Gt")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(paramSpecBuilder.build())
+                        .returns(targetClassName)
+                        .addStatement("return where($S, $L)",
+                                sql.quoteIdentifier(column.columnName) + " > ?",
+                                column.buildSerializeExpr("conn", column.name))
+                        .build()
+        );
+        methodSpecs.add(
+                MethodSpec.methodBuilder(column.name + "Ge")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(paramSpecBuilder.build())
+                        .returns(targetClassName)
+                        .addStatement("return where($S, $L)",
+                                sql.quoteIdentifier(column.columnName) + " >= ?",
+                                column.buildSerializeExpr("conn", column.name))
+                        .build()
+        );
     }
 
     public boolean isNumberType(TypeName typeName) {

@@ -33,6 +33,7 @@ import android.content.Context;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -69,6 +70,7 @@ public class ConditionHelpersTest {
                     model.longValue = (long) i;
                     model.floatValue = (float) i;
                     model.doubleValue = (double) i;
+                    model.dateValue = new Date(i);
                     inserter.execute(model);
                 }
             }
@@ -96,6 +98,7 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueEq((long) 1).count(), is(1));
         assertThat(rel().floatValueEq((float) 1).count(), is(1));
         assertThat(rel().doubleValueEq((double) 1).count(), is(1));
+        assertThat(rel().dateValueEq(new Date(1)).count(), is(1));
     }
 
     @Test
@@ -109,6 +112,7 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueNotEq((long) 1).count(), is(9));
         assertThat(rel().floatValueNotEq((float) 1).count(), is(9));
         assertThat(rel().doubleValueNotEq((double) 1).count(), is(9));
+        assertThat(rel().dateValueNotEq(new Date(1)).count(), is(9));
     }
 
     @Test
@@ -123,6 +127,7 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueIn(Arrays.asList((long) 1, (long) 2)).count(), is(2));
         assertThat(rel().floatValueIn(Arrays.asList((float) 1, (float) 2)).count(), is(2));
         assertThat(rel().doubleValueIn(Arrays.asList((double) 1, (double) 2)).count(), is(2));
+        assertThat(rel().dateValueIn(Arrays.asList(new Date(1), new Date(2))).count(), is(2));
     }
 
     @Test
@@ -136,6 +141,7 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueNotIn(Arrays.asList((long) 1, (long) 2)).count(), is(8));
         assertThat(rel().floatValueNotIn(Arrays.asList((float) 1, (float) 2)).count(), is(8));
         assertThat(rel().doubleValueNotIn(Arrays.asList((double) 1, (double) 2)).count(), is(8));
+        assertThat(rel().dateValueNotIn(Arrays.asList(new Date(1), new Date(2))).count(), is(8));
     }
 
     @Test
@@ -146,6 +152,7 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueLt((long) 3).count(), is(3));
         assertThat(rel().floatValueLt((float) 3).count(), is(3));
         assertThat(rel().doubleValueLt((double) 3).count(), is(3));
+        assertThat(rel().dateValueLt(new Date(3)).count(), is(3));
     }
 
     @Test
@@ -156,6 +163,7 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueLe((long) 3).count(), is(4));
         assertThat(rel().floatValueLe((float) 3).count(), is(4));
         assertThat(rel().doubleValueLe((double) 3).count(), is(4));
+        assertThat(rel().dateValueLe(new Date(3)).count(), is(4));
     }
 
     @Test
@@ -166,6 +174,7 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueGt((long) 3).count(), is(6));
         assertThat(rel().floatValueGt((float) 3).count(), is(6));
         assertThat(rel().doubleValueGt((double) 3).count(), is(6));
+        assertThat(rel().dateValueGt(new Date(3)).count(), is(6));
     }
 
     @Test
@@ -176,6 +185,7 @@ public class ConditionHelpersTest {
         assertThat(rel().longValueGe((long) 3).count(), is(7));
         assertThat(rel().floatValueGe((float) 3).count(), is(7));
         assertThat(rel().doubleValueGe((double) 3).count(), is(7));
+        assertThat(rel().dateValueGe(new Date(3)).count(), is(7));
     }
 
     @Test

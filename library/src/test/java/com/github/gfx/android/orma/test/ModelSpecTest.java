@@ -122,12 +122,11 @@ public class ModelSpecTest {
 
     @Test
     public void testObjectMapping() throws Exception {
-        final long now = new Date().getTime();
+        final long now = System.currentTimeMillis();
         final UUID uuid = UUID.randomUUID();
         final BigDecimal bd = BigDecimal.valueOf(Long.MAX_VALUE).add(BigDecimal.ONE);
         final BigInteger bi = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.TEN);
 
-        System.out.println(db.getConnection().getTypeAdapterRegistry().toString());
         ModelWithTypeAdapters model = db.createModelWithTypeAdapters(new ModelFactory<ModelWithTypeAdapters>() {
             @NonNull
             @Override
