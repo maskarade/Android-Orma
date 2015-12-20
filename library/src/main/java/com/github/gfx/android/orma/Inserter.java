@@ -67,7 +67,7 @@ public class Inserter<Model> {
     }
 
     /**
-     * {@link Single<Model>} wrapper to {@code execute(Model)}
+     * {@link Single} wrapper to {@code execute(Model)}
      * @param model A model object to insert
      * @return A cold observable for the last inserted row id
      */
@@ -81,8 +81,8 @@ public class Inserter<Model> {
     }
 
     /**
-     * {@link Single<Model>} wrapper to {@code execute(ModelFactory<Model>)}.
-     * {@link ModelFactory<Model>#create()} is called in {@link rx.Single.OnSubscribe<Long>#call()}.
+     * {@link Single} wrapper to {@code execute(ModelFactory<Model>)}.
+     * {@link ModelFactory#create()} is called in {@link Single.OnSubscribe#call(Object)}.
      *
      * @param modelFactory A model factory
      * @return A cold observable for the last inserted row id
