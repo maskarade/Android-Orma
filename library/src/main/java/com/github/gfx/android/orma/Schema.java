@@ -61,5 +61,5 @@ public interface Schema<Model> extends MigrationSchema {
     void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model);
 
     @NonNull
-    Model createModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor);
+    Model newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor);
 }

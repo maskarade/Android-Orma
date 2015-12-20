@@ -207,7 +207,7 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
     public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = execute();
         for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-            action.call(schema.createModelFromCursor(conn, cursor));
+            action.call(schema.newModelFromCursor(conn, cursor));
         }
         cursor.close();
     }
