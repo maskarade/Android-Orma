@@ -53,10 +53,7 @@ public interface Schema<Model> extends MigrationSchema {
     List<String> getCreateIndexStatements();
 
     @NonNull
-    String getInsertStatement();
-
-    @NonNull
-    String getInsertOrReplaceStatement();
+    String getInsertStatement(@OnConflict int onConflictAlgorithm);
 
     Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Model model);
 
