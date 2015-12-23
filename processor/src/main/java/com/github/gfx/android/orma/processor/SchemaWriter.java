@@ -414,10 +414,10 @@ public class SchemaWriter extends BaseWriter {
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getUnboxType();
             AssociationDefinition r = c.getRelation();
-            boolean nullable = !type.isPrimitive() && c.nullable;
+            boolean nullable = !c.getType().isPrimitive() && c.nullable;
 
             if (nullable) {
-                builder.beginControlFlow("if (model.$L != null)", c.name);
+                builder.beginControlFlow("if (model.$L != null)", c.buildGetColumnExpr());
             }
 
             if (type.equals(TypeName.BOOLEAN)) {
