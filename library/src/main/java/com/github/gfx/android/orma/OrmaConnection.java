@@ -263,7 +263,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
             dropAllTables(db);
             createAllTables(db);
-
         } finally {
             db.endTransaction();
             db.close();
@@ -306,7 +305,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
             }
         }
     }
-
 
     // SQLiteOpenHelper
 
