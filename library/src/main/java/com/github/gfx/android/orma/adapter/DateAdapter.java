@@ -19,6 +19,10 @@ import android.support.annotation.NonNull;
 
 import java.util.Date;
 
+/**
+ * Handles {@link Date} as an integer, or <strong>milliseconds</strong>.
+ * Use {@link java.sql.Timestamp} if you want to use SQLite date/time functions.
+ */
 public class DateAdapter extends AbstractTypeAdapter<Date> {
 
     @NonNull

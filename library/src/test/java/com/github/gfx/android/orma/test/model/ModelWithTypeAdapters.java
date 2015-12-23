@@ -49,6 +49,15 @@ public class ModelWithTypeAdapters {
     public Date date;
 
     @Column(indexed = true)
+    public java.sql.Date sqlDate;
+
+    @Column(indexed = true)
+    public java.sql.Time sqlTime;
+
+    @Column(indexed = true)
+    public java.sql.Timestamp sqlTimestamp;
+
+    @Column(indexed = true)
     public BigDecimal bigDecimal;
 
     @Column(indexed = true)

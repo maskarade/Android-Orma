@@ -63,6 +63,7 @@ public class ModelSpecTest {
     public void setUp() throws Exception {
         db = OrmaDatabase.builder(getContext())
                 .name(null)
+                .trace(true)
                 .build();
     }
 
@@ -139,6 +140,9 @@ public class ModelSpecTest {
                 model.set.add("baz");
                 model.uri = Uri.parse("http://example.com");
                 model.date = new Date(now);
+                model.sqlDate = new java.sql.Date(now);
+                model.sqlTime = new java.sql.Time(now);
+                model.sqlTimestamp = new java.sql.Timestamp(now);
                 model.uuid = uuid;
                 model.bigDecimal = bd;
                 model.bigInteger = bi;
@@ -151,6 +155,9 @@ public class ModelSpecTest {
         assertThat(model.set, containsInAnyOrder("foo", "bar", "baz"));
         assertThat(model.uri, is(Uri.parse("http://example.com")));
         assertThat(model.date, is(new Date(now)));
+        assertThat(model.sqlDate.toString(), is(new java.sql.Date(now).toString()));
+        assertThat(model.sqlTime.toString(), is(new java.sql.Time(now).toString()));
+        assertThat(model.sqlTimestamp.toString(), is(new java.sql.Timestamp(now).toString()));
         assertThat(model.uuid, is(uuid));
         assertThat(model.bigDecimal, is(bd));
         assertThat(model.bigInteger, is(bi));
