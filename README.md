@@ -2,12 +2,16 @@
 
 This is an **alpha** software and the interface will change until v1.0.0, which will be released Jan 2016.
 
-Orma is a lightning-fast ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
+Orma is an ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
 generating helper classes at compile time with **annotation processing**.
+
+* As fast as hand-written code with `SQLiteOpenHelper`
+* Annotation-based schema definitions
+* Semi-automatic migration
 
 # Install
 
-Orma requires **JDK 8** and **Android API level 15**. 
+Orma requires **JDK 8** and **Android API level 15**.
 
 ```groovy
 // To use "apt" in dependencies
@@ -105,7 +109,7 @@ orma.selectFromTodo()
 // update
 orma.updateTodo()
   .titleEq("foo")
-  .content("a new content")
+  .content("a new content") // to setup what are updated
   .execute();
 
 // delete
@@ -130,12 +134,14 @@ The answer is that I need ORM that have the following features:
   * They should be passed to another thread
 * Database handles must be instances
   * Not a singleton nor static-method based class
-* Automatic migration
+* Semi-automatic migration
   * For what can be detected logically
   * i.e. simple `add column` and `drop column`
 * Code completion friendly
   * `selectFromModel()` is better than `selectFrom(Model.class)`
-* Custom queries like `GROUP BY ... HAVING`
+* Custom queries
+  * `GROUP BY ... HAVING ...`
+  * `SELECT max(value), min(value), avg(value) FROM ...`
 
 They are just what Orma has. This is as fast as hand-written code, its models have no restriction, database handle is
 not a singleton, and has `SchemaDiffMigration` for automatic migration.
@@ -173,7 +179,7 @@ Relation Helper, e.g. `Todo_Relation`, is created by the database handle:
 Todo_Relation relation = orma.selectFromTodo();
 ```
 
-This is a query builder for `SELECT` statements.
+This is a query builder for `SELECT ... FROM *` statements.
 
 ## Updater Helper
 
@@ -183,7 +189,7 @@ Updater Helper, e.g. `Todo_Updater`, is created by the database handle:
 Todo_Updater updater = orma.updateTodo();
 ```
 
-This is a query builder for `UPDATE` statements.
+This is a query builder for `UPDATE *` statements.
 
 ## Deleter Helper
 
@@ -193,12 +199,12 @@ Updater Helper, e.g. `Todo_Deleter`, is created by the database handle:
 Todo_Deleter deleter = orma.deleteFromTodo();
 ```
 
-This is a query builder for `DELETE FROM` statements.
+This is a query builder for `DELETE FROM *` statements.
 
 ## Condition Query Helpers
 
 There are Condition Query Helpers, e.g. `titleEq()` shown in the synopsis
-section, which ar methods to help make `WHERE` and `ORDER BY` clauses,
+section, which are methods to help make `WHERE` and `ORDER BY` clauses,
 generated for columns with `indexed = true` or the `@PrimaryKey` column.
 
 Here is a list of Condition Query Helpers that are generated for all the `indexed` columns:
@@ -261,7 +267,7 @@ public class KeyValuePair {
         return value;
     }
 
-    @Setter // setter for the "value" colum
+    @Setter // setter for the "value" column
     public void setValue(String value) {
         this.value = value;
     }
@@ -336,20 +342,25 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .build();
 ```
 
+**The interface is alpha quality and are likely to change.**
+
 ## Built-In Type Adapters
 
-There are a few built-in type adapter provided by default:
+There are a lot of built-in type adapter provided by default, which include:
 
 * `StringListAdapter` for `List<String>`
 * `StringSetAdapter` for `Set<String>`
 * `DateAdapter` for `Date`
 * `UriAdapter` for `Uri`
 
+See [adapter/](library/src/main/java/com/github/gfx/android/orma/adapter)
+for all the adapters.
+
 # Example
 
-There is an example app to demonstrate what Orma is.
+There is an example app to demonstrate what Orma does.
 
-It is also including a simple benchmark with Realm and hand-written SQLiteDatabase
+It also includesa simple benchmark with Realm and hand-written SQLiteDatabase
 operations.
 
 See [example/](example/) for details.
