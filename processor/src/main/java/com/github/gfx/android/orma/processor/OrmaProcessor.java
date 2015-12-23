@@ -90,7 +90,7 @@ public class OrmaProcessor extends AbstractProcessor {
         return roundEnv
                 .getElementsAnnotatedWith(Table.class)
                 .stream()
-                .map(element -> new SchemaDefinition(validator.validate(element)));
+                .map(element -> new SchemaDefinition(context, validator.validate(element)));
     }
 
     public Stream<SchemaDefinition> buildVirtualTableSchemas(ProcessingContext context, RoundEnvironment roundEnv) {
@@ -98,7 +98,7 @@ public class OrmaProcessor extends AbstractProcessor {
         return roundEnv
                 .getElementsAnnotatedWith(VirtualTable.class)
                 .stream()
-                .map(element -> new SchemaDefinition(validator.validate(element)));
+                .map(element -> new SchemaDefinition(context, validator.validate(element)));
     }
 
     public void writeCodeForEachModel(SchemaDefinition schema, BaseWriter writer) {

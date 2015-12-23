@@ -30,8 +30,12 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 public class SchemaDefinition {
+
+    final ProcessingContext context;
 
     final TypeElement typeElement;
 
@@ -53,7 +57,8 @@ public class SchemaDefinition {
 
     final ExecutableElement constructorElement; // null if it has a default constructor
 
-    public SchemaDefinition(TypeElement typeElement) {
+    public SchemaDefinition(ProcessingContext context, TypeElement typeElement) {
+        this.context = context;
         this.typeElement = typeElement;
         this.modelClassName = ClassName.get(typeElement);
 
@@ -136,9 +141,9 @@ public class SchemaDefinition {
                     Setter setter = element.getAnnotation(Setter.class);
 
                     if (getter != null) {
-                        getters.put(extractNameFromGetter(getter, element), element);
+                        getters.put(extractNameFromGetter(getter, (ExecutableElement) element), element);
                     } else if (setter != null && !isConstructor(element)) {
-                        setters.put(extractNameFromSetter(setter, element), element);
+                        setters.put(extractNameFromSetter(setter, (ExecutableElement) element), element);
                     }
 
                 });
@@ -156,11 +161,17 @@ public class SchemaDefinition {
                 .collect(Collectors.toList());
     }
 
-    private static String extractNameFromGetter(Getter getter, Element element) {
+    private String extractNameFromGetter(Getter getter, ExecutableElement getterElement) {
         if (!Strings.isEmpty(getter.value())) {
             return getter.value();
         } else {
-            String name = element.getSimpleName().toString();
+            String name = getterElement.getSimpleName().toString();
+            if (isBooleanType(getterElement.getReturnType())) {
+                if (name.startsWith("is")) {
+                    return name.substring("is".length());
+                }
+                // fallback
+            }
             if (name.startsWith("get")) {
                 return name.substring("get".length());
             } else {
@@ -169,17 +180,22 @@ public class SchemaDefinition {
         }
     }
 
-    private static String extractNameFromSetter(Setter getter, Element element) {
+    private String extractNameFromSetter(Setter getter, ExecutableElement setterElement) {
         if (!Strings.isEmpty(getter.value())) {
             return getter.value();
         } else {
-            String name = element.getSimpleName().toString();
+            String name = setterElement.getSimpleName().toString();
             if (name.startsWith("set")) {
                 return name.substring("set".length());
             } else {
                 return name;
             }
         }
+    }
+
+    private boolean isBooleanType(TypeMirror type) {
+        return type.getKind() == TypeKind.BOOLEAN
+                || context.isSameType(type, context.getTypeMirrorOf(Boolean.class));
     }
 
     public boolean hasDefaultConstructor() {

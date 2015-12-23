@@ -21,6 +21,8 @@ import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 
+import android.support.annotation.Nullable;
+
 @Table
 public class ModelWithAccessors {
 
@@ -38,6 +40,12 @@ public class ModelWithAccessors {
     @Column // omit the name
     private String value;
 
+    @Column // boolean type getters might have "is" prefix
+    private boolean checked;
+
+    @Column
+    @Nullable // Boolean is a kind of boolean
+    private Boolean done;
 
     @Getter(kId)
     public long getId() {
@@ -67,5 +75,26 @@ public class ModelWithAccessors {
     @Setter // omit the name
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Getter
+    public boolean isChecked() {
+        return checked;
+    }
+
+    @Setter
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
+    @Getter
+    @Nullable
+    public Boolean isDone() {
+        return done;
+    }
+
+    @Setter
+    public void setDone(@Nullable Boolean done) {
+        this.done = done;
     }
 }
