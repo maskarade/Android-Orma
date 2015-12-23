@@ -316,20 +316,23 @@ public class DatabaseWriter extends BaseWriter {
                                     schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(Types.getInserter(schema.getModelClassName()))
-                            .addStatement("return $L.prepareInsert($L, $L.getInsertStatement())",
-                                    connection,
-                                    schemaInstance,
-                                    schemaInstance
+                            .addStatement("return prepareInsertInto$L($T.NONE)",
+                                    simpleModelName,
+                                    Types.OnConflict
                             )
                             .build());
 
             methodSpecs.add(
-                    MethodSpec.methodBuilder("prepareInsertOrReplaceInto" + simpleModelName)
-                            .addJavadoc("Create a prepared statement for {@code INSERT OR REPLACE INTO $T ...}.\n",
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
+                            .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
                                     schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                    .addAnnotation(Types.OnConflict)
+                                    .build())
                             .returns(Types.getInserter(schema.getModelClassName()))
-                            .addStatement("return $L.prepareInsert($L, $L.getInsertOrReplaceStatement())",
+                            .addStatement("return new $T($L, $L, $L.getInsertStatement(onConflictAlgorithm))",
+                                    Types.getInserter(schema.getModelClassName()),
                                     connection,
                                     schemaInstance,
                                     schemaInstance

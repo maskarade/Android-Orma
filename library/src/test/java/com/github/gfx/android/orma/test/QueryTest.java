@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
+import com.github.gfx.android.orma.OnConflict;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
@@ -656,18 +657,37 @@ public class QueryTest {
         Author author1 = new Author();
         author1.name = "山田太郎";
         author1.note = "foo";
-        long id1 = db.prepareInsertOrReplaceIntoAuthor().execute(author1);
+        long id1 = db.prepareInsertIntoAuthor(OnConflict.REPLACE).execute(author1);
 
         Author author2 = new Author();
         author2.name = "山田太郎";
         author2.note = "bar";
-        long id2 = db.prepareInsertOrReplaceIntoAuthor().execute(author2);
+        long id2 = db.prepareInsertIntoAuthor(OnConflict.REPLACE).execute(author2);
 
         assertThat("The row id changes by INSERT OR REPLACE", id1, is(not(id2)));
 
         Author_Relation authors = db.selectFromAuthor().nameEq("山田太郎");
         assertThat(authors.count(), is(1));
         assertThat(authors.value().note, is("bar"));
+    }
+
+    @Test
+    public void insertOrIgnore() throws Exception {
+        Author author1 = new Author();
+        author1.name = "山田太郎";
+        author1.note = "foo";
+        long id1 = db.prepareInsertIntoAuthor(OnConflict.IGNORE).execute(author1);
+        assertThat(id1, is(not(0L)));
+
+        Author author2 = new Author();
+        author2.name = "山田太郎";
+        author2.note = "bar";
+        long id2 = db.prepareInsertIntoAuthor(OnConflict.IGNORE).execute(author2);
+        assertThat(id2, is(id1));
+
+        Author_Relation authors = db.selectFromAuthor().nameEq("山田太郎");
+        assertThat(authors.count(), is(1));
+        assertThat("INSERT is ignored!", authors.value().note, is("foo"));
     }
 
     @Test

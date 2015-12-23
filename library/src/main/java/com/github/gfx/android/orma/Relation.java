@@ -232,7 +232,12 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
 
     @NonNull
     public Inserter<Model> inserter() {
-        return conn.prepareInsert(schema, schema.getInsertStatement());
+        return inserter(OnConflict.NONE);
+    }
+
+    @NonNull
+    public Inserter<Model> inserter(@OnConflict int onConflictAlgorithm) {
+        return new Inserter<>(conn, schema, schema.getInsertStatement(onConflictAlgorithm));
     }
 
     @NonNull

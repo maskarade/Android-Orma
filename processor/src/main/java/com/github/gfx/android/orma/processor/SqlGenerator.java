@@ -137,14 +137,23 @@ public class SqlGenerator {
     }
 
 
-    public String buildInsertStatement(SchemaDefinition schema, String onConflictAlgorithm) {
-        StringBuilder sb = new StringBuilder();
+    public CodeBlock buildInsertStatementCode(SchemaDefinition schema, String onConflictAlgorithmParamName) {
+        CodeBlock.Builder codeBuilder = CodeBlock.builder();
+        codeBuilder.addStatement("$T s = new $T()", StringBuilder.class, StringBuilder.class);
 
-        sb.append("INSERT");
-        if (!Strings.isEmpty(onConflictAlgorithm)) {
-            sb.append(" OR ");
-            sb.append(onConflictAlgorithm);
-        }
+
+        codeBuilder.addStatement("s.append($S)", "INSERT");
+
+        codeBuilder.beginControlFlow("switch ($L)", onConflictAlgorithmParamName)
+                .addStatement("case $T.NONE: /* nop */ break", Types.OnConflict)
+                .addStatement("case $T.ABORT: s.append($S); break", Types.OnConflict, " OR ABORT")
+                .addStatement("case $T.FAIL: s.append($S); break", Types.OnConflict, " OR FAIL")
+                .addStatement("case $T.IGNORE: s.append($S); break", Types.OnConflict, " OR IGNORE")
+                .addStatement("case $T.REPLACE: s.append($S); break", Types.OnConflict, " OR REPLACE")
+                .addStatement("case $T.ROLLBACK: s.append($S); break", Types.OnConflict, " OR ROLLBACK")
+                .endControlFlow();
+
+        StringBuilder sb = new StringBuilder();
         sb.append(" INTO ");
         appendIdentifier(sb, schema.getTableName());
         sb.append(" (");
@@ -175,7 +184,10 @@ public class SqlGenerator {
         }
         sb.append(')');
 
-        return sb.toString();
+        codeBuilder.addStatement("s.append($S)", sb.toString());
+        codeBuilder.addStatement("return s.toString()");
+
+        return codeBuilder.build();
     }
 
 

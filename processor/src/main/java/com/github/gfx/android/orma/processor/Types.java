@@ -110,6 +110,10 @@ public class Types {
 
     public static final ClassName OrmaConfiguration = ClassName.get(ormaPackageName, "OrmaConfiguration");
 
+    public static final ClassName OnConflict = ClassName.get(ormaPackageName, "OnConflict");
+
+    // helper methods
+
     public static ParameterizedTypeName getCollection(TypeName type) {
         return ParameterizedTypeName.get(Collection, type);
     }

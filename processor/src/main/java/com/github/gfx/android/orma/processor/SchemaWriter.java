@@ -303,17 +303,11 @@ public class SchemaWriter extends BaseWriter {
                 MethodSpec.methodBuilder("getInsertStatement")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
+                        .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                .addAnnotation(Types.OnConflict)
+                                .build())
                         .returns(Types.String)
-                        .addStatement("return $S", sql.buildInsertStatement(schema, null))
-                        .build()
-        );
-
-        methodSpecs.add(
-                MethodSpec.methodBuilder("getInsertOrReplaceStatement")
-                        .addAnnotations(overrideAndNonNull)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.String)
-                        .addStatement("return $S", sql.buildInsertStatement(schema, "REPLACE"))
+                        .addCode(sql.buildInsertStatementCode(schema, "onConflictAlgorithm"))
                         .build()
         );
 
@@ -381,7 +375,7 @@ public class SchemaWriter extends BaseWriter {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         List<ColumnDefinition> columns = schema.getColumnsWithoutAutoId();
-        builder.addStatement("$T args = new $T[$L]",  ArrayTypeName.of(TypeName.OBJECT), TypeName.OBJECT, columns.size());
+        builder.addStatement("$T args = new $T[$L]", ArrayTypeName.of(TypeName.OBJECT), TypeName.OBJECT, columns.size());
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
