@@ -1,7 +1,11 @@
 .gradle/
 local.properties
 gradle.properties
-.idea/*
+.idea/*.xml
+.idea/.*
+.idea/*/*.xml
+!.idea/copyright/*.xml
+!.idea/dictionaries/orma.xml
 !.idea/codeStyleSettings.xml
 *.iml
 .DS_Store
