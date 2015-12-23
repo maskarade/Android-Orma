@@ -57,7 +57,7 @@ public class SetterAndGetterTest {
         ModelWithAccessors model = db.createModelWithAccessors(new ModelFactory<ModelWithAccessors>() {
             @NonNull
             @Override
-            public ModelWithAccessors create() {
+            public ModelWithAccessors call() {
                 ModelWithAccessors model = new ModelWithAccessors();
                 model.setKey("key");
                 model.setValue("value");
@@ -75,7 +75,7 @@ public class SetterAndGetterTest {
         ModelWithSetterConstructor model = db.createModelWithSetterConstructor(new ModelFactory<ModelWithSetterConstructor>() {
             @NonNull
             @Override
-            public ModelWithSetterConstructor create() {
+            public ModelWithSetterConstructor call() {
                 return new ModelWithSetterConstructor(0, "key", "value");
             }
         });
@@ -91,7 +91,7 @@ public class SetterAndGetterTest {
                 new ModelFactory<ModelWithNamedSetterConstructor>() {
                     @NonNull
                     @Override
-                    public ModelWithNamedSetterConstructor create() {
+                    public ModelWithNamedSetterConstructor call() {
                         return new ModelWithNamedSetterConstructor(0, "key", "value");
                     }
                 });

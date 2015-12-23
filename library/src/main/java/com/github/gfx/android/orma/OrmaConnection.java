@@ -136,7 +136,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public <T> T createModel(Schema<T> schema, ModelFactory<T> builder) {
         Inserter<T> sth = new Inserter<>(this, schema, schema.getInsertStatement(OnConflict.NONE));
-        long id = sth.execute(builder.create());
+        long id = sth.execute(builder.call());
 
         ColumnDef<?> primaryKey = schema.getPrimaryKey();
         String whereClause = '"' + primaryKey.name + '"' + " = ?";

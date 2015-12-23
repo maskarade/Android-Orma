@@ -31,6 +31,7 @@ import com.github.gfx.android.orma.test.model.Book_Relation;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,7 +76,7 @@ public class QueryTest {
         publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "foo bar";
                 publisher.startedYear = 2015;
@@ -88,7 +89,7 @@ public class QueryTest {
         db.createBook(new ModelFactory<Book>() {
             @NonNull
             @Override
-            public Book create() {
+            public Book call() {
                 Book book = new Book();
                 book.title = "today";
                 book.content = "milk, banana";
@@ -101,7 +102,7 @@ public class QueryTest {
         db.createBook(new ModelFactory<Book>() {
             @NonNull
             @Override
-            public Book create() {
+            public Book call() {
                 Book book = new Book();
                 book.title = "friday";
                 book.content = "apple";
@@ -387,7 +388,7 @@ public class QueryTest {
         publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "foo bar baz";
                 publisher.startedYear = 2009;
@@ -400,7 +401,7 @@ public class QueryTest {
         db.createBook(new ModelFactory<Book>() {
             @NonNull
             @Override
-            public Book create() {
+            public Book call() {
                 Book book = new Book();
                 book.title = "today";
                 book.content = "avocado";
@@ -413,7 +414,7 @@ public class QueryTest {
         db.createBook(new ModelFactory<Book>() {
             @NonNull
             @Override
-            public Book create() {
+            public Book call() {
                 Book book = new Book();
                 book.title = "friday";
                 book.content = "fig";
@@ -460,7 +461,7 @@ public class QueryTest {
         Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "The Nova";
                 publisher.startedYear = 2015;
@@ -485,7 +486,7 @@ public class QueryTest {
         Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "The Nova";
                 publisher.startedYear = 2015;
@@ -704,7 +705,7 @@ public class QueryTest {
         inserter.execute(new ModelFactory<Book>() {
             @NonNull
             @Override
-            public Book create() {
+            public Book call() {
                 Book book = new Book();
                 book.title = "monday";
                 book.content = "apple";
@@ -749,7 +750,7 @@ public class QueryTest {
         inserter.execute(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "The Fire";
                 publisher.startedYear = 1998;
@@ -761,7 +762,7 @@ public class QueryTest {
         inserter.execute(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "The Ice";
                 publisher.startedYear = 2012;
@@ -812,7 +813,7 @@ public class QueryTest {
         final Publisher a = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "A";
                 return publisher;
@@ -822,7 +823,7 @@ public class QueryTest {
         final Publisher b = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "B";
                 return publisher;
@@ -834,7 +835,7 @@ public class QueryTest {
             db.createBook(new ModelFactory<Book>() {
                 @NonNull
                 @Override
-                public Book create() {
+                public Book call() {
                     Book book = new Book();
                     book.publisher = SingleAssociation.id(a.id);
                     book.title = "a " + x;
@@ -848,7 +849,7 @@ public class QueryTest {
             db.createBook(new ModelFactory<Book>() {
                 @NonNull
                 @Override
-                public Book create() {
+                public Book call() {
                     Book book = new Book();
                     book.publisher = SingleAssociation.id(b.id);
                     book.title = "b " + x;

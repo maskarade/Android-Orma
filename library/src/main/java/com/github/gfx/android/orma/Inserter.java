@@ -64,7 +64,7 @@ public class Inserter<Model> {
      * @return The last inserted row id
      */
     public long execute(@NonNull ModelFactory<Model> modelFactory) {
-        return execute(modelFactory.create());
+        return execute(modelFactory.call());
     }
 
     public void executeAll(@NonNull Iterable<Model> models) {
@@ -89,7 +89,7 @@ public class Inserter<Model> {
 
     /**
      * {@link Single} wrapper to {@code execute(ModelFactory<Model>)}.
-     * {@link ModelFactory#create()} is called in {@link Single.OnSubscribe#call(Object)}.
+     * {@link ModelFactory#call()} is called in {@link Single.OnSubscribe#call(Object)}.
      *
      * @param modelFactory A model factory
      * @return A cold observable for the last inserted row id

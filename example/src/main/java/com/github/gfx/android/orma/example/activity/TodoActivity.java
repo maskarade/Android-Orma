@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.example.activity;
 
 import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
 import com.github.gfx.android.orma.AccessThreadConstraint;
+import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
@@ -65,13 +66,17 @@ public class TodoActivity extends AppCompatActivity {
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Todo todo = new Todo();
-                number++;
-                todo.title = "todo #" + number;
-                todo.content = "content #" + number;
-                todo.createdTimeMillis = System.currentTimeMillis();
-                adapter.addItem(todo);
+                adapter.addItem(new ModelFactory<Todo>() {
+                    @Override
+                    public Todo call() {
+                        Todo todo = new Todo();
+                        number++;
+                        todo.title = "todo #" + number;
+                        todo.content = "content #" + number;
+                        todo.createdTimeMillis = System.currentTimeMillis();
+                        return todo;
+                    }
+                });
             }
         });
     }
@@ -94,7 +99,7 @@ public class TodoActivity extends AppCompatActivity {
             totalCount = orma.selectFromTodo().count();
         }
 
-        public void addItem(final Todo todo) {
+        public void addItem(final ModelFactory<Todo> todo) {
             orma.prepareInsertIntoTodo()
                     .observable(todo)
                     .subscribeOn(Schedulers.io())
@@ -106,6 +111,15 @@ public class TodoActivity extends AppCompatActivity {
                             notifyItemInserted(totalCount);
                         }
                     });
+        }
+
+        public void addItem(final Todo todo) {
+            addItem(new ModelFactory<Todo>() {
+                @Override
+                public Todo call() {
+                    return todo;
+                }
+            });
         }
 
         public boolean removeItem(final Todo todo) {

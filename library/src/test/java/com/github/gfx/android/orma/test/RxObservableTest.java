@@ -43,6 +43,8 @@ public class RxObservableTest {
 
     OrmaDatabase db;
 
+    Publisher publisher;
+
     Context getContext() {
         return RuntimeEnvironment.application;
     }
@@ -51,10 +53,10 @@ public class RxObservableTest {
     public void setUp() throws Exception {
         db = OrmaDatabase.builder(getContext()).name(null).build();
 
-        final Publisher publisher = db.createPublisher(new ModelFactory<Publisher>() {
+        publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull
             @Override
-            public Publisher create() {
+            public Publisher call() {
                 Publisher publisher = new Publisher();
                 publisher.name = "foo bar";
                 publisher.startedYear = 2015;
@@ -67,7 +69,7 @@ public class RxObservableTest {
         db.createBook(new ModelFactory<Book>() {
             @NonNull
             @Override
-            public Book create() {
+            public Book call() {
                 Book book = new Book();
                 book.title = "today";
                 book.content = "milk, banana";
@@ -80,7 +82,7 @@ public class RxObservableTest {
         db.createBook(new ModelFactory<Book>() {
             @NonNull
             @Override
-            public Book create() {
+            public Book call() {
                 Book book = new Book();
                 book.title = "friday";
                 book.content = "apple";
@@ -102,6 +104,26 @@ public class RxObservableTest {
 
         assertThat(list.size(), is(1));
         assertThat(list.get(0).title, is("today"));
+    }
+
+    @Test
+    public void inserterObservable() throws Exception {
+        long rowid = db.prepareInsertIntoBook()
+                .observable(new ModelFactory<Book>() {
+                    @Override
+                    public Book call() {
+                        Book book = new Book();
+                        book.title = "observable days";
+                        book.content = "reactive";
+                        book.inPrint = false;
+                        book.publisher = SingleAssociation.id(publisher.id);
+                        return book;
+                    }
+                })
+                .toBlocking()
+                .value();
+        assertThat(rowid, is(not(0L)));
+        assertThat(db.selectFromBook().count(), is(3));
     }
 
     @Test

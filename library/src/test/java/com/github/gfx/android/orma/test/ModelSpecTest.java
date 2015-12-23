@@ -71,7 +71,7 @@ public class ModelSpecTest {
         ModelWithDefaults model = db.createModelWithDefaults(new ModelFactory<ModelWithDefaults>() {
             @NonNull
             @Override
-            public ModelWithDefaults create() {
+            public ModelWithDefaults call() {
                 return new ModelWithDefaults();
             }
         });
@@ -110,7 +110,7 @@ public class ModelSpecTest {
         ModelWithBlob model = db.createModelWithBlob(new ModelFactory<ModelWithBlob>() {
             @NonNull
             @Override
-            public ModelWithBlob create() {
+            public ModelWithBlob call() {
                 ModelWithBlob model = new ModelWithBlob();
                 model.blob = new byte[]{0, 1, 2, 3};
                 return model;
@@ -130,7 +130,7 @@ public class ModelSpecTest {
         ModelWithTypeAdapters model = db.createModelWithTypeAdapters(new ModelFactory<ModelWithTypeAdapters>() {
             @NonNull
             @Override
-            public ModelWithTypeAdapters create() {
+            public ModelWithTypeAdapters call() {
                 ModelWithTypeAdapters model = new ModelWithTypeAdapters();
                 model.list = Arrays.asList("foo", "bar", "baz");
                 model.set = new HashSet<>();
@@ -162,7 +162,7 @@ public class ModelSpecTest {
         ModelWithPrimitives model = db.createModelWithPrimitives(new ModelFactory<ModelWithPrimitives>() {
             @NonNull
             @Override
-            public ModelWithPrimitives create() {
+            public ModelWithPrimitives call() {
                 ModelWithPrimitives model = new ModelWithPrimitives();
 
                 model.booleanValue = true;
@@ -191,7 +191,7 @@ public class ModelSpecTest {
         ModelWithBoxTypes model = db.createModelWithBoxTypes(new ModelFactory<ModelWithBoxTypes>() {
             @NonNull
             @Override
-            public ModelWithBoxTypes create() {
+            public ModelWithBoxTypes call() {
                 ModelWithBoxTypes model = new ModelWithBoxTypes();
 
                 model.booleanValue = true;
@@ -220,7 +220,7 @@ public class ModelSpecTest {
         ModelWithConstraints model = db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override
-            public ModelWithConstraints create() {
+            public ModelWithConstraints call() {
                 ModelWithConstraints model = new ModelWithConstraints();
                 model.foo = "foo";
                 model.bar = "bar";
@@ -236,7 +236,7 @@ public class ModelSpecTest {
         db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override
-            public ModelWithConstraints create() {
+            public ModelWithConstraints call() {
                 ModelWithConstraints model = new ModelWithConstraints();
                 model.foo = "foo";
                 model.bar = "bar";
@@ -247,7 +247,7 @@ public class ModelSpecTest {
         db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override
-            public ModelWithConstraints create() {
+            public ModelWithConstraints call() {
                 ModelWithConstraints model = new ModelWithConstraints();
                 model.foo = "foo";
                 model.bar = "bar";
@@ -261,7 +261,7 @@ public class ModelSpecTest {
         db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override
-            public ModelWithConstraints create() {
+            public ModelWithConstraints call() {
                 ModelWithConstraints model = new ModelWithConstraints();
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < 100; i++) {
@@ -279,7 +279,7 @@ public class ModelSpecTest {
         db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override
-            public ModelWithConstraints create() {
+            public ModelWithConstraints call() {
                 ModelWithConstraints model = new ModelWithConstraints();
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < 100; i++) {
