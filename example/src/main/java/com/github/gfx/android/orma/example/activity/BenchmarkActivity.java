@@ -106,8 +106,10 @@ public class BenchmarkActivity extends AppCompatActivity {
 
         RealmConfiguration realmConf = new RealmConfiguration.Builder(BenchmarkActivity.this)
                 .build();
+        Realm.setDefaultConfiguration(realmConf);
         Realm.deleteRealm(realmConf);
-        realm = Realm.getInstance(realmConf);
+
+        realm = Realm.getDefaultInstance();
         Schedulers.io().createWorker().schedule(new Action0() {
             @Override
             public void call() {
