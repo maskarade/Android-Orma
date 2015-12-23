@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 
@@ -32,10 +33,14 @@ public class Inserter<Model> {
 
     final SQLiteStatement statement;
 
-    public Inserter(OrmaConnection conn, Schema<Model> schema, SQLiteStatement statement) {
+    final String sql;
+
+    public Inserter(OrmaConnection conn, Schema<Model> schema, String insertStatement) {
+        SQLiteDatabase db = conn.getWritableDatabase();
         this.conn = conn;
         this.schema = schema;
-        this.statement = statement;
+        this.statement = db.compileStatement(insertStatement);
+        this.sql = insertStatement;
     }
 
     /**
@@ -46,6 +51,9 @@ public class Inserter<Model> {
      * @return The last inserted row id
      */
     public long execute(@NonNull Model model) {
+        if (conn.trace) {
+            conn.trace(sql, schema.convertToArgs(conn, model));
+        }
         schema.bindArgs(conn, statement, model);
         return statement.executeInsert();
     }
@@ -56,8 +64,7 @@ public class Inserter<Model> {
      * @return The last inserted row id
      */
     public long execute(@NonNull ModelFactory<Model> modelFactory) {
-        schema.bindArgs(conn, statement, modelFactory.create());
-        return statement.executeInsert();
+        return execute(modelFactory.create());
     }
 
     public void executeAll(@NonNull Iterable<Model> models) {
@@ -91,7 +98,7 @@ public class Inserter<Model> {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
             public void call(SingleSubscriber<? super Long> subscriber) {
-                subscriber.onSuccess(execute(modelFactory.create()));
+                subscriber.onSuccess(execute(modelFactory));
             }
         });
     }
