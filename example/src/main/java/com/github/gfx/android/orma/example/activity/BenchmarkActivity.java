@@ -28,6 +28,7 @@ import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.orma.Todo_Relation;
 import com.github.gfx.android.orma.example.realm.RealmTodo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -309,7 +310,9 @@ public class BenchmarkActivity extends AppCompatActivity {
                 todos.forEach(new Action1<Todo>() {
                     @Override
                     public void call(Todo todo) {
+                        @SuppressWarnings("unused")
                         String title = todo.title;
+                        @SuppressWarnings("unused")
                         String content = todo.content;
                         count.incrementAndGet();
                     }
@@ -336,7 +339,9 @@ public class BenchmarkActivity extends AppCompatActivity {
                 RealmResults<RealmTodo> results = realm.allObjectsSorted(
                         RealmTodo.class, "createdTimeMillis", Sort.ASCENDING);
                 for (@SuppressWarnings("unused") RealmTodo todo : results) {
+                    @SuppressWarnings("unused")
                     String title = todo.getTitle();
+                    @SuppressWarnings("unused")
                     String content = todo.getContent();
                     count.incrementAndGet();
                 }
@@ -366,7 +371,9 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                 if (cursor.moveToFirst()) {
                     do {
+                        @SuppressWarnings("unused")
                         String title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
+                        @SuppressWarnings("unused")
                         String content = cursor.getString(cursor.getColumnIndexOrThrow("content"));
                         count.incrementAndGet();
                     } while (cursor.moveToNext());
@@ -407,7 +414,8 @@ public class BenchmarkActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ItemResultBinding binding = ItemResultBinding.inflate(getLayoutInflater(), parent, false);
+            @SuppressLint("ViewHolder") ItemResultBinding binding = ItemResultBinding
+                    .inflate(getLayoutInflater(), parent, false);
 
             Result result = getItem(position);
             binding.title.setText(result.title);
