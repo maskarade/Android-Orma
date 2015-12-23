@@ -58,6 +58,8 @@ public interface Schema<Model> extends MigrationSchema {
     @NonNull
     String getInsertOrReplaceStatement();
 
+    Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Model model);
+
     void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model);
 
     @NonNull

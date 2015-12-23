@@ -21,6 +21,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +37,8 @@ public class Types {
     public static final ArrayTypeName StringArray = ArrayTypeName.of(String);
 
     public static final ArrayTypeName ByteArray = ArrayTypeName.of(byte.class);
+
+    public static final ClassName ArrayList = ClassName.get(ArrayList.class);
 
     public static final ClassName List = ClassName.get(List.class);
 

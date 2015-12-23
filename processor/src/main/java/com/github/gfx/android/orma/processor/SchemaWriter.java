@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Setter;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -317,7 +318,27 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("convertToArgs")
+                        .addJavadoc("Provided for debugging\n")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(ArrayTypeName.of(TypeName.OBJECT))
+                        .addParameter(
+                                ParameterSpec.builder(Types.OrmaConnection, "conn")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addParameter(
+                                ParameterSpec.builder(schema.getModelClassName(), "model")
+                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .build())
+                        .addCode(buildConvertTOArgs())
+                        .build()
+        );
+
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("bindArgs")
+                        .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(TypeName.VOID)
                         .addParameter(
@@ -354,6 +375,39 @@ public class SchemaWriter extends BaseWriter {
         );
 
         return methodSpecs;
+    }
+
+    private CodeBlock buildConvertTOArgs() {
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        List<ColumnDefinition> columns = schema.getColumnsWithoutAutoId();
+        builder.addStatement("$T args = new $T[$L]",  ArrayTypeName.of(TypeName.OBJECT), TypeName.OBJECT, columns.size());
+
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnDefinition c = columns.get(i);
+            TypeName type = c.getUnboxType();
+            AssociationDefinition r = c.getRelation();
+
+            if (type.equals(TypeName.BOOLEAN)) {
+                builder.addStatement("args[$L] = model.$L ? 1 : 0", i, c.buildGetColumnExpr());
+            } else if (Types.looksLikeIntegerType(type)) {
+                builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
+            } else if (Types.looksLikeFloatType(type)) {
+                builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
+            } else if (type.equals(Types.ByteArray)) {
+                builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
+            } else if (type.equals(Types.String)) {
+                builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
+            } else if (r != null && r.relationType.equals(Types.SingleAssociation)) {
+                builder.addStatement("args[$L] = model.$L.getId()", i, c.buildGetColumnExpr());
+            } else {
+                builder.addStatement("args[$L] = $L",
+                        i, c.buildSerializeExpr("conn", "model." + c.buildGetColumnExpr()));
+            }
+        }
+
+        builder.addStatement("return args");
+        return builder.build();
     }
 
     // http://developer.android.com/intl/ja/reference/android/database/sqlite/SQLiteStatement.html

@@ -28,7 +28,6 @@ import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.database.sqlite.SQLiteStatement;
 import android.os.Build;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -146,9 +145,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public <T> Inserter<T> prepareInsert(Schema<T> schema, String insertStatement) {
-        SQLiteDatabase db = getWritableDatabase();
-        SQLiteStatement statement = db.compileStatement(insertStatement);
-        return new Inserter<>(this, schema, statement);
+        return new Inserter<>(this, schema, insertStatement);
     }
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
@@ -291,12 +288,12 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
-    private void execSQL(SQLiteDatabase db, String sql) {
+    void execSQL(SQLiteDatabase db, String sql) {
         trace(sql, null);
         db.execSQL(sql);
     }
 
-    private void trace(@NonNull String sql, @Nullable Object[] bindArgs) {
+    void trace(@NonNull String sql, @Nullable Object[] bindArgs) {
         if (trace) {
             if (bindArgs == null) {
                 Log.v(TAG, sql);
