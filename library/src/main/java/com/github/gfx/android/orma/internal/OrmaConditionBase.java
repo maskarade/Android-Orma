@@ -51,7 +51,7 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
         where(condition);
     }
 
-    protected void bindArgs(@NonNull Object... args) {
+    protected void appendBindArgs(@NonNull Object... args) {
         if (bindArgs == null) {
             bindArgs = new ArrayList<>(args.length);
         }
@@ -86,7 +86,7 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
         whereClause.append('(');
         whereClause.append(conditions);
         whereClause.append(')');
-        bindArgs(args);
+        appendBindArgs(args);
         return (C) this;
     }
 

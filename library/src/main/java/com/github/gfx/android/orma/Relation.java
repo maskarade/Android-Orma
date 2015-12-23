@@ -70,7 +70,7 @@ public abstract class Relation<Model, R extends Relation<?, ?>>
     @SuppressWarnings("unchecked")
     public R having(@NonNull String having, @NonNull Object... args) {
         this.having = having;
-        bindArgs(args);
+        appendBindArgs(args);
         return (R) this;
     }
 
