@@ -1,0 +1,23 @@
+// SQLiteParser managed by by Antlr: https://github.com/antlr/antlr4
+
+apply plugin: 'java'
+apply plugin: 'antlr'
+
+generateGrammarSource {
+    arguments = ['-package', 'com.github.gfx.android.orma.sqliteparser.g']
+    outputDirectory = project.file("$buildDir/generated/source/antlr")
+}
+
+compileJava {
+    source project.file("$buildDir/generated/source/antlr")
+    println source
+
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+dependencies {
+    compile 'org.antlr:antlr4-runtime:4.5.1'
+    antlr 'org.antlr:antlr4:4.5.1'
+    testCompile 'junit:junit:4.12'
+}
