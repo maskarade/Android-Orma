@@ -10,6 +10,6 @@ WORKDIR $PROJECT
 ADD . $PROJECT
 
 RUN echo "sdk.dir=$ANDROID_HOME" > local.properties && \
-    ./gradlew --stacktrace --parallel androidDependencies
+    ./gradlew --stacktrace androidDependencies processor:dependencies
 
-CMD ./gradlew --stacktrace --parallel check
+CMD ./gradlew --stacktrace --info check
