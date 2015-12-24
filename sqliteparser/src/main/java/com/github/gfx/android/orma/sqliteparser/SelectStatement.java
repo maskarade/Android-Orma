@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.sqliteparser.test;
+package com.github.gfx.android.orma.sqliteparser;
 
-import com.github.gfx.android.orma.sqliteparser.SQLiteParsers;
+/**
+ * Created by gfx on 2015/12/24.
+ */
+public class SelectStatement {
 
-import org.antlr.v4.runtime.Parser;
-import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-
-public class SQLiteParsersTest {
-
-    @Test
-    public void testCreateParser() throws Exception {
-        Parser parser = SQLiteParsers.createParser("CREATE TABLE foo (id INTEGER PRIMARY KEY)");
-        assertThat(parser, is(not(nullValue())));
-    }
 }

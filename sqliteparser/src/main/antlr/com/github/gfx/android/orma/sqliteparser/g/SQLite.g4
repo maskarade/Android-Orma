@@ -37,7 +37,7 @@ parse
 error
  : UNEXPECTED_CHAR 
    { 
-     throw new RuntimeException("UNEXPECTED_CHAR=" + $UNEXPECTED_CHAR.text); 
+     throw new RuntimeException("SQLiteParser: UNEXPECTED_CHAR=" + $UNEXPECTED_CHAR.text);
    }
  ;
 
@@ -270,7 +270,7 @@ column_def
  ;
 
 type_name
- : name+ ( '(' signed_number ')'
+ : name+? ( '(' signed_number ')'
          | '(' signed_number ',' signed_number ')' )?
  ;
 
