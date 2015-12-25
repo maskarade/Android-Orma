@@ -101,4 +101,21 @@ public class SQLiteParserUtilsTest {
             assertThat(constraints.get(1).getTokens(), contains("DEFAULT", "(", "100", "*", "1.08", ")"));
         }
     }
+
+    @Test
+    public void testTableConstraints() throws Exception {
+        CreateTableStatement createTableStatement = SQLiteParserUtils.parseIntoCreateTableStatement(
+                "CREATE TABLE foo (\n"
+                        + "id INTEGER,\n"
+                        + "title TEXT,\n"
+                        + "PRIMARY KEY (id),\n"
+                        + "UNIQUE (title) ON CONFLICT REPLACE\n"
+                        + ")"
+        );
+
+        assertThat(createTableStatement.getTableName(), is("foo"));
+        assertThat(createTableStatement.getColumns(), hasSize(2));
+
+        assertThat(createTableStatement.getConstraints(), hasSize(2));
+    }
 }

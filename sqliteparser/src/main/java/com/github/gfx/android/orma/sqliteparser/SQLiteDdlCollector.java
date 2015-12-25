@@ -41,6 +41,16 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
     }
 
     @Override
+    public void exitCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
+        if (ctx.K_AS() != null) {
+            createTableStatement.selectStatement = new SelectStatement();
+            createTableStatement.selectStatement.tokens = asTokenList(ctx.select_stmt());
+        }
+
+        createTableStatement.tokens = asTokenList(ctx);
+    }
+
+    @Override
     public void exitTable_name(SQLiteParser.Table_nameContext ctx) {
         createTableStatement.tableName = dequote(ctx.getText());
     }
@@ -58,7 +68,9 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     @Override
     public void exitColumn_name(SQLiteParser.Column_nameContext ctx) {
-        columnDef.name = dequote(ctx.getText());
+        if (columnDef != null) {
+            columnDef.name = dequote(ctx.getText());
+        }
     }
 
     @Override
@@ -100,6 +112,20 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
         columnDef.constraints.add(constraint);
     }
 
+    @Override
+    public void exitTable_constraint(SQLiteParser.Table_constraintContext ctx) {
+        CreateTableStatement.Constraint constraint = new CreateTableStatement.Constraint();
+
+        if (ctx.K_CONSTRAINT() != null) {
+            constraint.name = ctx.name().getText();
+        }
+        constraint.tokens = asTokenList(ctx);
+
+        createTableStatement.constraints.add(constraint);
+    }
+
+    // utils
+
     List<String> asTokenList(ParseTree node) {
         return node.accept(new AbstractParseTreeVisitor<List<String>>() {
             final List<String> tokenList = new ArrayList<>();
@@ -136,7 +162,6 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
             }
         }).toString();
     }
-
 
     String dequote(String maybeQuoted) {
         if (maybeQuoted.charAt(0) == '"' || maybeQuoted.charAt(0) == '`') {

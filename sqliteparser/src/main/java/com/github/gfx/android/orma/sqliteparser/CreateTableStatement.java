@@ -29,6 +29,8 @@ public class CreateTableStatement {
 
     SelectStatement selectStatement;
 
+    List<String> tokens;
+
     public CreateTableStatement() {
 
     }
@@ -47,6 +49,10 @@ public class CreateTableStatement {
 
     public SelectStatement getSelectStatement() {
         return selectStatement;
+    }
+
+    public List<String> getTokens() {
+        return tokens;
     }
 
     public static class ColumnDef {
@@ -100,5 +106,16 @@ public class CreateTableStatement {
 
     public static class Constraint {
 
+        String name;
+
+        List<String> tokens;
+
+        public String getName() {
+            return name;
+        }
+
+        public List<String> getTokens() {
+            return tokens;
+        }
     }
 }
