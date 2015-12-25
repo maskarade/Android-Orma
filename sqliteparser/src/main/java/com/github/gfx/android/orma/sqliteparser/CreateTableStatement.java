@@ -57,14 +57,45 @@ public class CreateTableStatement {
 
         List<Constraint> constraints = new ArrayList<>();
 
-        public static class Constraint {
-
-        }
-
         public String getName() {
             return name;
         }
 
+        public String getType() {
+            return type;
+        }
+
+        public List<Constraint> getConstraints() {
+            return constraints;
+        }
+
+
+        public static class Constraint {
+
+            boolean primaryKey;
+
+            boolean nullable = true;
+
+            String defaultExpr;
+
+            List<String> tokens;
+
+            public boolean isPrimaryKey() {
+                return primaryKey;
+            }
+
+            public boolean isNullable() {
+                return !primaryKey && nullable;
+            }
+
+            public String getDefaultExpr() {
+                return defaultExpr;
+            }
+
+            public List<String> getTokens() {
+                return tokens;
+            }
+        }
     }
 
     public static class Constraint {

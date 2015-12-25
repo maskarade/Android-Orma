@@ -51,15 +51,54 @@ public class SQLiteParserUtilsTest {
     @Test
     public void testParseIntoCreateTableStatement() {
         CreateTableStatement createTableStatement = SQLiteParserUtils.parseIntoCreateTableStatement(
-                "CREATE TABLE foo (id INTEGER PRIMARY KEY, title TEXT NOT NULL ON CONFLICT REPLACE)"
+                "CREATE TABLE IF NOT EXISTS \"foo\" (\n"
+                        + "\"id\" INTEGER PRIMARY KEY,\n"
+                        + "`title` TEXT NOT NULL ON CONFLICT REPLACE,\n"
+                        + "price INTEGER UNSIGNED (8) NOT NULL DEFAULT(100 * 1.08)"
+                        + ")"
         );
         assertThat(createTableStatement, is(not(nullValue())));
 
         assertThat(createTableStatement.getTableName(), is("foo"));
 
         List<CreateTableStatement.ColumnDef> columns = createTableStatement.getColumns();
-        assertThat(columns, hasSize(2));
-        assertThat(columns.get(0).getName(), is("id"));
-        assertThat(columns.get(1).getName(), is("title"));
+
+        assertThat(columns, hasSize(3));
+        {
+            CreateTableStatement.ColumnDef column = columns.get(0);
+            assertThat(column.getName(), is("id"));
+            assertThat(column.getType(), is("INTEGER"));
+
+            List<CreateTableStatement.ColumnDef.Constraint> constraints = column.getConstraints();
+            assertThat(constraints, hasSize(1));
+            assertThat(constraints.get(0).isPrimaryKey(), is(true));
+            assertThat(constraints.get(0).isNullable(), is(false));
+            assertThat(constraints.get(0).getTokens(), contains("PRIMARY", "KEY"));
+        }
+
+        {
+            CreateTableStatement.ColumnDef column = columns.get(1);
+            assertThat(column.getName(), is("title"));
+            assertThat(column.getType(), is("TEXT"));
+            List<CreateTableStatement.ColumnDef.Constraint> constraints = column.getConstraints();
+            assertThat(constraints, hasSize(1));
+            assertThat(constraints.get(0).isPrimaryKey(), is(false));
+            assertThat(constraints.get(0).isNullable(), is(false));
+            assertThat(constraints.get(0).getTokens(), contains("NOT", "NULL", "ON", "CONFLICT", "REPLACE"));
+        }
+
+        {
+            CreateTableStatement.ColumnDef column = columns.get(2);
+            assertThat(column.getName(), is("price"));
+            assertThat("ignore size of data types", column.getType(), is("INTEGER UNSIGNED"));
+            List<CreateTableStatement.ColumnDef.Constraint> constraints = column.getConstraints();
+            assertThat(constraints, hasSize(2));
+            assertThat(constraints.get(0).isPrimaryKey(), is(false));
+            assertThat(constraints.get(0).isNullable(), is(false));
+            assertThat(constraints.get(0).getTokens(), contains("NOT", "NULL"));
+
+            assertThat(constraints.get(1).getDefaultExpr(), is("( 100 * 1.08 )"));
+            assertThat(constraints.get(1).getTokens(), contains("DEFAULT", "(", "100", "*", "1.08", ")"));
+        }
     }
 }

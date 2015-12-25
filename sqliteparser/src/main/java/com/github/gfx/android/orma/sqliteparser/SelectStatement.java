@@ -16,9 +16,6 @@
 
 package com.github.gfx.android.orma.sqliteparser;
 
-/**
- * Created by gfx on 2015/12/24.
- */
 public class SelectStatement {
 
 }

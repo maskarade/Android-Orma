@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.sqliteparser;
 
-import com.github.gfx.android.orma.sqliteparser.g.SQLiteBaseListener;
 import com.github.gfx.android.orma.sqliteparser.g.SQLiteLexer;
 import com.github.gfx.android.orma.sqliteparser.g.SQLiteParser;
 
@@ -28,6 +27,9 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
+/**
+ * An entrypoint of {@link SQLiteParser}
+ */
 public class SQLiteParserUtils {
 
     public static SQLiteParser createParser(String sql) {
@@ -46,39 +48,10 @@ public class SQLiteParserUtils {
 
     public static CreateTableStatement parseIntoCreateTableStatement(String sql) throws ParseCancellationException {
         SQLiteParser parser = createParser(sql);
-        CreateTableCollector collector = new CreateTableCollector();
+        SQLiteDdlCollector collector = new SQLiteDdlCollector();
         parser.addParseListener(collector);
         parser.parse();
 
         return collector.createTableStatement;
-    }
-
-    public static class CreateTableCollector extends SQLiteBaseListener {
-
-        CreateTableStatement.ColumnDef columnDef;
-
-        CreateTableStatement createTableStatement;
-
-        @Override
-        public void enterCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
-            createTableStatement = new CreateTableStatement();
-        }
-
-        @Override
-        public void exitCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
-            createTableStatement.tableName = ctx.table_name().getText();
-        }
-
-        @Override
-        public void enterColumn_def(SQLiteParser.Column_defContext ctx) {
-            columnDef = new CreateTableStatement.ColumnDef();
-        }
-
-        @Override
-        public void exitColumn_def(SQLiteParser.Column_defContext ctx) {
-            columnDef.name = ctx.column_name().getText();
-            createTableStatement.columns.add(columnDef);
-            columnDef = null;
-        }
     }
 }
