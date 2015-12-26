@@ -17,6 +17,10 @@ package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.MigrationSchema;
 
+import android.support.annotation.NonNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SchemaData implements MigrationSchema {
@@ -27,10 +31,11 @@ public class SchemaData implements MigrationSchema {
 
     final List<String> createIndexStatements;
 
-    public SchemaData(String tableName, String createTableStatement, List<String> createIndexStatements) {
+    public SchemaData(String tableName, String createTableStatement, @NonNull String... createIndexStatements) {
         this.tableName = tableName;
         this.createTableStatement = createTableStatement;
-        this.createIndexStatements = createIndexStatements;
+        this.createIndexStatements = new ArrayList<>(createIndexStatements.length);
+        Collections.addAll(this.createIndexStatements, createIndexStatements);
     }
 
     @Override
@@ -46,5 +51,16 @@ public class SchemaData implements MigrationSchema {
     @Override
     public List<String> getCreateIndexStatements() {
         return createIndexStatements;
+    }
+
+    public void addCreateIndexStatements(String... statements) {
+        Collections.addAll(createIndexStatements, statements);
+    }
+
+    public List<String> getAllTheStatements() {
+        List<String> statements = new ArrayList<>();
+        statements.add(createTableStatement);
+        statements.addAll(createIndexStatements);
+        return statements;
     }
 }

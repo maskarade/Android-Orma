@@ -129,17 +129,6 @@ public class SQLiteComponent {
             super(ensureDoubleQuoted(token));
         }
 
-        @NonNull
-        public String getUnquotedToken() {
-            return dequote(token);
-        }
-
-        @NonNull
-        @Override
-        public String toString() {
-            return token;
-        }
-
         static String ensureDoubleQuoted(String name) {
             return '"' + dequote(name) + '"';
         }
@@ -150,6 +139,17 @@ public class SQLiteComponent {
             } else {
                 return maybeQuoted;
             }
+        }
+
+        @NonNull
+        public String getUnquotedToken() {
+            return dequote(token);
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return token;
         }
     }
 }

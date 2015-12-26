@@ -48,8 +48,7 @@ public class SQLiteParserUtils {
 
     public static CreateTableStatement parseIntoCreateTableStatement(String sql) throws ParseCancellationException {
         SQLiteParser parser = createParser(sql);
-        com.github.gfx.android.orma.migration.sqliteparser.SQLiteDdlCollector
-                collector = new com.github.gfx.android.orma.migration.sqliteparser.SQLiteDdlCollector();
+        SQLiteDdlCollector collector = new SQLiteDdlCollector();
         parser.addParseListener(collector);
         parser.parse();
 

@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.migration.BuildConfig;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,31 +46,26 @@ public class SchemaDiffTest {
 
     static final List<SchemaData> schemas = Arrays.asList(
             new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
-                    Collections.<String>emptyList()),
-            new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)",
-                    Collections.<String>emptyList())
+                            "CREATE INDEX \"index_field01_on_foo\" ON \"foo\" (\"field01\")",
+                            "CREATE INDEX \"index_field02_on_foo\" ON \"foo\" (\"field02\")"
+                    ),
+            new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)")
     );
 
-    static final List<SchemaData> schemasWithIndexes = Arrays.asList(
-            new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
-                    Arrays.asList(
-                            "CREATE INDEX \"index_field01_on_foo\" (\"field01\")",
-                            "CREATE INDEX \"index_field02_on_foo\" (\"field02\")"
-                    )),
-            new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)",
-                    Collections.<String>emptyList())
+    static final List<String> initialData = Arrays.asList(
+            "INSERT INTO foo (field01, field02) VALUES ('value01', 'value02')",
+            "INSERT INTO bar (field10, field10) VALUES ('value10', 'value10')"
     );
 
-    static final List<SchemaData> schemasWithDifferentCases = Arrays.asList(
-            new SchemaData("FOO", "CREATE TABLE \"FOO\" (\"FIELD01\" TEXT, \"FIELD02\" TEXT)",
-                    Collections.<String>emptyList()),
-            new SchemaData("BAR", "CREATE TABLE \"BAR\" (\"FIELD10\" TEXT, \"FIELD20\" TEXT)",
-                    Collections.<String>emptyList())
-    );
+    OpenHelper openHelper;
 
     SchemaDiffMigration migration;
 
     SQLiteDatabase db;
+
+    Map<String, SQLiteMaster> metadata;
+
+    List<String> statements; // result of each test case
 
     Context getContext() {
         return RuntimeEnvironment.application;
@@ -77,67 +73,77 @@ public class SchemaDiffTest {
 
     @Before
     public void setUp() throws Exception {
-        OpenHelper openHelper = new OpenHelper(getContext());
-
+        openHelper = new OpenHelper(getContext());
         db = openHelper.getWritableDatabase();
-
         migration = new SchemaDiffMigration(getContext());
+        metadata = migration.loadMetadata(db, schemas);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (statements != null) {
+            migration.executeStatements(db, statements);
+        }
     }
 
     @Test
-    public void start() throws Exception {
-        migration.start(db, schemas);
-    }
-
-    @Test
-    public void diffAll_doNothing() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemas);
-
-        List<String> statements = migration.diffAll(metadata, schemas);
-
+    public void doNothing() throws Exception {
+        statements = migration.diffAll(metadata, schemas);
         assertThat(statements, is(empty()));
     }
 
     @Test
     public void diffAll_createTable() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemas.subList(0, 1));
+        List<SchemaData> newSchemas = new ArrayList<>(schemas);
 
-        List<String> statements = migration.diffAll(metadata, schemas);
+        SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x10\" TEXT, \"x20\" TEXT)");
+        newSchemas.add(newSchema);
 
-        assertThat(statements, is(Collections.singletonList(schemas.get(1).getCreateTableStatement())));
+        statements = migration.diffAll(metadata, newSchemas);
+
+        assertThat(statements, is(Collections.singletonList(newSchema.getCreateTableStatement())));
     }
 
     @Test
-    public void diffAll_createTableAndCreateIndexes() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemasWithIndexes.subList(1, 2));
+    public void createTableAndCreateIndexes() throws Exception {
+        List<SchemaData> newSchemas = new ArrayList<>(schemas);
 
-        List<String> statements = migration.diffAll(metadata, schemasWithIndexes);
+        SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x01\" TEXT, \"x02\" TEXT)",
+                        "CREATE INDEX \"index_x01_on_baz\" ON \"baz\" (\"x01\")",
+                        "CREATE INDEX \"index_x02_on_baz\" ON \"baz\" (\"x02\")"
+                );
+        newSchemas.add(newSchema);
 
-        List<String> expectedStatements = new ArrayList<>();
-        SchemaData ddl = schemasWithIndexes.get(0);
-        expectedStatements.add(ddl.getCreateTableStatement());
-        expectedStatements.addAll(ddl.getCreateIndexStatements());
+        statements = migration.diffAll(metadata, newSchemas);
 
-        assertThat(statements, is(expectedStatements));
+        assertThat(statements, is(newSchema.getAllTheStatements()));
     }
 
     @Test
-    public void diffAll_createIndexes() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemas);
+    public void createIndexes() throws Exception {
+        schemas.get(1).addCreateIndexStatements(
+                "CREATE INDEX \"index_field10_on_bar\" ON \"bar\" (\"field10\")",
+                "CREATE INDEX \"index_field20_on_bar\" ON \"bar\" (\"field20\")"
+        );
 
-        List<String> statements = migration.diffAll(metadata, schemasWithIndexes);
+        statements = migration.diffAll(metadata, schemas);
 
-        assertThat(statements, is(schemasWithIndexes.get(0).getCreateIndexStatements()));
+        assertThat(statements, is(schemas.get(1).getCreateIndexStatements()));
     }
 
-    @Test
-    public void diffAll_differentCases() throws Exception {
-        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemas);
+    //u@Test
+    public void differentCases() throws Exception {
+        List<SchemaData> newSchemas = Arrays.asList(
+                new SchemaData("FOO", "CREATE TABLE \"FOO\" (\"FIELD01\" TEXT, \"FIELD02\" TEXT)",
+                                "CREATE INDEX \"INDEX_FIELD01_ON_FOO\" ON \"FOO\" (\"FIELD01\")",
+                                "CREATE INDEX \"INDEX_FIELD02_ON_FOO\" ON \"FOO\" (\"FIELD02\")"
+                        ),
+                new SchemaData("BAR", "CREATE TABLE \"BAR\" (\"FIELD10\" TEXT, \"FIELD20\" TEXT)")
+        );
 
-        List<String> statements = migration.diffAll(metadata, schemasWithDifferentCases);
+        statements = migration.diffAll(metadata, newSchemas);
 
         assertThat(statements, is(empty()));
-
     }
 
     static class OpenHelper extends SQLiteOpenHelper {
@@ -150,6 +156,12 @@ public class SchemaDiffTest {
         public void onCreate(SQLiteDatabase db) {
             for (SchemaData ddl : schemas) {
                 db.execSQL(ddl.getCreateTableStatement());
+                for (String sql : ddl.getCreateIndexStatements()) {
+                    db.execSQL(sql);
+                }
+            }
+            for (String sql : initialData) {
+                db.execSQL(sql);
             }
         }
 
