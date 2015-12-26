@@ -16,6 +16,8 @@
 package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.BuildConfig;
+import com.github.gfx.android.orma.migration.MigrationEngine;
+import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,10 +29,16 @@ import static org.hamcrest.Matchers.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
-public class SchemaDiffMigrationTest {
+public class MigrationEngineTest {
 
     @Test
     public void testBuildConfig() throws Exception {
         assertThat(BuildConfig.VERSION_NAME, not(isEmptyString()));
+    }
+
+    @Test
+    public void testSchemaDiffMigration() throws Exception {
+        assertThat(MigrationEngine.class.isAssignableFrom(SchemaDiffMigration.class), is(true));
+
     }
 }
