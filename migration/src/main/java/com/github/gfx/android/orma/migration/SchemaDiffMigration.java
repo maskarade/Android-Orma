@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.migration;
 
 import com.github.gfx.android.orma.sqliteparser.CreateTableStatement;
+import com.github.gfx.android.orma.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.sqliteparser.SQLiteParserUtils;
 
 import android.content.Context;
@@ -29,12 +30,12 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -149,14 +150,14 @@ public class SchemaDiffMigration implements MigrationEngine {
         CreateTableStatement toTable = SQLiteParserUtils.parseIntoCreateTableStatement(to);
 
         Set<CreateTableStatement.ColumnDef> toColumns = new HashSet<>();
-        Set<String> toColumnNameAndTypes = new HashSet<>();
+        Set<SQLiteComponent.Name> toColumnNames = new HashSet<>();
         List<CreateTableStatement.ColumnDef> intersectionColumns = new ArrayList<>();
 
-        Map<String, String> intersectionColumnNameAndTypes = new HashMap<>();
+        List<SQLiteComponent.Name> intersectionColumnNames = new ArrayList<>();
 
         for (CreateTableStatement.ColumnDef column : toTable.getColumns()) {
             toColumns.add(column);
-            toColumnNameAndTypes.add(column.getName() + ' ' + column.getType());
+            toColumnNames.add(column.getName());
         }
 
         for (CreateTableStatement.ColumnDef column : fromTable.getColumns()) {
@@ -164,34 +165,34 @@ public class SchemaDiffMigration implements MigrationEngine {
                 intersectionColumns.add(column);
             }
 
-            String columnNameAndType = column.getName() + ' ' + column.getType();
-            if (toColumnNameAndTypes.contains(columnNameAndType)) {
-                intersectionColumnNameAndTypes.put(columnNameAndType, column.getName());
+            if (toColumnNames.contains(column.getName())) {
+                intersectionColumnNames.add(column.getName());
             }
         }
 
         if (intersectionColumns.size() != toTable.getColumns().size() ||
                 intersectionColumns.size() != fromTable.getColumns().size() ||
                 !fromTable.getConstraints().equals(toTable.getConstraints())) {
-            return buildRecreateTable(fromTable, toTable, intersectionColumnNameAndTypes.values());
+            return buildRecreateTable(fromTable, toTable, intersectionColumnNames);
         } else {
             return Collections.emptyList();
         }
     }
 
-    private List<String> buildRecreateTable(CreateTableStatement fromTable, CreateTableStatement toTable, Collection<String> columns) {
-        String fromTableName = fromTable.getTableName();
-        String toTableName = toTable.getTableName();
+    private List<String> buildRecreateTable(CreateTableStatement fromTable, CreateTableStatement toTable,
+            Collection<SQLiteComponent.Name> columns) {
+        SQLiteComponent.Name fromTableName = fromTable.getTableName();
+        SQLiteComponent.Name toTableName = toTable.getTableName();
 
         List<String> statements = new ArrayList<>();
 
-        String tempTableName = "__temp_" + SqliteDdlBuilder.ensureNotQuoted(toTableName);
+        SQLiteComponent.Name tempTableName = new SQLiteComponent.Name("__temp_" + toTableName.getUnquotedToken());
 
         statements.add(builder.buildCreateTable(tempTableName,
                 builder.map(toTable.getColumns(), new SqliteDdlBuilder.Func<CreateTableStatement.ColumnDef, String>() {
                     @Override
                     public String call(CreateTableStatement.ColumnDef arg) {
-                        StringBuilder columnSpecBuilder = new StringBuilder(SqliteDdlBuilder.ensureQuoted(arg.getName()));
+                        StringBuilder columnSpecBuilder = new StringBuilder(arg.getName());
 
                         if (arg.getType() != null) {
                             columnSpecBuilder.append(' ');
@@ -259,7 +260,7 @@ public class SchemaDiffMigration implements MigrationEngine {
                         + "(" + TextUtils.join(", ", tableNames) + ")",
                 null);
 
-        Map<String, SQLiteMaster> tables = new HashMap<>();
+        Map<String, SQLiteMaster> tables = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (cursor.moveToFirst()) {
             do {
                 String type = cursor.getString(0); // "table" or "index"

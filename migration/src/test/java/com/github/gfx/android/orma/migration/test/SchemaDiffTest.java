@@ -46,7 +46,8 @@ public class SchemaDiffTest {
     static final List<SchemaData> schemas = Arrays.asList(
             new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
                     Collections.<String>emptyList()),
-            new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)", Collections.<String>emptyList())
+            new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)",
+                    Collections.<String>emptyList())
     );
 
     static final List<SchemaData> schemasWithIndexes = Arrays.asList(
@@ -56,6 +57,13 @@ public class SchemaDiffTest {
                             "CREATE INDEX \"index_field02_on_foo\" (\"field02\")"
                     )),
             new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)",
+                    Collections.<String>emptyList())
+    );
+
+    static final List<SchemaData> schemasWithDifferentCases = Arrays.asList(
+            new SchemaData("FOO", "CREATE TABLE \"FOO\" (\"FIELD01\" TEXT, \"FIELD02\" TEXT)",
+                    Collections.<String>emptyList()),
+            new SchemaData("BAR", "CREATE TABLE \"BAR\" (\"FIELD10\" TEXT, \"FIELD20\" TEXT)",
                     Collections.<String>emptyList())
     );
 
@@ -119,9 +127,17 @@ public class SchemaDiffTest {
 
         List<String> statements = migration.diffAll(metadata, schemasWithIndexes);
 
-        System.out.println(statements.toString());
-
         assertThat(statements, is(schemasWithIndexes.get(0).getCreateIndexStatements()));
+    }
+
+    @Test
+    public void diffAll_differentCases() throws Exception {
+        Map<String, SQLiteMaster> metadata = migration.loadMetadata(db, schemas);
+
+        List<String> statements = migration.diffAll(metadata, schemasWithDifferentCases);
+
+        assertThat(statements, is(empty()));
+
     }
 
     static class OpenHelper extends SQLiteOpenHelper {

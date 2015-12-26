@@ -43,15 +43,15 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
     public void exitCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
         if (ctx.K_AS() != null) {
             createTableStatement.selectStatement = new SelectStatement();
-            appendTokenList(createTableStatement.selectStatement.tokens, ctx);
+            appendTokenList(createTableStatement.selectStatement, ctx);
         }
 
-        appendTokenList(createTableStatement.tokens, ctx);
+        appendTokenList(createTableStatement, ctx);
     }
 
     @Override
     public void exitTable_name(SQLiteParser.Table_nameContext ctx) {
-        createTableStatement.tableName = dequote(ctx.getText());
+        createTableStatement.tableName = new SQLiteComponent.Name(ctx.getText());
     }
 
     @Override
@@ -62,14 +62,14 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     @Override
     public void exitColumn_def(SQLiteParser.Column_defContext ctx) {
-        appendTokenList(columnDef.tokens, ctx);
+        appendTokenList(columnDef, ctx);
         columnDef = null;
     }
 
     @Override
     public void exitColumn_name(SQLiteParser.Column_nameContext ctx) {
         if (columnDef != null) {
-            columnDef.name = dequote(ctx.getText());
+            columnDef.name = new SQLiteComponent.Name(ctx.getText());
         }
     }
 
@@ -107,7 +107,7 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
             }
         }
 
-        appendTokenList(constraint.tokens, ctx);
+        appendTokenList(constraint, ctx);
 
         columnDef.constraints.add(constraint);
     }
@@ -117,20 +117,26 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
         CreateTableStatement.Constraint constraint = new CreateTableStatement.Constraint();
 
         if (ctx.K_CONSTRAINT() != null) {
-            constraint.name = ctx.name().getText();
+            constraint.name = new SQLiteComponent.Name(ctx.name().getText());
         }
-        appendTokenList(constraint.tokens, ctx);
+        appendTokenList(constraint, ctx);
 
         createTableStatement.constraints.add(constraint);
     }
 
     // utils
 
-    void appendTokenList(final List<String> tokenList, ParseTree node) {
-         node.accept(new AbstractParseTreeVisitor<Void>() {
+    void appendTokenList(final SQLiteComponent component, ParseTree node) {
+        node.accept(new AbstractParseTreeVisitor<Void>() {
             @Override
             public Void visitTerminal(TerminalNode node) {
-                tokenList.add(node.getText());
+                if (node.getParent() instanceof SQLiteParser.Any_nameContext) {
+                    component.tokens.add(new SQLiteComponent.Name(node.getText()));
+                } else if (node.getParent() instanceof SQLiteParser.KeywordContext) {
+                    component.tokens.add(new SQLiteComponent.Keyword(node.getText()));
+                } else {
+                    component.tokens.add(node.getText());
+                }
                 return null;
             }
         });
@@ -154,13 +160,5 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
                 return sb;
             }
         }).toString();
-    }
-
-    String dequote(String maybeQuoted) {
-        if (maybeQuoted.charAt(0) == '"' || maybeQuoted.charAt(0) == '`') {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-        } else {
-            return maybeQuoted;
-        }
     }
 }

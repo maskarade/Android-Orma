@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma.migration;
 
+import com.github.gfx.android.orma.sqliteparser.SQLiteComponent;
+
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -43,10 +45,10 @@ public class SqliteDdlBuilder {
     }
 
     @NonNull
-    public String buildCreateTable(@NonNull String table, @NonNull List<String> columns) {
+    public String buildCreateTable(@NonNull SQLiteComponent.Name table, @NonNull List<String> columns) {
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE ");
-        sb.append(ensureQuoted(table));
+        sb.append(table);
         sb.append(" (");
         appendWithSeparator(sb, ", ", columns);
         sb.append(")");
@@ -54,36 +56,35 @@ public class SqliteDdlBuilder {
     }
 
     @NonNull
-    public String buildInsertFromSelect(@NonNull String toTable, @NonNull String fromTable,
-            @NonNull Collection<String> columns) {
+    public String buildInsertFromSelect(@NonNull SQLiteComponent.Name toTable, @NonNull SQLiteComponent.Name fromTable,
+            @NonNull Collection<SQLiteComponent.Name> columns) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ");
-        sb.append(ensureQuoted(toTable));
+        sb.append(toTable);
         sb.append(" (");
-        String quotedColumns = joinBy(", ", columns, new Func<String, String>() {
-            @Override
-            public String call(String name) {
-                return SqliteDdlBuilder.ensureQuoted(name);
-            }
-        });
-        sb.append(quotedColumns);
+        appendWithSeparator(sb, ", ", columns);
         sb.append(") SELECT ");
-        sb.append(quotedColumns);
+        appendWithSeparator(sb, ", ", columns);
         sb.append(" FROM ");
-        sb.append(ensureQuoted(fromTable));
+        sb.append(fromTable);
 
         return sb.toString();
     }
 
     @NonNull
-    public String buildDropTable(@NonNull String table) {
-        return "DROP TABLE " + ensureQuoted(table);
+    public String buildDropTable(@NonNull SQLiteComponent.Name table) {
+        return "DROP TABLE " + table;
     }
 
     @NonNull
     public String buildRenameTable(@NonNull String fromTable, @NonNull String toTable) {
-        return "ALTER TABLE " + ensureQuoted(fromTable) + " RENAME TO " + ensureQuoted(toTable);
+        return buildRenameTable(new SQLiteComponent.Name(fromTable), new SQLiteComponent.Name(toTable));
+    }
+
+    @NonNull
+    public String buildRenameTable(@NonNull SQLiteComponent.Name fromTable, @NonNull SQLiteComponent.Name toTable) {
+        return "ALTER TABLE " + fromTable + " RENAME TO " + toTable;
     }
 
     @NonNull
@@ -95,10 +96,10 @@ public class SqliteDdlBuilder {
         return result;
     }
 
-    public void appendWithSeparator(StringBuilder builder, String separator, Collection<?> collection) {
+    public void appendWithSeparator(StringBuilder builder, String separator, Collection<? extends CharSequence> collection) {
         int i = 0;
         int size = collection.size();
-        for (Object item : collection) {
+        for (CharSequence item : collection) {
             builder.append(item);
             if ((i + 1) != size) {
                 builder.append(separator);
