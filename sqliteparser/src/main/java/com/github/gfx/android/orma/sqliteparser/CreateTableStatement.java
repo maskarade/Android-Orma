@@ -21,7 +21,7 @@ import java.util.List;
 
 public class CreateTableStatement extends SQLiteComponent {
 
-    String tableName;
+    Name tableName;
 
     List<ColumnDef> columns = new ArrayList<>();
 
@@ -33,7 +33,7 @@ public class CreateTableStatement extends SQLiteComponent {
 
     }
 
-    public String getTableName() {
+    public Name getTableName() {
         return tableName;
     }
 
@@ -51,13 +51,13 @@ public class CreateTableStatement extends SQLiteComponent {
 
     public static class ColumnDef extends SQLiteComponent {
 
-        String name;
+        Name name;
 
         String type;
 
         List<Constraint> constraints = new ArrayList<>();
 
-        public String getName() {
+        public Name getName() {
             return name;
         }
 
@@ -93,9 +93,9 @@ public class CreateTableStatement extends SQLiteComponent {
 
     public static class Constraint extends SQLiteComponent {
 
-        String name;
+        Name name;
 
-        public String getName() {
+        public Name getName() {
             return name;
         }
     }

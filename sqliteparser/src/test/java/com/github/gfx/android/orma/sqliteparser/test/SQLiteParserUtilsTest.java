@@ -75,46 +75,46 @@ public class SQLiteParserUtilsTest {
         );
         assertThat(createTableStatement, is(not(nullValue())));
 
-        assertThat(createTableStatement.getTableName(), is("foo"));
+        assertThat(createTableStatement.getTableName(), is(new SQLiteComponent.Name("foo")));
 
         List<CreateTableStatement.ColumnDef> columns = createTableStatement.getColumns();
 
         assertThat(columns, hasSize(3));
         {
             CreateTableStatement.ColumnDef column = columns.get(0);
-            assertThat(column.getName(), is("id"));
+            assertThat(column.getName(), is(new SQLiteComponent.Name("id")));
             assertThat(column.getType(), is("INTEGER"));
 
             List<CreateTableStatement.ColumnDef.Constraint> constraints = column.getConstraints();
             assertThat(constraints, hasSize(1));
             assertThat(constraints.get(0).isPrimaryKey(), is(true));
             assertThat(constraints.get(0).isNullable(), is(false));
-            assertThat(constraints.get(0).getTokens(), contains("PRIMARY", "KEY"));
+            assertThat(constraints.get(0).getTokens(), contains((CharSequence)"PRIMARY", "KEY"));
         }
 
         {
             CreateTableStatement.ColumnDef column = columns.get(1);
-            assertThat(column.getName(), is("title"));
+            assertThat(column.getName(), is(new SQLiteComponent.Name("title")));
             assertThat(column.getType(), is("TEXT"));
             List<CreateTableStatement.ColumnDef.Constraint> constraints = column.getConstraints();
             assertThat(constraints, hasSize(1));
             assertThat(constraints.get(0).isPrimaryKey(), is(false));
             assertThat(constraints.get(0).isNullable(), is(false));
-            assertThat(constraints.get(0).getTokens(), contains("NOT", "NULL", "ON", "CONFLICT", "REPLACE"));
+            assertThat(constraints.get(0).getTokens(), contains((CharSequence)"NOT", "NULL", "ON", "CONFLICT", "REPLACE"));
         }
 
         {
             CreateTableStatement.ColumnDef column = columns.get(2);
-            assertThat(column.getName(), is("price"));
+            assertThat(column.getName(), is(new SQLiteComponent.Name("price")));
             assertThat("ignore size of data types", column.getType(), is("INTEGER UNSIGNED"));
             List<CreateTableStatement.ColumnDef.Constraint> constraints = column.getConstraints();
             assertThat(constraints, hasSize(2));
             assertThat(constraints.get(0).isPrimaryKey(), is(false));
             assertThat(constraints.get(0).isNullable(), is(false));
-            assertThat(constraints.get(0).getTokens(), contains("NOT", "NULL"));
+            assertThat(constraints.get(0).getTokens(), contains((CharSequence)"NOT", "NULL"));
 
             assertThat(constraints.get(1).getDefaultExpr(), is("( 100 * 1.08 )"));
-            assertThat(constraints.get(1).getTokens(), contains("DEFAULT", "(", "100", "*", "1.08", ")"));
+            assertThat(constraints.get(1).getTokens(), contains((CharSequence)"DEFAULT", "(", "100", "*", "1.08", ")"));
         }
     }
 
@@ -129,7 +129,7 @@ public class SQLiteParserUtilsTest {
                         + ")"
         );
 
-        assertThat(createTableStatement.getTableName(), is("foo"));
+        assertThat(createTableStatement.getTableName(), is(new SQLiteComponent.Name("foo")));
         assertThat(createTableStatement.getColumns(), hasSize(2));
 
         assertThat(createTableStatement.getConstraints(), hasSize(2));

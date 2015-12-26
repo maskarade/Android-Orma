@@ -18,15 +18,18 @@ package com.github.gfx.android.orma.sqliteparser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import javax.annotation.Nonnull;
 
 /**
  * Base class of SQLite components
  */
 public class SQLiteComponent {
 
-    protected final List<String> tokens = new ArrayList<>();
+    protected final List<CharSequence> tokens = new ArrayList<>();
 
-    public List<String> getTokens() {
+    public List<CharSequence> getTokens() {
         return tokens;
     }
 
@@ -53,13 +56,100 @@ public class SQLiteComponent {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        for (String token : tokens) {
-            if (sb.length()!= 0) {
+        for (CharSequence token : tokens) {
+            if (sb.length() != 0) {
                 sb.append(' ');
             }
             sb.append(token);
         }
 
         return sb.toString();
+    }
+
+    public static class CaseInsensitiveToken implements CharSequence {
+
+        @Nonnull
+        final String token;
+
+        public CaseInsensitiveToken(@Nonnull String token) {
+            this.token = token;
+        }
+
+        @Override
+        public int length() {
+            return token.length();
+        }
+
+        @Override
+        public char charAt(int index) {
+            return token.charAt(index);
+        }
+
+        @Override
+        public CharSequence subSequence(int start, int end) {
+            return token.subSequence(start, end);
+        }
+
+        @Nonnull
+        @Override
+        public String toString() {
+            return token;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof CaseInsensitiveToken)) {
+                return false;
+            }
+
+            CaseInsensitiveToken that = (CaseInsensitiveToken) o;
+            return token.equalsIgnoreCase(that.token);
+
+        }
+
+        @Override
+        public int hashCode() {
+            return token.toLowerCase(Locale.US).hashCode();
+        }
+    }
+
+    public static class Keyword extends CaseInsensitiveToken {
+
+        public Keyword(@Nonnull String token) {
+            super(token);
+        }
+    }
+
+    public static class Name extends CaseInsensitiveToken {
+
+        public Name(@Nonnull String token) {
+            super(ensureDoubleQuoted(token));
+        }
+
+        @Nonnull
+        public String getUnquotedToken() {
+            return dequote(token);
+        }
+
+        @Nonnull
+        @Override
+        public String toString() {
+            return token;
+        }
+
+        static String ensureDoubleQuoted(String name) {
+            return '"' + dequote(name) + '"';
+        }
+
+        static String dequote(String maybeQuoted) {
+            if (maybeQuoted.charAt(0) == '"' || maybeQuoted.charAt(0) == '`') {
+                return maybeQuoted.substring(1, maybeQuoted.length() - 1);
+            } else {
+                return maybeQuoted;
+            }
+        }
     }
 }
