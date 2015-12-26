@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.sqliteparser;
+package com.github.gfx.android.orma.migration.sqliteparser;
 
 import java.util.ArrayList;
 import java.util.List;

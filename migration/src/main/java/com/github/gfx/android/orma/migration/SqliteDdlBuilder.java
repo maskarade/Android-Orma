@@ -15,7 +15,7 @@
  */
 package com.github.gfx.android.orma.migration;
 
-import com.github.gfx.android.orma.sqliteparser.SQLiteComponent;
+import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 
 import android.support.annotation.NonNull;
 
