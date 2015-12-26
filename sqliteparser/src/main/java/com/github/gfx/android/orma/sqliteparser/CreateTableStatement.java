@@ -19,7 +19,7 @@ package com.github.gfx.android.orma.sqliteparser;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateTableStatement {
+public class CreateTableStatement extends SQLiteComponent {
 
     String tableName;
 
@@ -28,8 +28,6 @@ public class CreateTableStatement {
     List<Constraint> constraints = new ArrayList<>();
 
     SelectStatement selectStatement;
-
-    List<String> tokens;
 
     public CreateTableStatement() {
 
@@ -51,11 +49,7 @@ public class CreateTableStatement {
         return selectStatement;
     }
 
-    public List<String> getTokens() {
-        return tokens;
-    }
-
-    public static class ColumnDef {
+    public static class ColumnDef extends SQLiteComponent {
 
         String name;
 
@@ -75,16 +69,13 @@ public class CreateTableStatement {
             return constraints;
         }
 
-
-        public static class Constraint {
+        public static class Constraint extends SQLiteComponent {
 
             boolean primaryKey;
 
             boolean nullable = true;
 
             String defaultExpr;
-
-            List<String> tokens;
 
             public boolean isPrimaryKey() {
                 return primaryKey;
@@ -97,25 +88,15 @@ public class CreateTableStatement {
             public String getDefaultExpr() {
                 return defaultExpr;
             }
-
-            public List<String> getTokens() {
-                return tokens;
-            }
         }
     }
 
-    public static class Constraint {
+    public static class Constraint extends SQLiteComponent {
 
         String name;
 
-        List<String> tokens;
-
         public String getName() {
             return name;
-        }
-
-        public List<String> getTokens() {
-            return tokens;
         }
     }
 }

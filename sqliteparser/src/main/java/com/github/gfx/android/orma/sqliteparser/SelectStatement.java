@@ -16,13 +16,6 @@
 
 package com.github.gfx.android.orma.sqliteparser;
 
-import java.util.List;
+public class SelectStatement extends SQLiteComponent {
 
-public class SelectStatement {
-
-    List<String> tokens;
-
-    public List<String> getTokens() {
-        return tokens;
-    }
 }

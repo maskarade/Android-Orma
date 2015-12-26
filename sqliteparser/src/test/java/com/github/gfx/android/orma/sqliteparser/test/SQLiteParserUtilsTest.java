@@ -17,6 +17,7 @@
 package com.github.gfx.android.orma.sqliteparser.test;
 
 import com.github.gfx.android.orma.sqliteparser.CreateTableStatement;
+import com.github.gfx.android.orma.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.sqliteparser.SQLiteParserUtils;
 import com.github.gfx.android.orma.sqliteparser.g.SQLiteParser;
 
@@ -46,6 +47,21 @@ public class SQLiteParserUtilsTest {
     public void testParseBad() throws Exception {
         SQLiteParser.ParseContext parseContext = SQLiteParserUtils.parse("CREATE TABLE");
         assertThat(parseContext.error(), is(not(empty())));
+    }
+
+    @Test
+    public void testSQLiteComponent() throws Exception {
+        String sql =  "CREATE TABLE foo (\n"
+                + "id INTEGER,\n"
+                + "title TEXT\n"
+                + ")";
+
+        SQLiteComponent a = SQLiteParserUtils.parseIntoCreateTableStatement(sql);
+        SQLiteComponent b = SQLiteParserUtils.parseIntoCreateTableStatement(sql);
+
+        assertThat(a, is(b));
+        assertThat(a.hashCode(), is(b.hashCode()));
+        assertThat(a.toString(), is(b.toString()));
     }
 
     @Test

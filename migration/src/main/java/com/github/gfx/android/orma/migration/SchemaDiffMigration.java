@@ -15,17 +15,14 @@
  */
 package com.github.gfx.android.orma.migration;
 
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.sf.jsqlparser.statement.create.table.Index;
+import com.github.gfx.android.orma.sqliteparser.CreateTableStatement;
+import com.github.gfx.android.orma.sqliteparser.SQLiteParserUtils;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -148,84 +145,64 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public List<String> tableDiff(String from, String to) {
-        CreateTable fromTable;
-        CreateTable toTable;
+        CreateTableStatement fromTable = SQLiteParserUtils.parseIntoCreateTableStatement(from);
+        CreateTableStatement toTable = SQLiteParserUtils.parseIntoCreateTableStatement(to);
 
-        try {
-            fromTable = (CreateTable) CCJSqlParserUtil.parse(from);
-            toTable = (CreateTable) CCJSqlParserUtil.parse(to);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
-
-        Map<String, ColumnDefinition> toColumns = new HashMap<>();
+        Set<CreateTableStatement.ColumnDef> toColumns = new HashSet<>();
         Set<String> toColumnNameAndTypes = new HashSet<>();
-        List<ColumnDefinition> intersectionColumns = new ArrayList<>();
+        List<CreateTableStatement.ColumnDef> intersectionColumns = new ArrayList<>();
+
         Map<String, String> intersectionColumnNameAndTypes = new HashMap<>();
 
-        for (ColumnDefinition column : toTable.getColumnDefinitions()) {
-            toColumns.put(column.toString(), column);
-            toColumnNameAndTypes.add(column.getColumnName() + ' ' + column.getColDataType());
+        for (CreateTableStatement.ColumnDef column : toTable.getColumns()) {
+            toColumns.add(column);
+            toColumnNameAndTypes.add(column.getName() + ' ' + column.getType());
         }
 
-        for (ColumnDefinition column : fromTable.getColumnDefinitions()) {
-            String columnSpec = column.toString();
-            if (toColumns.containsKey(columnSpec)) {
+        for (CreateTableStatement.ColumnDef column : fromTable.getColumns()) {
+            if (toColumns.contains(column)) {
                 intersectionColumns.add(column);
             }
 
-            String columnNameAndType = column.getColumnName() + ' ' + column.getColDataType();
+            String columnNameAndType = column.getName() + ' ' + column.getType();
             if (toColumnNameAndTypes.contains(columnNameAndType)) {
-                intersectionColumnNameAndTypes.put(columnNameAndType, column.getColumnName());
+                intersectionColumnNameAndTypes.put(columnNameAndType, column.getName());
             }
         }
 
-        if (intersectionColumns.size() != toTable.getColumnDefinitions().size() ||
-                intersectionColumns.size() != fromTable.getColumnDefinitions().size() ||
-                !constraintsEqual(fromTable.getIndexes(), toTable.getIndexes())) {
+        if (intersectionColumns.size() != toTable.getColumns().size() ||
+                intersectionColumns.size() != fromTable.getColumns().size() ||
+                !fromTable.getConstraints().equals(toTable.getConstraints())) {
             return buildRecreateTable(fromTable, toTable, intersectionColumnNameAndTypes.values());
         } else {
             return Collections.emptyList();
         }
     }
 
-    private boolean constraintsEqual(@Nullable List<Index> a, @Nullable List<Index> b) {
-        if (a == null && b == null) {
-            return true;
-        } else if (a == null || b == null) {
-            return false;
-        } else if (a.size() == b.size()) {
-            for (int i = 0; i < a.size(); i++) {
-                if (!a.get(i).toString().equals(b.get(i).toString())) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private List<String> buildRecreateTable(CreateTable fromTable, CreateTable toTable, Collection<String> columns) {
-
-        String fromTableName = fromTable.getTable().getName();
-        String toTableName = toTable.getTable().getName();
+    private List<String> buildRecreateTable(CreateTableStatement fromTable, CreateTableStatement toTable, Collection<String> columns) {
+        String fromTableName = fromTable.getTableName();
+        String toTableName = toTable.getTableName();
 
         List<String> statements = new ArrayList<>();
 
         String tempTableName = "__temp_" + SqliteDdlBuilder.ensureNotQuoted(toTableName);
 
         statements.add(builder.buildCreateTable(tempTableName,
-                builder.map(toTable.getColumnDefinitions(), new SqliteDdlBuilder.Func<ColumnDefinition, String>() {
+                builder.map(toTable.getColumns(), new SqliteDdlBuilder.Func<CreateTableStatement.ColumnDef, String>() {
                     @Override
-                    public String call(ColumnDefinition arg) {
-                        String columnSpec;
-                        if (arg.getColumnSpecStrings() != null) {
-                            columnSpec = ' ' + TextUtils.join(" ", arg.getColumnSpecStrings());
-                        } else {
-                            columnSpec = "";
+                    public String call(CreateTableStatement.ColumnDef arg) {
+                        StringBuilder columnSpecBuilder = new StringBuilder(SqliteDdlBuilder.ensureQuoted(arg.getName()));
+
+                        if (arg.getType() != null) {
+                            columnSpecBuilder.append(' ');
+                            columnSpecBuilder.append(arg.getType());
                         }
-                        return SqliteDdlBuilder.ensureQuoted(arg.getColumnName()) + ' ' + arg.getColDataType() + columnSpec;
+
+                        if (!arg.getConstraints().isEmpty()) {
+                            columnSpecBuilder.append(' ');
+                            columnSpecBuilder.append(TextUtils.join(" ", arg.getConstraints()));
+                        }
+                        return columnSpecBuilder.toString();
                     }
                 })));
 

@@ -23,7 +23,6 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,10 +43,10 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
     public void exitCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
         if (ctx.K_AS() != null) {
             createTableStatement.selectStatement = new SelectStatement();
-            createTableStatement.selectStatement.tokens = asTokenList(ctx.select_stmt());
+            appendTokenList(createTableStatement.selectStatement.tokens, ctx);
         }
 
-        createTableStatement.tokens = asTokenList(ctx);
+        appendTokenList(createTableStatement.tokens, ctx);
     }
 
     @Override
@@ -63,6 +62,7 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     @Override
     public void exitColumn_def(SQLiteParser.Column_defContext ctx) {
+        appendTokenList(columnDef.tokens, ctx);
         columnDef = null;
     }
 
@@ -107,7 +107,7 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
             }
         }
 
-        constraint.tokens = asTokenList(ctx);
+        appendTokenList(constraint.tokens, ctx);
 
         columnDef.constraints.add(constraint);
     }
@@ -119,26 +119,19 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
         if (ctx.K_CONSTRAINT() != null) {
             constraint.name = ctx.name().getText();
         }
-        constraint.tokens = asTokenList(ctx);
+        appendTokenList(constraint.tokens, ctx);
 
         createTableStatement.constraints.add(constraint);
     }
 
     // utils
 
-    List<String> asTokenList(ParseTree node) {
-        return node.accept(new AbstractParseTreeVisitor<List<String>>() {
-            final List<String> tokenList = new ArrayList<>();
-
+    void appendTokenList(final List<String> tokenList, ParseTree node) {
+         node.accept(new AbstractParseTreeVisitor<Void>() {
             @Override
-            protected List<String> defaultResult() {
-                return tokenList;
-            }
-
-            @Override
-            public List<String> visitTerminal(TerminalNode node) {
+            public Void visitTerminal(TerminalNode node) {
                 tokenList.add(node.getText());
-                return tokenList;
+                return null;
             }
         });
     }

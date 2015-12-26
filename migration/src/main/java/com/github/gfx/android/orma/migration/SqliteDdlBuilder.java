@@ -61,15 +61,15 @@ public class SqliteDdlBuilder {
         sb.append("INSERT INTO ");
         sb.append(ensureQuoted(toTable));
         sb.append(" (");
-        String quotedColumnNames = joinBy(", ", columns, new Func<String, String>() {
+        String quotedColumns = joinBy(", ", columns, new Func<String, String>() {
             @Override
             public String call(String name) {
                 return SqliteDdlBuilder.ensureQuoted(name);
             }
         });
-        sb.append(quotedColumnNames);
+        sb.append(quotedColumns);
         sb.append(") SELECT ");
-        sb.append(quotedColumnNames);
+        sb.append(quotedColumns);
         sb.append(" FROM ");
         sb.append(ensureQuoted(fromTable));
 
