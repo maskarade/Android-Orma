@@ -97,6 +97,21 @@ public class SchemaDiffTest {
     }
 
     @Test
+    public void differentCases() throws Exception {
+        List<SchemaData> newSchemas = Arrays.asList(
+                new SchemaData("FOO", "CREATE TABLE \"FOO\" (\"FIELD01\" TEXT, \"FIELD02\" TEXT)",
+                        "CREATE INDEX \"INDEX_FIELD01_ON_FOO\" ON \"FOO\" (\"FIELD01\")",
+                        "CREATE INDEX \"INDEX_FIELD02_ON_FOO\" ON \"FOO\" (\"FIELD02\")"
+                ),
+                new SchemaData("BAR", "CREATE TABLE \"BAR\" (\"FIELD10\" TEXT, \"FIELD20\" TEXT)")
+        );
+
+        statements = migration.diffAll(metadata, newSchemas);
+
+        assertThat(statements, is(empty()));
+    }
+    
+    @Test
     public void diffAll_createTable() throws Exception {
         SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x10\" TEXT, \"x20\" TEXT)");
         schemas.add(newSchema);
@@ -129,21 +144,6 @@ public class SchemaDiffTest {
         statements = migration.diffAll(metadata, schemas);
 
         assertThat(statements, is(schemas.get(1).getCreateIndexStatements()));
-    }
-
-    @Test
-    public void differentCases() throws Exception {
-        List<SchemaData> newSchemas = Arrays.asList(
-                new SchemaData("FOO", "CREATE TABLE \"FOO\" (\"FIELD01\" TEXT, \"FIELD02\" TEXT)",
-                        "CREATE INDEX \"INDEX_FIELD01_ON_FOO\" ON \"FOO\" (\"FIELD01\")",
-                        "CREATE INDEX \"INDEX_FIELD02_ON_FOO\" ON \"FOO\" (\"FIELD02\")"
-                ),
-                new SchemaData("BAR", "CREATE TABLE \"BAR\" (\"FIELD10\" TEXT, \"FIELD20\" TEXT)")
-        );
-
-        statements = migration.diffAll(metadata, newSchemas);
-
-        assertThat(statements, is(empty()));
     }
 
     class OpenHelper extends SQLiteOpenHelper {
