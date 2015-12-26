@@ -15,7 +15,7 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     compile 'com.google.code.findbugs:jsr305:3.0.1'
-    runtime 'org.antlr:antlr4-runtime:4.5.1'
+    compile 'org.antlr:antlr4-runtime:4.5.1'
     antlr 'org.antlr:antlr4:4.5.1'
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
