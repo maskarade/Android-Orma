@@ -30,7 +30,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class SchemaDiffMigration implements MigrationEngine {
 
     final int revision;
 
-    final SqliteDdlBuilder builder = new SqliteDdlBuilder();
+    final SqliteDdlBuilder util = new SqliteDdlBuilder();
 
     public SchemaDiffMigration(@NonNull Context context, boolean trace) {
         this.revision = extractRevision(context);
@@ -115,30 +115,41 @@ public class SchemaDiffMigration implements MigrationEngine {
         return statements;
     }
 
+    /**
+     * @param schemaIndexes Set of "CREATE INDEX" statements which the code has
+     * @param dbIndexes Set of "CREATED INDEX" statements which the DB has
+     * @return List of "CREATED INDEX" statements to apply to DB
+     */
     @NonNull
     public List<String> indexDiff(@NonNull Set<String> schemaIndexes, @NonNull Set<String> dbIndexes) {
-        //System.out.println("schemaIndexes: " + schemaIndexes);
-        //System.out.println("dbIndexes:     " + dbIndexes);
-
         List<String> createIndexStatements = new ArrayList<>();
 
-        Set<String> unionIndexes = new LinkedHashSet<>();
+        Map<SQLiteComponent, String> unionIndexes = new LinkedHashMap<>();
 
-        unionIndexes.addAll(schemaIndexes);
-        unionIndexes.addAll(dbIndexes);
+        Map<SQLiteComponent, String> fromIndexPairs = new LinkedHashMap<>();
+        for (String createIndexStatement : dbIndexes) {
+            fromIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
+        }
+        unionIndexes.putAll(fromIndexPairs);
 
-        for (String createIndexStatement : unionIndexes) {
-            boolean existsInSchema = schemaIndexes.contains(createIndexStatement);
-            boolean existsInDb = dbIndexes.contains(createIndexStatement);
+        Map<SQLiteComponent, String> toIndexPairs = new LinkedHashMap<>();
+        for (String createIndexStatement : schemaIndexes) {
+            toIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
+        }
+        unionIndexes.putAll(toIndexPairs);
 
-            if (existsInSchema && existsInDb) {
+        for (Map.Entry<SQLiteComponent, String> createIndexStatement : unionIndexes.entrySet()) {
+            boolean existsInDst = toIndexPairs.containsKey(createIndexStatement.getKey());
+            boolean existsInSrc = fromIndexPairs.containsKey(createIndexStatement.getKey());
+
+            if (existsInDst && existsInSrc) {
                 // okay, nothing to do
-            } else if (existsInSchema) {
-                createIndexStatements.add(createIndexStatement);
+            } else if (existsInDst) {
+                createIndexStatements.add(createIndexStatement.getValue());
             } else {
-                String statement = buildDropIndexStatement(createIndexStatement);
+                String statement = buildDropIndexStatement(createIndexStatement.getValue());
                 if (!TextUtils.isEmpty(statement)) {
-                    createIndexStatements.add(buildDropIndexStatement(createIndexStatement));
+                    createIndexStatements.add(buildDropIndexStatement(createIndexStatement.getValue()));
                 }
             }
         }
@@ -149,8 +160,8 @@ public class SchemaDiffMigration implements MigrationEngine {
         CreateTableStatement fromTable = SQLiteParserUtils.parseIntoCreateTableStatement(from);
         CreateTableStatement toTable = SQLiteParserUtils.parseIntoCreateTableStatement(to);
 
-        Set<CreateTableStatement.ColumnDef> toColumns = new HashSet<>();
-        Set<SQLiteComponent.Name> toColumnNames = new HashSet<>();
+        Set<CreateTableStatement.ColumnDef> toColumns = new LinkedHashSet<>();
+        Set<SQLiteComponent.Name> toColumnNames = new LinkedHashSet<>();
         List<CreateTableStatement.ColumnDef> intersectionColumns = new ArrayList<>();
 
         List<SQLiteComponent.Name> intersectionColumnNames = new ArrayList<>();
@@ -188,8 +199,8 @@ public class SchemaDiffMigration implements MigrationEngine {
 
         SQLiteComponent.Name tempTableName = new SQLiteComponent.Name("__temp_" + toTableName.getUnquotedToken());
 
-        statements.add(builder.buildCreateTable(tempTableName,
-                builder.map(toTable.getColumns(), new SqliteDdlBuilder.Func<CreateTableStatement.ColumnDef, String>() {
+        statements.add(util.buildCreateTable(tempTableName,
+                util.map(toTable.getColumns(), new SqliteDdlBuilder.Func<CreateTableStatement.ColumnDef, String>() {
                     @Override
                     public String call(CreateTableStatement.ColumnDef arg) {
                         StringBuilder columnSpecBuilder = new StringBuilder(arg.getName());
@@ -207,9 +218,9 @@ public class SchemaDiffMigration implements MigrationEngine {
                     }
                 })));
 
-        statements.add(builder.buildInsertFromSelect(tempTableName, fromTableName, columns));
-        statements.add(builder.buildDropTable(fromTableName));
-        statements.add(builder.buildRenameTable(tempTableName, toTableName));
+        statements.add(util.buildInsertFromSelect(tempTableName, fromTableName, columns));
+        statements.add(util.buildDropTable(fromTableName));
+        statements.add(util.buildRenameTable(tempTableName, toTableName));
 
         return statements;
     }

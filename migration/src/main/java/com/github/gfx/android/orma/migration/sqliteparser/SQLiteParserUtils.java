@@ -51,7 +51,14 @@ public class SQLiteParserUtils {
         SQLiteDdlCollector collector = new SQLiteDdlCollector();
         parser.addParseListener(collector);
         parser.parse();
-
         return collector.createTableStatement;
+    }
+
+    public static SQLiteComponent parseIntoSQLiteComponent(String sql) throws ParseCancellationException {
+        SQLiteParser parser = createParser(sql);
+        SQLiteParser.ParseContext parseContext = parser.parse();
+        SQLiteComponent component = new SQLiteComponent();
+        SQLiteDdlCollector.appendTokenList(component, parseContext);
+        return component;
     }
 }
