@@ -110,7 +110,7 @@ public class SchemaDiffTest {
 
         assertThat(statements, is(empty()));
     }
-    
+
     @Test
     public void diffAll_createTable() throws Exception {
         SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x10\" TEXT, \"x20\" TEXT)");
