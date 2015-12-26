@@ -2,15 +2,22 @@
 
 `orma-migration` is a library which provides migration for `SQLiteDatabase`.
 
+This is independent on `orma` module and available for
+any Android `SQLiteDatabase` tools.
+
 ## MigrationEngine
 
 `MigrationEngine` is an interface to provide migration.
 
 ## SchemaDiffMigration
 
+`SchemaDiffMigration` can make SQL statements from two different schemas.
+
 TBD
 
 ## ManualStepMigration
+
+``ManualStepMigration`` provides a way to handle hand-written migration steps.
 
 TBD
 
