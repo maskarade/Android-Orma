@@ -88,9 +88,9 @@ public class SqliteDdlBuilder {
     }
 
     @NonNull
-    public <T> List<String> map(Collection<T> collection, @NonNull Func<T, String> func) {
-        List<String> result = new ArrayList<>(collection.size());
-        for (T item : collection) {
+    public <A, R> List<R> map(Collection<A> collection, @NonNull Func<A, R> func) {
+        List<R> result = new ArrayList<>(collection.size());
+        for (A item : collection) {
             result.add(func.call(item));
         }
         return result;

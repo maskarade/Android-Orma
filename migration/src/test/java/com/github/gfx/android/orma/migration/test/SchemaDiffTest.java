@@ -44,18 +44,9 @@ import static org.hamcrest.Matchers.*;
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class SchemaDiffTest {
 
-    static final List<SchemaData> schemas = Arrays.asList(
-            new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
-                            "CREATE INDEX \"index_field01_on_foo\" ON \"foo\" (\"field01\")",
-                            "CREATE INDEX \"index_field02_on_foo\" ON \"foo\" (\"field02\")"
-                    ),
-            new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)")
-    );
+    List<SchemaData> schemas;
 
-    static final List<String> initialData = Arrays.asList(
-            "INSERT INTO foo (field01, field02) VALUES ('value01', 'value02')",
-            "INSERT INTO bar (field10, field10) VALUES ('value10', 'value10')"
-    );
+    List<String> initialData;
 
     OpenHelper openHelper;
 
@@ -73,6 +64,19 @@ public class SchemaDiffTest {
 
     @Before
     public void setUp() throws Exception {
+        schemas = new ArrayList<>(Arrays.asList(
+                new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
+                        "CREATE INDEX \"index_field01_on_foo\" ON \"foo\" (\"field01\")",
+                        "CREATE INDEX \"index_field02_on_foo\" ON \"foo\" (\"field02\")"
+                ),
+                new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)")
+        ));
+
+        initialData = Arrays.asList(
+                "INSERT INTO foo (field01, field02) VALUES ('value01', 'value02')",
+                "INSERT INTO bar (field10, field10) VALUES ('value10', 'value10')"
+        );
+
         openHelper = new OpenHelper(getContext());
         db = openHelper.getWritableDatabase();
         migration = new SchemaDiffMigration(getContext());
@@ -94,27 +98,23 @@ public class SchemaDiffTest {
 
     @Test
     public void diffAll_createTable() throws Exception {
-        List<SchemaData> newSchemas = new ArrayList<>(schemas);
-
         SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x10\" TEXT, \"x20\" TEXT)");
-        newSchemas.add(newSchema);
+        schemas.add(newSchema);
 
-        statements = migration.diffAll(metadata, newSchemas);
+        statements = migration.diffAll(metadata, schemas);
 
         assertThat(statements, is(Collections.singletonList(newSchema.getCreateTableStatement())));
     }
 
     @Test
     public void createTableAndCreateIndexes() throws Exception {
-        List<SchemaData> newSchemas = new ArrayList<>(schemas);
-
         SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x01\" TEXT, \"x02\" TEXT)",
-                        "CREATE INDEX \"index_x01_on_baz\" ON \"baz\" (\"x01\")",
-                        "CREATE INDEX \"index_x02_on_baz\" ON \"baz\" (\"x02\")"
-                );
-        newSchemas.add(newSchema);
+                "CREATE INDEX \"index_x01_on_baz\" ON \"baz\" (\"x01\")",
+                "CREATE INDEX \"index_x02_on_baz\" ON \"baz\" (\"x02\")"
+        );
+        schemas.add(newSchema);
 
-        statements = migration.diffAll(metadata, newSchemas);
+        statements = migration.diffAll(metadata, schemas);
 
         assertThat(statements, is(newSchema.getAllTheStatements()));
     }
@@ -131,13 +131,13 @@ public class SchemaDiffTest {
         assertThat(statements, is(schemas.get(1).getCreateIndexStatements()));
     }
 
-    //u@Test
+    @Test
     public void differentCases() throws Exception {
         List<SchemaData> newSchemas = Arrays.asList(
                 new SchemaData("FOO", "CREATE TABLE \"FOO\" (\"FIELD01\" TEXT, \"FIELD02\" TEXT)",
-                                "CREATE INDEX \"INDEX_FIELD01_ON_FOO\" ON \"FOO\" (\"FIELD01\")",
-                                "CREATE INDEX \"INDEX_FIELD02_ON_FOO\" ON \"FOO\" (\"FIELD02\")"
-                        ),
+                        "CREATE INDEX \"INDEX_FIELD01_ON_FOO\" ON \"FOO\" (\"FIELD01\")",
+                        "CREATE INDEX \"INDEX_FIELD02_ON_FOO\" ON \"FOO\" (\"FIELD02\")"
+                ),
                 new SchemaData("BAR", "CREATE TABLE \"BAR\" (\"FIELD10\" TEXT, \"FIELD20\" TEXT)")
         );
 
@@ -146,7 +146,7 @@ public class SchemaDiffTest {
         assertThat(statements, is(empty()));
     }
 
-    static class OpenHelper extends SQLiteOpenHelper {
+    class OpenHelper extends SQLiteOpenHelper {
 
         public OpenHelper(Context context) {
             super(context, null, null, 1);

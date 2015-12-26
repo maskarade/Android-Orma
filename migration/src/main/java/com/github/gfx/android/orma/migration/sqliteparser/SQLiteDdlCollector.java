@@ -17,8 +17,10 @@
 package com.github.gfx.android.orma.migration.sqliteparser;
 
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteBaseListener;
+import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteLexer;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -126,13 +128,18 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     // utils
 
-    void appendTokenList(final SQLiteComponent component, ParseTree node) {
+    static void appendTokenList(final SQLiteComponent component, ParseTree node) {
         node.accept(new AbstractParseTreeVisitor<Void>() {
             @Override
             public Void visitTerminal(TerminalNode node) {
+                int type = node.getSymbol().getType();
+                if (type == Token.EOF) {
+                    return null;
+                }
+
                 if (node.getParent() instanceof SQLiteParser.Any_nameContext) {
                     component.tokens.add(new SQLiteComponent.Name(node.getText()));
-                } else if (node.getParent() instanceof SQLiteParser.KeywordContext) {
+                } else if (isKeyword(type)) {
                     component.tokens.add(new SQLiteComponent.Keyword(node.getText()));
                 } else {
                     component.tokens.add(node.getText());
@@ -142,7 +149,12 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
         });
     }
 
-    String combineParseTree(ParseTree node) {
+    static boolean isKeyword(int type) {
+        String name = SQLiteLexer.VOCABULARY.getSymbolicName(type);
+        return name.startsWith("K_");
+    }
+
+    static String combineParseTree(ParseTree node) {
         return node.accept(new AbstractParseTreeVisitor<StringBuilder>() {
             final StringBuilder sb = new StringBuilder();
 

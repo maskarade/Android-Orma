@@ -25,6 +25,7 @@ import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -90,7 +91,7 @@ public class SQLiteParserUtilsTest {
             assertThat(constraints, hasSize(1));
             assertThat(constraints.get(0).isPrimaryKey(), is(true));
             assertThat(constraints.get(0).isNullable(), is(false));
-            assertThat(constraints.get(0).getTokens(), contains((CharSequence)"PRIMARY", "KEY"));
+            assertThat(constraints.get(0).getTokens(), is(keywordList("PRIMARY", "KEY")));
         }
 
         {
@@ -101,7 +102,7 @@ public class SQLiteParserUtilsTest {
             assertThat(constraints, hasSize(1));
             assertThat(constraints.get(0).isPrimaryKey(), is(false));
             assertThat(constraints.get(0).isNullable(), is(false));
-            assertThat(constraints.get(0).getTokens(), contains((CharSequence)"NOT", "NULL", "ON", "CONFLICT", "REPLACE"));
+            assertThat(constraints.get(0).getTokens(), is(keywordList("NOT", "NULL", "ON", "CONFLICT", "REPLACE")));
         }
 
         {
@@ -112,10 +113,11 @@ public class SQLiteParserUtilsTest {
             assertThat(constraints, hasSize(2));
             assertThat(constraints.get(0).isPrimaryKey(), is(false));
             assertThat(constraints.get(0).isNullable(), is(false));
-            assertThat(constraints.get(0).getTokens(), contains((CharSequence)"NOT", "NULL"));
+            assertThat(constraints.get(0).getTokens(), is(keywordList("NOT", "NULL")));
 
             assertThat(constraints.get(1).getDefaultExpr(), is("( 100 * 1.08 )"));
-            assertThat(constraints.get(1).getTokens(), contains((CharSequence)"DEFAULT", "(", "100", "*", "1.08", ")"));
+            assertThat(constraints.get(1).getTokens(), contains(
+                    new SQLiteComponent.Keyword("DEFAULT"), "(", "100", "*", "1.08", ")"));
         }
     }
 
@@ -134,5 +136,30 @@ public class SQLiteParserUtilsTest {
         assertThat(createTableStatement.getColumns(), hasSize(2));
 
         assertThat(createTableStatement.getConstraints(), hasSize(2));
+    }
+
+    @Test
+    public void testParseIntoSQLiteComponent() throws Exception {
+        SQLiteComponent component = SQLiteParserUtils.parseIntoSQLiteComponent(
+                "CREATE INDEX index_title_on_book ON \"book\" (`title`)"
+        );
+
+        assertThat(component.getTokens(),
+                contains(new SQLiteComponent.Keyword("CREATE"),
+                        new SQLiteComponent.Keyword("INDEX"),
+                        new SQLiteComponent.Name("index_title_on_book"),
+                        new SQLiteComponent.Keyword("ON"),
+                        new SQLiteComponent.Name("book"),
+                        "(",
+                        new SQLiteComponent.Name("title"),
+                        ")"));
+    }
+
+    public List<CharSequence> keywordList(String... keywords) {
+        List<CharSequence> keywordList = new ArrayList<>();
+        for (String k : keywords) {
+            keywordList.add(new SQLiteComponent.Keyword(k));
+        }
+        return keywordList;
     }
 }
