@@ -1,6 +1,6 @@
 
 check:
-	./gradlew clean check bintrayUpload
+	./gradlew clean mavenAndroidJavadocs check bintrayUpload
 
 publish: check
 	./gradlew -PdryRun=false --info annotations:bintrayUpload || echo 'Failure!'

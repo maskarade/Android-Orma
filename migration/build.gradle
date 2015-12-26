@@ -34,11 +34,16 @@ android.sourceSets.main.java.srcDir ANTLR_OUTPUT_DIR
 task generateParserSources(type: JavaExec) {
     description = 'Generate SQLiteParser sources with ANTLR4'
     main = 'org.antlr.v4.Tool'
+    // See https://github.com/antlr/antlr4/blob/master/doc/tool-options.md for details
     args = [GRAMMAR_FILE, '-o', "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH", '-package', PACKAGE, '-Werror', '-long-messages']
     classpath =  configurations.antlr
 }
 
-tasks.preBuild.dependsOn(generateParserSources)
+task cleanupAntlrTemporaryFiles(type: Delete, dependsOn: generateParserSources) {
+    delete fileTree(dir: "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH", include: '*.tokens')
+}
+
+tasks.preBuild.dependsOn(cleanupAntlrTemporaryFiles)
 
 dependencies {
     antlr 'org.antlr:antlr4:4.5.1'
