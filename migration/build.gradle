@@ -20,11 +20,30 @@ android {
     }
 }
 
+final PACKAGE = 'com.github.gfx.android.orma.migration.sqliteparser.g'
+final PACKAGE_PATH = PACKAGE.replaceAll(/\./, '/')
+final GRAMMAR_FILE = project.file("src/main/antlr/SQLite.g4")
+final ANTLR_OUTPUT_DIR = "$buildDir/generated/source/antlr"
+
+configurations {
+    antlr
+}
+
+android.sourceSets.main.java.srcDir ANTLR_OUTPUT_DIR
+
+task generateParserSources(type: JavaExec) {
+    description = 'Generate SQLiteParser sources with ANTLR4'
+    main = 'org.antlr.v4.Tool'
+    args = [GRAMMAR_FILE, '-o', "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH", '-package', PACKAGE, '-Werror', '-long-messages']
+    classpath =  configurations.antlr
+}
+
+tasks.preBuild.dependsOn(generateParserSources)
+
 dependencies {
-    compile(project(':sqliteparser')) {
-        exclude group: 'org.antlr', module: 'antlr4'
-        exclude group: 'com.google.code.findbugs', module: 'jsr305'
-    }
+    antlr 'org.antlr:antlr4:4.5.1'
+    compile 'org.antlr:antlr4-runtime:4.5.1'
+
     compile 'com.android.support:support-annotations:23.1.1'
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'junit:junit:4.12'

@@ -15,9 +15,9 @@
  */
 package com.github.gfx.android.orma.migration;
 
-import com.github.gfx.android.orma.sqliteparser.CreateTableStatement;
-import com.github.gfx.android.orma.sqliteparser.SQLiteComponent;
-import com.github.gfx.android.orma.sqliteparser.SQLiteParserUtils;
+import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
+import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
+import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
 import android.content.Context;
 import android.content.pm.PackageManager;

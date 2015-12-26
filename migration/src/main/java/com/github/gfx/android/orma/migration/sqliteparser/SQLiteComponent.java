@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.sqliteparser;
+package com.github.gfx.android.orma.migration.sqliteparser;
+
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import javax.annotation.Nonnull;
 
 /**
  * Base class of SQLite components
@@ -68,10 +68,10 @@ public class SQLiteComponent {
 
     public static class CaseInsensitiveToken implements CharSequence {
 
-        @Nonnull
+        @NonNull
         final String token;
 
-        public CaseInsensitiveToken(@Nonnull String token) {
+        public CaseInsensitiveToken(@NonNull String token) {
             this.token = token;
         }
 
@@ -90,7 +90,7 @@ public class SQLiteComponent {
             return token.subSequence(start, end);
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String toString() {
             return token;
@@ -118,23 +118,23 @@ public class SQLiteComponent {
 
     public static class Keyword extends CaseInsensitiveToken {
 
-        public Keyword(@Nonnull String token) {
+        public Keyword(@NonNull String token) {
             super(token);
         }
     }
 
     public static class Name extends CaseInsensitiveToken {
 
-        public Name(@Nonnull String token) {
+        public Name(@NonNull String token) {
             super(ensureDoubleQuoted(token));
         }
 
-        @Nonnull
+        @NonNull
         public String getUnquotedToken() {
             return dequote(token);
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String toString() {
             return token;

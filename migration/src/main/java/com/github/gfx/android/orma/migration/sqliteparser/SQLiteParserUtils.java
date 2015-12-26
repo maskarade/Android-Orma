@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.sqliteparser;
+package com.github.gfx.android.orma.migration.sqliteparser;
 
-import com.github.gfx.android.orma.sqliteparser.g.SQLiteLexer;
-import com.github.gfx.android.orma.sqliteparser.g.SQLiteParser;
+import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteLexer;
+import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -48,7 +48,8 @@ public class SQLiteParserUtils {
 
     public static CreateTableStatement parseIntoCreateTableStatement(String sql) throws ParseCancellationException {
         SQLiteParser parser = createParser(sql);
-        SQLiteDdlCollector collector = new SQLiteDdlCollector();
+        com.github.gfx.android.orma.migration.sqliteparser.SQLiteDdlCollector
+                collector = new com.github.gfx.android.orma.migration.sqliteparser.SQLiteDdlCollector();
         parser.addParseListener(collector);
         parser.parse();
 

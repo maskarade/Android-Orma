@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.sqliteparser;
+package com.github.gfx.android.orma.migration.sqliteparser;
 
-import com.github.gfx.android.orma.sqliteparser.g.SQLiteBaseListener;
-import com.github.gfx.android.orma.sqliteparser.g.SQLiteParser;
+import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteBaseListener;
+import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -30,13 +30,13 @@ import java.util.List;
  */
 public class SQLiteDdlCollector extends SQLiteBaseListener {
 
-    CreateTableStatement.ColumnDef columnDef;
+    com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement.ColumnDef columnDef;
 
-    CreateTableStatement createTableStatement;
+    com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement createTableStatement;
 
     @Override
     public void enterCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
-        createTableStatement = new CreateTableStatement();
+        createTableStatement = new com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement();
     }
 
     @Override
@@ -51,12 +51,12 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     @Override
     public void exitTable_name(SQLiteParser.Table_nameContext ctx) {
-        createTableStatement.tableName = new SQLiteComponent.Name(ctx.getText());
+        createTableStatement.tableName = new com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent.Name(ctx.getText());
     }
 
     @Override
     public void enterColumn_def(SQLiteParser.Column_defContext ctx) {
-        columnDef = new CreateTableStatement.ColumnDef();
+        columnDef = new com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement.ColumnDef();
         createTableStatement.columns.add(columnDef);
     }
 
@@ -69,7 +69,7 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
     @Override
     public void exitColumn_name(SQLiteParser.Column_nameContext ctx) {
         if (columnDef != null) {
-            columnDef.name = new SQLiteComponent.Name(ctx.getText());
+            columnDef.name = new com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent.Name(ctx.getText());
         }
     }
 
@@ -88,7 +88,8 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     @Override
     public void exitColumn_constraint(SQLiteParser.Column_constraintContext ctx) {
-        CreateTableStatement.ColumnDef.Constraint constraint = new CreateTableStatement.ColumnDef.Constraint();
+        com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement.ColumnDef.Constraint
+                constraint = new com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement.ColumnDef.Constraint();
 
         if (ctx.K_PRIMARY() != null) {
             constraint.primaryKey = true;
@@ -114,10 +115,11 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     @Override
     public void exitTable_constraint(SQLiteParser.Table_constraintContext ctx) {
-        CreateTableStatement.Constraint constraint = new CreateTableStatement.Constraint();
+        com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement.Constraint
+                constraint = new com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement.Constraint();
 
         if (ctx.K_CONSTRAINT() != null) {
-            constraint.name = new SQLiteComponent.Name(ctx.name().getText());
+            constraint.name = new com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent.Name(ctx.name().getText());
         }
         appendTokenList(constraint, ctx);
 
@@ -126,14 +128,14 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     // utils
 
-    void appendTokenList(final SQLiteComponent component, ParseTree node) {
+    void appendTokenList(final com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent component, ParseTree node) {
         node.accept(new AbstractParseTreeVisitor<Void>() {
             @Override
             public Void visitTerminal(TerminalNode node) {
                 if (node.getParent() instanceof SQLiteParser.Any_nameContext) {
-                    component.tokens.add(new SQLiteComponent.Name(node.getText()));
+                    component.tokens.add(new com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent.Name(node.getText()));
                 } else if (node.getParent() instanceof SQLiteParser.KeywordContext) {
-                    component.tokens.add(new SQLiteComponent.Keyword(node.getText()));
+                    component.tokens.add(new com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent.Keyword(node.getText()));
                 } else {
                     component.tokens.add(node.getText());
                 }
