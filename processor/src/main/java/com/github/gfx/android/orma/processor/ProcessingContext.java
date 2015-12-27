@@ -19,6 +19,7 @@ import com.squareup.javapoet.TypeName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,9 +36,9 @@ public class ProcessingContext {
 
     public final Map<TypeName, SchemaDefinition> schemaMap;
 
-    public ProcessingContext(ProcessingEnvironment processingEnv, Map<TypeName, SchemaDefinition> schemaMap) {
+    public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
-        this.schemaMap = schemaMap;
+        this.schemaMap = new HashMap<>();
     }
 
     public void addError(String message, Element element) {

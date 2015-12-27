@@ -330,7 +330,6 @@ public class SchemaWriter extends BaseWriter {
                         .build()
         );
 
-
         methodSpecs.add(
                 MethodSpec.methodBuilder("bindArgs")
                         .addAnnotation(Override.class)
@@ -455,28 +454,31 @@ public class SchemaWriter extends BaseWriter {
         List<ColumnDefinition> columns = schema.getColumns();
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
-            AssociationDefinition r = c.getAssociation();
             TypeName type = c.getUnboxType();
-            if (r == null) {
-                CodeBlock.Builder getCursorExpr = CodeBlock.builder();
 
+            if (Types.isDirectAssociation(context, type)) {
+                ClassName className = (ClassName) type;
+                String singleAssocType = "SingleAssociation<" + className.simpleName() + ">";
+                context.addError("Direct association is not yet supported. Use " + singleAssocType + " instead.", c.element);
+            } else if (Types.isSingleAssociation(type)) {
+                AssociationDefinition r = c.getAssociation();
+                CodeBlock.Builder getRhsExpr = CodeBlock.builder()
+                        .add("new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
+                                r.relationType, r.modelType, i);
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
+            } else {
+                CodeBlock.Builder getRhsExpr = CodeBlock.builder();
                 if (Types.needsTypeAdapter(type)) {
-                    getCursorExpr.add("$L.$L($L)",
+                    getRhsExpr.add("$L.$L($L)",
                             c.buildGetTypeAdapter("conn"),
                             c.nullable ? "deserializeNullable" : "deserialize",
                             cursorGetter(c, i));
                 } else {
-                    getCursorExpr.add("$L",
+                    getRhsExpr.add("$L",
                             cursorGetter(c, i));
                 }
 
-                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getCursorExpr.build()));
-            } else { // SingleAssociation
-                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(CodeBlock.builder()
-                                .add("new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
-                                        r.relationType, r.modelType, i)
-                                .build()
-                ));
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             }
         }
         return builder.build();
