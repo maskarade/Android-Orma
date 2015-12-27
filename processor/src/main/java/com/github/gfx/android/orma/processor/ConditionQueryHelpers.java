@@ -33,9 +33,10 @@ public class ConditionQueryHelpers {
 
     private final ClassName targetClassName;
 
-    private final SqlGenerator sql = new SqlGenerator();
+    private final SqlGenerator sql;
 
-    public ConditionQueryHelpers(SchemaDefinition schema, ClassName targetClassName) {
+    public ConditionQueryHelpers(ProcessingContext context, SchemaDefinition schema, ClassName targetClassName) {
+        this.sql = new SqlGenerator(context);
         this.schema = schema;
         this.targetClassName = targetClassName;
     }

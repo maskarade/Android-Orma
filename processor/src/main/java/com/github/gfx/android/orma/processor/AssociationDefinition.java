@@ -21,7 +21,7 @@ import com.squareup.javapoet.TypeName;
 
 public class AssociationDefinition {
 
-    final ClassName relationType;
+    final ClassName associationType;
 
     final ClassName modelType;
 
@@ -30,8 +30,8 @@ public class AssociationDefinition {
         return new AssociationDefinition(pt.rawType, pt.typeArguments.get(0));
     }
 
-    public AssociationDefinition(ClassName relationType, TypeName modelType) {
-        this.relationType = relationType;
+    public AssociationDefinition(ClassName associationType, TypeName modelType) {
+        this.associationType = associationType;
         this.modelType = (ClassName)modelType;
     }
 }

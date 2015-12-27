@@ -30,12 +30,10 @@ public class UpdaterWriter extends BaseWriter {
 
     private final ConditionQueryHelpers conditionQueryHelpers;
 
-    private final SqlGenerator sql = new SqlGenerator();
-
     public UpdaterWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
-        conditionQueryHelpers = new ConditionQueryHelpers(schema, schema.getUpdaterClassName());
+        conditionQueryHelpers = new ConditionQueryHelpers(context, schema, schema.getUpdaterClassName());
     }
 
     @Override

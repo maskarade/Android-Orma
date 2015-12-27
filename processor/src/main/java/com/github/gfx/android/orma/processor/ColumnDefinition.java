@@ -34,6 +34,8 @@ import javax.lang.model.element.VariableElement;
 
 public class ColumnDefinition {
 
+    public static final String kDefaultPrimaryKeyName = "_rowid_";
+
     public final SchemaDefinition schema;
 
     public final VariableElement element;

@@ -43,6 +43,8 @@ public class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     MigrationEngine migrationEngine;
 
+    boolean foreignKeys = true;
+
     boolean wal = true;
 
     boolean trace;
@@ -98,6 +100,19 @@ public class OrmaConfiguration<T extends OrmaConfiguration<?>> {
      */
     public T writeAheadLogging(boolean wal) {
         this.wal = wal;
+        return (T) this;
+    }
+
+    /**
+     * Controls SQLite {@code foreign_keys} support. {@code true} by default.
+     *
+     * @see <a href="https://www.sqlite.org/foreignkeys.html">https://www.sqlite.org/foreignkeys.html</a>
+     *
+     * @param foreignKeys {@code false} to disable {@code foreign_keys}
+     * @return The receiver itself
+     */
+    public T foreignKeys(boolean foreignKeys) {
+        this.foreignKeys = foreignKeys;
         return (T) this;
     }
 

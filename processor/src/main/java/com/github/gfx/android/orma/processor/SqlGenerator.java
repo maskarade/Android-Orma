@@ -25,6 +25,12 @@ import java.util.stream.Collectors;
 
 public class SqlGenerator {
 
+    final ProcessingContext context;
+
+    public SqlGenerator(ProcessingContext context) {
+        this.context = context;
+    }
+
     public String buildCreateTableStatement(SchemaDefinition schema) {
         StringBuilder sb = new StringBuilder();
 
@@ -92,6 +98,10 @@ public class SqlGenerator {
             constraints.add("COLLATE " + column.collate.name());
         }
 
+        if (Types.isSingleAssociation(column.type)) {
+            constraints.add(foreignKeyConstraints(column));
+        }
+
         sb.append(constraints.stream().collect(Collectors.joining(" ")));
     }
 
@@ -110,6 +120,20 @@ public class SqlGenerator {
             default:
                 return null;
         }
+    }
+
+    String foreignKeyConstraints(ColumnDefinition column) {
+        AssociationDefinition a = column.getAssociation();
+        SchemaDefinition foreignTableSchema = context.getSchemaDef(a.modelType);
+        StringBuilder sb = new StringBuilder();
+        sb.append("REFERENCES ");
+        appendIdentifier(sb, foreignTableSchema.getTableName());
+        sb.append('(');
+        appendIdentifier(sb, foreignTableSchema.getPrimaryKeyName());
+        sb.append(')');
+        sb.append(" ON UPDATE CASCADE");
+        sb.append(" ON DELETE CASCADE");
+        return sb.toString();
     }
 
     public CodeBlock buildCreateIndexStatements(SchemaDefinition schema) {

@@ -56,8 +56,6 @@ public class SchemaWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final SqlGenerator sql = new SqlGenerator();
-
     FieldSpec primaryKey;
 
     public SchemaWriter(ProcessingContext context, SchemaDefinition schema) {
@@ -152,19 +150,18 @@ public class SchemaWriter extends BaseWriter {
     }
 
     public FieldSpec buildRowIdColumnFieldSpec() {
-        String name = "_rowid_";
         TypeName columnDefType = ParameterizedTypeName.get(Types.ColumnDef, TypeName.LONG.box());
 
         CodeBlock initializer;
         initializer = CodeBlock.builder()
                 .add("new $T($S, $T.class, $S, $L, $L, $L, $L, $L, $L)",
                         columnDefType,
-                        name, TypeName.LONG, SqlTypes.getSqliteType(TypeName.LONG),
+                        ColumnDefinition.kDefaultPrimaryKeyName, TypeName.LONG, SqlTypes.getSqliteType(TypeName.LONG),
                         false /* nullable */, true /* primary key */, false /* autoincrement */, true /* autoId */,
-                        false /* indexed */,  false /* unique */)
+                        false /* indexed */, false /* unique */)
                 .build();
 
-        return FieldSpec.builder(columnDefType, name)
+        return FieldSpec.builder(columnDefType, ColumnDefinition.kDefaultPrimaryKeyName)
                 .addModifiers(publicStaticFinal)
                 .initializer(initializer)
                 .build();
@@ -392,7 +389,7 @@ public class SchemaWriter extends BaseWriter {
                 builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
             } else if (type.equals(Types.String)) {
                 builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
-            } else if (r != null && r.relationType.equals(Types.SingleAssociation)) {
+            } else if (r != null && r.associationType.equals(Types.SingleAssociation)) {
                 builder.addStatement("args[$L] = model.$L.getId()", i, c.buildGetColumnExpr());
             } else {
                 builder.addStatement("args[$L] = $L",
@@ -430,7 +427,7 @@ public class SchemaWriter extends BaseWriter {
                 builder.addStatement("statement.bindBlob($L, model.$L)", n, c.buildGetColumnExpr());
             } else if (type.equals(Types.String)) {
                 builder.addStatement("statement.bindString($L, model.$L)", n, c.buildGetColumnExpr());
-            } else if (r != null && r.relationType.equals(Types.SingleAssociation)) {
+            } else if (r != null && r.associationType.equals(Types.SingleAssociation)) {
                 builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.buildGetColumnExpr());
             } else {
                 builder.addStatement("statement.bindString($L, $L)",
@@ -464,7 +461,7 @@ public class SchemaWriter extends BaseWriter {
                 AssociationDefinition r = c.getAssociation();
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder()
                         .add("new $T<>(conn, $L, cursor.getLong($L))",
-                                r.relationType, context.getSchemaInstanceExpr(r.modelType), i);
+                                r.associationType, context.getSchemaInstanceExpr(r.modelType), i);
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             } else {
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder();
