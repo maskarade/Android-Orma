@@ -154,35 +154,11 @@ public class ColumnDefinition {
     }
 
     public TypeName getUnboxType() {
-        if (type.equals(TypeName.VOID.box())) {
-            return TypeName.VOID;
-        } else if (type.equals(TypeName.BOOLEAN.box())) {
-            return TypeName.BOOLEAN;
-        } else if (type.equals(TypeName.BYTE.box())) {
-            return TypeName.BYTE;
-        } else if (type.equals(TypeName.SHORT.box())) {
-            return TypeName.SHORT;
-        } else if (type.equals(TypeName.INT.box())) {
-            return TypeName.INT;
-        } else if (type.equals(TypeName.LONG.box())) {
-            return TypeName.LONG;
-        } else if (type.equals(TypeName.CHAR.box())) {
-            return TypeName.CHAR;
-        } else if (type.equals(TypeName.FLOAT.box())) {
-            return TypeName.FLOAT;
-        } else if (type.equals(TypeName.DOUBLE.box())) {
-            return TypeName.DOUBLE;
-        }
-
-        return type;
+        return Types.asUnboxType(type);
     }
 
     public TypeName getRawType() {
-        if (type instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) type).rawType;
-        } else {
-            return type;
-        }
+        return Types.asRawType(type);
     }
 
     /**
