@@ -25,6 +25,8 @@ public class ColumnDef<T /* type param is not used */> {
 
     public final Type type;
 
+    public final String storageType;
+
     public final boolean nullable;
 
     public final boolean primaryKey;
@@ -37,10 +39,11 @@ public class ColumnDef<T /* type param is not used */> {
 
     public final boolean unique;
 
-    public ColumnDef(String name, Type type, boolean nullable, boolean primaryKey, boolean autoincrement, boolean autoId,
+    public ColumnDef(String name, Type type, String storageType, boolean nullable, boolean primaryKey, boolean autoincrement, boolean autoId,
             boolean indexed, boolean unique) {
         this.name = name;
         this.type = type;
+        this.storageType = storageType;
         this.nullable = nullable;
         this.primaryKey = primaryKey;
         this.autoincrement = autoincrement;

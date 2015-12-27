@@ -127,23 +127,23 @@ public class SchemaWriter extends BaseWriter {
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
         TypeName type = c.getType();
 
-        CodeBlock initializer;
+        CodeBlock typeInstance;
         if (type instanceof ParameterizedTypeName) {
-            initializer = CodeBlock.builder()
-                    .add("new $T($S, $T.getType(new $T<$T>(){}), $L, $L, $L, $L, $L, $L)",
-                            c.getColumnDefType(), c.columnName,
-                            Types.ParameterizedTypes, Types.TypeHolder, type,
-                            c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
-                    .build();
-
+            typeInstance = CodeBlock.builder()
+                    .add("$T.getType(new $T<$T>(){})", Types.ParameterizedTypes, Types.TypeHolder, type
+                    ).build();
         } else {
-            initializer = CodeBlock.builder()
-                    .add("new $T($S, $T.class, $L, $L, $L, $L, $L, $L)",
-                            c.getColumnDefType(), c.columnName,
-                            type,
-                            c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
+            typeInstance = CodeBlock.builder()
+                    .add("$T.class", type)
                     .build();
         }
+
+        CodeBlock initializer = CodeBlock.builder()
+                .add("new $T($S, $L, $S, $L, $L, $L, $L, $L, $L)",
+                        c.getColumnDefType(),
+                        c.columnName, typeInstance, SqlTypes.getSqliteType(c.getRawType()),
+                        c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
+                .build();
 
         return FieldSpec.builder(c.getColumnDefType(), c.name)
                 .addModifiers(publicStaticFinal)
@@ -157,11 +157,11 @@ public class SchemaWriter extends BaseWriter {
 
         CodeBlock initializer;
         initializer = CodeBlock.builder()
-                .add("new $T($S, $T.class, $L, $L, $L, $L, $L, $L)",
-                        columnDefType, name,
-                        TypeName.LONG,
-                        false /* nullable */, true /* primary key */, false /* autoincrement */, true /* autoId */, false,
-                        false)
+                .add("new $T($S, $T.class, $S, $L, $L, $L, $L, $L, $L)",
+                        columnDefType,
+                        name, TypeName.LONG, SqlTypes.getSqliteType(TypeName.LONG),
+                        false /* nullable */, true /* primary key */, false /* autoincrement */, true /* autoId */,
+                        false /* indexed */,  false /* unique */)
                 .build();
 
         return FieldSpec.builder(columnDefType, name)
