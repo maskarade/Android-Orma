@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.github.gfx.android.orma.annotation.Column;
 import com.squareup.javapoet.CodeBlock;
 
 import java.util.ArrayList;
@@ -80,8 +81,8 @@ public class SqlGenerator {
             constraints.add("DEFAULT (" + column.defaultExpr + ")");
         }
 
-        if (!Strings.isEmpty(column.collate)) {
-            constraints.add("COLLATE " + column.collate);
+        if (column.collate != Column.Collate.BINARY) {
+            constraints.add("COLLATE " + column.collate.name());
         }
 
         sb.append(constraints.stream().collect(Collectors.joining(" ")));

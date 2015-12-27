@@ -57,7 +57,7 @@ public class ColumnDefinition {
 
     public final String defaultExpr;
 
-    public final String collate;
+    public final Column.Collate collate;
 
     public Element getter;
 
@@ -85,7 +85,7 @@ public class ColumnDefinition {
             indexed = false;
             unique = false;
             defaultExpr = null;
-            collate = null;
+            collate = Column.Collate.BINARY;
         }
 
         if (primaryKeyAnnotation != null) {

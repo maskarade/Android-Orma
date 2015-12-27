@@ -84,26 +84,26 @@ public class ModelSpecTest {
     @Test
     public void testCollation() throws Exception {
         ModelWithCollation one = new ModelWithCollation();
-        one.noCollationField = "foo";
+        one.binaryField = "foo";
         one.rtrimField = "foo";
         one.nocaseField = "foo";
         db.insertIntoModelWithCollation(one);
 
         ModelWithCollation two = new ModelWithCollation();
-        two.noCollationField = "foo  ";
+        two.binaryField = "foo  ";
         two.rtrimField = "foo  ";
         two.nocaseField = "foo  ";
         db.insertIntoModelWithCollation(two);
 
         ModelWithCollation three = new ModelWithCollation();
-        three.noCollationField = "FOO";
+        three.binaryField = "FOO";
         three.rtrimField = "FOO";
         three.nocaseField = "FOO";
         db.insertIntoModelWithCollation(three);
 
         assertThat(db.selectFromModelWithCollation().where("rtrimField = ?", "foo ").count(), is(2));
         assertThat(db.selectFromModelWithCollation().where("nocaseField = ?", "foo").count(), is(2));
-        assertThat(db.selectFromModelWithCollation().where("noCollationField = ?", "foo").count(), is(1));
+        assertThat(db.selectFromModelWithCollation().where("binaryField = ?", "foo").count(), is(1));
     }
 
     @Test
