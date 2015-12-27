@@ -19,7 +19,7 @@ import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.adapter.StringListAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.TypeAdapterNotFoundException;
-import com.github.gfx.android.orma.internal.ParameterizedTypes;
+import com.github.gfx.android.orma.internal.TypeHolder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,11 +42,11 @@ import static org.junit.Assert.*;
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class TypeAdaptersTest {
 
-    static final Type stringListType = ParameterizedTypes.getType(new ParameterizedTypes.TypeHolder<List<String>>() {
-    });
+    static final Type stringListType = new TypeHolder<List<String>>() {
+    }.getType();
 
-    static final Type stringSetType = ParameterizedTypes.getType(new ParameterizedTypes.TypeHolder<Set<String>>() {
-    });
+    static final Type stringSetType = new TypeHolder<Set<String>>() {
+    }.getType();
 
     static final StringListAdapter stringListAdapter = new StringListAdapter();
 
