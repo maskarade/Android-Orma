@@ -21,15 +21,14 @@ import com.github.gfx.android.orma.annotation.Table;
 @Table
 public class ModelWithCollation {
 
-    @Column
-    public
-    String noCollationField;
+    @Column(collate = Column.Collate.BINARY)
+    public String binaryField;
 
-    @Column(collate = "RTRIM")
+    @Column(collate = Column.Collate.RTRIM)
     public
     String rtrimField;
 
-    @Column(collate = "NOCASE")
+    @Column(collate = Column.Collate.NOCASE)
     public
     String nocaseField;
 }

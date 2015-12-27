@@ -24,6 +24,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Column {
 
+    enum Collate {
+        BINARY,
+        NOCASE,
+        RTRIM
+    }
+
     /**
      * @return The column name in SQLite tables. It is case-insensitive.
      */
@@ -40,12 +46,16 @@ public @interface Column {
     boolean unique() default false;
 
     /**
-     * @return Specifies the DEFAULT expression in terms of DDL. This is useful to fill values in migration.
+     * The {@code DEFAULT} expression for the column. Currently it is only used in migration.
+     *
+     * @return An SQLite expression. For example. {@code "''"} for an empty string, and {@code "0"} for a literal zero,
      */
     String defaultExpr() default "";
 
     /**
-     * @return Specifies how the column is compared. Must be one of {@code "BINARY"}, {@code "NOCASE"} or {@code "RTRIM"}
+     * Specifies how the column is compared.
+     *
+     * @return One of {@code Column.Collate.BINARY}, {@code Column.Collate.NOCASE} or {@code Column.Collate.RTRIM}
      */
-    String collate() default "";
+    Collate collate() default Collate.BINARY;
 }
