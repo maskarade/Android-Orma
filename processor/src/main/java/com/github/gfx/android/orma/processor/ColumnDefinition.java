@@ -146,7 +146,7 @@ public class ColumnDefinition {
         return false;
     }
 
-    public AssociationDefinition getRelation() {
+    public AssociationDefinition getAssociation() {
         if (AssociationDefinition.isSingleAssociation(type)) {
             return AssociationDefinition.create(type);
         }

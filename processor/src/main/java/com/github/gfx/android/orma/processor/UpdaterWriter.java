@@ -70,7 +70,7 @@ public class UpdaterWriter extends BaseWriter {
         );
 
         schema.getColumnsWithoutAutoId().forEach(column -> {
-            AssociationDefinition r = column.getRelation();
+            AssociationDefinition r = column.getAssociation();
 
             if (r == null) {
                 String paramName = column.name;

@@ -381,7 +381,7 @@ public class SchemaWriter extends BaseWriter {
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getUnboxType();
-            AssociationDefinition r = c.getRelation();
+            AssociationDefinition r = c.getAssociation();
 
             if (type.equals(TypeName.BOOLEAN)) {
                 builder.addStatement("args[$L] = model.$L ? 1 : 0", i, c.buildGetColumnExpr());
@@ -414,7 +414,7 @@ public class SchemaWriter extends BaseWriter {
             int n = i + 1; // bind index starts 1
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getUnboxType();
-            AssociationDefinition r = c.getRelation();
+            AssociationDefinition r = c.getAssociation();
             boolean nullable = !c.getType().isPrimitive() && c.nullable;
 
             if (nullable) {
@@ -455,7 +455,7 @@ public class SchemaWriter extends BaseWriter {
         List<ColumnDefinition> columns = schema.getColumns();
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
-            AssociationDefinition r = c.getRelation();
+            AssociationDefinition r = c.getAssociation();
             TypeName type = c.getUnboxType();
             if (r == null) {
                 CodeBlock.Builder getCursorExpr = CodeBlock.builder();
