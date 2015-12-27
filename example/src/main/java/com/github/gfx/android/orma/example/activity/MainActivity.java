@@ -98,8 +98,13 @@ public class MainActivity extends AppCompatActivity
         orma = OrmaDatabase.builder(this)
                 .migrationEngine(new SchemaDiffMigration(this) {
                     @Override
-                    public void executeStatements(SQLiteDatabase db, List<String> statements) {
-                        logsAdapter.addAll(statements);
+                    public void executeStatements(SQLiteDatabase db, final List<String> statements) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                logsAdapter.addAll(statements);
+                            }
+                        });
 
                         super.executeStatements(db, statements);
                     }
