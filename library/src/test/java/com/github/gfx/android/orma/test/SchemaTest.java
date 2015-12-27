@@ -54,8 +54,13 @@ public class SchemaTest {
         assertThat(schema.getPrimaryKey(), is((ColumnDef) Book_Schema.id));
 
         assertThat(Book_Schema.id.name, is("id"));
+        assertThat(Book_Schema.id.storageType, is("INTEGER"));
         assertThat(Book_Schema.title.name, is("title"));
+        assertThat(Book_Schema.title.storageType, is("TEXT"));
         assertThat(Book_Schema.content.name, is("content"));
+        assertThat(Book_Schema.content.storageType, is("TEXT"));
+        assertThat(Book_Schema.publisher.name, is("publisher"));
+        assertThat(Book_Schema.publisher.storageType, is("INTEGER"));
     }
 
     @Test
