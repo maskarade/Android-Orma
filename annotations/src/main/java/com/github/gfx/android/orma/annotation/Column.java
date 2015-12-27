@@ -24,9 +24,28 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Column {
 
+    /**
+     * Set of {@code COLLATE} algorithms.
+     *
+     * @see <a href="https://www.sqlite.org/datatype3.html#collation">https://www.sqlite.org/datatype3.html#collation</a>
+     */
     enum Collate {
+        /**
+         * <blockquote cite="https://www.sqlite.org/datatype3.html#collation">Compares string data using memcmp(), regardless
+         * of text encoding.</blockquote>
+         */
         BINARY,
+        /**
+         * <blockquote cite="https://www.sqlite.org/datatype3.html#collation">The same as binary, except the 26 upper
+         * case characters of ASCII are folded to their lower case equivalents before the comparison is performed. Note that
+         * only ASCII characters are case folded. SQLite does not attempt to do full UTF case folding due to the size of the
+         * tables required.</blockquote>
+         */
         NOCASE,
+        /**
+         * <blockquote cite="https://www.sqlite.org/datatype3.html#collation">The same as binary, except that trailing space
+         * characters are ignored.</blockquote>
+         */
         RTRIM
     }
 
