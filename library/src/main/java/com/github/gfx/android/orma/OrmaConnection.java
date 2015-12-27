@@ -58,6 +58,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean wal;
 
+    final boolean foreignKeys;
+
     final boolean trace;
 
     final TypeAdapterRegistry typeAdapterRegistry;
@@ -70,6 +72,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         super(configuration.context, configuration.name, null, configuration.migrationEngine.getVersion());
         this.schemas = schemas;
         this.migration = configuration.migrationEngine;
+        this.foreignKeys = configuration.foreignKeys;
         this.wal = configuration.wal;
         this.typeAdapterRegistry = configuration.typeAdapterRegistry;
 
@@ -308,6 +311,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
         if (wal && getDatabaseName() != null && !isRunningOnJellyBean()) {
             db.enableWriteAheadLogging();
+        }
+        if (foreignKeys) {
+            db.execSQL("PRAGMA foreign_keys = ON");
+        } else {
+            db.execSQL("PRAGMA foreign_keys = OFF");
         }
     }
 

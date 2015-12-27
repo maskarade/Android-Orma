@@ -252,6 +252,11 @@ public class SchemaDefinition {
         return null;
     }
 
+    public String getPrimaryKeyName() {
+        ColumnDefinition primaryKey = getPrimaryKey();
+        return primaryKey != null ? primaryKey.columnName : ColumnDefinition.kDefaultPrimaryKeyName;
+    }
+
     @Override
     public String toString() {
         return getModelClassName().simpleName();

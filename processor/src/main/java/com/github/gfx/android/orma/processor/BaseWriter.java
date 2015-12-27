@@ -19,10 +19,13 @@ import com.squareup.javapoet.TypeSpec;
 
 public abstract class BaseWriter {
 
-    public final ProcessingContext context;
+    protected final ProcessingContext context;
+
+    protected final SqlGenerator sql;
 
     public BaseWriter(ProcessingContext context) {
         this.context = context;
+        this.sql = new SqlGenerator(context);
     }
 
     public abstract TypeSpec buildTypeSpec();

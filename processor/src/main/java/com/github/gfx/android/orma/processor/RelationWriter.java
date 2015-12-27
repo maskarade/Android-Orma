@@ -30,12 +30,10 @@ public class RelationWriter extends BaseWriter {
 
     private final ConditionQueryHelpers conditionQueryHelpers;
 
-    private final SqlGenerator sql = new SqlGenerator();
-
     public RelationWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
-        this.conditionQueryHelpers = new ConditionQueryHelpers(schema, schema.getRelationClassName());
+        this.conditionQueryHelpers = new ConditionQueryHelpers(context, schema, schema.getRelationClassName());
     }
 
     @Override
