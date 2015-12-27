@@ -79,9 +79,7 @@ public class SqlGenerator {
                     constraints.add(onConflictClause(column.uniqueOnConflict));
                 }
             }
-            if (column.nullable) {
-                constraints.add("NULL");
-            } else {
+            if (!column.nullable) {
                 constraints.add("NOT NULL");
             }
         }
