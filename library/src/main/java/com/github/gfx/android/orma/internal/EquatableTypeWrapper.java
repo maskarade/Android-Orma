@@ -20,10 +20,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
-// Hack to make Android 4.x's type to be equatable
+// Hack to make Android 4.x's type to be suitable for HashMap keys, used in TypeAdapterRegistry
 public class EquatableTypeWrapper implements Type {
 
-    static final boolean ON_JVM = !System.getProperty("java.version").equals("0"); // robolectric
+    static final boolean ROBOLECTRIC_TESTING = !System.getProperty("java.version").equals("0");
 
     static final boolean USE_TYPE_WRAPPER;
 
@@ -37,8 +37,7 @@ public class EquatableTypeWrapper implements Type {
         // sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl (Oracle JDK 8)
         // org.apache.harmony.luni.lang.reflect.ImplForType (Android 4.2.2)
         // libcore.reflect.ParameterizedTypeImpl (Android 5.0.2)
-
-        USE_TYPE_WRAPPER = ON_JVM || !a.equals(b);
+        USE_TYPE_WRAPPER = ROBOLECTRIC_TESTING || !a.equals(b);
     }
 
     public static Type wrap(Type type) {
