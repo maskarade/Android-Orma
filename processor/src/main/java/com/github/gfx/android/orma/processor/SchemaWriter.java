@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.Setter;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
@@ -304,7 +305,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
-                                .addAnnotation(Types.OnConflict)
+                                .addAnnotation(OnConflict.class)
                                 .build())
                         .returns(Types.String)
                         .addCode(sql.buildInsertStatementCode(schema, "onConflictAlgorithm"))

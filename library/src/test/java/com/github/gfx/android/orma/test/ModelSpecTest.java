@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.ModelWithBlob;
 import com.github.gfx.android.orma.test.model.ModelWithBoxTypes;
 import com.github.gfx.android.orma.test.model.ModelWithCollation;
+import com.github.gfx.android.orma.test.model.ModelWithConflictResolutions;
 import com.github.gfx.android.orma.test.model.ModelWithConstraints;
 import com.github.gfx.android.orma.test.model.ModelWithDefaults;
 import com.github.gfx.android.orma.test.model.ModelWithPrimitives;
@@ -297,6 +298,73 @@ public class ModelSpecTest {
                 return model;
             }
         });
+    }
+
+    @Test
+    public void testPrimaryKeyOnConflict() throws Exception {
+        db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+            @Override
+            public ModelWithConflictResolutions call() {
+                ModelWithConflictResolutions model = new ModelWithConflictResolutions();
+                model.primaryKeyOrIgnore = 10;
+                model.uniqueOrRollback = 1;
+                model.uniqueOrAbort = 1;
+                model.uniqueOrFail = 1;
+                model.uniqueOrIgnore = 1;
+                model.uniqueOrReplace = 1;
+                return model;
+            }
+        });
+
+        db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+            @Override
+            public ModelWithConflictResolutions call() {
+                ModelWithConflictResolutions model = new ModelWithConflictResolutions();
+                model.primaryKeyOrIgnore = 10;
+                model.uniqueOrRollback = 2;
+                model.uniqueOrAbort = 2;
+                model.uniqueOrFail = 2;
+                model.uniqueOrIgnore = 2;
+                model.uniqueOrReplace = 2;
+                return model;
+            }
+        });
+
+        assertThat(db.selectFromModelWithConflictResolutions().count(), is(1));
+    }
+
+    @Test
+    public void testUniqueOnConflict() throws Exception {
+        db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+            @Override
+            public ModelWithConflictResolutions call() {
+                ModelWithConflictResolutions model = new ModelWithConflictResolutions();
+                model.primaryKeyOrIgnore = 10;
+                model.uniqueOrRollback = 1;
+                model.uniqueOrAbort = 1;
+                model.uniqueOrFail = 1;
+                model.uniqueOrIgnore = 1;
+                model.uniqueOrReplace = 1;
+                return model;
+            }
+        });
+
+        db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+            @Override
+            public ModelWithConflictResolutions call() {
+                ModelWithConflictResolutions model = new ModelWithConflictResolutions();
+                model.primaryKeyOrIgnore = 11;
+                model.uniqueOrRollback = 2;
+                model.uniqueOrAbort = 2;
+                model.uniqueOrFail = 2;
+                model.uniqueOrIgnore = 2;
+                model.uniqueOrReplace = 1;
+                return model;
+            }
+        });
+
+        assertThat(db.selectFromModelWithConflictResolutions().count(), is(1));
+        assertThat(db.selectFromModelWithConflictResolutions().value().primaryKeyOrIgnore, is(11L));
     }
 
 }

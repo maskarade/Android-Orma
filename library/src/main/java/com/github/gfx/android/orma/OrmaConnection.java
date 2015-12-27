@@ -17,6 +17,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 

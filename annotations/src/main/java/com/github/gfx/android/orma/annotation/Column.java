@@ -41,9 +41,19 @@ public @interface Column {
     boolean indexed() default false;
 
     /**
-     * @return Indicates the column value is unique in rows.
+     * Specifies {@code UNIQUE} constraint. Shortcut of {@code uniqueOnConflict = OnConflict.ABORT}.
+     *
+     * @return True if the column value is unique in the table.
      */
     boolean unique() default false;
+
+    /**
+     * Specifies {@code UNIQUE} constraint with an {@code ON CONFLICT} clause.
+     *
+     * @return One of {@code OnConflict.ABORT}, {@code FAIL}, {@code IGNORE},
+     * {@code REPLACE}, or {@code ROLLBACK}
+     */
+    @OnConflict int uniqueOnConflict() default OnConflict.NONE;
 
     /**
      * The {@code DEFAULT} expression for the column. Currently it is only used in migration.
@@ -55,7 +65,7 @@ public @interface Column {
     /**
      * Specifies how the column is compared.
      *
-     * @return One of {@code Column.Collate.BINARY}, {@code Column.Collate.NOCASE} or {@code Column.Collate.RTRIM}
+     * @return One of {@code Column.Collate.BINARY} (the default), {@code NOCASE} or {@code RTRIM}
      */
     Collate collate() default Collate.BINARY;
 }

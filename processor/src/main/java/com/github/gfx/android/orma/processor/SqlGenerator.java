@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Column;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.squareup.javapoet.CodeBlock;
 
 import java.util.ArrayList;
@@ -66,9 +67,17 @@ public class SqlGenerator {
 
         if (column.primaryKey) {
             constraints.add("PRIMARY KEY");
+            if (column.primaryKeyOnConflict != OnConflict.NONE) {
+                constraints.add("ON CONFLICT");
+                constraints.add(onConflictClause(column.primaryKeyOnConflict));
+            }
         } else {
             if (column.unique) {
                 constraints.add("UNIQUE");
+                if (column.uniqueOnConflict != OnConflict.NONE) {
+                    constraints.add("ON CONFLICT");
+                    constraints.add(onConflictClause(column.uniqueOnConflict));
+                }
             }
             if (column.nullable) {
                 constraints.add("NULL");
@@ -86,6 +95,23 @@ public class SqlGenerator {
         }
 
         sb.append(constraints.stream().collect(Collectors.joining(" ")));
+    }
+
+    String onConflictClause(@OnConflict int conflictAlgorithm) {
+        switch (conflictAlgorithm) {
+            case OnConflict.ROLLBACK:
+                return "ROLLBACK";
+            case OnConflict.ABORT:
+                return "ABORT";
+            case OnConflict.FAIL:
+                return "FAIL";
+            case OnConflict.IGNORE:
+                return "IGNORE";
+            case OnConflict.REPLACE:
+                return "REPLACE";
+            default:
+                return null;
+        }
     }
 
     public CodeBlock buildCreateIndexStatements(SchemaDefinition schema) {
@@ -146,12 +172,12 @@ public class SqlGenerator {
         codeBuilder.addStatement("s.append($S)", "INSERT");
 
         codeBuilder.beginControlFlow("switch ($L)", onConflictAlgorithmParamName)
-                .addStatement("case $T.NONE: /* nop */ break", Types.OnConflict)
-                .addStatement("case $T.ABORT: s.append($S); break", Types.OnConflict, " OR ABORT")
-                .addStatement("case $T.FAIL: s.append($S); break", Types.OnConflict, " OR FAIL")
-                .addStatement("case $T.IGNORE: s.append($S); break", Types.OnConflict, " OR IGNORE")
-                .addStatement("case $T.REPLACE: s.append($S); break", Types.OnConflict, " OR REPLACE")
-                .addStatement("case $T.ROLLBACK: s.append($S); break", Types.OnConflict, " OR ROLLBACK")
+                .addStatement("case $T.NONE: /* nop */ break", OnConflict.class)
+                .addStatement("case $T.ABORT: s.append($S); break", OnConflict.class, " OR ABORT")
+                .addStatement("case $T.FAIL: s.append($S); break", OnConflict.class, " OR FAIL")
+                .addStatement("case $T.IGNORE: s.append($S); break", OnConflict.class, " OR IGNORE")
+                .addStatement("case $T.REPLACE: s.append($S); break", OnConflict.class, " OR REPLACE")
+                .addStatement("case $T.ROLLBACK: s.append($S); break", OnConflict.class, " OR ROLLBACK")
                 .endControlFlow();
 
         StringBuilder sb = new StringBuilder();
