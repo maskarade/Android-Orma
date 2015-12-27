@@ -23,16 +23,7 @@ public class AssociationDefinition {
 
     final ClassName relationType;
 
-    final TypeName modelType;
-
-    public static boolean isSingleAssociation(TypeName type) {
-        if (type instanceof ParameterizedTypeName) {
-            ParameterizedTypeName pt = (ParameterizedTypeName) type;
-            return pt.rawType.equals(Types.SingleAssociation);
-        } else {
-            return false;
-        }
-    }
+    final ClassName modelType;
 
     public static AssociationDefinition create(TypeName type) {
         ParameterizedTypeName pt = (ParameterizedTypeName) type;
@@ -41,6 +32,6 @@ public class AssociationDefinition {
 
     public AssociationDefinition(ClassName relationType, TypeName modelType) {
         this.relationType = relationType;
-        this.modelType = modelType;
+        this.modelType = (ClassName)modelType;
     }
 }

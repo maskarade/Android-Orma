@@ -168,6 +168,19 @@ public class Types {
                 || type.equals(TypeName.DOUBLE);
     }
 
+    public static boolean isSingleAssociation(TypeName type) {
+        if (type instanceof ParameterizedTypeName) {
+            ParameterizedTypeName pt = (ParameterizedTypeName) type;
+            return pt.rawType.equals(Types.SingleAssociation);
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isDirectAssociation(ProcessingContext context, TypeName type) {
+        return context.getSchemaDef(type) != null;
+    }
+
     public static boolean needsTypeAdapter(TypeName type) {
         return type instanceof ParameterizedTypeName
                 || !(type.isPrimitive() || type.equals(Types.String) || type.equals(Types.ByteArray));

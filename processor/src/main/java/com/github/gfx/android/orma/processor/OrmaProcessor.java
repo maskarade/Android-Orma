@@ -18,11 +18,8 @@ package com.github.gfx.android.orma.processor;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeName;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -48,19 +45,18 @@ public class OrmaProcessor extends AbstractProcessor {
             return true;
         }
 
-        Map<TypeName, SchemaDefinition> schemaMap = new HashMap<>();
-        ProcessingContext context = new ProcessingContext(processingEnv, schemaMap);
+        ProcessingContext context = new ProcessingContext(processingEnv);
 
         try {
             buildTableSchemas(context, roundEnv)
-                    .forEach(schema -> schemaMap.put(schema.getModelClassName(), schema));
+                    .forEach(schema -> context.schemaMap.put(schema.getModelClassName(), schema));
 
             buildVirtualTableSchemas(context, roundEnv)
                     .peek(schema -> {
                         throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
                     });
 
-            schemaMap.values().forEach((schema) -> {
+            context.schemaMap.values().forEach((schema) -> {
                 writeCodeForEachModel(schema, new SchemaWriter(context, schema));
                 writeCodeForEachModel(schema, new RelationWriter(context, schema));
                 writeCodeForEachModel(schema, new UpdaterWriter(context, schema));
