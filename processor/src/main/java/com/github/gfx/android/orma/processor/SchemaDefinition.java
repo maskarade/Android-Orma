@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -153,7 +154,7 @@ public class SchemaDefinition {
                 .filter(element -> element.getAnnotation(Column.class) != null
                         || element.getAnnotation(PrimaryKey.class) != null)
                 .map((element) -> {
-                    ColumnDefinition column = new ColumnDefinition(this, element);
+                    ColumnDefinition column = new ColumnDefinition(this, (VariableElement)element);
                     column.getter = getters.get(column.columnName);
                     column.setter = setters.get(column.columnName);
                     return column;

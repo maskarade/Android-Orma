@@ -29,12 +29,13 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
+import javax.lang.model.element.VariableElement;
 
 public class ColumnDefinition {
 
     public final SchemaDefinition schema;
 
-    public final Element element;
+    public final VariableElement element;
 
     public final String name;
 
@@ -62,11 +63,10 @@ public class ColumnDefinition {
 
     public Element setter;
 
-    public ColumnDefinition(SchemaDefinition schema, Element element) {
+    public ColumnDefinition(SchemaDefinition schema, VariableElement element) {
         this.schema = schema;
         this.element = element;
 
-        // TODO: autoincrement, conflict clause, default value, etc...
         // See https://www.sqlite.org/lang_createtable.html for full specification
         Column column = element.getAnnotation(Column.class);
         PrimaryKey primaryKeyAnnotation = element.getAnnotation(PrimaryKey.class);
