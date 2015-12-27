@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 
 import java.io.IOException;
@@ -55,6 +56,8 @@ public class OrmaProcessor extends AbstractProcessor {
                     .peek(schema -> {
                         throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
                     });
+
+            context.initializeOrmaDatabase();
 
             context.schemaMap.values().forEach((schema) -> {
                 writeCodeForEachModel(schema, new SchemaWriter(context, schema));

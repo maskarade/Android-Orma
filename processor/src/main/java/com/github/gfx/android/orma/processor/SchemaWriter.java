@@ -463,8 +463,8 @@ public class SchemaWriter extends BaseWriter {
             } else if (Types.isSingleAssociation(type)) {
                 AssociationDefinition r = c.getAssociation();
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder()
-                        .add("new $T<>(conn, OrmaDatabase.schema$T, cursor.getLong($L))",
-                                r.relationType, r.modelType, i);
+                        .add("new $T<>(conn, $L, cursor.getLong($L))",
+                                r.relationType, context.getSchemaInstanceExpr(r.modelType), i);
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             } else {
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder();

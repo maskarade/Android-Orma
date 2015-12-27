@@ -15,11 +15,13 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,15 +32,18 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
 public class ProcessingContext {
+
     public final ProcessingEnvironment processingEnv;
 
     public final List<ProcessingException> errors = new ArrayList<>();
 
     public final Map<TypeName, SchemaDefinition> schemaMap;
 
+    public ClassName OrmaDatabase;
+
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
-        this.schemaMap = new HashMap<>();
+        this.schemaMap = new LinkedHashMap<>(); // the order matters
     }
 
     public void addError(String message, Element element) {
@@ -67,11 +72,23 @@ public class ProcessingContext {
         throw new RuntimeException("No schema defined");
     }
 
+    public CodeBlock getSchemaInstanceExpr(ClassName modelClassName) {
+        return CodeBlock.builder()
+                .add("$T.schema$L", OrmaDatabase, modelClassName.simpleName())
+                .build();
+    }
+
     public TypeMirror getTypeMirrorOf(Type type) {
         return processingEnv.getElementUtils().getTypeElement(type.getTypeName()).asType();
     }
 
     public boolean isSameType(TypeMirror t1, TypeMirror t2) {
         return processingEnv.getTypeUtils().isSameType(t1, t2);
+    }
+
+    public void initializeOrmaDatabase() {
+        if (!schemaMap.isEmpty()) {
+            OrmaDatabase = ClassName.get(getPackageName(), DatabaseWriter.kClassName);
+        }
     }
 }
