@@ -95,10 +95,7 @@ public class Types {
 
     public static final ClassName MigrationEngine = ClassName.get(ormaPackageName + ".migration", "MigrationEngine");
 
-    public static final ClassName ParameterizedTypes = ClassName.get(ormaPackageName + ".internal", "ParameterizedTypes");
-
-    public static final ClassName TypeHolder = ClassName
-            .get(ormaPackageName + ".internal", "ParameterizedTypes", "TypeHolder");
+    public static final ClassName TypeHolder = ClassName.get(ormaPackageName + ".internal", "TypeHolder");
 
     public static final ClassName TypeAdapter = ClassName.get(ormaPackageName + ".adapter", "TypeAdapter");
 

@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma.adapter;
 
+import com.github.gfx.android.orma.internal.EquatableTypeWrapper;
+
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -27,7 +29,7 @@ public abstract class AbstractTypeAdapter<SourceType> implements TypeAdapter<Sou
     @Override
     public Type getSourceType() {
         ParameterizedType superClass = (ParameterizedType) getClass().getGenericSuperclass();
-        return superClass.getActualTypeArguments()[0];
+        return EquatableTypeWrapper.wrap(superClass.getActualTypeArguments()[0]);
     }
 
     @Nullable

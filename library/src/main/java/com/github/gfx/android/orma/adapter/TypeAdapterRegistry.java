@@ -46,6 +46,7 @@ public class TypeAdapterRegistry {
     }
 
     public <SourceType> void add(@NonNull TypeAdapter<SourceType> adapter) {
+        //System.out.println("XXX " + adapter.getSourceType() + " " + adapter.getSourceType().getClass());
         adapters.put(adapter.getSourceType(), adapter);
     }
 

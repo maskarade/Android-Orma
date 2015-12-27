@@ -128,7 +128,7 @@ public class SchemaWriter extends BaseWriter {
         CodeBlock typeInstance;
         if (type instanceof ParameterizedTypeName) {
             typeInstance = CodeBlock.builder()
-                    .add("$T.getType(new $T<$T>(){})", Types.ParameterizedTypes, Types.TypeHolder, type
+                    .add("new $T<$T>(){}.getType()", Types.TypeHolder, type
                     ).build();
         } else {
             typeInstance = CodeBlock.builder()

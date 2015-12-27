@@ -13,27 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.gfx.android.orma.internal;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
- * A utility class to get {@link Type} instance of a generic type.
- * e.g. {@code ParameterizedTypes.getType(new ParameterizedTypes.Holder<List<String>>(){}}
+ * A helper class to get the type instance of parameterized types.
+ *
+ * @see <a href="https://github.com/google/gson/blob/master/gson/src/main/java/com/google/gson/reflect/TypeToken.java">google/gson/TypeToken.java</a>
  */
-public class ParameterizedTypes {
+@SuppressWarnings("unused")
+public abstract class TypeHolder<T> {
 
-    public static Type getType(TypeHolder<?> typeHolder) {
-        ParameterizedType t = (ParameterizedType) typeHolder.getClass().getGenericInterfaces()[0];
-        return t.getActualTypeArguments()[0];
-    }
-
-    /**
-     * A helper class to hold parameterized types.
-     */
-    @SuppressWarnings("unused")
-    public interface TypeHolder<T> {
-
+    public Type getType() {
+        Class<?> c = getClass();
+        ParameterizedType t = (ParameterizedType) c.getGenericSuperclass();
+        return EquatableTypeWrapper.wrap(t.getActualTypeArguments()[0]);
     }
 }

@@ -21,8 +21,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class HandWrittenOpenHelper extends SQLiteOpenHelper {
 
+    int VERSION = 4;
+
     public HandWrittenOpenHelper(Context context, String name) {
-        super(context, name, null, 3);
+        super(context, name, null, 4);
     }
 
     @Override
