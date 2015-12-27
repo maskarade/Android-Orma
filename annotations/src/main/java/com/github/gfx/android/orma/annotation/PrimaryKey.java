@@ -27,8 +27,8 @@ public @interface PrimaryKey {
 
     /**
      * Corresponds the {@code AUTOINCREMENT} keyword.
-     * Note that this is slower than {@code auto = true}.
-     * See https://www.sqlite.org/autoinc.html for details.
+     *
+     * @see <a href="https://www.sqlite.org/autoinc.html">https://www.sqlite.org/autoinc.html</a>.
      */
     boolean autoincrement() default false;
 
@@ -37,4 +37,9 @@ public @interface PrimaryKey {
      * If true, any value you set to this column will be ignored in {@code INSERT}.
      */
     boolean auto() default true;
+
+    /**
+     * @return The conflict resolution algorithm for {@code PRIMARY KEY}.
+     */
+    @OnConflict int onConflict() default OnConflict.NONE;
 }

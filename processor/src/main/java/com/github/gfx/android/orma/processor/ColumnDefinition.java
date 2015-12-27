@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Column;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -47,6 +48,8 @@ public class ColumnDefinition {
 
     public final boolean primaryKey;
 
+    public final int primaryKeyOnConflict;
+
     public final boolean autoincrement;
 
     public final boolean autoId;
@@ -54,6 +57,8 @@ public class ColumnDefinition {
     public final boolean indexed;
 
     public final boolean unique;
+
+    public final int uniqueOnConflict;
 
     public final String defaultExpr;
 
@@ -78,21 +83,25 @@ public class ColumnDefinition {
 
         if (column != null) {
             indexed = column.indexed();
-            unique = column.unique();
+            uniqueOnConflict = column.uniqueOnConflict();
+            unique = uniqueOnConflict != OnConflict.NONE || column.unique();
             collate = column.collate();
             defaultExpr = column.defaultExpr();
         } else {
             indexed = false;
+            uniqueOnConflict = OnConflict.NONE;
             unique = false;
             defaultExpr = null;
             collate = Column.Collate.BINARY;
         }
 
         if (primaryKeyAnnotation != null) {
+            primaryKeyOnConflict = primaryKeyAnnotation.onConflict();
             primaryKey = true;
             autoincrement = primaryKeyAnnotation.autoincrement();
             autoId = primaryKeyAnnotation.auto() && Types.looksLikeIntegerType(type);
         } else {
+            primaryKeyOnConflict = OnConflict.NONE;
             primaryKey = false;
             autoincrement = false;
             autoId = false;

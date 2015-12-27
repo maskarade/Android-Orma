@@ -18,7 +18,7 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.OnConflict;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
@@ -31,7 +31,6 @@ import com.github.gfx.android.orma.test.model.Book_Relation;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -318,7 +319,7 @@ public class DatabaseWriter extends BaseWriter {
                             .returns(Types.getInserter(schema.getModelClassName()))
                             .addStatement("return prepareInsertInto$L($T.NONE)",
                                     simpleModelName,
-                                    Types.OnConflict
+                                    OnConflict.class
                             )
                             .build());
 
@@ -328,7 +329,7 @@ public class DatabaseWriter extends BaseWriter {
                                     schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
-                                    .addAnnotation(Types.OnConflict)
+                                    .addAnnotation(OnConflict.class)
                                     .build())
                             .returns(Types.getInserter(schema.getModelClassName()))
                             .addStatement("return new $T($L, $L, $L.getInsertStatement(onConflictAlgorithm))",

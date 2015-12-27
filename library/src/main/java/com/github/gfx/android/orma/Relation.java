@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;

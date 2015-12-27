@@ -4,6 +4,10 @@ apply plugin: 'com.novoda.bintray-release'
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
 
+dependencies {
+    compile 'com.android.support:support-annotations:23.1.1'
+}
+
 publish {
     artifactId = 'orma-annotations'
     desc = 'Annotations for Orma'
