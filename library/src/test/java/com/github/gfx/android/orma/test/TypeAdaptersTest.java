@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.adapter.StringListAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.TypeAdapterNotFoundException;
@@ -24,10 +23,9 @@ import com.github.gfx.android.orma.internal.TypeHolder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import android.net.Uri;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -38,8 +36,7 @@ import java.util.Set;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.NONE)
+@RunWith(AndroidJUnit4.class)
 public class TypeAdaptersTest {
 
     static final Type stringListType = new TypeHolder<List<String>>() {

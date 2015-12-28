@@ -15,12 +15,11 @@
  */
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.TransactionTask;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
@@ -34,14 +33,13 @@ import com.github.gfx.android.orma.test.model.Publisher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +54,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.NONE)
+@RunWith(AndroidJUnit4.class)
 public class QueryTest {
 
     OrmaDatabase db;
@@ -65,7 +62,7 @@ public class QueryTest {
     Publisher publisher;
 
     Context getContext() {
-        return RuntimeEnvironment.application;
+        return InstrumentationRegistry.getTargetContext();
     }
 
     @Before
@@ -632,8 +629,7 @@ public class QueryTest {
         Author author2 = new Author();
         author2.name = "山田太郎";
         author2.note = "bar";
-        long id2 = db.prepareInsertIntoAuthor(OnConflict.IGNORE).execute(author2);
-        assertThat(id2, is(id1));
+        db.prepareInsertIntoAuthor(OnConflict.IGNORE).execute(author2);
 
         Author_Relation authors = db.selectFromAuthor().nameEq("山田太郎");
         assertThat(authors.count(), is(1));
