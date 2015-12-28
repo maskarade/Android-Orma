@@ -50,13 +50,23 @@ public class SQLiteParserUtils {
         SQLiteParser parser = createParser(sql);
         SQLiteDdlCollector collector = new SQLiteDdlCollector();
         parser.addParseListener(collector);
-        parser.parse();
+        try {
+            parser.parse();
+        } catch (StackOverflowError e) {
+            throw new ParseCancellationException("SQL is too complex to parse: " + sql, e);
+        }
         return collector.createTableStatement;
     }
 
     public static SQLiteComponent parseIntoSQLiteComponent(String sql) throws ParseCancellationException {
         SQLiteParser parser = createParser(sql);
-        SQLiteParser.ParseContext parseContext = parser.parse();
+
+        SQLiteParser.ParseContext parseContext;
+        try {
+            parseContext = parser.parse();
+        } catch (StackOverflowError e) {
+            throw new ParseCancellationException("SQL is too complex to parse: " + sql);
+        }
         SQLiteComponent component = new SQLiteComponent();
         SQLiteDdlCollector.appendTokenList(component, parseContext);
         return component;
