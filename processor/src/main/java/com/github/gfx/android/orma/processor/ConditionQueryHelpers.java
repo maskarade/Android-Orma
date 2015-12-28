@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
@@ -52,7 +53,29 @@ public class ConditionQueryHelpers {
 
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
 
-        ParameterSpec.Builder paramSpecBuilder = conditionParamSpecBuilder(column, column.name);
+        boolean isAssociation = Types.isSingleAssociation(column.getType());
+
+        TypeName type = isAssociation ? column.getAssociation().modelType : column.getType();
+
+        TypeName collectionType = Types.getCollection(type.box());
+
+        ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
+                .addAnnotations(nullabilityAnnotations(column))
+                .build();
+
+        CodeBlock serializedFieldExpr;
+        if (isAssociation) {
+            ColumnDefinition primaryKey = schema.getPrimaryKey();
+            if (primaryKey == null) {
+                throw new ProcessingException("Missing @PrimaryKey for " + schema.getModelClassName().simpleName(),
+                        schema.getElement());
+            }
+            serializedFieldExpr = CodeBlock.builder()
+                    .add("$L.$L", paramSpec.name, primaryKey.buildGetColumnExpr())
+                    .build();
+        } else {
+            serializedFieldExpr = column.buildSerializeExpr("conn", paramSpec.name);
+        }
 
         if (column.nullable) {
             methodSpecs.add(
@@ -75,20 +98,25 @@ public class ConditionQueryHelpers {
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "Eq")
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpecBuilder.build())
+                        .addParameter(paramSpec)
                         .returns(targetClassName)
                         .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " = ?",
-                                column.buildSerializeExpr("conn", column.name))
+                                serializedFieldExpr)
                         .build()
         );
+
+        if (isAssociation) {
+            // generates only "*Eq" for associations
+            return;
+        }
 
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "NotEq")
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpecBuilder.build())
+                        .addParameter(paramSpec)
                         .returns(targetClassName)
                         .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " <> ?",
-                                column.buildSerializeExpr("conn", column.name))
+                                serializedFieldExpr)
                         .build()
         );
 
@@ -96,7 +124,7 @@ public class ConditionQueryHelpers {
             methodSpecs.add(
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
+                            .addParameter(ParameterSpec.builder(collectionType, "values")
                                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                     .build())
                             .returns(targetClassName)
@@ -108,7 +136,7 @@ public class ConditionQueryHelpers {
             methodSpecs.add(
                     MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
+                            .addParameter(ParameterSpec.builder(collectionType, "values")
                                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                     .build())
                             .returns(targetClassName)
@@ -120,7 +148,7 @@ public class ConditionQueryHelpers {
             methodSpecs.add(
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
+                            .addParameter(ParameterSpec.builder(collectionType, "values")
                                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                     .build())
                             .returns(targetClassName)
@@ -132,7 +160,7 @@ public class ConditionQueryHelpers {
             methodSpecs.add(
                     MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(Types.getCollection(column.getBoxType()), "values")
+                            .addParameter(ParameterSpec.builder(collectionType, "values")
                                     .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                     .build())
                             .returns(targetClassName)
@@ -145,57 +173,43 @@ public class ConditionQueryHelpers {
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "Lt")
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpecBuilder.build())
+                        .addParameter(paramSpec)
                         .returns(targetClassName)
                         .addStatement("return where($S, $L)",
                                 sql.quoteIdentifier(column.columnName) + " < ?",
-                                column.buildSerializeExpr("conn", column.name))
+                                serializedFieldExpr)
                         .build()
         );
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "Le")
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpecBuilder.build())
+                        .addParameter(paramSpec)
                         .returns(targetClassName)
                         .addStatement("return where($S, $L)",
                                 sql.quoteIdentifier(column.columnName) + " <= ?",
-                                column.buildSerializeExpr("conn", column.name))
+                                serializedFieldExpr)
                         .build()
         );
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "Gt")
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpecBuilder.build())
+                        .addParameter(paramSpec)
                         .returns(targetClassName)
                         .addStatement("return where($S, $L)",
                                 sql.quoteIdentifier(column.columnName) + " > ?",
-                                column.buildSerializeExpr("conn", column.name))
+                                serializedFieldExpr)
                         .build()
         );
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "Ge")
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpecBuilder.build())
+                        .addParameter(paramSpec)
                         .returns(targetClassName)
                         .addStatement("return where($S, $L)",
                                 sql.quoteIdentifier(column.columnName) + " >= ?",
-                                column.buildSerializeExpr("conn", column.name))
+                                serializedFieldExpr)
                         .build()
         );
-    }
-
-    public boolean isNumberType(TypeName typeName) {
-        return typeName.equals(TypeName.BYTE)
-                || typeName.equals(TypeName.SHORT)
-                || typeName.equals(TypeName.INT)
-                || typeName.equals(TypeName.LONG)
-                || typeName.equals(TypeName.FLOAT)
-                || typeName.equals(TypeName.DOUBLE);
-    }
-
-    public ParameterSpec.Builder conditionParamSpecBuilder(ColumnDefinition column, String name) {
-        return ParameterSpec.builder(column.getType(), name)
-                .addAnnotations(nullabilityAnnotations(column));
     }
 
     public List<AnnotationSpec> nullabilityAnnotations(ColumnDefinition column) {
