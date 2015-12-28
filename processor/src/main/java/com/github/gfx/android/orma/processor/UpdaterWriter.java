@@ -111,6 +111,12 @@ public class UpdaterWriter extends BaseWriter {
                     );
                 }
 
+                ColumnDefinition primaryKey = modelSchema.getPrimaryKey();
+                if (primaryKey == null) {
+                    throw new ProcessingException("SingleAssociation<T> requires the @PrimaryKey field with long type",
+                            modelSchema.getElement());
+                }
+
                 methodSpecs.add(
                         MethodSpec.methodBuilder(column.name)
                                 .addModifiers(Modifier.PUBLIC)
