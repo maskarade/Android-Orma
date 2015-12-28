@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
@@ -24,14 +23,13 @@ import com.github.gfx.android.orma.test.model.PublisherSchema;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+
+import android.support.test.runner.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.NONE)
+@RunWith(AndroidJUnit4.class)
 public class SchemaTest {
 
     @Test

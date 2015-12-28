@@ -323,7 +323,7 @@ public class SchemaWriter extends BaseWriter {
                                 ParameterSpec.builder(schema.getModelClassName(), "model")
                                         .addAnnotation(Specs.buildNonNullAnnotationSpec())
                                         .build())
-                        .addCode(buildConvertTOArgs())
+                        .addCode(buildConvertToArgs())
                         .build()
         );
 
@@ -368,7 +368,7 @@ public class SchemaWriter extends BaseWriter {
         return methodSpecs;
     }
 
-    private CodeBlock buildConvertTOArgs() {
+    private CodeBlock buildConvertToArgs() {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         List<ColumnDefinition> columns = schema.getColumnsWithoutAutoId();
@@ -380,7 +380,13 @@ public class SchemaWriter extends BaseWriter {
             AssociationDefinition r = c.getAssociation();
 
             if (type.equals(TypeName.BOOLEAN)) {
+                if (c.nullable) {
+                    builder.beginControlFlow("if (model.$L != null)", c.buildGetColumnExpr());
+                }
                 builder.addStatement("args[$L] = model.$L ? 1 : 0", i, c.buildGetColumnExpr());
+                if (c.nullable) {
+                    builder.endControlFlow();
+                }
             } else if (Types.looksLikeIntegerType(type)) {
                 builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
             } else if (Types.looksLikeFloatType(type)) {
