@@ -29,6 +29,7 @@ import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -39,9 +40,6 @@ import android.util.Log;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
-
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
 
 /**
  * Low-level interface to Orma database connection.
@@ -181,7 +179,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
             String having, String orderBy, long offset) {
-        SQLiteCursor cursor = (SQLiteCursor) query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy, offset + ",1");
+        SQLiteCursor cursor = (SQLiteCursor) query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy,
+                offset + ",1");
 
         try {
             if (cursor.moveToFirst()) {
@@ -214,14 +213,12 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public void transactionNonExclusiveAsync(@NonNull final TransactionTask task) {
-        Schedulers.io()
-                .createWorker()
-                .schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        transactionNonExclusiveSync(task);
-                    }
-                });
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
+            @Override
+            public void run() {
+                transactionNonExclusiveSync(task);
+            }
+        });
     }
 
     @WorkerThread
@@ -240,14 +237,12 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public void transactionAsync(@NonNull final TransactionTask task) {
-        Schedulers.io()
-                .createWorker()
-                .schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        transactionSync(task);
-                    }
-                });
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
+            @Override
+            public void run() {
+                transactionSync(task);
+            }
+        });
     }
 
     /**
