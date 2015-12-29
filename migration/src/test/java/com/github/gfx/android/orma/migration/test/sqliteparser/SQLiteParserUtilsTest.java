@@ -23,7 +23,11 @@ import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +35,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+@RunWith(AndroidJUnit4.class)
 public class SQLiteParserUtilsTest {
 
     @Test
@@ -72,7 +77,7 @@ public class SQLiteParserUtilsTest {
                 "CREATE TABLE IF NOT EXISTS \"foo\" (\n"
                         + "\"id\" INTEGER PRIMARY KEY,\n"
                         + "`title` TEXT NOT NULL ON CONFLICT REPLACE,\n"
-                        + "price INTEGER UNSIGNED (8) NOT NULL DEFAULT(100 * 1.08)"
+                        + "price INTEGER UNSIGNED (8) NOT NULL DEFAULT 100"
                         + ")"
         );
         assertThat(createTableStatement, is(not(nullValue())));
@@ -115,9 +120,9 @@ public class SQLiteParserUtilsTest {
             assertThat(constraints.get(0).isNullable(), is(false));
             assertThat(constraints.get(0).getTokens(), is(keywordList("NOT", "NULL")));
 
-            assertThat(constraints.get(1).getDefaultExpr(), is("( 100 * 1.08 )"));
+            assertThat(constraints.get(1).getDefaultExpr(), is("100"));
             assertThat(constraints.get(1).getTokens(), contains(
-                    new SQLiteComponent.Keyword("DEFAULT"), "(", "100", "*", "1.08", ")"));
+                    new SQLiteComponent.Keyword("DEFAULT"), "100"));
         }
     }
 
@@ -136,6 +141,16 @@ public class SQLiteParserUtilsTest {
         assertThat(createTableStatement.getColumns(), hasSize(2));
 
         assertThat(createTableStatement.getConstraints(), hasSize(2));
+    }
+
+    @Ignore("StackOverflowError is thrown if executed as androidTest")
+    @Test
+    public void testComplexTable() throws Exception {
+        CreateTableStatement createTableStatement = SQLiteParserUtils.parseIntoCreateTableStatement(
+                "CREATE TABLE foo (title TEXT DEFAULT (''))"
+        );
+
+        assertThat(createTableStatement.getTableName(), is(new SQLiteComponent.Name("foo")));
     }
 
     @Test

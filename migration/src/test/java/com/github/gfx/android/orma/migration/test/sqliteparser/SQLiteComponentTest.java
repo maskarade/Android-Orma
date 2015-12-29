@@ -19,10 +19,14 @@ package com.github.gfx.android.orma.migration.test.sqliteparser;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import android.support.test.runner.AndroidJUnit4;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+
+@RunWith(AndroidJUnit4.class)
 public class SQLiteComponentTest {
 
     @Test

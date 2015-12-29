@@ -15,18 +15,16 @@
  */
 package com.github.gfx.android.orma.migration.test;
 
-import com.github.gfx.android.orma.migration.BuildConfig;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +32,13 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.NONE)
+@RunWith(AndroidJUnit4.class)
 public class ManualStepMigrationTest {
 
     static int VERSION = 100;
 
     static {
-        System.setProperty("robolectric.logging", "stdout");
+        //System.setProperty("robolectric.logging", "stdout");
     }
 
     SQLiteDatabase db;

@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.migration.test;
 
-import com.github.gfx.android.orma.migration.BuildConfig;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
@@ -23,13 +22,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +38,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.NONE)
+@RunWith(AndroidJUnit4.class)
 public class SchemaDiffTest {
 
     List<SchemaData> schemas;
@@ -59,7 +56,7 @@ public class SchemaDiffTest {
     List<String> statements; // result of each test case
 
     Context getContext() {
-        return RuntimeEnvironment.application;
+        return InstrumentationRegistry.getTargetContext();
     }
 
     @Before

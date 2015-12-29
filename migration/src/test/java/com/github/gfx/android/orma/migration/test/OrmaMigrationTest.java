@@ -22,18 +22,16 @@ import com.github.gfx.android.orma.migration.OrmaMigration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.NONE)
+@RunWith(AndroidJUnit4.class)
 public class OrmaMigrationTest {
 
     static int VERSION = 100;
@@ -43,7 +41,7 @@ public class OrmaMigrationTest {
     OrmaMigration engine;
 
     static Context getContext() {
-        return RuntimeEnvironment.application;
+        return InstrumentationRegistry.getTargetContext();
     }
 
     @Before
