@@ -38,6 +38,7 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.0'
     compile 'com.android.support:support-annotations:23.1.1'
     testApt project(':processor')
+    testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.0.2'
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
