@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -35,6 +36,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,9 +44,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.util.List;
-
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -111,14 +110,25 @@ public class MainActivity extends AppCompatActivity
                 })
                 .build();
 
-        Schedulers.io()
-                .createWorker()
-                .schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        simpleCRUD();
-                    }
-                });
+        AsyncTask.SERIAL_EXECUTOR.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    simpleCRUD();
+                } catch (Exception e) {
+                    largeLog("MainActivity", Log.getStackTraceString(e));
+                }
+            }
+        });
+    }
+
+    public static void largeLog(String tag, String content) {
+        if (content.length() > 2000) {
+            Log.e(tag, content.substring(0, 2000));
+            largeLog(tag, content.substring(2000));
+        } else {
+            Log.e(tag, content);
+        }
     }
 
     /**
