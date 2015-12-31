@@ -32,11 +32,14 @@ public class Types {
     public static final String ormaPackageName = "com.github.gfx.android.orma";
 
     // Android standard types
+
     public static final ClassName String = ClassName.get(String.class);
+
+    public static final TypeName ObjectArray = ArrayTypeName.of(TypeName.OBJECT);
 
     public static final ArrayTypeName StringArray = ArrayTypeName.of(String);
 
-    public static final ArrayTypeName ByteArray = ArrayTypeName.of(byte.class);
+    public static final ArrayTypeName ByteArray = ArrayTypeName.of(TypeName.BYTE);
 
     public static final ClassName ArrayList = ClassName.get(ArrayList.class);
 
@@ -79,6 +82,8 @@ public class Types {
 
     public static final ClassName Relation = ClassName.get(ormaPackageName, "Relation");
 
+    public static final ClassName Selector = ClassName.get(ormaPackageName, "Selector");
+
     public static final ClassName Updater = ClassName.get(ormaPackageName, "Updater");
 
     public static final ClassName Deleter = ClassName.get(ormaPackageName, "Deleter");
@@ -107,6 +112,8 @@ public class Types {
 
     public static final ClassName OrmaConfiguration = ClassName.get(ormaPackageName, "OrmaConfiguration");
 
+    public static final ClassName OrmaConditionBase = ClassName.get(ormaPackageName + ".internal", "OrmaConditionBase");
+
     // helper methods
 
     public static ParameterizedTypeName getCollection(TypeName type) {
@@ -121,16 +128,24 @@ public class Types {
         return ParameterizedTypeName.get(ColumnDef, typeName);
     }
 
+    public static ParameterizedTypeName getOrmaConditionBase(TypeName modelType) {
+        return ParameterizedTypeName.get(OrmaConditionBase, modelType, WildcardTypeName.subtypeOf(TypeName.OBJECT));
+    }
+
     public static ParameterizedTypeName getRelation(TypeName modelType, TypeName concreteRelationType) {
         return ParameterizedTypeName.get(Relation, modelType, concreteRelationType);
     }
 
-    public static ParameterizedTypeName getUpdater(TypeName modelType, TypeName concreteRelationType) {
-        return ParameterizedTypeName.get(Updater, modelType, concreteRelationType);
+    public static ParameterizedTypeName getSelector(TypeName modelType, TypeName concreteSelectorType) {
+        return ParameterizedTypeName.get(Selector, modelType, concreteSelectorType);
     }
 
-    public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concreteRelationType) {
-        return ParameterizedTypeName.get(Deleter, modelType, concreteRelationType);
+    public static ParameterizedTypeName getUpdater(TypeName modelType, TypeName concreteUpdaterType) {
+        return ParameterizedTypeName.get(Updater, modelType, concreteUpdaterType);
+    }
+
+    public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concleteDeleterType) {
+        return ParameterizedTypeName.get(Deleter, modelType, concleteDeleterType);
     }
 
     public static ParameterizedTypeName getList(TypeName typeName) {

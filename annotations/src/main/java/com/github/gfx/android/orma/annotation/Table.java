@@ -42,4 +42,6 @@ public @interface Table {
     String updaterClassName() default "";
 
     String deleterClassName() default "";
+
+    String selectorClassName() default "";
 }

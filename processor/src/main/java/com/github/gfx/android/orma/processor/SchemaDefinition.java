@@ -46,6 +46,8 @@ public class SchemaDefinition {
 
     final ClassName relationClassName;
 
+    final ClassName selectorClassName;
+
     final ClassName updaterClassName;
 
     final ClassName deleterClassName;
@@ -67,6 +69,7 @@ public class SchemaDefinition {
         this.constraints = table.constraints();
         this.schemaClassName = helperClassName(table.schemaClassName(), modelClassName, "_Schema");
         this.relationClassName = helperClassName(table.relationClassName(), modelClassName, "_Relation");
+        this.selectorClassName = helperClassName(table.selectorClassName(), modelClassName, "_Selector");
         this.updaterClassName = helperClassName(table.updaterClassName(), modelClassName, "_Updater");
         this.deleterClassName = helperClassName(table.deleterClassName(), modelClassName, "_Deleter");
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
@@ -225,6 +228,10 @@ public class SchemaDefinition {
 
     public ClassName getRelationClassName() {
         return relationClassName;
+    }
+
+    public ClassName getSelectorClassName() {
+        return selectorClassName;
     }
 
     public ClassName getUpdaterClassName() {

@@ -30,7 +30,7 @@ public class Category {
     public String name;
 
     Item_Relation getItems(OrmaDatabase orma) {
-        return orma.selectFromItem().categoryEq(this);
+        return orma.relationOfCategory().categoryEq(this);
     }
 
 }

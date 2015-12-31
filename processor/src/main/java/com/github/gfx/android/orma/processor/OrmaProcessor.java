@@ -17,7 +17,6 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 
 import java.io.IOException;
@@ -62,6 +61,7 @@ public class OrmaProcessor extends AbstractProcessor {
             context.schemaMap.values().forEach((schema) -> {
                 writeCodeForEachModel(schema, new SchemaWriter(context, schema));
                 writeCodeForEachModel(schema, new RelationWriter(context, schema));
+                writeCodeForEachModel(schema, new SelectorWriter(context, schema));
                 writeCodeForEachModel(schema, new UpdaterWriter(context, schema));
                 writeCodeForEachModel(schema, new DeleterWriter(context, schema));
 

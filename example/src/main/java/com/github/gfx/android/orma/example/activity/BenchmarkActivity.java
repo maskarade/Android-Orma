@@ -25,7 +25,7 @@ import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
 import com.github.gfx.android.orma.example.handwritten.HandWrittenOpenHelper;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
-import com.github.gfx.android.orma.example.orma.Todo_Relation;
+import com.github.gfx.android.orma.example.orma.Todo_Selector;
 import com.github.gfx.android.orma.example.realm.RealmTodo;
 
 import android.annotation.SuppressLint;
@@ -306,7 +306,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 final AtomicInteger count = new AtomicInteger();
 
-                Todo_Relation todos = orma.selectFromTodo().orderByCreatedTimeMillisAsc();
+                Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeMillisAsc();
                 todos.forEach(new Action1<Todo>() {
                     @Override
                     public void call(Todo todo) {

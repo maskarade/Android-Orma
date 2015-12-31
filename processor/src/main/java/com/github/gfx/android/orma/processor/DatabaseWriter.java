@@ -261,13 +261,25 @@ public class DatabaseWriter extends BaseWriter {
                     .build());
 
             methodSpecs.add(
-                    MethodSpec.methodBuilder("selectFrom" + simpleModelName)
-                            .addJavadoc("Starts building a query: {@code SELECT * FROM $T ...}.\n", schema.getModelClassName())
+                    MethodSpec.methodBuilder("relationOf" + simpleModelName)
+                            .addJavadoc("Creates a relation of {@code $T}, which is an entry point of all the operations.\n", schema.getModelClassName())
                             .addAnnotation(Specs.buildNonNullAnnotationSpec())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getRelationClassName())
                             .addStatement("return new $T($L, $L)",
                                     schema.getRelationClassName(),
+                                    connection,
+                                    schemaInstance)
+                            .build());
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("selectFrom" + simpleModelName)
+                            .addJavadoc("Starts building a query: {@code SELECT * FROM $T ...}.\n", schema.getModelClassName())
+                            .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(schema.getSelectorClassName())
+                            .addStatement("return new $T($L, $L)",
+                                    schema.getSelectorClassName(),
                                     connection,
                                     schemaInstance)
                             .build());
