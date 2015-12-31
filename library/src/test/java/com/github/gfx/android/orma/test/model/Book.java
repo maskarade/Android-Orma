@@ -38,6 +38,6 @@ public class Book {
     @Column
     public boolean inPrint;
 
-    @Column
+    @Column(indexed = true)
     public SingleAssociation<Publisher> publisher;
 }

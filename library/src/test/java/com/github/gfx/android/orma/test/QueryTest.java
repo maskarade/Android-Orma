@@ -24,9 +24,9 @@ import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
 import com.github.gfx.android.orma.test.model.Author;
-import com.github.gfx.android.orma.test.model.Author_Relation;
+import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.Book;
-import com.github.gfx.android.orma.test.model.Book_Relation;
+import com.github.gfx.android.orma.test.model.Book_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 
@@ -191,7 +191,7 @@ public class QueryTest {
 
     @Test
     public void testGet() throws Exception {
-        Book_Relation rel = db.selectFromBook();
+        Book_Selector rel = db.selectFromBook();
         List<Book> books = rel.toList();
         assertThat(rel.get(0).id, is(books.get(0).id));
         assertThat(rel.get(1).id, is(books.get(1).id));
@@ -440,7 +440,7 @@ public class QueryTest {
 
     @Test
     public void updateViaRelation() throws Exception {
-        int count = db.selectFromBook()
+        int count = db.relationOfBook()
                 .titleEq("today")
                 .updater()
                 .content("modified")
@@ -465,7 +465,7 @@ public class QueryTest {
 
     @Test
     public void deleteViaRelation() throws Exception {
-        int result = db.selectFromBook()
+        int result = db.relationOfBook()
                 .titleEq("today")
                 .deleter()
                 .execute();
@@ -613,7 +613,7 @@ public class QueryTest {
 
         assertThat("The row id changes by INSERT OR REPLACE", id1, is(not(id2)));
 
-        Author_Relation authors = db.selectFromAuthor().nameEq("山田太郎");
+        Author_Selector authors = db.selectFromAuthor().nameEq("山田太郎");
         assertThat(authors.count(), is(1));
         assertThat(authors.value().note, is("bar"));
     }
@@ -631,7 +631,7 @@ public class QueryTest {
         author2.note = "bar";
         db.prepareInsertIntoAuthor(OnConflict.IGNORE).execute(author2);
 
-        Author_Relation authors = db.selectFromAuthor().nameEq("山田太郎");
+        Author_Selector authors = db.selectFromAuthor().nameEq("山田太郎");
         assertThat(authors.count(), is(1));
         assertThat("INSERT is ignored!", authors.value().note, is("foo"));
     }

@@ -42,7 +42,7 @@ public class Publisher {
     @Column("started_month")
     public int startedMonth;
 
-    public Book_Relation books(OrmaDatabase orma) {
-        return orma.selectFromBook().where("publisher = ?", id);
+    public Book_Selector books(OrmaDatabase orma) {
+        return orma.selectFromBook().publisherEq(this);
     }
 }

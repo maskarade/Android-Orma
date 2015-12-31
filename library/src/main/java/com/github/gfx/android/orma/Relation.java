@@ -38,6 +38,14 @@ public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaCond
         super(relation);
     }
 
+    public OrmaConnection getConnection() {
+        return conn;
+    }
+
+    public Schema<Model> getSchema() {
+        return schema;
+    }
+
     @Override
     public abstract R clone();
 
