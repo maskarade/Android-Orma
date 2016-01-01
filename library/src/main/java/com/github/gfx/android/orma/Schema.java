@@ -36,13 +36,13 @@ public interface Schema<Model> extends MigrationSchema {
     String getEscapedTableName();
 
     @NonNull
-    ColumnDef<?> getPrimaryKey();
+    ColumnDef<Model, ?> getPrimaryKey();
 
     @NonNull
     String[] getEscapedColumnNames();
 
     @NonNull
-    List<ColumnDef<?>> getColumns();
+    List<ColumnDef<Model, ?>> getColumns();
 
     @NonNull
     String getCreateTableStatement();

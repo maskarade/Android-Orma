@@ -19,7 +19,21 @@ import android.support.annotation.NonNull;
 
 import java.lang.reflect.Type;
 
-public class ColumnDef<T /* type param is not used */> {
+public abstract class ColumnDef<Model, T> {
+
+    public static int PRIMARY_KEY = 0x01;
+
+    public static int AUTOINCREMENT = 0x02;
+
+    public static int AUTO_VALUE = 0x04;
+
+    public static int NULLABLE = 0x08;
+
+    public static int INDEXED = 0x10;
+
+    public static int UNIQUE = 0x20;
+
+    public final Schema<Model> schema;
 
     public final String name;
 
@@ -27,29 +41,56 @@ public class ColumnDef<T /* type param is not used */> {
 
     public final String storageType;
 
-    public final boolean nullable;
+    public final int flags;
 
-    public final boolean primaryKey;
-
-    public final boolean autoincrement;
-
-    public final boolean autoId;
-
-    public final boolean indexed;
-
-    public final boolean unique;
-
-    public ColumnDef(String name, Type type, String storageType, boolean nullable, boolean primaryKey, boolean autoincrement, boolean autoId,
-            boolean indexed, boolean unique) {
+    public ColumnDef(Schema<Model> schema, String name, Type type, String storageType, int flags) {
+        this.schema = schema;
         this.name = name;
         this.type = type;
         this.storageType = storageType;
-        this.nullable = nullable;
-        this.primaryKey = primaryKey;
-        this.autoincrement = autoincrement;
-        this.autoId = autoId;
-        this.indexed = indexed;
-        this.unique = unique;
+        this.flags = flags;
+    }
+
+    public StringBuilder createQuotedName() {
+        return new StringBuilder().append('"').append(name).append('"');
+    }
+
+    private boolean checkFlags(int flags) {
+        return (this.flags & flags) == flags;
+    }
+
+    public boolean isPrimaryKey() {
+        return checkFlags(PRIMARY_KEY);
+    }
+
+    public boolean isAutoincremnt() {
+        return checkFlags(AUTOINCREMENT);
+    }
+
+    public boolean isAutoValue() {
+        return checkFlags(AUTO_VALUE);
+    }
+
+    public boolean isNullable() {
+        return checkFlags(NULLABLE);
+    }
+
+    public boolean isIndexed() {
+        return checkFlags(INDEXED);
+    }
+
+    public boolean isUnique() {
+        return checkFlags(UNIQUE);
+    }
+
+    public abstract T get(@NonNull Model model);
+
+    public OrderSpec<Model> orderInAscending() {
+        return new OrderSpec<>(this, OrderSpec.ASC);
+    }
+
+    public OrderSpec<Model> orderInDescending() {
+        return new OrderSpec<>(this, OrderSpec.DESC);
     }
 
     @NonNull

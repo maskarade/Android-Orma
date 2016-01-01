@@ -25,7 +25,7 @@ import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
 import com.github.gfx.android.orma.example.handwritten.HandWrittenOpenHelper;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
-import com.github.gfx.android.orma.example.orma.Todo_Relation;
+import com.github.gfx.android.orma.example.orma.Todo_Selector;
 import com.github.gfx.android.orma.example.realm.RealmTodo;
 
 import android.annotation.SuppressLint;
@@ -54,7 +54,6 @@ import io.realm.Sort;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -306,17 +305,15 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 final AtomicInteger count = new AtomicInteger();
 
-                Todo_Relation todos = orma.selectFromTodo().orderByCreatedTimeMillisAsc();
-                todos.forEach(new Action1<Todo>() {
-                    @Override
-                    public void call(Todo todo) {
-                        @SuppressWarnings("unused")
-                        String title = todo.title;
-                        @SuppressWarnings("unused")
-                        String content = todo.content;
-                        count.incrementAndGet();
-                    }
-                });
+                Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeMillisAsc();
+
+                for (Todo todo : todos) {
+                    @SuppressWarnings("unused")
+                    String title = todo.title;
+                    @SuppressWarnings("unused")
+                    String content = todo.content;
+                    count.incrementAndGet();
+                }
 
                 if (todos.count() != count.get()) {
                     throw new AssertionError("unexpected value: " + count.get());

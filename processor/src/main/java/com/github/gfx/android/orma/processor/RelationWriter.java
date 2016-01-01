@@ -15,7 +15,10 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -33,14 +36,18 @@ public class RelationWriter extends BaseWriter {
     public RelationWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
-        this.conditionQueryHelpers = new ConditionQueryHelpers(context, schema, schema.getRelationClassName());
+        this.conditionQueryHelpers = new ConditionQueryHelpers(context, schema, getTargetClassName());
+    }
+
+    ClassName getTargetClassName() {
+        return schema.getRelationClassName();
     }
 
     @Override
     public TypeSpec buildTypeSpec() {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getRelationClassName().simpleName());
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getTargetClassName().simpleName());
         classBuilder.addModifiers(Modifier.PUBLIC);
-        classBuilder.superclass(Types.getRelation(schema.getModelClassName(), schema.getRelationClassName()));
+        classBuilder.superclass(Types.getRelation(schema.getModelClassName(), getTargetClassName()));
 
         classBuilder.addMethods(buildMethodSpecs());
 
@@ -52,9 +59,107 @@ public class RelationWriter extends BaseWriter {
 
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(Types.OrmaConnection, "orma")
+                .addParameter(Types.OrmaConnection, "conn")
                 .addParameter(Types.getSchema(schema.getModelClassName()), "schema")
-                .addCode("super(orma, schema);\n")
+                .addCode("super(conn, schema);\n")
+                .build());
+
+        methodSpecs.add(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(getTargetClassName(), "relation")
+                .addCode("super(relation);\n")
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("clone")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(getTargetClassName())
+                .addStatement("return new $T(this)", getTargetClassName())
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("selector")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addAnnotation(Specs.nonNullAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSelectorClassName())
+                .addStatement("return new $T(this)", schema.getSelectorClassName())
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("updater")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addAnnotation(Specs.nonNullAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getUpdaterClassName())
+                .addStatement("return new $T(this)", schema.getUpdaterClassName())
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("deleter")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addAnnotation(Specs.nonNullAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getDeleterClassName())
+                .addStatement("return new $T(this)", schema.getDeleterClassName())
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("groupBy")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSelectorClassName())
+                .addParameter(ParameterSpec.builder(Types.String, "groupBy")
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .build())
+                .addStatement("return selector().groupBy(groupBy)")
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("having")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSelectorClassName())
+                .addParameter(ParameterSpec.builder(Types.String, "having")
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .build())
+                .varargs()
+                .addParameter(ParameterSpec.builder(Types.ObjectArray, "args")
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .build())
+                .addStatement("return selector().having(having, args)")
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("limit")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSelectorClassName())
+                .addParameter(ParameterSpec.builder(TypeName.LONG, "limit")
+                        .build())
+                .addStatement("return selector().limit(limit)")
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("offset")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSelectorClassName())
+                .addParameter(ParameterSpec.builder(TypeName.LONG, "offset")
+                        .build())
+                .addStatement("return selector().offset(offset)")
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("page")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSelectorClassName())
+                .addParameter(ParameterSpec.builder(TypeName.LONG, "page")
+                        .build())
+                .addStatement("return selector().page(page)")
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("per")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSelectorClassName())
+                .addParameter(ParameterSpec.builder(TypeName.LONG, "per")
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .build())
+                .addStatement("return selector().per(per)")
                 .build());
 
         methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers());
@@ -65,43 +170,28 @@ public class RelationWriter extends BaseWriter {
                 .flatMap(this::buildOrderByHelpers)
                 .forEach(methodSpecs::add);
 
-        methodSpecs.add(MethodSpec.methodBuilder("updater")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
-                .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getUpdaterClassName())
-                .addStatement("assert groupBy == null && having == null")
-                .addStatement("return new $T(this)", schema.getUpdaterClassName())
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("deleter")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
-                .addAnnotation(Specs.buildNonNullAnnotationSpec())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getDeleterClassName())
-                .addStatement("assert groupBy == null && having == null")
-                .addStatement("return new $T(this)", schema.getDeleterClassName())
-                .build());
-
         return methodSpecs;
     }
 
     boolean needsOrderByHelpers(ColumnDefinition column) {
-        return (column.indexed || (column.primaryKey && column.autoincrement));
+        return (column.indexed || (column.primaryKey && (column.autoincrement || !column.autoId)));
     }
 
     Stream<MethodSpec> buildOrderByHelpers(ColumnDefinition column) {
         return Stream.of(
                 MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Asc")
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(schema.getRelationClassName())
-                        .addStatement("return orderBy($S)", sql.quoteIdentifier(column.columnName) + " ASC")
+                        .returns(getTargetClassName())
+                        .addStatement("return orderBy($T.$L.orderInAscending())", schema.getSchemaClassName(),
+                                column.name)
                         .build(),
                 MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Desc")
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(schema.getRelationClassName())
-                        .addStatement("return orderBy($S)", sql.quoteIdentifier(column.columnName) + " DESC")
+                        .returns(getTargetClassName())
+                        .addStatement("return orderBy($T.$L.orderInDescending())", schema.getSchemaClassName(),
+                                column.name)
                         .build()
         );
     }
+
 }

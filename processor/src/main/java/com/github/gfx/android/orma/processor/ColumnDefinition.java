@@ -112,6 +112,28 @@ public class ColumnDefinition {
         nullable = hasNullableAnnotation(element);
     }
 
+    private ColumnDefinition(SchemaDefinition schema) {
+        this.schema = schema;
+        this.element = null;
+        this.name = kDefaultPrimaryKeyName;
+        this.columnName = kDefaultPrimaryKeyName;
+        this.type = TypeName.LONG;
+        this.nullable = false;
+        this.primaryKey = true;
+        this.primaryKeyOnConflict = OnConflict.NONE;
+        this.autoincrement = false;
+        this.autoId = true;
+        this.indexed = false;
+        this.unique = false;
+        this.uniqueOnConflict = OnConflict.NONE;
+        this.defaultExpr = "";
+        this.collate = Column.Collate.BINARY;
+    }
+
+    public static ColumnDefinition createDefaultPrimaryKey(SchemaDefinition schema) {
+        return new ColumnDefinition(schema);
+    }
+
     public static String getColumnName(Element element) {
         Column column = element.getAnnotation(Column.class);
         return getColumnName(column, element);
@@ -176,7 +198,7 @@ public class ColumnDefinition {
      * @return A representation of {@code ColumnDef<T>}
      */
     public ParameterizedTypeName getColumnDefType() {
-        return Types.getColumnDef(getBoxType());
+        return Types.getColumnDef(schema.getModelClassName(), getBoxType());
     }
 
     public CodeBlock buildSetColumnExpr(CodeBlock rhsExpr) {

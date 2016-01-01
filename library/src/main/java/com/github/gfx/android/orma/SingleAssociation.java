@@ -48,7 +48,7 @@ public class SingleAssociation<Model> {
         single = Single.create(new Single.OnSubscribe<Model>() {
             @Override
             public void call(SingleSubscriber<? super Model> subscriber) {
-                ColumnDef<?> primaryKey = schema.getPrimaryKey();
+                ColumnDef<Model, ?> primaryKey = schema.getPrimaryKey();
                 String whereClause = "\"" + primaryKey.name + "\" = ?";
                 String[] whereArgs = {String.valueOf(id)};
                 Model model = conn.querySingle(schema, schema.getEscapedColumnNames(),

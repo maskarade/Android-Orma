@@ -29,7 +29,7 @@ import android.support.annotation.Nullable;
  * This class represents Orma options, and it is the base class of {@code OrmaDatabase.Builder}.
  */
 @SuppressWarnings("unchecked")
-public class OrmaConfiguration<T extends OrmaConfiguration<?>> {
+public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     @NonNull
     final Context context;

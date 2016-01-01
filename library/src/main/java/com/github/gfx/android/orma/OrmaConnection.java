@@ -140,7 +140,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         Inserter<T> sth = new Inserter<>(this, schema, schema.getInsertStatement(OnConflict.NONE));
         long id = sth.execute(builder.call());
 
-        ColumnDef<?> primaryKey = schema.getPrimaryKey();
+        ColumnDef<T, ?> primaryKey = schema.getPrimaryKey();
         String whereClause = '"' + primaryKey.name + '"' + " = ?";
         String[] whereArgs = {String.valueOf(id)};
         return querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null, 0);

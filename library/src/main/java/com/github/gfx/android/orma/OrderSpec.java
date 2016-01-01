@@ -13,31 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.test.model;
 
-import com.github.gfx.android.orma.SingleAssociation;
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Table;
+package com.github.gfx.android.orma;
 
-import android.support.annotation.Nullable;
+public class OrderSpec<Model> {
 
-@Table
-public class Book {
+    public static String ASC = "ASC";
 
-    @PrimaryKey
-    public long id;
+    public static String DESC = "DESC";
 
-    @Column(indexed = true)
-    public String title;
+    public final ColumnDef<Model, ?> column;
 
-    @Column
-    @Nullable
-    public String content;
+    public final String ordering;
 
-    @Column
-    public boolean inPrint;
+    public OrderSpec(ColumnDef<Model, ?> column, String ordering) {
+        this.column = column;
+        this.ordering = ordering;
+    }
 
-    @Column(indexed = true)
-    public SingleAssociation<Publisher> publisher;
+    @Override
+    public String toString() {
+        return column.createQuotedName().append(" ").append(ordering).toString();
+    }
 }

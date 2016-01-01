@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.internal;
 
+import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.adapter.TypeAdapter;
@@ -26,11 +27,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
+public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model, ?>> {
 
     protected final OrmaConnection conn;
 
-    protected final Schema<T> schema;
+    protected final Schema<Model> schema;
 
     protected String whereConjunction = " AND ";
 
@@ -40,15 +41,22 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     @Nullable
     protected ArrayList<String> bindArgs;
 
-    public OrmaConditionBase(@NonNull OrmaConnection conn, @NonNull Schema<T> schema) {
+    public OrmaConditionBase(@NonNull OrmaConnection conn, @NonNull Schema<Model> schema) {
         this.conn = conn;
         this.schema = schema;
     }
 
-    public OrmaConditionBase(@NonNull OrmaConditionBase<T, ?> condition) {
-        this.conn = condition.conn;
-        this.schema = condition.schema;
+    public OrmaConditionBase(@NonNull OrmaConditionBase<Model, ?> condition) {
+        this(condition.conn, condition.schema);
         where(condition);
+    }
+
+    public OrmaConnection getConnection() {
+        return conn;
+    }
+
+    public Schema<Model> getSchema() {
+        return schema;
     }
 
     protected void appendBindArgs(@NonNull Object... args) {
@@ -88,6 +96,11 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
         whereClause.append(')');
         appendBindArgs(args);
         return (C) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public C where(@NonNull ColumnDef<Model, ?> column, @NonNull String operator, @NonNull Object value) {
+        return where(column.createQuotedName().append(operator).append(" ?"), value);
     }
 
     @SuppressWarnings("unchecked")
@@ -140,7 +153,7 @@ public abstract class OrmaConditionBase<T, C extends OrmaConditionBase<?, ?>> {
     }
 
     @SuppressWarnings("unchecked")
-    public C where(@NonNull OrmaConditionBase<T, ?> condition) {
+    public C where(@NonNull OrmaConditionBase<Model, ?> condition) {
         if (condition.whereClause != null && condition.bindArgs != null) {
             this.where(condition.whereClause, condition.bindArgs);
         }

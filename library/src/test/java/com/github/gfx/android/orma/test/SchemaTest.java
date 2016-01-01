@@ -71,16 +71,16 @@ public class SchemaTest {
 
     @Test
     public void testPrimaryKeyAttributes() throws Exception {
-        assertThat(PublisherSchema.id.primaryKey, is(true));
-        assertThat(PublisherSchema.id.autoincrement, is(true));
-        assertThat(PublisherSchema.id.autoId, is(true));
+        assertThat(PublisherSchema.id.isPrimaryKey(), is(true));
+        assertThat(PublisherSchema.id.isAutoincremnt(), is(true));
+        assertThat(PublisherSchema.id.isAutoValue(), is(true));
 
-        assertThat(Book_Schema.id.primaryKey, is(true));
-        assertThat(Book_Schema.id.autoincrement, is(false));
-        assertThat(Book_Schema.id.autoId, is(true));
+        assertThat(Book_Schema.id.isPrimaryKey(), is(true));
+        assertThat(Book_Schema.id.isAutoincremnt(), is(false));
+        assertThat(Book_Schema.id.isAutoValue(), is(true));
 
-        assertThat(Author_Schema.name.primaryKey, is(true));
-        assertThat(Author_Schema.name.autoincrement, is(false));
-        assertThat(Author_Schema.name.autoId, is(false));
+        assertThat(Author_Schema.name.isPrimaryKey(), is(true));
+        assertThat(Author_Schema.name.isAutoincremnt(), is(false));
+        assertThat(Author_Schema.name.isAutoValue(), is(false));
     }
 }

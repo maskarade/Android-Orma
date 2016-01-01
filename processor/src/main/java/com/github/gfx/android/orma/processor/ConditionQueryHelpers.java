@@ -125,7 +125,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .addAnnotation(Specs.nonNullAnnotationSpec())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(false, $S, values, $L)",
@@ -137,7 +137,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .addAnnotation(Specs.nonNullAnnotationSpec())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(true, $S, values, $L)",
@@ -149,7 +149,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .addAnnotation(Specs.nonNullAnnotationSpec())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(false, $S, values)",
@@ -161,7 +161,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                    .addAnnotation(Specs.nonNullAnnotationSpec())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(true, $S, values)",
@@ -218,9 +218,9 @@ public class ConditionQueryHelpers {
         }
 
         if (column.nullable) {
-            return Collections.singletonList(Specs.buildNullableAnnotationSpec());
+            return Collections.singletonList(Specs.nullableAnnotation());
         } else {
-            return Collections.singletonList(Specs.buildNonNullAnnotationSpec());
+            return Collections.singletonList(Specs.nonNullAnnotationSpec());
         }
     }
 

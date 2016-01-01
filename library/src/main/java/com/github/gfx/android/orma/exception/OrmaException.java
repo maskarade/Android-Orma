@@ -16,7 +16,7 @@
 package com.github.gfx.android.orma.exception;
 
 @SuppressWarnings("serial")
-public abstract class OrmaException extends RuntimeException {
+public class OrmaException extends RuntimeException {
 
     public OrmaException(String detailMessage) {
         super(detailMessage);
