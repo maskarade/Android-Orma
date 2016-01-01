@@ -94,7 +94,10 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                     public void execute() throws Exception {
                         int position = indexOf(item);
 
-                        int deletedRows = deleter().where(schema.getPrimaryKey(), "=", item).execute();
+                        ColumnDef<Model, ?> column = schema.getPrimaryKey();
+                        int deletedRows = deleter()
+                                .where(column, "=",  column.get(item))
+                                .execute();
 
                         if (deletedRows > 0) {
                             subscriber.onSuccess(position);
