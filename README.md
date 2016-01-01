@@ -60,7 +60,7 @@ public class Todo {
     public String title;
 
     @Column
-    @Nullable // indicates NOT NULL constraints
+    @Nullable // allows NULL (default: NOT NULL)
     public String content;
 
     @Column
@@ -167,23 +167,23 @@ can use Orma as a type-safe ORM.
 
 ## Schema Helper
 
-Schema Helper, e.g. `Todo_Schema`, has metadata for the corresponding model.
+A Schema helper, e.g. `Todo_Schema`, has metadata for the corresponding model.
 
-This is an internal helper class which is not intended to be used by users.
+This is an internal helper class, which is not intended to be used by users.
 
-## Relation Helper
+## Selector Helper
 
-Relation Helper, e.g. `Todo_Relation`, is created by the database handle:
+A Selector helper, e.g. `Todo_Selector`, is created by the database handle:
 
 ```java
-Todo_Relation relation = orma.selectFromTodo();
+Todo_Selector selector = orma.selectFromTodo();
 ```
 
 This is a query builder for `SELECT ... FROM *` statements.
 
 ## Updater Helper
 
-Updater Helper, e.g. `Todo_Updater`, is created by the database handle:
+An Updater helper, e.g. `Todo_Updater`, is created by the database handle:
 
 ```java
 Todo_Updater updater = orma.updateTodo();
@@ -193,13 +193,59 @@ This is a query builder for `UPDATE *` statements.
 
 ## Deleter Helper
 
-Updater Helper, e.g. `Todo_Deleter`, is created by the database handle:
+A Delete helper, e.g. `Todo_Deleter`, is created by the database handle:
 
 ```java
 Todo_Deleter deleter = orma.deleteFromTodo();
 ```
 
 This is a query builder for `DELETE FROM *` statements.
+
+## Insert Helper
+
+An Insert helper is created by the database handle:
+
+```java
+Insert<Todo> inserter = orma.prepareInsertIntoTodo();
+```
+
+This is a prepared statement to execute `INSERT * INTO ...` statements.
+
+## Relation Helper
+
+A Relation helper, e.g. `Todo_Relation`, is created by the database handle:
+
+```java
+Todo_Relation relation = orma.relationOfTodo();
+```
+
+This is able to create Selector, Updater, Deleter, and Inserter of the specified model. In other words, an entry point of model helpers.
+
+```java
+Todo_Relation todos = orma.relationOfTodo();
+
+todos.selector().toList(); // Todo_Selector
+todos.updater().content("foo").execute(); // Todo_Updater
+todos.inserter().execute(todo); // Inserter<Todo>
+todos.deleter().execute(); // Todo_Deleter
+```
+
+This is also a subset of a table which has `ORDER BY` clauses and `WHERE` clauses with some `List`-like methods:
+
+```java
+Todo_Relation todos = orma.relationOfTodo()
+  .doneEq(false) // can have conditions
+  .orderByCreatedTimeMillis(); // can have orders
+
+// List-like features:
+int count = todos.count();
+Todo todo = todos.get(0);
+int position = todos.indexOf(todo);
+
+for (Todo todo : todos) {
+  // ...
+}
+```
 
 ## Condition Query Helpers
 
