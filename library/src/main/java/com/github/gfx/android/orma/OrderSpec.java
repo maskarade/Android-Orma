@@ -22,17 +22,17 @@ public class OrderSpec<Model> {
 
     public static String DESC = "DESC";
 
-    public final String columnName;
+    public final ColumnDef<Model, ?> column;
 
     public final String ordering;
 
     public OrderSpec(ColumnDef<Model, ?> column, String ordering) {
-        this.columnName = column.name;
+        this.column = column;
         this.ordering = ordering;
     }
 
     @Override
     public String toString() {
-        return columnName + " " + ordering;
+        return column.getQuotedName() + " " + ordering;
     }
 }

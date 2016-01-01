@@ -88,7 +88,7 @@ public class SelectorWriter extends BaseWriter {
     }
 
     boolean needsOrderByHelpers(ColumnDefinition column) {
-        return (column.indexed || (column.primaryKey && column.autoincrement));
+        return (column.indexed || (column.primaryKey && (column.autoincrement || !column.autoId)));
     }
 
     Stream<MethodSpec> buildOrderByHelpers(ColumnDefinition column) {

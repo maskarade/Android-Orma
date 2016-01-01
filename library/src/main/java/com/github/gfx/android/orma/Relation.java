@@ -22,6 +22,7 @@ import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -29,8 +30,8 @@ import java.util.ArrayList;
  * @param <Model> An Orma model
  * @param <R>     The derived class itself. e.g {@code class Foo_Schema extends Relation<Foo, Foo_Schema>}
  */
-public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaConditionBase<Model, R>
-    implements Cloneable {
+public abstract class Relation<Model, R extends Relation<Model, ?>> extends OrmaConditionBase<Model, R>
+        implements Cloneable, Iterable<Model> {
 
     final protected ArrayList<OrderSpec<Model>> orderSpecs = new ArrayList<>();
 
@@ -42,12 +43,34 @@ public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaCond
         super(relation);
     }
 
-    public OrmaConnection getConnection() {
-        return conn;
+    @SuppressWarnings("unchecked")
+    public R orderBy(@NonNull OrderSpec<Model> orderSpec) {
+        orderSpecs.add(0, orderSpec);
+        return (R) this;
     }
 
-    public Schema<Model> getSchema() {
-        return schema;
+    /**
+     * Finds the index of the item, assuming an order specified by a set of {@code orderBy*()} methods.
+     *
+     * @param item The item to find
+     * @return The position of the item
+     */
+    @SuppressWarnings("unchecked")
+    public int indexOf(@NonNull Model item) {
+        Selector<Model, ?> selector = selector();
+        for (OrderSpec<Model> orderSpec : orderSpecs) {
+            if (orderSpec.ordering.equals(OrderSpec.ASC)) {
+                selector.where(orderSpec.column.getQuotedName() + " < ?", schema.getField(item, orderSpec.column));
+            } else {
+                selector.where(orderSpec.column.getQuotedName() + " > ?", schema.getField(item, orderSpec.column));
+            }
+        }
+        return selector.count();
+    }
+
+    @NonNull
+    public Model get(int position) {
+        return selector().get(position);
     }
 
     @Override
@@ -58,9 +81,6 @@ public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaCond
 
     @SuppressWarnings("unchecked")
     public abstract Selector<Model, ?> having(@NonNull String having, @NonNull Object... args);
-
-    @SuppressWarnings("unchecked")
-    public abstract Relation<Model, ?> orderBy(@NonNull OrderSpec<Model>... orderSpecs);
 
     @SuppressWarnings("unchecked")
     public abstract Selector<Model, ?> limit(@IntRange(from = 1, to = Integer.MAX_VALUE) long limit);
@@ -93,5 +113,12 @@ public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaCond
     @NonNull
     public Inserter<Model> inserter(@OnConflict int onConflictAlgorithm) {
         return new Inserter<>(conn, schema, schema.getInsertStatement(onConflictAlgorithm));
+    }
+
+    // Iterator<Model>
+
+    @Override
+    public Iterator<Model> iterator() {
+        return selector().iterator();
     }
 }

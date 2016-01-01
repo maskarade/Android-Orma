@@ -108,7 +108,7 @@ public class TodoActivity extends AppCompatActivity {
 
         Adapter(Context context, OrmaDatabase orma) {
             inflater = LayoutInflater.from(context);
-            relation = orma.relationOfTodo();
+            relation = orma.relationOfTodo().orderByCreatedTimeMillisAsc();
             totalCount = relation.selector().count();
         }
 
@@ -147,22 +147,20 @@ public class TodoActivity extends AppCompatActivity {
             relation.getConnection().transactionAsync(new TransactionTask() {
                 @Override
                 public void execute() throws Exception {
-                    final int position = relation.selector()
-                            .createdTimeMillisLt(todo.createdTimeMillis)
-                            .count();
+                    final int position = relation.indexOf(todo);
                     final int deletedRows = relation.deleter()
                             .idEq(todo.id)
                             .execute();
 
-                    runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (deletedRows > 0) {
+                    if (deletedRows > 0) {
+                        runOnMainThread(new Runnable() {
+                            @Override
+                            public void run() {
                                 totalCount--;
                                 notifyItemRemoved(position);
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             });
 
@@ -177,9 +175,7 @@ public class TodoActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final VH holder, int position) {
             CardTodoBinding binding = holder.binding;
-            final Todo todo = relation.selector()
-                    .orderByCreatedTimeMillisAsc()
-                    .get(position);
+            final Todo todo = relation.get(position);
 
             binding.title.setText(todo.title);
             binding.content.setText(todo.content);

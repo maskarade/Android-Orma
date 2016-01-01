@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<?, ?>> {
+public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model, ?>> {
 
     protected final OrmaConnection conn;
 
@@ -48,6 +48,14 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<?, ?>
     public OrmaConditionBase(@NonNull OrmaConditionBase<Model, ?> condition) {
         this(condition.conn, condition.schema);
         where(condition);
+    }
+
+    public OrmaConnection getConnection() {
+        return conn;
+    }
+
+    public Schema<Model> getSchema() {
+        return schema;
     }
 
     protected void appendBindArgs(@NonNull Object... args) {

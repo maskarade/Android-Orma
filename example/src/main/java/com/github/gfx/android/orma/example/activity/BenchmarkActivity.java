@@ -54,7 +54,6 @@ import io.realm.Sort;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -307,16 +306,14 @@ public class BenchmarkActivity extends AppCompatActivity {
                 final AtomicInteger count = new AtomicInteger();
 
                 Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeMillisAsc();
-                todos.forEach(new Action1<Todo>() {
-                    @Override
-                    public void call(Todo todo) {
-                        @SuppressWarnings("unused")
-                        String title = todo.title;
-                        @SuppressWarnings("unused")
-                        String content = todo.content;
-                        count.incrementAndGet();
-                    }
-                });
+
+                for (Todo todo : todos) {
+                    @SuppressWarnings("unused")
+                    String title = todo.title;
+                    @SuppressWarnings("unused")
+                    String content = todo.content;
+                    count.incrementAndGet();
+                }
 
                 if (todos.count() != count.get()) {
                     throw new AssertionError("unexpected value: " + count.get());

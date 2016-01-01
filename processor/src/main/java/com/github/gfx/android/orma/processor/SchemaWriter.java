@@ -227,7 +227,8 @@ public class SchemaWriter extends BaseWriter {
     public CodeBlock buildColumnsInitializer(List<FieldSpec> columns) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
-        builder.add("$T.<$T>asList(\n", Types.Arrays, Types.getColumnDef(schema.getModelClassName(), Types.WildcardType)).indent();
+        builder.add("$T.<$T>asList(\n", Types.Arrays, Types.getColumnDef(schema.getModelClassName(), Types.WildcardType))
+                .indent();
 
         for (int i = 0; i < columns.size(); i++) {
             builder.add("$N", columns.get(i));
@@ -384,6 +385,23 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("getField")
+                        .addAnnotation(Specs.suppressWarningsAnnotation("unchecked"))
+                        .addAnnotation(Specs.overrideAnnotationSpec())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addTypeVariable(Types.T)
+                        .returns(Types.T)
+                        .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
+                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .build())
+                        .addParameter(ParameterSpec.builder(Types.getColumnDef(schema.getModelClassName(), Types.T), "column")
+                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .build())
+                        .addCode(buildGetField())
+                        .build()
+        );
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("bindArgs")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
@@ -422,6 +440,27 @@ public class SchemaWriter extends BaseWriter {
         );
 
         return methodSpecs;
+    }
+
+    private CodeBlock buildGetField() {
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        builder.beginControlFlow("switch (column.name)");
+
+        for (ColumnDefinition column : schema.getColumns()) {
+            if (column.type.isPrimitive()) {
+                builder.addStatement("case $S: return ($T)($T)model.$L",
+                        column.columnName, Types.T, column.getBoxType(), column.buildGetColumnExpr());
+            } else {
+                builder.addStatement("case $S: return ($T)model.$L",
+                        column.columnName, Types.T, column.buildGetColumnExpr());
+            }
+        }
+
+        builder.addStatement("default: throw new $T()", AssertionError.class);
+        builder.endControlFlow();
+
+        return builder.build();
     }
 
     private CodeBlock buildConvertToArgs() {

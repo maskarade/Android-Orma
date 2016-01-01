@@ -19,6 +19,7 @@ import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 
 import java.util.ArrayList;
@@ -70,6 +71,8 @@ public class Types {
     public static final ClassName Single = ClassName.get("rx", "Single");
 
     public static final ClassName Observable = ClassName.get("rx", "Observable");
+
+    public static final TypeVariableName T = TypeVariableName.get("T");
 
     // Orma types
     public static final ClassName Schema = ClassName.get(ormaPackageName, "Schema");

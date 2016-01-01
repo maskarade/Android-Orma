@@ -23,7 +23,7 @@ import android.support.annotation.NonNull;
 import rx.Single;
 import rx.SingleSubscriber;
 
-public abstract class Updater<Model, U extends Updater<?, ?>> extends OrmaConditionBase<Model, U> {
+public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaConditionBase<Model, U> {
 
     final protected ContentValues contents = new ContentValues();
 

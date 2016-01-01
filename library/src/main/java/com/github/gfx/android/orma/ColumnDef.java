@@ -51,6 +51,10 @@ public class ColumnDef<Model, T> {
         this.flags = flags;
     }
 
+    public String getQuotedName() {
+        return '"' + name + '"';
+    }
+
     private boolean checkFlags(int flags) {
         return (this.flags & flags) == flags;
     }

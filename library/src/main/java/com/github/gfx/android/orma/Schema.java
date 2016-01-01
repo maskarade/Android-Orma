@@ -58,6 +58,8 @@ public interface Schema<Model> extends MigrationSchema {
 
     Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Model model);
 
+    <T> T getField(@NonNull Model model, @NonNull ColumnDef<Model, T> column);
+
     void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model);
 
     @NonNull

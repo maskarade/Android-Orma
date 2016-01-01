@@ -22,7 +22,7 @@ import android.support.annotation.NonNull;
 import rx.Single;
 import rx.SingleSubscriber;
 
-public abstract class Deleter<Model, D extends Deleter<?, ?>> extends OrmaConditionBase<Model, D> {
+public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaConditionBase<Model, D> {
 
     public Deleter(@NonNull OrmaConnection connection, @NonNull Schema<Model> schema) {
         super(connection, schema);

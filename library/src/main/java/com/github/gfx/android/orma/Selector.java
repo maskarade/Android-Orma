@@ -19,12 +19,12 @@ package com.github.gfx.android.orma;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
+import com.github.gfx.android.orma.internal.OrmaIterator;
 
 import android.database.Cursor;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,6 +43,11 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     public Selector(@NonNull OrmaConditionBase<Model, ?> condition) {
         super(condition);
+        if (condition instanceof Relation) {
+            @SuppressWarnings("unchecked")
+            Relation<Model, ?> relation = (Relation<Model, ?>) condition;
+            orderBy(relation.orderSpecs);
+        }
     }
 
     @Nullable
@@ -77,8 +82,33 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @SuppressWarnings("unchecked")
-    public S orderBy(@NonNull String... orderBys) {
-        this.orderBy = TextUtils.join(", ", orderBys);
+    public S orderBy(@NonNull String orderByTerm) {
+        if (orderBy == null) {
+            orderBy = orderByTerm;
+        } else {
+            orderBy = orderByTerm + ", " + orderBy;
+        }
+        return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S orderBy(@NonNull List<OrderSpec<Model>> orderSpecs) {
+        if (orderSpecs.isEmpty()) {
+            return (S) this;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if (orderBy != null) {
+            sb.append(orderBy);
+            sb.append(", ");
+        }
+        for (OrderSpec<Model> orderSpec : orderSpecs) {
+            if (sb.length() != 0) {
+                sb.append(", ");
+            }
+            sb.append(orderSpec);
+        }
+        orderBy = sb.toString();
         return (S) this;
     }
 
@@ -209,18 +239,14 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = execute();
         for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-            action.call(schema.newModelFromCursor(conn, cursor));
+            action.call(newModelFromCursor(cursor));
         }
         cursor.close();
     }
 
-    public void forEach(int batchSize, @NonNull Action1<Model> action) {
-        for (int i = 0, count = count(); i < count; i += batchSize) {
-            S s = clone();
-            s.limit(batchSize);
-            s.offset(i);
-            s.forEach(action);
-        }
+    @NonNull
+    public Model newModelFromCursor(@NonNull Cursor cursor) {
+        return schema.newModelFromCursor(conn, cursor);
     }
 
     @NonNull
@@ -247,6 +273,6 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @NonNull
     @Override
     public Iterator<Model> iterator() {
-        return observable().toBlocking().getIterator();
+        return new OrmaIterator<>(this);
     }
 }
