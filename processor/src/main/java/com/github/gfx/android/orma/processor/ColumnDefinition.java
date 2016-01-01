@@ -176,7 +176,7 @@ public class ColumnDefinition {
      * @return A representation of {@code ColumnDef<T>}
      */
     public ParameterizedTypeName getColumnDefType() {
-        return Types.getColumnDef(getBoxType());
+        return Types.getColumnDef(schema.getModelClassName(), getBoxType());
     }
 
     public CodeBlock buildSetColumnExpr(CodeBlock rhsExpr) {

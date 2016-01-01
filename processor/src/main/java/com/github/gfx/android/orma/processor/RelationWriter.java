@@ -77,66 +77,68 @@ public class RelationWriter extends BaseWriter {
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("selector")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
-                .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addAnnotation(Specs.nonNullAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSelectorClassName())
                 .addStatement("return new $T(this)", schema.getSelectorClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("updater")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
-                .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addAnnotation(Specs.nonNullAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getUpdaterClassName())
                 .addStatement("return new $T(this)", schema.getUpdaterClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("deleter")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
-                .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addAnnotation(Specs.nonNullAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getDeleterClassName())
                 .addStatement("return new $T(this)", schema.getDeleterClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("groupBy")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSelectorClassName())
                 .addParameter(ParameterSpec.builder(Types.String, "groupBy")
-                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
                         .build())
                 .addStatement("return selector().groupBy(groupBy)")
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("having")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSelectorClassName())
                 .addParameter(ParameterSpec.builder(Types.String, "having")
-                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
                         .build())
                 .varargs()
                 .addParameter(ParameterSpec.builder(Types.ObjectArray, "args")
-                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
                         .build())
                 .addStatement("return selector().having(having, args)")
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("orderBy")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addAnnotation(Specs.suppressWarningsAnnotation("unchecked", "varargs"))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSelectorClassName())
-                .addParameter(ParameterSpec.builder(Types.StringArray, "orderByClauses")
-                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                .returns(schema.getRelationClassName())
+                .addParameter(ParameterSpec.builder(Types.getOrderSpecArray(schema.getModelClassName()), "orderSpecs")
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
                         .build())
                 .varargs()
-                .addStatement("return selector().orderBy(orderByClauses)")
+                .addStatement("$T.addAll(this.orderSpecs, orderSpecs)", Types.Collections)
+                .addStatement("return this")
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("limit")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSelectorClassName())
                 .addParameter(ParameterSpec.builder(TypeName.LONG, "limit")
@@ -145,7 +147,7 @@ public class RelationWriter extends BaseWriter {
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("offset")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSelectorClassName())
                 .addParameter(ParameterSpec.builder(TypeName.LONG, "offset")
@@ -154,7 +156,7 @@ public class RelationWriter extends BaseWriter {
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("page")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSelectorClassName())
                 .addParameter(ParameterSpec.builder(TypeName.LONG, "page")
@@ -163,11 +165,11 @@ public class RelationWriter extends BaseWriter {
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("per")
-                .addAnnotation(Specs.buildOverrideAnnotationSpec())
+                .addAnnotation(Specs.overrideAnnotationSpec())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSelectorClassName())
                 .addParameter(ParameterSpec.builder(TypeName.LONG, "per")
-                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
                         .build())
                 .addStatement("return selector().per(per)")
                 .build());

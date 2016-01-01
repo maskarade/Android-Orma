@@ -21,6 +21,8 @@ import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
+
 /**
  * Representation of a relation, or a {@code SELECT} query.
  *
@@ -29,6 +31,8 @@ import android.support.annotation.NonNull;
  */
 public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaConditionBase<Model, R>
     implements Cloneable {
+
+    final protected ArrayList<OrderSpec<Model>> orderSpecs = new ArrayList<>();
 
     public Relation(@NonNull OrmaConnection connection, @NonNull Schema<Model> schema) {
         super(connection, schema);
@@ -56,7 +60,7 @@ public abstract class Relation<Model, R extends Relation<?, ?>> extends OrmaCond
     public abstract Selector<Model, ?> having(@NonNull String having, @NonNull Object... args);
 
     @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> orderBy(@NonNull String... orderByClauses);
+    public abstract Relation<Model, ?> orderBy(@NonNull OrderSpec<Model>... orderSpecs);
 
     @SuppressWarnings("unchecked")
     public abstract Selector<Model, ?> limit(@IntRange(from = 1, to = Integer.MAX_VALUE) long limit);

@@ -78,6 +78,10 @@ public class SchemaWriter extends BaseWriter {
     public List<FieldSpec> buildFieldSpecs() {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
 
+        fieldSpecs.add(FieldSpec.builder(schema.getSchemaClassName(), "INSTANCE", publicStaticFinal)
+                .initializer("new $T()", schema.getSchemaClassName())
+                .build());
+
         List<FieldSpec> columns = new ArrayList<>();
 
         schema.getColumns().forEach(columnDef -> {
@@ -92,7 +96,7 @@ public class SchemaWriter extends BaseWriter {
         if (primaryKey == null) {
             // Even if primary key is omitted, "_rowid_" is always available.
             // (WITHOUT ROWID is not supported by Orma)
-            primaryKey = buildRowIdColumnFieldSpec();
+            primaryKey = buildPrimaryKeyColumn();
             fieldSpecs.add(primaryKey);
         }
 
@@ -106,7 +110,7 @@ public class SchemaWriter extends BaseWriter {
         );
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.ColumnList, COLUMNS)
+                FieldSpec.builder(Types.getColumnDefList(schema.getModelClassName()), COLUMNS)
                         .addModifiers(publicStaticFinal)
                         .initializer(buildColumnsInitializer(columns))
                         .build()
@@ -137,10 +141,9 @@ public class SchemaWriter extends BaseWriter {
         }
 
         CodeBlock initializer = CodeBlock.builder()
-                .add("new $T($S, $L, $S, $L, $L, $L, $L, $L, $L)",
-                        c.getColumnDefType(),
-                        c.columnName, typeInstance, SqlTypes.getSqliteType(c.getRawType()),
-                        c.nullable, c.primaryKey, c.autoincrement, c.autoId, c.indexed, c.unique)
+                .add("new $T(INSTANCE, $S, $L, $S, $L)",
+                        c.getColumnDefType(), c.columnName, typeInstance, SqlTypes.getSqliteType(c.getRawType()),
+                        buildColumnFlags(c))
                 .build();
 
         return FieldSpec.builder(c.getColumnDefType(), c.name)
@@ -149,16 +152,69 @@ public class SchemaWriter extends BaseWriter {
                 .build();
     }
 
-    public FieldSpec buildRowIdColumnFieldSpec() {
-        TypeName columnDefType = ParameterizedTypeName.get(Types.ColumnDef, TypeName.LONG.box());
+    public CodeBlock buildColumnFlags(ColumnDefinition c) {
+        CodeBlock.Builder builder = CodeBlock.builder();
+        boolean some = false;
+
+        if (c.primaryKey) {
+            builder.add("$T.PRIMARY_KEY", Types.ColumnDef);
+            some = true;
+        }
+
+        if (c.autoId) {
+            if (some) {
+                builder.add(" | ");
+            }
+            builder.add("$T.AUTO_VALUE", Types.ColumnDef);
+            some = true;
+        }
+
+        if (c.autoincrement) {
+            if (some) {
+                builder.add(" | ");
+            }
+            builder.add("$T.AUTOINCREMENT", Types.ColumnDef);
+            some = true;
+        }
+
+        if (c.nullable) {
+            if (some) {
+                builder.add(" | ");
+            }
+            builder.add("$T.NULLABLE", Types.ColumnDef);
+            some = true;
+        }
+        if (c.indexed) {
+            if (some) {
+                builder.add(" | ");
+            }
+            builder.add("$T.INDEXED", Types.ColumnDef);
+            some = true;
+        }
+
+        if (c.unique) {
+            if (some) {
+                builder.add(" | ");
+            }
+            builder.add("$T.UNIQUE", Types.ColumnDef);
+            some = true;
+        }
+
+        if (!some) {
+            builder.add("0");
+        }
+        return builder.build();
+    }
+
+    public FieldSpec buildPrimaryKeyColumn() {
+        TypeName columnDefType = Types.getColumnDef(schema.getModelClassName(), TypeName.LONG.box());
 
         CodeBlock initializer;
         initializer = CodeBlock.builder()
-                .add("new $T($S, $T.class, $S, $L, $L, $L, $L, $L, $L)",
+                .add("new $T(INSTANCE, $S, $T.class, $S, $T.PRIMARY_KEY | $T.AUTO_VALUE)",
                         columnDefType,
                         ColumnDefinition.kDefaultPrimaryKeyName, TypeName.LONG, SqlTypes.getSqliteType(TypeName.LONG),
-                        false /* nullable */, true /* primary key */, false /* autoincrement */, true /* autoId */,
-                        false /* indexed */, false /* unique */)
+                        Types.ColumnDef, Types.ColumnDef)
                 .build();
 
         return FieldSpec.builder(columnDefType, ColumnDefinition.kDefaultPrimaryKeyName)
@@ -171,7 +227,7 @@ public class SchemaWriter extends BaseWriter {
     public CodeBlock buildColumnsInitializer(List<FieldSpec> columns) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
-        builder.add("$T.<$T>asList(\n", Types.Arrays, Types.WildcardColumnDef).indent();
+        builder.add("$T.<$T>asList(\n", Types.Arrays, Types.getColumnDef(schema.getModelClassName(), Types.WildcardType)).indent();
 
         for (int i = 0; i < columns.size(); i++) {
             builder.add("$N", columns.get(i));
@@ -212,8 +268,8 @@ public class SchemaWriter extends BaseWriter {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
         List<AnnotationSpec> overrideAndNonNull = Arrays.asList(
-                Specs.buildNonNullAnnotationSpec(),
-                Specs.buildOverrideAnnotationSpec()
+                Specs.nonNullAnnotationSpec(),
+                Specs.overrideAnnotationSpec()
         );
 
         methodSpecs.add(
@@ -247,7 +303,7 @@ public class SchemaWriter extends BaseWriter {
                 MethodSpec.methodBuilder("getPrimaryKey")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.WildcardColumnDef)
+                        .returns(Types.getColumnDef(schema.getModelClassName(), Types.WildcardType))
                         .addStatement("return $N", primaryKey)
                         .build()
         );
@@ -256,7 +312,7 @@ public class SchemaWriter extends BaseWriter {
                 MethodSpec.methodBuilder("getColumns")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.ColumnList)
+                        .returns(Types.getColumnDefList(schema.getModelClassName()))
                         .addStatement("return $L", COLUMNS)
                         .build()
         );
@@ -317,11 +373,11 @@ public class SchemaWriter extends BaseWriter {
                         .returns(ArrayTypeName.of(TypeName.OBJECT))
                         .addParameter(
                                 ParameterSpec.builder(Types.OrmaConnection, "conn")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addParameter(
                                 ParameterSpec.builder(schema.getModelClassName(), "model")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addCode(buildConvertToArgs())
                         .build()
@@ -334,15 +390,15 @@ public class SchemaWriter extends BaseWriter {
                         .returns(TypeName.VOID)
                         .addParameter(
                                 ParameterSpec.builder(Types.OrmaConnection, "conn")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addParameter(
                                 ParameterSpec.builder(Types.SQLiteStatement, "statement")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addParameter(
                                 ParameterSpec.builder(schema.getModelClassName(), "model")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addCode(buildBindArgs())
                         .build()
@@ -355,11 +411,11 @@ public class SchemaWriter extends BaseWriter {
                         .returns(schema.getModelClassName())
                         .addParameter(
                                 ParameterSpec.builder(Types.OrmaConnection, "conn")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addParameter(
                                 ParameterSpec.builder(Types.Cursor, "cursor")
-                                        .addAnnotation(Specs.buildNonNullAnnotationSpec())
+                                        .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addCode(buildNewModelFromCursor())
                         .build()

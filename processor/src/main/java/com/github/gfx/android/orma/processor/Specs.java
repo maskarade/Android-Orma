@@ -16,26 +16,46 @@
 package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.CodeBlock;
 
 public class Specs {
 
-    public static AnnotationSpec buildOverrideAnnotationSpec() {
-        return AnnotationSpec.builder(Override.class)
-                .build();
+    private static final AnnotationSpec overrideAnnotationSpec = AnnotationSpec.builder(Override.class).build();
+
+    private static final AnnotationSpec nonNullAnnotationSpec = AnnotationSpec.builder(Types.NonNull).build();
+
+    private static final AnnotationSpec nullableAnnotationSpec = AnnotationSpec.builder(Types.Nullable).build();
+
+    public static AnnotationSpec overrideAnnotationSpec() {
+        return overrideAnnotationSpec;
     }
 
-    public static AnnotationSpec buildNonNullAnnotationSpec() {
-        return AnnotationSpec.builder(Types.NonNull)
-                .build();
+    public static AnnotationSpec nonNullAnnotationSpec() {
+        return nonNullAnnotationSpec;
     }
 
-    public static AnnotationSpec buildNullableAnnotationSpec() {
-        return AnnotationSpec.builder(Types.Nullable)
-                .build();
+    public static AnnotationSpec nullableAnnotation() {
+        return nullableAnnotationSpec;
     }
 
-    public static AnnotationSpec buildWorkerThreadSpec() {
+    public static AnnotationSpec workerThreadAnnotation() {
         return AnnotationSpec.builder(Types.WorkerThread)
                 .build();
+    }
+
+    public static AnnotationSpec suppressWarningsAnnotation(String... warnings) {
+        AnnotationSpec.Builder builder = AnnotationSpec.builder(SuppressWarnings.class);
+        CodeBlock.Builder names = CodeBlock.builder();
+        boolean first = true;
+        for (String warning : warnings) {
+            if (first) {
+                names.add("$S", warning);
+                first = false;
+            } else {
+                names.add(", $S", warning);
+            }
+        }
+        builder.addMember("value", "{$L}", names.build());
+        return builder.build();
     }
 }
