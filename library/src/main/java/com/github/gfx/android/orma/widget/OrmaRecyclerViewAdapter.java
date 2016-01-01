@@ -44,6 +44,11 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
         totalCount = relation.selector().count();
     }
 
+    @Override
+    public int getItemCount() {
+        return totalCount;
+    }
+
     public Context getContext() {
         return context;
     }
@@ -111,9 +116,17 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
                 });
     }
 
-    @Override
-    public int getItemCount() {
-        return totalCount;
+    public void clear() {
+        relation.deleter()
+                .observable()
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer deletedRows) {
+                        totalCount = 0;
+                        notifyDataSetChanged();
+                    }
+                });
     }
 
 }
