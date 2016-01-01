@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
+import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
@@ -58,6 +59,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean foreignKeys;
 
+    final boolean debug;
+
     final boolean trace;
 
     final TypeAdapterRegistry typeAdapterRegistry;
@@ -74,6 +77,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         this.wal = configuration.wal;
         this.typeAdapterRegistry = configuration.typeAdapterRegistry;
 
+        this.debug = configuration.debug;
         this.trace = configuration.trace;
         this.readOnMainThread = configuration.readOnMainThread;
         this.writeOnMainThread = configuration.readOnMainThread;
@@ -275,6 +279,9 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     void createAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
+            if (debug) {
+                SQLiteParserUtils.parse(schema.getCreateTableStatement());
+            }
             execSQL(db, schema.getCreateTableStatement());
 
             for (String statement : schema.getCreateIndexStatements()) {
