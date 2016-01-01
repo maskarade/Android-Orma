@@ -120,6 +120,8 @@ public class Types {
 
     public static final ClassName OrderSpec = ClassName.get(ormaPackageName, "OrderSpec");
 
+    public static final ClassName NoValueException = ClassName.get(ormaPackageName + ".exception", "NoValueException");
+
     // helper methods
 
     public static ParameterizedTypeName getCollection(TypeName type) {

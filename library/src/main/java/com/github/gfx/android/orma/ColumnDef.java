@@ -19,7 +19,7 @@ import android.support.annotation.NonNull;
 
 import java.lang.reflect.Type;
 
-public class ColumnDef<Model, T> {
+public abstract class ColumnDef<Model, T> {
 
     public static int PRIMARY_KEY = 0x01;
 
@@ -51,8 +51,8 @@ public class ColumnDef<Model, T> {
         this.flags = flags;
     }
 
-    public String getQuotedName() {
-        return '"' + name + '"';
+    public StringBuilder createQuotedName() {
+        return new StringBuilder().append('"').append(name).append('"');
     }
 
     private boolean checkFlags(int flags) {
@@ -82,6 +82,8 @@ public class ColumnDef<Model, T> {
     public boolean isUnique() {
         return checkFlags(UNIQUE);
     }
+
+    public abstract T get(@NonNull Model model);
 
     public OrderSpec<Model> orderInAscending() {
         return new OrderSpec<>(this, OrderSpec.ASC);

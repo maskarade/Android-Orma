@@ -18,7 +18,6 @@ package com.github.gfx.android.orma.example.activity;
 import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
@@ -144,25 +143,18 @@ public class TodoActivity extends AppCompatActivity {
         }
 
         public boolean removeItem(final Todo todo) {
-            relation.getConnection().transactionAsync(new TransactionTask() {
-                @Override
-                public void execute() throws Exception {
-                    final int position = relation.indexOf(todo);
-                    final int deletedRows = relation.deleter()
-                            .idEq(todo.id)
-                            .execute();
-
-                    if (deletedRows > 0) {
-                        runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
+            relation.deleteAsObservable(todo)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Integer>() {
+                        @Override
+                        public void call(Integer position) {
+                            if (position != -1) {
                                 totalCount--;
                                 notifyItemRemoved(position);
                             }
-                        });
-                    }
-                }
-            });
+                        }
+                    });
 
             return true;
         }

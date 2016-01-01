@@ -140,15 +140,27 @@ public class SchemaWriter extends BaseWriter {
                     .build();
         }
 
-        CodeBlock initializer = CodeBlock.builder()
-                .add("new $T(INSTANCE, $S, $L, $S, $L)",
-                        c.getColumnDefType(), c.columnName, typeInstance, SqlTypes.getSqliteType(c.getRawType()),
-                        buildColumnFlags(c))
-                .build();
+        TypeSpec.Builder columnDefType = TypeSpec.anonymousClassBuilder("INSTANCE, $S, $L, $S, $L",
+                c.columnName, typeInstance, SqlTypes.getSqliteType(c.getRawType()), buildColumnFlags(c));
+        columnDefType.superclass(c.getColumnDefType());
+        MethodSpec.Builder getBuilder = MethodSpec.methodBuilder("get")
+                .addAnnotation(Specs.overrideAnnotationSpec())
+                .addAnnotation(c.nullable ? Specs.nullableAnnotation() : Specs.nonNullAnnotationSpec())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(c.getBoxType())
+                .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .build());
+        if (c.element != null) {
+            getBuilder.addStatement("return model.$L", c.buildGetColumnExpr());
+        } else {
+            getBuilder.addStatement("throw new $T($S)", Types.NoValueException, "Missing @PrimaryKey definition");
+        }
+        columnDefType.addMethod(getBuilder.build());
 
         return FieldSpec.builder(c.getColumnDefType(), c.name)
                 .addModifiers(publicStaticFinal)
-                .initializer(initializer)
+                .initializer("$L", columnDefType.build())
                 .build();
     }
 
@@ -207,20 +219,7 @@ public class SchemaWriter extends BaseWriter {
     }
 
     public FieldSpec buildPrimaryKeyColumn() {
-        TypeName columnDefType = Types.getColumnDef(schema.getModelClassName(), TypeName.LONG.box());
-
-        CodeBlock initializer;
-        initializer = CodeBlock.builder()
-                .add("new $T(INSTANCE, $S, $T.class, $S, $T.PRIMARY_KEY | $T.AUTO_VALUE)",
-                        columnDefType,
-                        ColumnDefinition.kDefaultPrimaryKeyName, TypeName.LONG, SqlTypes.getSqliteType(TypeName.LONG),
-                        Types.ColumnDef, Types.ColumnDef)
-                .build();
-
-        return FieldSpec.builder(columnDefType, ColumnDefinition.kDefaultPrimaryKeyName)
-                .addModifiers(publicStaticFinal)
-                .initializer(initializer)
-                .build();
+        return buildColumnFieldSpec(ColumnDefinition.createDefaultPrimaryKey(schema));
     }
 
 
@@ -381,23 +380,6 @@ public class SchemaWriter extends BaseWriter {
                                         .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addCode(buildConvertToArgs())
-                        .build()
-        );
-
-        methodSpecs.add(
-                MethodSpec.methodBuilder("getField")
-                        .addAnnotation(Specs.suppressWarningsAnnotation("unchecked"))
-                        .addAnnotation(Specs.overrideAnnotationSpec())
-                        .addModifiers(Modifier.PUBLIC)
-                        .addTypeVariable(Types.T)
-                        .returns(Types.T)
-                        .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
-                                .addAnnotation(Specs.nonNullAnnotationSpec())
-                                .build())
-                        .addParameter(ParameterSpec.builder(Types.getColumnDef(schema.getModelClassName(), Types.T), "column")
-                                .addAnnotation(Specs.nonNullAnnotationSpec())
-                                .build())
-                        .addCode(buildGetField())
                         .build()
         );
 

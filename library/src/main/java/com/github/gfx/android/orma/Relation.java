@@ -24,6 +24,9 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import rx.Single;
+import rx.SingleSubscriber;
+
 /**
  * Representation of a relation, or a {@code SELECT} query.
  *
@@ -49,6 +52,11 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return (R) this;
     }
 
+    @NonNull
+    public Model get(int position) {
+        return selector().get(position);
+    }
+
     /**
      * Finds the index of the item, assuming an order specified by a set of {@code orderBy*()} methods.
      *
@@ -59,18 +67,49 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     public int indexOf(@NonNull Model item) {
         Selector<Model, ?> selector = selector();
         for (OrderSpec<Model> orderSpec : orderSpecs) {
+            ColumnDef<Model, ?> column = orderSpec.column;
             if (orderSpec.ordering.equals(OrderSpec.ASC)) {
-                selector.where(orderSpec.column.getQuotedName() + " < ?", schema.getField(item, orderSpec.column));
+                selector.where(column, "<", column.get(item));
             } else {
-                selector.where(orderSpec.column.getQuotedName() + " > ?", schema.getField(item, orderSpec.column));
+                selector.where(column, ">", column.get(item));
             }
         }
         return selector.count();
     }
 
+    /**
+     * Deletes a specified model and produces where it was. Suitable to implement {@link android.widget.Adapter}.
+     * Operations are surrounded by a transaction.
+     *
+     * @param item A model to delete.
+     * @return A single observable that produces the position of item. {@code -1} if no item is deleted.
+     */
     @NonNull
-    public Model get(int position) {
-        return selector().get(position);
+    public Single<Integer> deleteAsObservable(@NonNull final Model item) {
+        return Single.create(new Single.OnSubscribe<Integer>() {
+            @Override
+            public void call(final SingleSubscriber<? super Integer> subscriber) {
+                conn.transactionSync(new TransactionTask() {
+                    @Override
+                    public void execute() throws Exception {
+                        int position = indexOf(item);
+
+                        int deletedRows = deleter().where(schema.getPrimaryKey(), "=", item).execute();
+
+                        if (deletedRows > 0) {
+                            subscriber.onSuccess(position);
+                        } else {
+                            subscriber.onSuccess(-1);
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Exception exception) {
+                        subscriber.onError(exception);
+                    }
+                });
+            }
+        });
     }
 
     @Override

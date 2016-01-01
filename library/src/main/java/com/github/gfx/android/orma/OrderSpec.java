@@ -33,6 +33,6 @@ public class OrderSpec<Model> {
 
     @Override
     public String toString() {
-        return column.getQuotedName() + " " + ordering;
+        return column.createQuotedName().append(" ").append(ordering).toString();
     }
 }

@@ -240,8 +240,16 @@ Todo_Relation todos = orma.relationOfTodo()
 // List-like features:
 int count = todos.count();
 Todo todo = todos.get(0);
-int position = todos.indexOf(todo);
 
+// Convenience utilities
+int position = todos.indexOf(todo);
+todos.deleteAsObservable(position -> {
+    if (position != -1) {
+      notifyItemRemoved(position); // assumes Adapter#notifyItemRemoved()
+    }
+});
+
+// as Iterable<Todo>
 for (Todo todo : todos) {
   // ...
 }

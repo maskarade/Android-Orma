@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.internal;
 
+import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.adapter.TypeAdapter;
@@ -95,6 +96,11 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
         whereClause.append(')');
         appendBindArgs(args);
         return (C) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public C where(@NonNull ColumnDef<Model, ?> column, @NonNull String operator, @NonNull Object value) {
+        return where(column.createQuotedName().append(operator).append(" ?"), value);
     }
 
     @SuppressWarnings("unchecked")
