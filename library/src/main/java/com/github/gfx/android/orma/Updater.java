@@ -48,7 +48,7 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
     }
 
     @NonNull
-    public Single<Integer> observable() {
+    public Single<Integer> executeAsObservable() {
         return Single.create(new Single.OnSubscribe<Integer>() {
             @Override
             public void call(SingleSubscriber<? super Integer> subscriber) {

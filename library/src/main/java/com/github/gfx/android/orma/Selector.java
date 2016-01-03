@@ -250,7 +250,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @NonNull
-    public Observable<Model> observable() {
+    public Observable<Model> executeAsObservable() {
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
             public void call(final Subscriber<? super Model> subscriber) {

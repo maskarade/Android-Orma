@@ -126,7 +126,7 @@ public class OrmaAdapterDelegate<Model> {
 
     public Single<Integer> clearAsObservable() {
         return relation.deleter()
-                .observable()
+                .executeAsObservable()
                 .subscribeOn(background)
                 .doOnSuccess(new Action1<Integer>() {
                     @Override

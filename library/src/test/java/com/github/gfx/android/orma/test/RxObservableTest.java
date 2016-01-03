@@ -94,7 +94,7 @@ public class RxObservableTest {
     public void relationObservable() throws Exception {
         List<Book> list = db.selectFromBook()
                 .where("title = ?", "today")
-                .observable()
+                .executeAsObservable()
                 .toList()
                 .toBlocking()
                 .single();
@@ -106,7 +106,7 @@ public class RxObservableTest {
     @Test
     public void inserterObservable() throws Exception {
         long rowid = db.prepareInsertIntoBook()
-                .observable(new ModelFactory<Book>() {
+                .executeAsObservable(new ModelFactory<Book>() {
                     @Override
                     public Book call() {
                         Book book = new Book();
@@ -128,7 +128,7 @@ public class RxObservableTest {
         int count = db.updateBook()
                 .where("title = ?", "today")
                 .content("modified")
-                .observable()
+                .executeAsObservable()
                 .toBlocking()
                 .value();
 
@@ -140,7 +140,7 @@ public class RxObservableTest {
     public void deleterObservable() throws Exception {
         int count = db.deleteFromBook()
                 .where("title = ?", "today")
-                .observable()
+                .executeAsObservable()
                 .toBlocking()
                 .value();
 

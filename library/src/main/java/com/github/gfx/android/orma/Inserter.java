@@ -19,8 +19,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 
+import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
+import rx.Subscriber;
 
 /**
  * Represents a prepared statement to insert models in batch.
@@ -59,7 +61,6 @@ public class Inserter<Model> {
     }
 
     /**
-     *
      * @param modelFactory A mode factory to create a model object to insert
      * @return The last inserted row id
      */
@@ -75,14 +76,16 @@ public class Inserter<Model> {
 
     /**
      * {@link Single} wrapper to {@code execute(Model)}
+     *
      * @param model A model object to insert
-     * @return A cold observable for the last inserted row id
+     * @return An {@link Observable} for the last inserted row id
      */
-    public Single<Long> observable(@NonNull final Model model) {
+    public Single<Long> executeAsObservable(@NonNull final Model model) {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
             public void call(SingleSubscriber<? super Long> subscriber) {
-                subscriber.onSuccess(execute(model));
+                long rowId = execute(model);
+                subscriber.onSuccess(rowId);
             }
         });
     }
@@ -92,14 +95,35 @@ public class Inserter<Model> {
      * {@link ModelFactory#call()} is called in {@link Single.OnSubscribe#call(Object)}.
      *
      * @param modelFactory A model factory
-     * @return A cold observable for the last inserted row id
+     * @return An {@link Observable} for the last inserted row id
      */
-    public Single<Long> observable(@NonNull final ModelFactory<Model> modelFactory) {
+    public Single<Long> executeAsObservable(@NonNull final ModelFactory<Model> modelFactory) {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
             public void call(SingleSubscriber<? super Long> subscriber) {
-                subscriber.onSuccess(execute(modelFactory));
+                long rowId = execute(modelFactory);
+                subscriber.onSuccess(rowId);
             }
         });
     }
+
+    /**
+     * {@link Single} wrapper to {@code execute(Model)}
+     *
+     * @param models model objects to insert
+     * @return An {@link Observable} for the last inserted row ids
+     */
+    public Observable<Long> executeAllAsObservable(@NonNull final Iterable<Model> models) {
+        return Observable.create(new Observable.OnSubscribe<Long>() {
+            @Override
+            public void call(Subscriber<? super Long> subscriber) {
+                for (Model model : models) {
+                    long rowId = execute(model);
+                    subscriber.onNext(rowId);
+                }
+                subscriber.onCompleted();
+            }
+        });
+    }
+
 }

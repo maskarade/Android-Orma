@@ -148,7 +148,7 @@ public class BenchmarkActivity extends AppCompatActivity {
         hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
         orma.deleteFromTodo()
-                .observable()
+                .executeAsObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(new Func1<Integer, Single<Result>>() {

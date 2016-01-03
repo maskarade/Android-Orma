@@ -103,7 +103,7 @@ orma.transactionSync( -> { // or transactionAsync() to execute tasks in backgrou
 // read
 orma.selectFromTodo()
   .titleEq("foo") // equivalent to `where("title = ?", "foo")`
-  .observable() // first-class RxJava interface
+  .executeAsObservable() // first-class RxJava interface
   .subscribe(...);
 
 // update
