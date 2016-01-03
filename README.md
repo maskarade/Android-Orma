@@ -2,6 +2,9 @@
 
 This is an **alpha** software and the interface will change until v1.0.0, which will be released Jan 2016.
 
+> Easy things should be easy, and hard things should be possible.
+-- [Larry Wall](https://en.wikiquote.org/wiki/Larry_Wall)
+
 Orma is an ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
 generating helper classes at compile time with **annotation processing**.
 
