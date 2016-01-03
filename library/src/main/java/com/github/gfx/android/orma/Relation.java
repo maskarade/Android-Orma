@@ -24,8 +24,10 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
+import rx.Subscriber;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -57,6 +59,26 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return selector().get(position);
     }
 
+    @NonNull
+    public Single<Model> getWithTransactionAsObservable(final int position) {
+        return Single.create(new Single.OnSubscribe<Model>() {
+            @Override
+            public void call(final SingleSubscriber<? super Model> subscriber) {
+                conn.transactionNonExclusiveSync(new TransactionTask() {
+                    @Override
+                    public void execute() throws Exception {
+                        subscriber.onSuccess(get(position));
+                    }
+
+                    @Override
+                    public void onError(@NonNull Exception exception) {
+                        subscriber.onError(exception);
+                    }
+                });
+            }
+        });
+    }
+
     /**
      * Finds the index of the item, assuming an order specified by a set of {@code orderBy*()} methods.
      *
@@ -78,29 +100,58 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
-     * Deletes a specified model and produces where it was. Suitable to implement {@link android.widget.Adapter}.
-     * Operations are surrounded by a transaction.
+     * Deletes a specified model and yields where it was. Suitable to implement {@link android.widget.Adapter}.
+     * Operations are executed in a transaction.
      *
      * @param item A model to delete.
-     * @return A single observable that produces the position of item. {@code -1} if no item is deleted.
+     * @return An {@link Observable} that yields the position of the deleted item if the item is deleted.
      */
     @NonNull
-    public Single<Integer> deleteAsObservable(@NonNull final Model item) {
-        return Single.create(new Single.OnSubscribe<Integer>() {
+    public Observable<Integer> deleteWithTransactionAsObservable(@NonNull final Model item) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
-            public void call(final SingleSubscriber<? super Integer> subscriber) {
+            public void call(final Subscriber<? super Integer> subscriber) {
                 conn.transactionSync(new TransactionTask() {
                     @Override
                     public void execute() throws Exception {
                         int position = indexOf(item);
 
-                        int deletedRows = deleter().where(schema.getPrimaryKey(), "=", item).execute();
+                        ColumnDef<Model, ?> column = schema.getPrimaryKey();
+                        int deletedRows = deleter()
+                                .where(column, "=", column.get(item))
+                                .execute();
 
                         if (deletedRows > 0) {
-                            subscriber.onSuccess(position);
-                        } else {
-                            subscriber.onSuccess(-1);
+                            subscriber.onNext(position);
                         }
+                        subscriber.onCompleted();
+                    }
+
+                    @Override
+                    public void onError(@NonNull Exception exception) {
+                        subscriber.onError(exception);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Inserts an item. Operations are executed in a transaction.
+     *
+     * @param factory A model to insert.
+     * @return An {@link Single} that yields the newly inserted row id.
+     */
+    @NonNull
+    public Single<Long> insertWithTransactionAsObservable(@NonNull final ModelFactory<Model> factory) {
+        return Single.create(new Single.OnSubscribe<Long>() {
+            @Override
+            public void call(final SingleSubscriber<? super Long> subscriber) {
+                conn.transactionSync(new TransactionTask() {
+                    @Override
+                    public void execute() throws Exception {
+                        long rowId = inserter().execute(factory);
+                        subscriber.onSuccess(rowId);
                     }
 
                     @Override

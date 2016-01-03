@@ -30,12 +30,14 @@ import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.database.sqlite.SQLiteStatement;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.lang.reflect.Type;
@@ -47,7 +49,7 @@ import java.util.List;
  */
 public class OrmaConnection extends SQLiteOpenHelper {
 
-    static final String TAG = OrmaConnection.class.getSimpleName();
+    static final String TAG = "Orma";
 
     static final String[] countSelections = {"COUNT(*)"};
 
@@ -199,7 +201,17 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public int delete(@NonNull Schema<?> schema, @Nullable String whereClause, @Nullable String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
-        return db.delete(schema.getEscapedTableName(), whereClause, whereArgs);
+
+        String sql = "DELETE FROM " + schema.getEscapedTableName()
+                + (!TextUtils.isEmpty(whereClause) ? " WHERE " + whereClause : "");
+        trace(sql, whereArgs);
+        SQLiteStatement statement = db.compileStatement(sql);
+        statement.bindAllArgsAsStrings(whereArgs);
+        try {
+            return statement.executeUpdateDelete();
+        } finally {
+            statement.close();
+        }
     }
 
     public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
@@ -298,9 +310,9 @@ public class OrmaConnection extends SQLiteOpenHelper {
     void trace(@NonNull String sql, @Nullable Object[] bindArgs) {
         if (trace) {
             if (bindArgs == null) {
-                Log.v(TAG, sql);
+                Log.v(TAG + '@' + Thread.currentThread().getName(), sql);
             } else {
-                Log.v(TAG, sql + " - " + Arrays.deepToString(bindArgs));
+                Log.v(TAG + '@' + Thread.currentThread().getName(), sql + " - " + Arrays.deepToString(bindArgs));
             }
         }
     }
