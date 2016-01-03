@@ -98,7 +98,7 @@ public class TodoActivity extends AppCompatActivity {
 
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new VH(LayoutInflater.from(getContext()), parent);
+            return new VH(getLayoutInflater(), parent);
         }
 
         @Override

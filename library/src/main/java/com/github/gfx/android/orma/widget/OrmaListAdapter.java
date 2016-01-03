@@ -67,12 +67,8 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
         return delegate.getRelation();
     }
 
-    /**
-     * Same as {@link android.app.Activity#runOnUiThread(Runnable)}.
-     * @param task A task to run on the UI thread.
-     */
-    public void runOnUiThread(@NonNull Runnable task) {
-        delegate.runOnUiThread(task);
+    public void runOnUiThreadSync(@NonNull Runnable task) {
+        delegate.runOnUiThreadSync(task);
     }
 
     /**
@@ -87,7 +83,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
                 .doOnSuccess(new Action1<Long>() {
                     @Override
                     public void call(Long rowId) {
-                        runOnUiThread(new Runnable() {
+                        runOnUiThreadSync(new Runnable() {
                             @Override
                             public void run() {
                                 notifyDataSetChanged();
@@ -124,7 +120,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
                 .doOnNext(new Action1<Integer>() {
                     @Override
                     public void call(Integer position) {
-                        runOnUiThread(new Runnable() {
+                        runOnUiThreadSync(new Runnable() {
                             @Override
                             public void run() {
                                 notifyDataSetChanged();
@@ -144,7 +140,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
                 .doOnSuccess(new Action1<Integer>() {
                     @Override
                     public void call(Integer deletedItems) {
-                        runOnUiThread(new Runnable() {
+                        runOnUiThreadSync(new Runnable() {
                             @Override
                             public void run() {
                                 notifyDataSetChanged();

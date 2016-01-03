@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.exception.OrmaException;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -25,6 +26,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
+
+import java.util.concurrent.CountDownLatch;
 
 import rx.Observable;
 import rx.Scheduler;
@@ -70,22 +73,37 @@ public class OrmaAdapterDelegate<Model> {
         return (Relation<Model, T>) relation;
     }
 
-    public void runOnUiThread(@NonNull Runnable task) {
+    public void runOnUiThreadSync(@NonNull final Runnable task) {
         if (handler.getLooper().getThread() == Thread.currentThread()) {
             task.run();
         } else {
-            handler.post(task);
+            final CountDownLatch latch = new CountDownLatch(1);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    latch.countDown();
+                    task.run();
+                }
+            });
+
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new OrmaException(e);
+            }
         }
     }
 
     @NonNull
     public Model getItem(int position) {
-        return relation.get(position);
+        return relation.getWithTransactionAsObservable(position)
+                .subscribeOn(background)
+                .toBlocking()
+                .value();
     }
 
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
-        return relation.inserter()
-                .observable(factory)
+        return relation.insertWithTransactionAsObservable(factory)
                 .subscribeOn(background)
                 .doOnSuccess(new Action1<Long>() {
                     @Override
@@ -96,8 +114,8 @@ public class OrmaAdapterDelegate<Model> {
     }
 
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
-        return relation.deleteAsObservable(item)
-                .subscribeOn(Schedulers.from(AsyncTask.SERIAL_EXECUTOR))
+        return relation.deleteWithTransactionAsObservable(item)
+                .subscribeOn(background)
                 .doOnNext(new Action1<Integer>() {
                     @Override
                     public void call(final Integer deletedPosition) {
@@ -109,7 +127,7 @@ public class OrmaAdapterDelegate<Model> {
     public Single<Integer> clearAsObservable() {
         return relation.deleter()
                 .observable()
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(background)
                 .doOnSuccess(new Action1<Integer>() {
                     @Override
                     public void call(Integer deletedItems) {
