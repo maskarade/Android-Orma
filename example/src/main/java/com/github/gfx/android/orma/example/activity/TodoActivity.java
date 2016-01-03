@@ -65,7 +65,7 @@ public class TodoActivity extends AppCompatActivity {
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.addItem(new ModelFactory<Todo>() {
+                adapter.addItemAsObservable(new ModelFactory<Todo>() {
                     @Override
                     public Todo call() {
                         Todo todo = new Todo();
@@ -75,7 +75,7 @@ public class TodoActivity extends AppCompatActivity {
                         todo.createdTimeMillis = System.currentTimeMillis();
                         return todo;
                     }
-                });
+                }).subscribe();
             }
         });
     }
@@ -112,7 +112,7 @@ public class TodoActivity extends AppCompatActivity {
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    removeItem(todo);
+                    removeItem(todo).subscribe();
                 }
             });
         }

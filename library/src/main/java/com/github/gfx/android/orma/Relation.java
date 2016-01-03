@@ -24,8 +24,8 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import rx.Single;
-import rx.SingleSubscriber;
+import rx.Observable;
+import rx.Subscriber;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -82,13 +82,13 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * Operations are surrounded by a transaction.
      *
      * @param item A model to delete.
-     * @return A single observable that produces the position of item. {@code -1} if no item is deleted.
+     * @return An {@link Observable} that yields the position of the deleted item if the item is deleted.
      */
     @NonNull
-    public Single<Integer> deleteAsObservable(@NonNull final Model item) {
-        return Single.create(new Single.OnSubscribe<Integer>() {
+    public Observable<Integer> deleteAsObservable(@NonNull final Model item) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
-            public void call(final SingleSubscriber<? super Integer> subscriber) {
+            public void call(final Subscriber<? super Integer> subscriber) {
                 conn.transactionSync(new TransactionTask() {
                     @Override
                     public void execute() throws Exception {
@@ -100,10 +100,9 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                                 .execute();
 
                         if (deletedRows > 0) {
-                            subscriber.onSuccess(position);
-                        } else {
-                            subscriber.onSuccess(-1);
+                            subscriber.onNext(position);
                         }
+                        subscriber.onCompleted();
                     }
 
                     @Override
