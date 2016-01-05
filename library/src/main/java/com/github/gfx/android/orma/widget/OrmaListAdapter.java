@@ -33,7 +33,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     protected final OrmaAdapterDelegate<Model> delegate;
 
     public OrmaListAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
-        this(new OrmaAdapterDelegate<Model>(context, relation));
+        this(new OrmaAdapterDelegate<>(context, relation));
     }
 
     public OrmaListAdapter(OrmaAdapterDelegate<Model> delegate) {
@@ -49,6 +49,11 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     @NonNull
     public Model getItem(int position) {
         return delegate.getItem(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
     }
 
     @NonNull

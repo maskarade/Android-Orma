@@ -121,7 +121,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      * @return An {@link Observable} that yields the position at which the item was. {@code onNext()} is only called if the
      * item existed.
      */
-    public Observable<Integer> removeItem(@NonNull final Model item) {
+    public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
         return delegate.removeItemAsObservable(item)
                 .doOnNext(new Action1<Integer>() {
                     @Override
