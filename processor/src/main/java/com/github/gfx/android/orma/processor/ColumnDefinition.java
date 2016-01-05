@@ -66,9 +66,9 @@ public class ColumnDefinition {
 
     public final Column.Collate collate;
 
-    public Element getter;
+    public ExecutableElement getter;
 
-    public Element setter;
+    public ExecutableElement setter;
 
     public ColumnDefinition(SchemaDefinition schema, VariableElement element) {
         this.schema = schema;
@@ -168,6 +168,15 @@ public class ColumnDefinition {
             }
         }
         return false;
+    }
+
+    public void initGetterAndSetter(ExecutableElement getter, ExecutableElement setter) {
+        if (getter != null) {
+            this.getter = getter;
+        }
+        if (setter != null) {
+            this.setter = setter;
+        }
     }
 
     public AssociationDefinition getAssociation() {
