@@ -112,7 +112,7 @@ public class TodoActivity extends AppCompatActivity {
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    removeItem(todo).subscribe();
+                    removeItemAsObservable(todo).subscribe();
                 }
             });
         }
