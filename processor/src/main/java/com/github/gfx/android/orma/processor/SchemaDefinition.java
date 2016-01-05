@@ -136,20 +136,25 @@ public class SchemaDefinition {
     }
 
     List<ColumnDefinition> collectColumns(TypeElement typeElement) {
-        Map<String, Element> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        Map<String, Element> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, ExecutableElement> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, ExecutableElement> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         typeElement.getEnclosedElements()
                 .forEach(element -> {
+                    if (!(element instanceof ExecutableElement)) {
+                        return;
+                    }
+                    if (isConstructor(element)) {
+                        return;
+                    }
+
+                    ExecutableElement executableElement = (ExecutableElement) element;
+
                     Getter getter = element.getAnnotation(Getter.class);
                     Setter setter = element.getAnnotation(Setter.class);
 
-                    if (getter != null) {
-                        getters.put(extractNameFromGetter(getter, (ExecutableElement) element), element);
-                    } else if (setter != null && !isConstructor(element)) {
-                        setters.put(extractNameFromSetter(setter, (ExecutableElement) element), element);
-                    }
-
+                    getters.put(extractNameFromGetter(getter,  executableElement), executableElement);
+                    setters.put(extractNameFromSetter(setter,  executableElement), executableElement);
                 });
 
         return typeElement.getEnclosedElements()
@@ -158,15 +163,14 @@ public class SchemaDefinition {
                         || element.getAnnotation(PrimaryKey.class) != null)
                 .map((element) -> {
                     ColumnDefinition column = new ColumnDefinition(this, (VariableElement)element);
-                    column.getter = getters.get(column.columnName);
-                    column.setter = setters.get(column.columnName);
+                    column.initGetterAndSetter(getters.get(column.columnName), setters.get(column.columnName));
                     return column;
                 })
                 .collect(Collectors.toList());
     }
 
     private String extractNameFromGetter(Getter getter, ExecutableElement getterElement) {
-        if (!Strings.isEmpty(getter.value())) {
+        if (getter != null && !Strings.isEmpty(getter.value())) {
             return getter.value();
         } else {
             String name = getterElement.getSimpleName().toString();
@@ -184,9 +188,9 @@ public class SchemaDefinition {
         }
     }
 
-    private String extractNameFromSetter(Setter getter, ExecutableElement setterElement) {
-        if (!Strings.isEmpty(getter.value())) {
-            return getter.value();
+    private String extractNameFromSetter(Setter setter, ExecutableElement setterElement) {
+        if (setter != null && !Strings.isEmpty(setter.value())) {
+            return setter.value();
         } else {
             String name = setterElement.getSimpleName().toString();
             if (name.startsWith("set")) {

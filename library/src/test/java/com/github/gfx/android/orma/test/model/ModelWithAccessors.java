@@ -47,6 +47,9 @@ public class ModelWithAccessors {
     @Nullable // Boolean is a kind of boolean
     private Boolean done;
 
+    @Column // without @Getter and @Setter annotations
+    private long order;
+
     @Getter(kId)
     public long getId() {
         return id;
@@ -96,5 +99,13 @@ public class ModelWithAccessors {
     @Setter
     public void setDone(@Nullable Boolean done) {
         this.done = done;
+    }
+
+    public long getOrder() {
+        return order;
+    }
+
+    public void setOrder(long order) {
+        this.order = order;
     }
 }
