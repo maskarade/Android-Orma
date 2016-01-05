@@ -291,7 +291,9 @@ And `ORDER BY` helpers:
 
 ## Setters and Getters
 
-You can define private columns with `@Getter` and `@Setter`,
+Orma uses getters and setters if their names are inferred.
+
+You can also connect getters and setters with `@Getter` and `@Setter` respectively,
 which tells `orma-processor` to use accessors.
 
 Each accessor name can specify a column name in SQLite database,
