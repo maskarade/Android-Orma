@@ -20,10 +20,10 @@ import android.content.Context
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers
 import com.github.gfx.android.orma.Relation
 import com.github.gfx.android.orma.example_kotlin.databinding.ActivityKotlinBinding
 import com.github.gfx.android.orma.example_kotlin.databinding.ItemBinding
@@ -46,14 +46,15 @@ class KotlinActivity : AppCompatActivity() {
         binding.list.adapter = adapter
 
         binding.fab.setOnClickListener {
-            Log.d("XXX", "hoge")
             adapter.addItemAsObservable({
                 val item = Item()
                 item.content = "content #" + orma.selectFromItem().count()
                 item
-            }).subscribe({
-                Toast.makeText(this, "item created!", Toast.LENGTH_SHORT).show()
             })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        Toast.makeText(this, "item created!", Toast.LENGTH_SHORT).show()
+                    })
         }
     }
 
