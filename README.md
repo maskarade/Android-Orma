@@ -14,7 +14,7 @@ generating helper classes at compile time with **annotation processing**.
 
 # Install
 
-Orma requires **JDK 8 (1.8.0_66 or later)** and **Android API level 15**.
+Orma requires **JDK 8 (1.8.0_66 or later)** to build, and **Android API level 15** to run.
 
 ```groovy
 // To use "apt" in dependencies
