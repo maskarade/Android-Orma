@@ -415,6 +415,10 @@ There are a lot of built-in type adapter provided by default, which include:
 See [adapter/](library/src/main/java/com/github/gfx/android/orma/adapter)
 for all the adapters.
 
+## Kotlin Support
+
+Orma works with Kotlin. Yey!
+
 # Example
 
 There is an example app to demonstrate what Orma does.
