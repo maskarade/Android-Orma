@@ -34,13 +34,17 @@ public class ManualStepMigration implements MigrationEngine {
     static final String MIGRATION_HISTORY_NAME = "orma_migration_steps";
 
     static final String MIGRATION_HISTORY_DDL = "CREATE TABLE IF NOT EXISTS "
-            + MIGRATION_HISTORY_NAME + " (version INTEGER NOT NULL, sql TEXT NULL, created_time_millis INTEGER NOT NULL)";
+            + MIGRATION_HISTORY_NAME + " ("
+            + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + "version INTEGER NOT NULL, "
+            + "sql TEXT NULL, "
+            + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
+
+    static final String kId = "id";
 
     static final String kVersion = "version";
 
     static final String kSql = "sql";
-
-    static final String kCreatedTimeMillis = "created_time_millis";
 
     final int version;
 
@@ -67,7 +71,7 @@ public class ManualStepMigration implements MigrationEngine {
 
     public int getDbVersion(SQLiteDatabase db) {
         Cursor cursor = db.query(MIGRATION_HISTORY_NAME, new String[]{kVersion},
-                null, null, null, null, kCreatedTimeMillis + " DESC", "1");
+                null, null, null, null, kId + " DESC", "1");
         try {
             if (cursor.moveToFirst()) {
                 return cursor.getInt(0);
@@ -145,14 +149,12 @@ public class ManualStepMigration implements MigrationEngine {
         }
     }
 
-    public void imprintStep(SQLiteDatabase db, int version, @Nullable String sql) {
+    public void saveStep(SQLiteDatabase db, int version, @Nullable String sql) {
         createMigrationHistoryTable(db);
 
         ContentValues values = new ContentValues();
         values.put(kVersion, version);
         values.put(kSql, sql);
-        values.put(kCreatedTimeMillis, System.currentTimeMillis());
-
         db.insertOrThrow(MIGRATION_HISTORY_NAME, null, values);
     }
 
@@ -216,7 +218,7 @@ public class ManualStepMigration implements MigrationEngine {
                 Log.v(TAG, sql);
             }
             db.execSQL(sql);
-            imprintStep(db, upgrade ? version : version - 1, sql);
+            saveStep(db, upgrade ? version : version - 1, sql);
         }
     }
 }

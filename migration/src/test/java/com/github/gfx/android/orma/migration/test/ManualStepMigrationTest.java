@@ -52,7 +52,7 @@ public class ManualStepMigrationTest {
         db = SQLiteDatabase.create(null);
 
         engine = new ManualStepMigration(VERSION, true);
-        engine.imprintStep(db, 1, null);
+        engine.saveStep(db, 1, null);
 
         seq = new ArrayList<>();
         setupSteps();
@@ -225,7 +225,7 @@ public class ManualStepMigrationTest {
         {
             engine = new ManualStepMigration(100, true);
             setupSteps();
-            engine.imprintStep(db, 1, null);
+            engine.saveStep(db, 1, null);
             engine.start(db, new ArrayList<SchemaData>());
 
             assertThat(seq.size(), is(4));
