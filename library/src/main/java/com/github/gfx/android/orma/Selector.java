@@ -46,7 +46,10 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         if (condition instanceof Relation) {
             @SuppressWarnings("unchecked")
             Relation<Model, ?> relation = (Relation<Model, ?>) condition;
-            orderBy(relation.orderSpecs);
+            CharSequence orderByTerm = relation.buildOrderingTerms();
+            if (orderByTerm != null) {
+                orderBy(orderByTerm);
+            }
         }
     }
 
@@ -82,33 +85,12 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @SuppressWarnings("unchecked")
-    public S orderBy(@NonNull String orderByTerm) {
+    public S orderBy(@NonNull CharSequence orderByTerm) {
         if (orderBy == null) {
-            orderBy = orderByTerm;
+            orderBy = orderByTerm.toString();
         } else {
-            orderBy = orderByTerm + ", " + orderBy;
+            orderBy += ", " + orderByTerm;
         }
-        return (S) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public S orderBy(@NonNull List<OrderSpec<Model>> orderSpecs) {
-        if (orderSpecs.isEmpty()) {
-            return (S) this;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (orderBy != null) {
-            sb.append(orderBy);
-            sb.append(", ");
-        }
-        for (OrderSpec<Model> orderSpec : orderSpecs) {
-            if (sb.length() != 0) {
-                sb.append(", ");
-            }
-            sb.append(orderSpec);
-        }
-        orderBy = sb.toString();
         return (S) this;
     }
 
