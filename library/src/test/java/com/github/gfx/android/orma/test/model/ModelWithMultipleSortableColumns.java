@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma;
+package com.github.gfx.android.orma.test.model;
 
-public class OrderSpec<Model> {
+import com.github.gfx.android.orma.annotation.Column;
+import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.annotation.Table;
 
-    public static String ASC = "ASC";
+@Table
+public class ModelWithMultipleSortableColumns {
 
-    public static String DESC = "DESC";
+    @PrimaryKey(auto = false)
+    public long id;
 
-    public final ColumnDef<Model, ?> column;
+    @Column(indexed = true)
+    public int first;
 
-    public final String ordering;
-
-    public OrderSpec(ColumnDef<Model, ?> column, String ordering) {
-        this.column = column;
-        this.ordering = ordering;
-    }
-
-    @Override
-    public String toString() {
-        return column.getEscapedName().append(" ").append(ordering).toString();
-    }
+    @Column(indexed = true)
+    public int second;
 }

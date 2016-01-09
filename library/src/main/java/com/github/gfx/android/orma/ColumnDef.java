@@ -51,7 +51,7 @@ public abstract class ColumnDef<Model, T> {
         this.flags = flags;
     }
 
-    public StringBuilder createQuotedName() {
+    public StringBuilder getEscapedName() {
         return new StringBuilder().append('"').append(name).append('"');
     }
 
@@ -96,6 +96,6 @@ public abstract class ColumnDef<Model, T> {
     @NonNull
     @Override
     public String toString() {
-        return name;
+        return getEscapedName().toString();
     }
 }
