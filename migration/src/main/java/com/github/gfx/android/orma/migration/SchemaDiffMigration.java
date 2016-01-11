@@ -184,6 +184,11 @@ public class SchemaDiffMigration implements MigrationEngine {
         if (intersectionColumns.size() != toTable.getColumns().size() ||
                 intersectionColumns.size() != fromTable.getColumns().size() ||
                 !fromTable.getConstraints().equals(toTable.getConstraints())) {
+            if (trace) {
+                Log.v(TAG, "tables differ:");
+                Log.v(TAG, "from: " + from);
+                Log.v(TAG, "to:   " + to);
+            }
             return buildRecreateTable(fromTable, toTable, intersectionColumnNames);
         } else {
             return Collections.emptyList();
@@ -243,16 +248,13 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public void executeStatements(SQLiteDatabase db, List<String> statements) {
-        if (trace) {
-            for (String statement : statements) {
-                Log.v(TAG, statement);
-            }
-        }
-
         db.beginTransaction();
 
         try {
             for (String statement : statements) {
+                if (trace) {
+                    Log.v(TAG, statement);
+                }
                 db.execSQL(statement);
             }
             db.setTransactionSuccessful();
