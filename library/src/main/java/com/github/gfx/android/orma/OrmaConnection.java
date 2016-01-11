@@ -61,7 +61,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean foreignKeys;
 
-    final boolean debug;
+    final boolean tryParsingSql;
 
     final boolean trace;
 
@@ -79,7 +79,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         this.wal = configuration.wal;
         this.typeAdapterRegistry = configuration.typeAdapterRegistry;
 
-        this.debug = configuration.debug;
+        this.tryParsingSql = configuration.tryParsingSql;
         this.trace = configuration.trace;
         this.readOnMainThread = configuration.readOnMainThread;
         this.writeOnMainThread = configuration.readOnMainThread;
@@ -291,7 +291,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     void createAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
-            if (debug) {
+            if (tryParsingSql) {
                 SQLiteParserUtils.parse(schema.getCreateTableStatement());
             }
             execSQL(db, schema.getCreateTableStatement());

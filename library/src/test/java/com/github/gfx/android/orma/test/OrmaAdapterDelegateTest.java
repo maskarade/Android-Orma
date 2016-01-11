@@ -46,9 +46,7 @@ public class OrmaAdapterDelegateTest {
 
     @Before
     public void setUp() throws Exception {
-        OrmaDatabase orma = OrmaDatabase.builder(getContext())
-                .name(null)
-                .build();
+        OrmaDatabase orma = OrmaBuilder.create();
 
         Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
         inserter.execute(new ModelFactory<Author>() {

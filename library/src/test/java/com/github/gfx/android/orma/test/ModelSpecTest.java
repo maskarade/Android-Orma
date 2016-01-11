@@ -30,11 +30,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.math.BigDecimal;
@@ -53,16 +51,9 @@ public class ModelSpecTest {
 
     OrmaDatabase db;
 
-    Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
-
     @Before
     public void setUp() throws Exception {
-        db = OrmaDatabase.builder(getContext())
-                .name(null)
-                .trace(true)
-                .build();
+        db = OrmaBuilder.create();
     }
 
     @Test

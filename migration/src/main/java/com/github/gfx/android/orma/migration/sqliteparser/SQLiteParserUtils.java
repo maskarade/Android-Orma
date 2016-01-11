@@ -43,7 +43,11 @@ public class SQLiteParserUtils {
 
     public static SQLiteParser.ParseContext parse(String sql) throws ParseCancellationException {
         SQLiteParser parser = createParser(sql);
-        return parser.parse();
+        try {
+            return parser.parse();
+        } catch (StackOverflowError e) {
+            throw new ParseCancellationException("SQL is too complex to parse: " + sql, e);
+        }
     }
 
     public static CreateTableStatement parseIntoCreateTableStatement(String sql) throws ParseCancellationException {

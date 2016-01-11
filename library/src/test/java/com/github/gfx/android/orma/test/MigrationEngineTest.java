@@ -45,6 +45,7 @@ public class MigrationEngineTest {
         conn = OrmaDatabase.builder(getContext())
                 .name(null)
                 .migrationEngine(migration)
+                .tryParsingSql(false)
                 .build()
                 .getConnection();
     }
