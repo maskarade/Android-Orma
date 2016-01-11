@@ -42,12 +42,12 @@ dependencies {
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.0.5'
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
-    testCompile 'com.google.code.gson:gson:2.4'
+    testCompile 'com.google.code.gson:gson:2.5'
     androidTestApt project(':processor')
     androidTestCompile 'com.android.support.test:runner:0.4.1'
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-    androidTestCompile 'com.google.code.gson:gson:2.4'
+    androidTestCompile 'com.google.code.gson:gson:2.5'
 }
 
 publish {
