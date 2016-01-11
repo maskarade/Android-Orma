@@ -24,7 +24,7 @@ import com.github.gfx.android.orma.example.databinding.ActivityListViewBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
-import com.github.gfx.android.orma.widget.OrmaListViewAdapter;
+import com.github.gfx.android.orma.widget.OrmaListAdapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -83,7 +83,7 @@ public class ListViewActivity extends AppCompatActivity {
         });
     }
 
-    static class Adapter extends OrmaListViewAdapter<Todo> {
+    static class Adapter extends OrmaListAdapter<Todo> {
 
         public Adapter(@NonNull Context context, @NonNull Relation<Todo, ?> relation) {
             super(context, relation);
