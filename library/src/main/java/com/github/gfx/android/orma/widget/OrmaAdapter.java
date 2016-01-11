@@ -50,7 +50,7 @@ public class OrmaAdapter<Model> {
 
     final Handler handler = new Handler(Looper.getMainLooper());
 
-    final Scheduler background = Schedulers.from(AsyncTask.SERIAL_EXECUTOR);
+    final Scheduler background = Schedulers.from(AsyncTask.THREAD_POOL_EXECUTOR);
 
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
@@ -101,12 +101,15 @@ public class OrmaAdapter<Model> {
 
     @NonNull
     public Model getItem(int position) {
-        return relation.getWithTransactionAsObservable(position)
-                .subscribeOn(background)
-                .toBlocking()
-                .value();
+        return relation.get(position);
     }
 
+    @NonNull
+    public Single<Model> getItemAsObservable(int position) {
+        return relation.getWithTransactionAsObservable(position);
+    }
+
+    @NonNull
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
         return relation.insertWithTransactionAsObservable(factory)
                 .subscribeOn(background)
@@ -118,6 +121,7 @@ public class OrmaAdapter<Model> {
                 });
     }
 
+    @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
         return relation.deleteWithTransactionAsObservable(item)
                 .subscribeOn(background)
@@ -129,6 +133,7 @@ public class OrmaAdapter<Model> {
                 });
     }
 
+    @NonNull
     public Single<Integer> clearAsObservable() {
         return relation.deleter()
                 .executeAsObservable()

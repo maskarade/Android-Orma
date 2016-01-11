@@ -110,6 +110,13 @@ public class OrmaAdapterTest {
     }
 
     @Test
+    public void testGetItemAsObservable() throws Exception {
+        assertThat(adapter.getItemAsObservable(0).toBlocking().value().name, is("A"));
+        assertThat(adapter.getItemAsObservable(1).toBlocking().value().name, is("B"));
+        assertThat(adapter.getItemAsObservable(2).toBlocking().value().name, is("C"));
+    }
+
+    @Test
     public void testAddItemAsObservable() throws Exception {
         long id = adapter.addItemAsObservable(new ModelFactory<Author>() {
             @Override
