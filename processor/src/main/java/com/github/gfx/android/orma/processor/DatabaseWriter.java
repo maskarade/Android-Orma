@@ -63,7 +63,7 @@ public class DatabaseWriter extends BaseWriter {
     public TypeSpec buildTypeSpec() {
         assert isRequired();
 
-        ClassName builderClass = ClassName.get(getPackageName(), kBuilderClassName);
+        ClassName builderClass = ClassName.get(getPackageName(), context.OrmaDatabase.simpleName(), kBuilderClassName);
 
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(context.OrmaDatabase.simpleName());
         classBuilder.addJavadoc("The Orma database handle class.<br><br>\n");
