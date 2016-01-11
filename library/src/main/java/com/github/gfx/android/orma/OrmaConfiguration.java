@@ -49,6 +49,8 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     boolean trace;
 
+    boolean tryParsingSql;
+
     AccessThreadConstraint readOnMainThread;
 
     AccessThreadConstraint writeOnMainThread;
@@ -61,6 +63,7 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
         // debug flags
 
         trace = debug;
+        tryParsingSql = debug;
 
         if (debug) {
             readOnMainThread = AccessThreadConstraint.WARNING;
@@ -114,6 +117,11 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
     public T foreignKeys(boolean foreignKeys) {
         this.foreignKeys = foreignKeys;
         return (T) this;
+    }
+
+    public T tryParsingSql(boolean tryParsingSql) {
+        this.tryParsingSql = tryParsingSql;
+        return (T)this;
     }
 
     /**

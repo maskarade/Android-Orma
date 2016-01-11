@@ -41,15 +41,9 @@ public class ConditionHelpersTest {
 
     OrmaDatabase db;
 
-    Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
-
     @Before
     public void setUp() throws Exception {
-        db = OrmaDatabase.builder(getContext())
-                .name(null)
-                .build();
+        db = OrmaBuilder.create();
 
         db.transactionSync(new TransactionTask() {
             @Override

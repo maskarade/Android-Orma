@@ -55,6 +55,7 @@ public class OrmaDatabaseTest {
                 .typeAdapters(new UriAdapter(), new DateAdapter())
                 .readOnMainThread(AccessThreadConstraint.NONE)
                 .writeOnMainThread(AccessThreadConstraint.NONE)
+                .tryParsingSql(false)
                 .trace(true)
                 .build();
 
@@ -69,6 +70,7 @@ public class OrmaDatabaseTest {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
                 .name(NAME)
                 .writeAheadLogging(true)
+                .tryParsingSql(false)
                 .build();
 
         assertThat(db.getConnection().getReadableDatabase().isWriteAheadLoggingEnabled(), is(true));
@@ -80,6 +82,7 @@ public class OrmaDatabaseTest {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
                 .name(NAME)
                 .writeAheadLogging(false)
+                .tryParsingSql(false)
                 .build();
 
         assertThat(db.getConnection().getReadableDatabase().isWriteAheadLoggingEnabled(), is(false));
