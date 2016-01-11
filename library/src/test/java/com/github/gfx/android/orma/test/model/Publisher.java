@@ -24,6 +24,7 @@ import com.github.gfx.android.orma.annotation.Table;
 @Table(value = "publishers",
         schemaClassName = "PublisherSchema",
         relationClassName = "PublisherRelation",
+        selectorClassName = "PublisherSelector",
         updaterClassName = "PublisherUpdater",
         deleterClassName = "PublisherDeleter"
 )
