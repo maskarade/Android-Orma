@@ -35,7 +35,12 @@ import rx.Single;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class OrmaAdapterDelegate<Model> {
+/**
+ * A helper class to provide Adapter method implementations.
+ *
+ * @param <Model> An Orma model class
+ */
+public class OrmaAdapter<Model> {
 
     int totalCount = 0;
 
@@ -47,7 +52,7 @@ public class OrmaAdapterDelegate<Model> {
 
     final Scheduler background = Schedulers.from(AsyncTask.SERIAL_EXECUTOR);
 
-    public OrmaAdapterDelegate(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
+    public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
         this.relation = relation;
         totalCount = relation.selector().count();

@@ -28,15 +28,18 @@ import rx.Observable;
 import rx.Single;
 import rx.functions.Action1;
 
+/**
+ * A kind of {@link android.widget.ArrayAdapter} or {@link android.widget.CursorAdapter}.
+ */
 public abstract class OrmaListAdapter<Model> extends BaseAdapter {
 
-    protected final OrmaAdapterDelegate<Model> delegate;
+    protected final OrmaAdapter<Model> delegate;
 
     public OrmaListAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
-        this(new OrmaAdapterDelegate<>(context, relation));
+        this(new OrmaAdapter<>(context, relation));
     }
 
-    public OrmaListAdapter(OrmaAdapterDelegate<Model> delegate) {
+    public OrmaListAdapter(OrmaAdapter<Model> delegate) {
         this.delegate = delegate;
     }
 

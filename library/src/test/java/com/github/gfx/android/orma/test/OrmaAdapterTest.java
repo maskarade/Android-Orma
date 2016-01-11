@@ -21,7 +21,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
-import com.github.gfx.android.orma.widget.OrmaAdapterDelegate;
+import com.github.gfx.android.orma.widget.OrmaAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +36,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
-public class OrmaAdapterDelegateTest {
+public class OrmaAdapterTest {
 
     OrmaAdapterDelegate<Author> adapter;
 
@@ -79,7 +79,7 @@ public class OrmaAdapterDelegateTest {
             }
         });
 
-        adapter = new OrmaAdapterDelegate<>(getContext(), orma.relationOfAuthor().orderByNameAsc());
+        adapter = new OrmaAdapter<>(getContext(), orma.relationOfAuthor().orderByNameAsc());
     }
 
     @Test
