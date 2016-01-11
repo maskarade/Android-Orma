@@ -143,5 +143,6 @@ public class OrmaAdapterTest {
     public void testClearAsObservable() throws Exception {
         int deletedCount = adapter.clearAsObservable().toBlocking().value();
         assertThat(deletedCount, is(3));
+        assertThat(adapter.getItemCount(), is(0));
     }
 }

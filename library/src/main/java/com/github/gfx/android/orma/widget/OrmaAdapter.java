@@ -21,7 +21,6 @@ import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.exception.OrmaException;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -30,10 +29,8 @@ import android.view.LayoutInflater;
 import java.util.concurrent.CountDownLatch;
 
 import rx.Observable;
-import rx.Scheduler;
 import rx.Single;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * A helper class to provide Adapter method implementations.
@@ -49,8 +46,6 @@ public class OrmaAdapter<Model> {
     final Relation<Model, ?> relation;
 
     final Handler handler = new Handler(Looper.getMainLooper());
-
-    final Scheduler background = Schedulers.from(AsyncTask.THREAD_POOL_EXECUTOR);
 
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
@@ -101,7 +96,7 @@ public class OrmaAdapter<Model> {
 
     @NonNull
     public Model getItem(int position) {
-        return relation.get(position);
+        return getItemAsObservable(position).toBlocking().value();
     }
 
     @NonNull
@@ -112,7 +107,6 @@ public class OrmaAdapter<Model> {
     @NonNull
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
         return relation.insertWithTransactionAsObservable(factory)
-                .subscribeOn(background)
                 .doOnSuccess(new Action1<Long>() {
                     @Override
                     public void call(Long rowId) {
@@ -124,7 +118,6 @@ public class OrmaAdapter<Model> {
     @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
         return relation.deleteWithTransactionAsObservable(item)
-                .subscribeOn(background)
                 .doOnNext(new Action1<Integer>() {
                     @Override
                     public void call(final Integer deletedPosition) {
@@ -137,11 +130,10 @@ public class OrmaAdapter<Model> {
     public Single<Integer> clearAsObservable() {
         return relation.deleter()
                 .executeAsObservable()
-                .subscribeOn(background)
                 .doOnSuccess(new Action1<Integer>() {
                     @Override
                     public void call(Integer deletedItems) {
-                        totalCount = getItemCount();
+                        totalCount = 0;
                     }
                 });
     }
