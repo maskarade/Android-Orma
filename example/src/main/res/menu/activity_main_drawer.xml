@@ -3,9 +3,14 @@
 
     <group android:checkableBehavior="single">
         <item
-                android:id="@+id/nav_todo"
+                android:id="@+id/nav_recycler_view"
                 android:icon="@drawable/ic_menu_slideshow"
-                android:title="Todo Example"
+                android:title="RecyclerView Example"
+                />
+        <item
+                android:id="@+id/nav_list_view"
+                android:icon="@drawable/ic_menu_slideshow"
+                android:title="ListView Example"
                 />
         <item
                 android:id="@+id/nav_benchmark"

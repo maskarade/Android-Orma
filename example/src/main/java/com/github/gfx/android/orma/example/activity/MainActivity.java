@@ -197,8 +197,10 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_todo) {
-            startActivity(TodoActivity.createIntent(this));
+        if (id == R.id.nav_recycler_view) {
+            startActivity(RecyclerViewActivity.createIntent(this));
+        } else if (id == R.id.nav_list_view) {
+            startActivity(ListViewActivity.createIntent(this));
         } else if (id == R.id.nav_benchmark) {
             startActivity(BenchmarkActivity.createIntent(this));
         } else if (id == R.id.nav_share) {

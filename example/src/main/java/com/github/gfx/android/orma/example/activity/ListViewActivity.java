@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.gfx.android.orma.example.activity;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.example.R;
-import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
+import com.github.gfx.android.orma.example.databinding.ActivityListViewBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
-import com.github.gfx.android.orma.widget.OrmaRecyclerViewAdapter;
+import com.github.gfx.android.orma.widget.OrmaListAdapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -31,29 +32,29 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class TodoActivity extends AppCompatActivity {
+import rx.schedulers.Schedulers;
+
+public class ListViewActivity extends AppCompatActivity {
 
     OrmaDatabase orma;
 
-    ActivityTodoBinding binding;
+    ActivityListViewBinding binding;
 
     Adapter adapter;
 
     int number = 0;
 
     public static Intent createIntent(Context context) {
-        return new Intent(context, TodoActivity.class);
+        return new Intent(context, ListViewActivity.class);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_todo);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_list_view);
 
         orma = OrmaDatabase.builder(this)
                 .readOnMainThread(AccessThreadConstraint.NONE)
@@ -75,36 +76,27 @@ public class TodoActivity extends AppCompatActivity {
                         todo.createdTimeMillis = System.currentTimeMillis();
                         return todo;
                     }
-                }).subscribe();
+                })
+                        .subscribeOn(Schedulers.io())
+                        .subscribe();
             }
         });
     }
 
-    static class VH extends RecyclerView.ViewHolder {
-
-        CardTodoBinding binding;
-
-        public VH(LayoutInflater inflater, ViewGroup parent) {
-            super(CardTodoBinding.inflate(inflater, parent, false).getRoot());
-            binding = DataBindingUtil.getBinding(itemView);
-        }
-    }
-
-    static class Adapter extends OrmaRecyclerViewAdapter<Todo, VH> {
+    static class Adapter extends OrmaListAdapter<Todo> {
 
         public Adapter(@NonNull Context context, @NonNull Relation<Todo, ?> relation) {
             super(context, relation);
         }
 
         @Override
-        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new VH(getLayoutInflater(), parent);
-        }
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = CardTodoBinding.inflate(getLayoutInflater(), parent, false).getRoot();
+            }
 
-        @Override
-        public void onBindViewHolder(final VH holder, int position) {
-            CardTodoBinding binding = holder.binding;
             final Todo todo = getItem(position);
+            CardTodoBinding binding = DataBindingUtil.getBinding(convertView);
 
             binding.title.setText(todo.title);
             binding.content.setText(todo.content);
@@ -112,9 +104,14 @@ public class TodoActivity extends AppCompatActivity {
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    removeItemAsObservable(todo).subscribe();
+                    removeItemAsObservable(todo)
+                            .subscribeOn(Schedulers.io())
+                            .subscribe();
                 }
             });
+
+            return convertView;
         }
     }
+
 }
