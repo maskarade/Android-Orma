@@ -77,6 +77,9 @@ public class SqlGenerator {
                 constraints.add("ON CONFLICT");
                 constraints.add(onConflictClause(column.primaryKeyOnConflict));
             }
+            if (column.autoincrement) {
+                constraints.add("AUTOINCREMENT");
+            }
         } else {
             if (column.unique) {
                 constraints.add("UNIQUE");
