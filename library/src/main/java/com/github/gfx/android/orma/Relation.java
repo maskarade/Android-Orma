@@ -19,7 +19,6 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -208,24 +207,6 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     @Override
     public abstract R clone();
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> groupBy(@NonNull String groupBy);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> having(@NonNull String having, @NonNull Object... args);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> limit(@IntRange(from = 1, to = Integer.MAX_VALUE) long limit);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> offset(@IntRange(from = 0) long offset);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> page(@IntRange(from = 1) long page);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> per(@IntRange(from = 1, to = Integer.MAX_VALUE) long per);
 
     // Operation helpers
 

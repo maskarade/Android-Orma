@@ -17,8 +17,6 @@ package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -99,67 +97,6 @@ public class RelationWriter extends BaseWriter {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getDeleterClassName())
                 .addStatement("return new $T(this)", schema.getDeleterClassName())
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("groupBy")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSelectorClassName())
-                .addParameter(ParameterSpec.builder(Types.String, "groupBy")
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
-                        .build())
-                .addStatement("return selector().groupBy(groupBy)")
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("having")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSelectorClassName())
-                .addParameter(ParameterSpec.builder(Types.String, "having")
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
-                        .build())
-                .varargs()
-                .addParameter(ParameterSpec.builder(Types.ObjectArray, "args")
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
-                        .build())
-                .addStatement("return selector().having(having, args)")
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("limit")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSelectorClassName())
-                .addParameter(ParameterSpec.builder(TypeName.LONG, "limit")
-                        .build())
-                .addStatement("return selector().limit(limit)")
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("offset")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSelectorClassName())
-                .addParameter(ParameterSpec.builder(TypeName.LONG, "offset")
-                        .build())
-                .addStatement("return selector().offset(offset)")
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("page")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSelectorClassName())
-                .addParameter(ParameterSpec.builder(TypeName.LONG, "page")
-                        .build())
-                .addStatement("return selector().page(page)")
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("per")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSelectorClassName())
-                .addParameter(ParameterSpec.builder(TypeName.LONG, "per")
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
-                        .build())
-                .addStatement("return selector().per(per)")
                 .build());
 
         methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers());
