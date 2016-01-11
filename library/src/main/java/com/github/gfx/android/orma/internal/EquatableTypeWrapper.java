@@ -23,7 +23,7 @@ import java.util.List;
 // Hack to make Android 4.x's type to be suitable for HashMap keys, used in TypeAdapterRegistry
 public class EquatableTypeWrapper implements Type {
 
-    static final boolean ROBOLECTRIC_TESTING = !System.getProperty("java.version").equals("0");
+    static final boolean JVM_TESTING = !System.getProperty("java.vm.name").equals("Dalvik");
 
     static final boolean USE_TYPE_WRAPPER;
 
@@ -33,11 +33,12 @@ public class EquatableTypeWrapper implements Type {
         Type b = new TypeHolder<List<String>>() {
         }.getType();
 
-        // ParameterizedType implementation differs in runtimes:
+        // ParameterizedType implementation differs in runtime environments:
         // sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl (Oracle JDK 8)
         // org.apache.harmony.luni.lang.reflect.ImplForType (Android 4.2.2)
         // libcore.reflect.ParameterizedTypeImpl (Android 5.0.2)
-        USE_TYPE_WRAPPER = ROBOLECTRIC_TESTING || !a.equals(b);
+        // Anyway, always use EquatableTypeWrapper in JVM testing.
+        USE_TYPE_WRAPPER = JVM_TESTING || !a.equals(b);
     }
 
     public static Type wrap(Type type) {

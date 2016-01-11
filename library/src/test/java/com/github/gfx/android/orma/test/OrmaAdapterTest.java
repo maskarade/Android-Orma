@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.*;
 @RunWith(AndroidJUnit4.class)
 public class OrmaAdapterTest {
 
-    OrmaAdapterDelegate<Author> adapter;
+    OrmaAdapter<Author> adapter;
 
     static Context getContext() {
         return InstrumentationRegistry.getTargetContext();
