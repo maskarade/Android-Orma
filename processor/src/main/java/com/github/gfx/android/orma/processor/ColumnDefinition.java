@@ -66,6 +66,8 @@ public class ColumnDefinition {
 
     public final Column.Collate collate;
 
+    public final String storageType;
+
     public ExecutableElement getter;
 
     public ExecutableElement setter;
@@ -79,9 +81,10 @@ public class ColumnDefinition {
         PrimaryKey primaryKeyAnnotation = element.getAnnotation(PrimaryKey.class);
 
         name = element.getSimpleName().toString();
-        columnName = getColumnName(column, element);
+        columnName = columnName(column, element);
 
         type = ClassName.get(element.asType());
+        storageType = storageType(column, type);
 
         if (column != null) {
             indexed = column.indexed();
@@ -112,6 +115,7 @@ public class ColumnDefinition {
         nullable = hasNullableAnnotation(element);
     }
 
+    // to create primary key columns
     private ColumnDefinition(SchemaDefinition schema) {
         this.schema = schema;
         this.element = null;
@@ -128,6 +132,7 @@ public class ColumnDefinition {
         this.uniqueOnConflict = OnConflict.NONE;
         this.defaultExpr = "";
         this.collate = Column.Collate.BINARY;
+        this.storageType = storageType(null, type);
     }
 
     public static ColumnDefinition createDefaultPrimaryKey(SchemaDefinition schema) {
@@ -136,10 +141,10 @@ public class ColumnDefinition {
 
     public static String getColumnName(Element element) {
         Column column = element.getAnnotation(Column.class);
-        return getColumnName(column, element);
+        return columnName(column, element);
     }
 
-    static String getColumnName(Column column, Element element) {
+    static String columnName(Column column, Element element) {
         if (column != null && !column.value().equals("")) {
             return column.value();
         } else {
@@ -158,6 +163,14 @@ public class ColumnDefinition {
             }
         }
         return element.getSimpleName().toString();
+    }
+
+    static String storageType(Column column, TypeName type) {
+        if (column != null && !Strings.isEmpty(column.storageType())) {
+            return column.storageType();
+        } else {
+            return SqlTypes.getSqliteType(Types.asRawType(type));
+        }
     }
 
     static boolean hasNullableAnnotation(Element element) {
@@ -199,8 +212,8 @@ public class ColumnDefinition {
         return Types.asUnboxType(type);
     }
 
-    public TypeName getRawType() {
-        return Types.asRawType(type);
+    public String getStorageType() {
+        return storageType;
     }
 
     /**

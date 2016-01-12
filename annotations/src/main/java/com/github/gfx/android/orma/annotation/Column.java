@@ -87,4 +87,12 @@ public @interface Column {
      * @return One of {@code Column.Collate.BINARY} (the default), {@code NOCASE} or {@code RTRIM}
      */
     Collate collate() default Collate.BINARY;
+
+    /**
+     * Specifies a storage type for the column to suppress automatic migration for existing tables.
+     * <strong>Not recommended</strong>.  Will become deprecated in a future.
+     *
+     * @return An SQLite data type. e.g. {@code "TEXT"}, {@code "FLOAT"}, {@code "INTEGER"}, or {@code "BLOB"}
+     */
+    String storageType() default "";
 }

@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithStorageTypes_Schema;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.PublisherSchema;
 
@@ -86,5 +87,14 @@ public class SchemaTest {
         assertThat(Author_Schema.name.isPrimaryKey(), is(true));
         assertThat(Author_Schema.name.isAutoincremnt(), is(false));
         assertThat(Author_Schema.name.isAutoValue(), is(false));
+    }
+
+    @Test
+    public void testColumnStorageTypes() throws Exception {
+        assertThat(ModelWithStorageTypes_Schema.date.storageType, is("INTEGER"));
+        assertThat(ModelWithStorageTypes_Schema.timestamp.storageType, is("DATETIME"));
+        assertThat(ModelWithStorageTypes_Schema.INSTANCE.getCreateTableStatement(), is(
+                "CREATE TABLE \"ModelWithStorageTypes\" (\"date\" INTEGER NOT NULL, \"timestamp\" DATETIME NOT NULL)"
+        ));
     }
 }
