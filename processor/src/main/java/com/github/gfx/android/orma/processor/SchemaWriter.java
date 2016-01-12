@@ -141,7 +141,7 @@ public class SchemaWriter extends BaseWriter {
         }
 
         TypeSpec.Builder columnDefType = TypeSpec.anonymousClassBuilder("INSTANCE, $S, $L, $S, $L",
-                c.columnName, typeInstance, SqlTypes.getSqliteType(c.getRawType()), buildColumnFlags(c));
+                c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c));
         columnDefType.superclass(c.getColumnDefType());
         MethodSpec.Builder getBuilder = MethodSpec.methodBuilder("get")
                 .addAnnotation(Specs.overrideAnnotationSpec())

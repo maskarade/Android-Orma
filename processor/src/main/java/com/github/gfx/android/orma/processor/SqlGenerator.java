@@ -66,7 +66,7 @@ public class SqlGenerator {
         appendIdentifier(sb, column.columnName);
         sb.append(' ');
 
-        sb.append(SqlTypes.getSqliteType(column.getRawType()));
+        sb.append(column.getStorageType());
         sb.append(' ');
 
         List<String> constraints = new ArrayList<>();
