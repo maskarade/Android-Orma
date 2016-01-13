@@ -271,7 +271,7 @@ public class SchemaDiffMigration implements MigrationEngine {
             tableNames.add(schema.getTableName());
         }
 
-        for (Map.Entry<String, SQLiteMaster> entry : SQLiteMaster.load(db).entrySet()) {
+        for (Map.Entry<String, SQLiteMaster> entry : SQLiteMaster.loadTables(db).entrySet()) {
             if (tableNames.contains(entry.getKey())) {
                 metadata.put(entry.getKey(), entry.getValue());
             }

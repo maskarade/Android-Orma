@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
+import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
 import android.content.Intent;
@@ -47,6 +48,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    static final String TAG = MainActivity.class.getSimpleName();
 
     static final String ORMA_SITE = "https://github.com/gfx/Android-Orma/";
 
@@ -120,6 +123,10 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+
+        for (SQLiteMaster metadata : SQLiteMaster.loadTables(orma.getConnection().getReadableDatabase()).values()) {
+            Log.d(TAG, metadata.toString());
+        }
     }
 
     public static void largeLog(String tag, String content) {
