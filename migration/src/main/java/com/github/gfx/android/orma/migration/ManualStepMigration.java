@@ -158,6 +158,14 @@ public class ManualStepMigration implements MigrationEngine {
         db.insertOrThrow(MIGRATION_HISTORY_NAME, null, values);
     }
 
+    public void execStep(SQLiteDatabase db, int version, @Nullable String sql) {
+        if (trace) {
+            Log.v(TAG, sql);
+        }
+        db.execSQL(sql);
+        saveStep(db, version, sql);
+    }
+
     /**
      * A migration step which handles {@code down()}, and {@code change()}.
      */
@@ -214,11 +222,7 @@ public class ManualStepMigration implements MigrationEngine {
         }
 
         public void execSQL(@NonNull String sql) {
-            if (trace) {
-                Log.v(TAG, sql);
-            }
-            db.execSQL(sql);
-            saveStep(db, upgrade ? version : version - 1, sql);
+            execStep(db, upgrade ? version : version - 1, sql);
         }
     }
 }

@@ -45,6 +45,14 @@ public class OrmaMigration implements MigrationEngine {
                 == ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
+    public ManualStepMigration getManualStepMigration() {
+        return manualStepMigration;
+    }
+
+    public SchemaDiffMigration getSchemaDiffMigration() {
+        return schemaDiffMigration;
+    }
+
     public void addStep(int newVersion, @NonNull ManualStepMigration.Step step) {
         manualStepMigration.addStep(newVersion, step);
     }
