@@ -31,6 +31,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class OrmaMigrationTest {
@@ -39,7 +41,7 @@ public class OrmaMigrationTest {
 
     SQLiteDatabase db;
 
-    OrmaMigration engine;
+    OrmaMigration migration;
 
     static Context getContext() {
         return InstrumentationRegistry.getTargetContext();
@@ -49,38 +51,72 @@ public class OrmaMigrationTest {
     public void setUp() throws Exception {
         db = SQLiteDatabase.create(null);
 
-        engine = new OrmaMigration(getContext(), VERSION, BuildConfig.DEBUG);
-        engine.addStep(2, new ManualStepMigration.ChangeStep() {
+        migration = new OrmaMigration(getContext(), VERSION, BuildConfig.DEBUG);
+    }
+
+    @Test
+    public void testHomeostasis() throws Exception {
+        migration.addStep(2, new ManualStepMigration.ChangeStep() {
             @Override
             public void change(@NonNull ManualStepMigration.Helper helper) {
                 helper.execSQL("CREATE TABLE step_2 (id INTEGER PRIMARY KEY)");
             }
         });
-        engine.addStep(4, new ManualStepMigration.ChangeStep() {
+        migration.addStep(4, new ManualStepMigration.ChangeStep() {
             @Override
             public void change(@NonNull ManualStepMigration.Helper helper) {
                 helper.execSQL("CREATE TABLE step_4 (id INTEGER PRIMARY KEY)");
             }
         });
-        engine.addStep(8, new ManualStepMigration.ChangeStep() {
+        migration.addStep(8, new ManualStepMigration.ChangeStep() {
             @Override
             public void change(@NonNull ManualStepMigration.Helper helper) {
                 helper.execSQL("CREATE TABLE step_8 (id INTEGER PRIMARY KEY)");
             }
         });
 
-        engine.addStep(16, new ManualStepMigration.ChangeStep() {
+        migration.addStep(16, new ManualStepMigration.ChangeStep() {
             @Override
             public void change(@NonNull ManualStepMigration.Helper helper) {
                 helper.execSQL("CREATE TABLE step_16 (id INTEGER PRIMARY KEY)");
             }
         });
+
+        migration.start(db, new ArrayList<SchemaData>());
+        migration.start(db, new ArrayList<SchemaData>());
+        migration.start(db, new ArrayList<SchemaData>());
     }
 
     @Test
-    public void testIdempotenceWithNop() throws Exception {
-        engine.start(db, new ArrayList<SchemaData>());
-        engine.start(db, new ArrayList<SchemaData>());
-        engine.start(db, new ArrayList<SchemaData>());
+    public void testForceRecreate() throws Exception {
+        // initialize
+        String[] initData = {
+                "CREATE TABLE foo (id PRIMARY KEY)",
+                "CREATE TABLE bar (id PRIMARY KEY)",
+
+                "INSERT INTO foo (id) VALUES (1)",
+                "INSERT INTO bar (id) VALUES (2)",
+        };
+
+        for (String s : initData) {
+            migration.getManualStepMigration().execStep(db, 1, s);
+        }
+
+        // define steps
+        migration.addStep(3, new ManualStepMigration.ChangeStep() {
+            @Override
+            public void change(@NonNull ManualStepMigration.Helper helper) {
+                helper.execSQL("DROP TABLE foo");
+                helper.execSQL("DROP TABLE bar");
+            }
+        });
+
+        List<SchemaData> schemas = Arrays.asList(
+                new SchemaData("foo", "CREATE TABLE foo (id PRIMARY KEY, field01 TEXT NOT NULL, field02 TEXT NOT NULL)"),
+                new SchemaData("bar", "CREATE TABLE bar (id PRIMARY KEY, field10 TEXT NOT NULL, field20 TEXT NOT NULL)")
+        );
+
+        // start migration
+        migration.start(db, schemas);
     }
 }
