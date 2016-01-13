@@ -69,7 +69,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
     }
 
     public void runOnUiThreadSync(@NonNull Runnable task) {
-        delegate.runOnUiThreadSync(task);
+        delegate.runOnUiThread(task);
     }
 
     @NonNull

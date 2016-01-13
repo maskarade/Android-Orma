@@ -216,6 +216,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
         SQLiteDatabase db = getReadableDatabase();
+        trace("begin transaction (non exclusive)", null);
         db.beginTransactionNonExclusive();
 
         try {
@@ -225,6 +226,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
             task.onError(e);
         } finally {
             db.endTransaction();
+            trace("end transaction (non exclusive)", null);
         }
     }
 
@@ -240,6 +242,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     @WorkerThread
     public void transactionSync(@NonNull TransactionTask task) {
         SQLiteDatabase db = getWritableDatabase();
+        trace("begin transaction", null);
         db.beginTransaction();
 
         try {
@@ -249,6 +252,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
             task.onError(e);
         } finally {
             db.endTransaction();
+            trace("end transaction", null);
         }
     }
 
@@ -309,10 +313,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     void trace(@NonNull String sql, @Nullable Object[] bindArgs) {
         if (trace) {
+            String prefix = "[" + Thread.currentThread().getName() + "] ";
             if (bindArgs == null) {
-                Log.v(TAG + '@' + Thread.currentThread().getName(), sql);
+                Log.v(TAG, prefix + sql);
             } else {
-                Log.v(TAG + '@' + Thread.currentThread().getName(), sql + " - " + Arrays.deepToString(bindArgs));
+                Log.v(TAG, prefix + sql + " - " + Arrays.deepToString(bindArgs));
             }
         }
     }

@@ -18,15 +18,12 @@ package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.exception.OrmaException;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
-
-import java.util.concurrent.CountDownLatch;
 
 import rx.Observable;
 import rx.Single;
@@ -73,25 +70,8 @@ public class OrmaAdapter<Model> {
         return (Relation<Model, T>) relation;
     }
 
-    public void runOnUiThreadSync(@NonNull final Runnable task) {
-        if (handler.getLooper().getThread() == Thread.currentThread()) {
-            task.run();
-        } else {
-            final CountDownLatch latch = new CountDownLatch(1);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    latch.countDown();
-                    task.run();
-                }
-            });
-
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                throw new OrmaException(e);
-            }
-        }
+    public void runOnUiThread(@NonNull final Runnable task) {
+        handler.post(task);
     }
 
     @NonNull

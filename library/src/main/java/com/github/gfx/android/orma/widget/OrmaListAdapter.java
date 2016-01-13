@@ -45,7 +45,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return delegate.totalCount;
+        return delegate.getItemCount();
     }
 
     @Override
@@ -75,8 +75,8 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
         return delegate.getRelation();
     }
 
-    public void runOnUiThreadSync(@NonNull Runnable task) {
-        delegate.runOnUiThreadSync(task);
+    public void runOnUiThread(@NonNull Runnable task) {
+        delegate.runOnUiThread(task);
     }
 
     /**
@@ -91,7 +91,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
                 .doOnSuccess(new Action1<Long>() {
                     @Override
                     public void call(Long rowId) {
-                        runOnUiThreadSync(new Runnable() {
+                        runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 notifyDataSetChanged();
@@ -128,7 +128,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
                 .doOnNext(new Action1<Integer>() {
                     @Override
                     public void call(Integer position) {
-                        runOnUiThreadSync(new Runnable() {
+                        runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 notifyDataSetChanged();
@@ -148,7 +148,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
                 .doOnSuccess(new Action1<Integer>() {
                     @Override
                     public void call(Integer deletedItems) {
-                        runOnUiThreadSync(new Runnable() {
+                        runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 notifyDataSetChanged();
