@@ -13,7 +13,29 @@ any Android `SQLiteDatabase` tools.
 
 `SchemaDiffMigration` can make SQL statements from two different schemas.
 
-TBD
+For example, if the following table is defined in a database:
+
+```sql
+CREATE TABLE Book (name TEXT NOT NULL, author TEXT NOT NULL)
+```
+
+and a new table defined in the code is like this:
+
+```sql
+CREATE TABLE Book (name TEXT NOT NULL, author TEXT NOT NULL, published_date DATE)
+```
+
+The SchemaDiffMigration generates the following statements:
+
+```sql
+CREATE __temp_Book (name TEXT NOT NULL, author TEXT NOT NULL, published_date DATE);
+INSERT INTO __temp_Book (name, author) SELECT name, author FROM Book;
+DROP TABLE Book;
+ALTER TABLE __temp_Book RENAME TO Book;
+```
+
+Because [SQLite's ALTER TABLE](https://www.sqlite.org/lang_altertable.html)
+is limited, `SchemaDiffMigration` always re-create tables if two tables differs.
 
 ## ManualStepMigration
 
@@ -25,7 +47,7 @@ TBD
 
 This is a composite class with `ManualStepMigration` and `SchemaDiffMigration`.
 
-First, it invokes `ManualStepMigration`, and the invokes `SchemaDiffMigration`.
+It invokes `ManualStepMigration` at first, and then invokes `SchemaDiffMigration`.
 
 ## How To Define Migration Steps
 
