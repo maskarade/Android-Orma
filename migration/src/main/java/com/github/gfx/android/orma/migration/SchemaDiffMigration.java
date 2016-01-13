@@ -86,54 +86,58 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @NonNull
-    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables,
+    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> masterData,
             @NonNull List<? extends MigrationSchema> schemas) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database
         for (MigrationSchema schema : schemas) {
-            SQLiteMaster table = dbTables.get(schema.getTableName());
+            SQLiteMaster table = masterData.get(schema.getTableName());
             if (table == null) {
                 statements.add(schema.getCreateTableStatement());
                 statements.addAll(schema.getCreateIndexStatements());
             } else {
-                if (!table.sql.equals(schema.getCreateTableStatement())) {
-                    statements.addAll(tableDiff(table.sql, schema.getCreateTableStatement()));
+                List<String> tableDiffStatements = tableDiff(table.sql, schema.getCreateTableStatement());
+
+                if (tableDiffStatements.isEmpty()) {
+                    Set<String> schemaIndexes = new LinkedHashSet<>();
+                    Set<String> dbIndexes = new LinkedHashSet<>();
+
+                    schemaIndexes.addAll(schema.getCreateIndexStatements());
+
+                    for (SQLiteMaster index : table.indexes) {
+                        dbIndexes.add(index.sql);
+                    }
+                    statements.addAll(indexDiff(dbIndexes, schemaIndexes));
+                } else {
+                    // The table needs re-create, where all the indexes are also dropped.
+                    statements.addAll(tableDiffStatements);
+                    statements.addAll(schema.getCreateIndexStatements());
                 }
-
-                Set<String> schemaIndexes = new LinkedHashSet<>();
-                Set<String> dbIndexes = new LinkedHashSet<>();
-
-                schemaIndexes.addAll(schema.getCreateIndexStatements());
-
-                for (SQLiteMaster index : table.indexes) {
-                    dbIndexes.add(index.sql);
-                }
-                statements.addAll(indexDiff(schemaIndexes, dbIndexes));
             }
         }
         return statements;
     }
 
     /**
-     * @param schemaIndexes Set of "CREATE INDEX" statements which the code has
-     * @param dbIndexes Set of "CREATED INDEX" statements which the DB has
+     * @param sourceIndex Set of "CREATED INDEX" statements which the DB has
+     * @param destIndex   Set of "CREATE INDEX" statements which the code has
      * @return List of "CREATED INDEX" statements to apply to DB
      */
     @NonNull
-    public List<String> indexDiff(@NonNull Set<String> schemaIndexes, @NonNull Set<String> dbIndexes) {
+    public List<String> indexDiff(@NonNull Set<String> sourceIndex, @NonNull Set<String> destIndex) {
         List<String> createIndexStatements = new ArrayList<>();
 
         Map<SQLiteComponent, String> unionIndexes = new LinkedHashMap<>();
 
         Map<SQLiteComponent, String> fromIndexPairs = new LinkedHashMap<>();
-        for (String createIndexStatement : dbIndexes) {
+        for (String createIndexStatement : sourceIndex) {
             fromIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
         }
         unionIndexes.putAll(fromIndexPairs);
 
         Map<SQLiteComponent, String> toIndexPairs = new LinkedHashMap<>();
-        for (String createIndexStatement : schemaIndexes) {
+        for (String createIndexStatement : destIndex) {
             toIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
         }
         unionIndexes.putAll(toIndexPairs);
@@ -157,6 +161,10 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public List<String> tableDiff(String from, String to) {
+        if (from.equals(to)) {
+            return Collections.emptyList();
+        }
+
         CreateTableStatement fromTable = SQLiteParserUtils.parseIntoCreateTableStatement(from);
         CreateTableStatement toTable = SQLiteParserUtils.parseIntoCreateTableStatement(to);
 
@@ -223,7 +231,7 @@ public class SchemaDiffMigration implements MigrationEngine {
                     }
                 })));
 
-        statements.add(util.buildInsertFromSelect(tempTableName, fromTableName, columns));
+        statements.add(util.buildInsertFromSelect(tempTableName, fromTableName, columns)); // TODO: progressive migration
         statements.add(util.buildDropTable(fromTableName));
         statements.add(util.buildRenameTable(tempTableName, toTableName));
 

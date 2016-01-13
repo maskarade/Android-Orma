@@ -144,6 +144,19 @@ public class SchemaDiffMigrationTest {
         assertThat(statements, is(schemas.get(1).getCreateIndexStatements()));
     }
 
+    @Test
+    public void recreateTableWithIndes() throws Exception {
+        schemas.set(0, new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT, \"field03\" TEXT)",
+                "CREATE INDEX \"index_field01_on_foo\" ON \"foo\" (\"field01\")",
+                "CREATE INDEX \"index_field02_on_foo\" ON \"foo\" (\"field02\")"
+        ));
+        statements = migration.diffAll(metadata, schemas);
+
+        migration.executeStatements(db, statements);
+
+        assertThat(migration.diffAll(migration.loadMetadata(db, schemas), schemas), is(empty()));
+    }
+
     class OpenHelper extends SQLiteOpenHelper {
 
         public OpenHelper(Context context) {
