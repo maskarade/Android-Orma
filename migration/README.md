@@ -13,19 +13,19 @@ any Android `SQLiteDatabase` tools.
 
 `SchemaDiffMigration` can make SQL statements from two different schemas.
 
-For example, if the following table is defined in a database:
+For example, given there is a table:
 
 ```sql
 CREATE TABLE Book (name TEXT NOT NULL, author TEXT NOT NULL)
 ```
 
-and a new table defined in the code is like this:
+and there is another table:
 
 ```sql
 CREATE TABLE Book (name TEXT NOT NULL, author TEXT NOT NULL, published_date DATE)
 ```
 
-The SchemaDiffMigration generates the following statements:
+Then, `SchemaDiffMigration` generates the following statements:
 
 ```sql
 CREATE __temp_Book (name TEXT NOT NULL, author TEXT NOT NULL, published_date DATE);
@@ -35,13 +35,14 @@ ALTER TABLE __temp_Book RENAME TO Book;
 ```
 
 Because [SQLite's ALTER TABLE](https://www.sqlite.org/lang_altertable.html)
-is limited, `SchemaDiffMigration` always re-create tables if two tables differs.
+is limited, `SchemaDiffMigration` always re-creates tables if two tables differs.
 
 ## ManualStepMigration
 
-``ManualStepMigration`` provides a way to handle hand-written migration steps.
+`ManualStepMigration` provides a way to handle hand-written migration steps.
 
-TBD
+[ManualStepMigrationTest.java](src/test/java/com/github/gfx/android/orma/migration/test/ManualStepMigrationTest.java)
+is an example.
 
 ## OrmaMigration
 
@@ -49,10 +50,45 @@ This is a composite class with `ManualStepMigration` and `SchemaDiffMigration`.
 
 It invokes `ManualStepMigration` at first, and then invokes `SchemaDiffMigration`.
 
-## How To Define Migration Steps
+### How To Define Migration Steps
 
-[ManualStepMigrationTest.java](src/test/java/com/github/gfx/android/orma/migration/test/ManualStepMigrationTest.java)
-is an example.
+* Use `OrmaMigration` which has both `ManualStepMigration` and `SchemaDiffMigration` functions
+* Use `BuildConfig.VERSION_CODE` for the database version
+* Hand-written migration steps are saved in `ManualStepMigration.MIGRATION_STEPS_TABLE` for debugging
+
+Here is an example to use `OrmaMigration`:
+
+```java
+int VERSION_2;
+int VERSION_3;
+
+OrmaMigration migration = new OrmaMigration(context, BuildConfig.VERSION_CODE);
+
+// register up() / down() steps
+migration.addStep(VERSION_2, new ManualStepMigration.Step() {
+    @Override
+    public void up(@NonNull ManualStepMigration.Helper helper) {
+        helper.execSQL("... upgrading ...");
+    }
+
+    @Override
+    public void down(@NonNull ManualStepMigration.Helper helper) {
+        helper.execSQL("... downgrading ...");
+    }
+});
+
+// register change(), which is used both in upgrade and downgrade
+migration.addStep(VERSION_3, new ManualStepMigration.ChangeStep() {
+    @Override
+    public void change(@NonNull ManualStepMigration.Helper helper) {
+        Log.(TAG, helper.upgrade ? "upgrade" : "downgrade");
+        helper.execSQL("DROP TABLE foo");
+        helper.execSQL("DROP TABLE bar");
+    }
+});
+```
+
+You can see migration logs in debug build, which are disabled in release build.
 
 ## See Also
 
