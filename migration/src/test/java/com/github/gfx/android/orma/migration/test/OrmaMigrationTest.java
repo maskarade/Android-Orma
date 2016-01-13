@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.migration.test;
 import com.github.gfx.android.orma.migration.BuildConfig;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.OrmaMigration;
+import com.github.gfx.android.orma.migration.test.util.SchemaData;
 
 import org.junit.Before;
 import org.junit.Test;

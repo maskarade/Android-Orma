@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.migration.test.sqliteparser;
+package com.github.gfx.android.orma.migration.test.sqliteparser_test;
 
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 

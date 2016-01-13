@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
+import com.github.gfx.android.orma.migration.test.util.SchemaData;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +40,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
-public class SchemaDiffTest {
+public class SchemaDiffMigrationTest {
 
     List<SchemaData> schemas;
 
@@ -167,5 +168,4 @@ public class SchemaDiffTest {
 
         }
     }
-
 }

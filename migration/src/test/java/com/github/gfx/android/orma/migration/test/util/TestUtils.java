@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.migration.test;
+package com.github.gfx.android.orma.migration.test.util;
 
 public class TestUtils {
     public static boolean runOnAndroid() {

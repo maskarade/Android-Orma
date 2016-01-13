@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.migration.test.sqliteparser;
+package com.github.gfx.android.orma.migration.test.sqliteparser_test;
 
 
 import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
-import com.github.gfx.android.orma.migration.test.TestUtils;
+import com.github.gfx.android.orma.migration.test.util.TestUtils;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
