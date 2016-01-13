@@ -21,7 +21,6 @@ import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -36,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -264,51 +264,18 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<? extends MigrationSchema> schemas) {
-        List<String> tableNames = new ArrayList<>();
+        Map<String, SQLiteMaster> metadata = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        Set<String> tableNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         for (MigrationSchema schema : schemas) {
-            tableNames.add(SqliteDdlBuilder.ensureQuoted(schema.getTableName()));
+            tableNames.add(schema.getTableName());
         }
-        Cursor cursor = db.rawQuery(
-                "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE tbl_name IN "
-                        + "(" + TextUtils.join(", ", tableNames) + ")",
-                null);
 
-        Map<String, SQLiteMaster> tables = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        if (cursor.moveToFirst()) {
-            do {
-                String type = cursor.getString(0); // "table" or "index"
-                String name = cursor.getString(1); // table or index name
-                String tableName = cursor.getString(2);
-                String sql = cursor.getString(3);
-
-                SQLiteMaster meta = tables.get(tableName);
-                if (meta == null) {
-                    meta = new SQLiteMaster();
-                    tables.put(tableName, meta);
-                }
-
-                switch (type) {
-                    case "table":
-                        meta.type = type;
-                        meta.name = name;
-                        meta.tableName = tableName;
-                        meta.sql = sql;
-                        break;
-                    case "index":
-                        // sql=null for sqlite_autoindex_${table}_${columnIndex}
-                        if (sql != null) {
-                            meta.indexes.add(new SQLiteMaster(type, name, tableName, sql));
-                        }
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("FIXME: unsupported type: " + type);
-                }
-
-                tables.put(name, new SQLiteMaster(type, name, tableName, sql));
-            } while (cursor.moveToNext());
+        for (Map.Entry<String, SQLiteMaster> entry : SQLiteMaster.load(db).entrySet()) {
+            if (tableNames.contains(entry.getKey())) {
+                metadata.put(entry.getKey(), entry.getValue());
+            }
         }
-        cursor.close();
-
-        return tables;
+        return metadata;
     }
 }

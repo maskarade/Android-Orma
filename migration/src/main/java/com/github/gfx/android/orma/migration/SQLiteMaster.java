@@ -15,10 +15,18 @@
  */
 package com.github.gfx.android.orma.migration;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SQLiteMaster {
+
+    public static String TAG = "SQLiteMaster";
 
     public String type;
 
@@ -38,5 +46,45 @@ public class SQLiteMaster {
         this.name = name;
         this.tableName = tableName;
         this.sql = sql;
+    }
+
+    public static Map<String, SQLiteMaster> load(SQLiteDatabase db) {
+        Cursor cursor = db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master", null);
+
+        Map<String, SQLiteMaster> tables = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        if (cursor.moveToFirst()) {
+            do {
+                String type = cursor.getString(0); // "table" or "index"
+                String name = cursor.getString(1); // table or index name
+                String tableName = cursor.getString(2);
+                String sql = cursor.getString(3);
+
+                SQLiteMaster meta = tables.get(tableName);
+                if (meta == null) {
+                    meta = new SQLiteMaster();
+                    tables.put(tableName, meta);
+                }
+
+                switch (type) {
+                    case "table":
+                        meta.type = type;
+                        meta.name = name;
+                        meta.tableName = tableName;
+                        meta.sql = sql;
+                        break;
+                    case "index":
+                        // sql=null for sqlite_autoindex_${table}_${columnIndex}
+                        if (sql != null) {
+                            meta.indexes.add(new SQLiteMaster(type, name, tableName, sql));
+                        }
+                        break;
+                    default:
+                        Log.w(TAG, "unsupported type:" + type);
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        return tables;
     }
 }
