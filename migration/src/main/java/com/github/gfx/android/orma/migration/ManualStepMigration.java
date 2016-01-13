@@ -31,10 +31,10 @@ public class ManualStepMigration implements MigrationEngine {
 
     public static final String TAG = "ManualStepMigration";
 
-    static final String MIGRATION_HISTORY_NAME = "orma_migration_steps";
+    public static final String MIGRATION_STEPS_TABLE = "orma_migration_steps";
 
     static final String MIGRATION_HISTORY_DDL = "CREATE TABLE IF NOT EXISTS "
-            + MIGRATION_HISTORY_NAME + " ("
+            + MIGRATION_STEPS_TABLE + " ("
             + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
             + "version INTEGER NOT NULL, "
             + "sql TEXT NULL, "
@@ -70,7 +70,7 @@ public class ManualStepMigration implements MigrationEngine {
     }
 
     public int getDbVersion(SQLiteDatabase db) {
-        Cursor cursor = db.query(MIGRATION_HISTORY_NAME, new String[]{kVersion},
+        Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kVersion},
                 null, null, null, null, kId + " DESC", "1");
         try {
             if (cursor.moveToFirst()) {
@@ -155,7 +155,7 @@ public class ManualStepMigration implements MigrationEngine {
         ContentValues values = new ContentValues();
         values.put(kVersion, version);
         values.put(kSql, sql);
-        db.insertOrThrow(MIGRATION_HISTORY_NAME, null, values);
+        db.insertOrThrow(MIGRATION_STEPS_TABLE, null, values);
     }
 
     public void execStep(SQLiteDatabase db, int version, @Nullable String sql) {
