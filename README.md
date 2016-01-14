@@ -35,8 +35,8 @@ apply plugin: 'com.neenbedankt.android-apt'
 // To use orma in your Android applications or libraries
 
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:0.32.0'
-    compile 'com.github.gfx.android.orma:orma:0.32.0'
+    apt 'com.github.gfx.android.orma:orma-processor:1.0.0'
+    compile 'com.github.gfx.android.orma:orma:1.0.0'
 }
 ```
 
@@ -441,6 +441,10 @@ as of Orma v0.9.0 and Realm 0.86.0:
 
 * Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
 * Feel free to ask for questions to the author [@\_\_gfx\_\_](https://twitter.com/__gfx__)
+
+## Contribution
+
+Patches welcome!
 
 ## Licenses in Runtime Dependencies
 

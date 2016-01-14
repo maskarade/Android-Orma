@@ -1,7 +1,7 @@
-The revision history of Orma
+The revision history of Orma.
 
-This is an alpha software.
+The versioning follows [Semantic Versioning](http://semver.org/).
 
-## v1.0.0 (not yet released)
+## v1.0.0 - 2016/01/14
 
 * The initial stable version
