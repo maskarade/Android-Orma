@@ -4,7 +4,7 @@
 -- [Larry Wall](http://www.amazon.com/gp/feature.html?ie=UTF8&docId=7137)
 
 Orma is an ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
-generating helper classes at compile time with **annotation processing**.
+generating helper classes at compile time with **annotation processing**, inspired in ActiveAndroid, GreenDAO, and Realm.
 
 Orma has the following features:
 
@@ -79,10 +79,6 @@ Here is an example to configure `OrmaDatabase`:
 // see OrmaConfiguration for options
 // each value is the default.
 OrmaDatabase orma = OrmaDatabase.builder(context)
-    .name(context.getPackageName() + ".orma.db") // optional
-    .migrationEngine(new SchemaDiffMigration(context, BuildConfig.DEBUG)) // optional
-    .writeAheadLogging(true) // optional
-    .trace(BuildConfig.DEBUG) // optional
     .readOnMainThread(AccessThreadConstraint.WARNING) // optional
     .writeOnMainThread(AccessThreadConstraint.FATAL) // optional
     .build();
@@ -125,28 +121,28 @@ Use background threads explicitly or RxJava interfaces with `Schedulers.io()`.
 
 ## Motivation
 
-There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I have to add another?
+There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I have to add another wheel?
 
-The answer is that I need ORM that have the following features:
+The answer is that I need ORM that have *all* the following features:
 
-* As fast as hand-written code
+* Fast as hand-written code
 * POJO models
   * That is, model classes must have no restriction
   * Might implement `Parcelable` and/or extend any classes
   * They should be passed to another thread
-* Database handles must be instances
+* A Database handle must be an object instance
   * Not a singleton nor static-method based class
 * Semi-automatic migration
   * For what can be detected logically
   * i.e. simple `add column` and `drop column`
+  * There is an wheel in Perl: [SQL::Translator::Diff](https://metacpan.org/pod/SQL::Translator::Diff)
 * Code completion friendly
-  * `selectFromModel()` is better than `selectFrom(Model.class)`
+  * `db.selectFromModel()` is better than `new Select(Model.class)`
 * Custom queries
   * `GROUP BY ... HAVING ...`
-  * `SELECT max(value), min(value), avg(value) FROM ...`
+  * `SELECT max(value), min(value), avg(value), count(value) FROM ...`
 
-They are just what Orma has. This is as fast as hand-written code, its models have no restriction, database handle is
-not a singleton, and has `SchemaDiffMigration` for automatic migration.
+Now they are just what Orma has.
 
 ## The Components
 
@@ -183,7 +179,9 @@ and orderings.
 This is created by the database handle:
 
 ```java
-Todo_Relation relation = orma.relationOfTodo();
+public static Todo_Relation relation() {
+  return orma.relationOfTodo();
+}
 ```
 
 This is able to create `Selector`, `Updater`, `Deleter`, and `Inserter` of the specified model. In other words, this is an entry point of model helpers.
@@ -231,7 +229,8 @@ for (Todo todo : todos) {
 A `Selector` helper, e.g. `Todo_Selector`, is created by the database handle:
 
 ```java
-Todo_Selector selector = orma.selectFromTodo();
+Todo_Selector selector = relation().selector();
+// or orma.selectFromTodo();
 ```
 
 This is a query builder for `SELECT ... FROM *` statements.
@@ -241,7 +240,8 @@ This is a query builder for `SELECT ... FROM *` statements.
 An `Updater` helper, e.g. `Todo_Updater`, is created by the database handle:
 
 ```java
-Todo_Updater updater = orma.updateTodo();
+Todo_Updater updater = relation().updater();
+// or orma.updateTodo();
 ```
 
 This is a query builder for `UPDATE *` statements.
@@ -251,7 +251,8 @@ This is a query builder for `UPDATE *` statements.
 A `Delete` helper, e.g. `Todo_Deleter`, is created by the database handle:
 
 ```java
-Todo_Deleter deleter = orma.deleteFromTodo();
+Todo_Deleter deleter = relation().deleter();
+// or orma.deleteFromTodo();
 ```
 
 This is a query builder for `DELETE FROM *` statements.
@@ -259,8 +260,10 @@ This is a query builder for `DELETE FROM *` statements.
 ## Condition Query Helpers
 
 There are Condition Query Helpers, e.g. `titleEq()` shown in the synopsis
-section, which are methods to help make `WHERE` and `ORDER BY` clauses,
-generated for columns with `indexed = true` or the `@PrimaryKey` column.
+section, which are methods to help make `WHERE` and `ORDER BY` clauses, for
+`Relation`, `Selecotr`, `Deleter`, and `Updater`.
+
+They are generated for columns with `indexed = true` or the `@PrimaryKey` column.
 
 Here is a list of Condition Query Helpers that are generated for all the `indexed` columns:
 
@@ -287,21 +290,33 @@ And `ORDER BY` helpers:
 * `orderBy*Asc()` to make `ORDER BY * ASC`
 * `orderBy*Desc()` to make `ORDER BY * DESC`
 
+## The Inserter Helper
+
+This is a prepared statement for `INSERT INTO ...` for bulk insertions.
+
+```java
+Inserter<Todo> inserter = relation().inserter();
+// or orma.insertIntoTodo()
+
+inserter.execute(todo);
+inserter.executeAll(todos);
+```
+
 ## Setters and Getters
 
-Orma uses getters and setters if their names are inferred.
+Orma uses getters and setters if columns have corresponding methods.
 
-You can also connect getters and setters with `@Getter` and `@Setter` respectively,
-which tells `orma-processor` to use accessors.
+You can also connect getters and setters with `@Getter` and `@Setter`
+respectively, which tells `orma-processor` to use accessors.
 
-Each accessor name can specify a column name in SQLite database,
+Each accessor name can have a column name in SQLite databases,
 which is inferred from its method name if omitted.
 
 ```java
 @Table
 public class KeyValuePair {
 
-    static final String kKey = "key";
+    static final String kKey = "Key";
 
     @Column(kKey) // specifies the name
     private String key;
@@ -319,12 +334,14 @@ public class KeyValuePair {
         this.key = key;
     }
 
-    @Getter // getter for the "value" column
+    // used as a getter for the "value" column
+    // @Getter is optional in this case
     public String getValue() {
         return value;
     }
 
-    @Setter // setter for the "value" column
+    // used as a setter for the "value" column
+    // @Setter is optional in this case
     public void setValue(String value) {
         this.value = value;
     }
@@ -353,6 +370,28 @@ public class KeyValuePair {
     }
 }
 ```
+
+Can be declared with custom names:
+
+```java
+@Table
+public class KeyValuePair {
+    static final String kKey = "Key";
+    static final String kValue = "Value";
+
+    @Column(kKey)
+    public final String key;
+
+    @Column(kValue)
+    public final String value;
+
+    KeyVakuePair(@Setter(kKey) String key, @Setter(kValue) String value) {
+        this.key = key;
+        this.value = value;
+    }
+}
+```
+
 
 ## Migration
 
