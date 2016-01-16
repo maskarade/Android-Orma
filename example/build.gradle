@@ -41,7 +41,7 @@ android {
 dependencies {
     apt project(':processor')
     compile project(':library')
-    compile 'io.realm:realm-android:0.87.1'
+    compile 'io.realm:realm-android:0.87.2'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:cardview-v7:23.1.1'
     compile 'com.android.support:recyclerview-v7:23.1.1'
