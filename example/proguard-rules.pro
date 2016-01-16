@@ -28,4 +28,4 @@
 -dontwarn io.realm.**
 
 # Android Support Library
--keep class android.support.**
+-keep class android.support.** { *; }

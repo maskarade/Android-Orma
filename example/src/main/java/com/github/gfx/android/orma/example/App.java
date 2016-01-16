@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.example;
 
 import com.facebook.stetho.Stetho;
+import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import android.app.Application;
 
@@ -26,5 +27,6 @@ public class App extends Application {
         super.onCreate();
 
         Stetho.initializeWithDefaults(this);
+        AndroidThreeTen.init(this);
     }
 }

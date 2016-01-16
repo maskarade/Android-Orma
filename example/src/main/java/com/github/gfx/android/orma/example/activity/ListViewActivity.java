@@ -26,6 +26,8 @@ import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.widget.OrmaListAdapter;
 
+import org.threeten.bp.ZonedDateTime;
+
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -71,8 +73,8 @@ public class ListViewActivity extends AppCompatActivity {
                     public Todo call() {
                         Todo todo = new Todo();
                         number++;
-                        todo.title = "todo #" + number;
-                        todo.content = "content #" + number;
+                        todo.title = "ListView item #" + number;
+                        todo.content = ZonedDateTime.now().toString();
                         todo.createdTimeMillis = System.currentTimeMillis();
                         return todo;
                     }
