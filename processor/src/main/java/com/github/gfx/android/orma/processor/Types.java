@@ -116,6 +116,8 @@ public class Types {
 
     public static final ClassName OrmaConfiguration = ClassName.get(ormaPackageName, "OrmaConfiguration");
 
+    public static final ClassName DatabaseHandle = ClassName.get(ormaPackageName, "DatabaseHandle");
+
     public static final ClassName OrmaConditionBase = ClassName.get(ormaPackageName + ".internal", "OrmaConditionBase");
 
     public static final ClassName OrderSpec = ClassName.get(ormaPackageName, "OrderSpec");
