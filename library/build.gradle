@@ -12,6 +12,8 @@ android {
         versionCode 1
         versionName rootProject.ext.metadata.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        consumerProguardFiles 'proguard-rules.pro'
     }
     buildTypes {
         release {
