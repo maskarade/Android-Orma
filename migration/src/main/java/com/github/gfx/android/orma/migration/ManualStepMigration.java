@@ -212,13 +212,13 @@ public class ManualStepMigration implements MigrationEngine {
         }
 
         public void renameTable(@NonNull String fromTableName, @NonNull String toTableName) {
+            String sql;
             if (upgrade) {
-                String sql = sqliteDdlBuilder.buildRenameTable(fromTableName, toTableName);
-                execSQL(sql);
+                sql = sqliteDdlBuilder.buildRenameTable(fromTableName, toTableName);
             } else {
-                String sql = sqliteDdlBuilder.buildRenameTable(toTableName, fromTableName);
-                execSQL(sql);
+                sql = sqliteDdlBuilder.buildRenameTable(toTableName, fromTableName);
             }
+            execSQL(sql);
         }
 
         public void execSQL(@NonNull String sql) {

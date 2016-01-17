@@ -17,5 +17,10 @@ package com.github.gfx.android.orma;
 
 import rx.functions.Func0;
 
+/**
+ * A helper method to make a scope or task.
+ *
+ * @param <T> Type of a model to create
+ */
 public interface ModelFactory<T> extends Func0<T> {
 }

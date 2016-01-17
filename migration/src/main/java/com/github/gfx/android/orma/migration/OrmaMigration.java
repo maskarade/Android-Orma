@@ -53,15 +53,32 @@ public class OrmaMigration implements MigrationEngine {
         return schemaDiffMigration;
     }
 
-    public void addStep(int newVersion, @NonNull ManualStepMigration.Step step) {
-        manualStepMigration.addStep(newVersion, step);
+    /**
+     * Delegates to {@link ManualStepMigration#addStep(int, ManualStepMigration.Step)}.
+     * @param version A target version for the step
+     * @param step A migration step task for {@code version}
+     */
+    public void addStep(int version, @NonNull ManualStepMigration.Step step) {
+        manualStepMigration.addStep(version, step);
     }
 
+    /**
+     * Delegates to {@link SchemaDiffMigration#getVersion()}.
+     *
+     * @return The current version of the database.
+     */
     @Override
     public int getVersion() {
         return schemaDiffMigration.getVersion();
     }
 
+    /**
+     * Starts migration process, invoking {@link ManualStepMigration#start(SQLiteDatabase, List)} first, and then
+     * invoking {@link SchemaDiffMigration#start(SQLiteDatabase, List)}.
+     *
+     * @param db A writable database
+     * @param schemas Destination schemas
+     */
     @Override
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         manualStepMigration.start(db, schemas);

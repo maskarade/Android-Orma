@@ -79,11 +79,23 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
                 == ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
+    /**
+     * Replaces the database name. {@code null} for on-memory databases.
+     *
+     * @param name A filename or {@code null}
+     * @return the receiver itself
+     */
     public T name(@Nullable String name) {
         this.name = name;
         return (T) this;
     }
 
+    /**
+     * Adds type adapters. You can override the defaults.
+     *
+     * @param typeAdapters Custom type adapters to add
+     * @return the receiver itself
+     */
     public T typeAdapters(@NonNull TypeAdapter<?>... typeAdapters) {
         if (typeAdapterRegistry == null) {
             typeAdapterRegistry = new TypeAdapterRegistry();
@@ -93,12 +105,22 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
         return (T) this;
     }
 
+    /**
+     * Replaces the migration engine with your own. {@link SchemaDiffMigration} is the default.
+     *
+     * @param migrationEngine A migration engine to replace the default.
+     * @return the receiver itself
+     */
     public T migrationEngine(@NonNull MigrationEngine migrationEngine) {
         this.migrationEngine = migrationEngine;
         return (T) this;
     }
 
     /**
+     * Controls write-ahead logging in SQLite. The default is {@code true}.
+     *
+     * @param wal {@code true} to enable WAL
+     * @return the receiver itself
      * @see <a href="http://sqlite.org/wal.html">Write-Ahead Logging in SQLite</a>
      */
     public T writeAheadLogging(boolean wal) {
@@ -107,25 +129,37 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
     }
 
     /**
-     * Controls SQLite {@code foreign_keys} support. {@code true} by default.
+     * Controls {@code foreign_keys} support in SQLite. The default is {@code true}.
      *
-     * @see <a href="https://www.sqlite.org/foreignkeys.html">https://www.sqlite.org/foreignkeys.html</a>
-     *
-     * @param foreignKeys {@code false} to disable {@code foreign_keys}
+     * @param foreignKeys {@code true} to enable {@code foreign_keys}
      * @return The receiver itself
+     * @see <a href="https://www.sqlite.org/foreignkeys.html">https://www.sqlite.org/foreignkeys.html</a>
      */
     public T foreignKeys(boolean foreignKeys) {
         this.foreignKeys = foreignKeys;
         return (T) this;
     }
 
+    /**
+     * If true, each `CREATE TABLE` statement used in Orma is passed to internal SQLite parser before executed.
+     * The SQLite parser is used in migration, so the flag ensures the statement is migration ready.
+     *
+     * The default depends on the application's {@code BuildConfig.DEBUG}, but do not use this flag unless you know
+     * what you do. This is provided to test Orma itself.
+     *
+     * @param tryParsingSql {@code true} to try parsing SQL for each `CREATE TABLE` statement
+     * @return the receiver itself
+     */
     public T tryParsingSql(boolean tryParsingSql) {
         this.tryParsingSql = tryParsingSql;
-        return (T)this;
+        return (T) this;
     }
 
     /**
-     * If true, SQL executions are logged to console.
+     * If {@code true}, each SQL is logged to console before executed.
+     *
+     * @param trace {@code true} to enable SQL tracing
+     * @return the receiver itself
      */
     public T trace(boolean trace) {
         this.trace = trace;
@@ -134,6 +168,9 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     /**
      * Sets {@link AccessThreadConstraint} for reading.
+     *
+     * @param readOnMainThread A constraint for reading
+     * @return the receiver itself
      */
     public T readOnMainThread(AccessThreadConstraint readOnMainThread) {
         this.readOnMainThread = readOnMainThread;
@@ -142,6 +179,9 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     /**
      * Sets {@link AccessThreadConstraint} for writing.
+
+     * @param writeOnMainThread A constraint for writing
+     * @return the receiver itself
      */
     public T writeOnMainThread(AccessThreadConstraint writeOnMainThread) {
         this.writeOnMainThread = writeOnMainThread;

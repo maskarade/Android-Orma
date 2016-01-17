@@ -217,6 +217,8 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     /**
      * Executes a query and calls {@code Action1<Model>#call} for each model}.
+     *
+     * @param action An action called for each model in the iteration.
      */
     public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = execute();
