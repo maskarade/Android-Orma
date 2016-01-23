@@ -109,6 +109,11 @@ public class QueryTest {
     }
 
     @Test
+    public void empty() throws Exception {
+        assertThat(db.selectFromBook().empty(), is(false));
+    }
+
+    @Test
     public void countAsObservable() throws Exception {
         assertThat(db.selectFromBook().countAsObservable().toBlocking().single(), is(2));
     }
