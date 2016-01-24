@@ -392,29 +392,65 @@ public class KeyValuePair {
 }
 ```
 
+## Associations
 
-## Migration
+Tow orma models can be associated with Association mechanism. There are two type of association: has-one and has-many.
 
-Orma has pluggable migration mechanism via the `MigrationEngine` interface.
+### Has-One Associations
 
-The default migration engine is `SchemaDiffMigration`, which handles
-schema changes by making diff with old and new table definitions.
+There is `SingleAssociation` to support has-one associations.
 
-You can set a custom migration engine to `OrmaDatabase` builders:
+For example, a book has a publisher:
+
 
 ```java
-class CustomMigrationEngine implements MigrationEngine { ... }
+@Table
+class Publisher {
+  @PrimaryKey
+  public long id;
+}
 
-OrmaDatabase orma = OrmaDatabase.builder(context)
-  .migrationEngine(new CustomMigrationEngine())
-  .build();
+@Table
+class Book {
+
+    @Column
+    public SingleAssociation<Publisher> publisher;
+
+}
 ```
 
-See [migration/README.md](migration/README.md) for details.
+The entity of `Book#publisher` is `Publisher#id`.
 
-# Type Adapters
+### Has-Many Associations
 
-Type adapters, which serializes and deserializes custom classes, are supported.
+Has-many associations are not directly supported but you can define a method to get associated objects:
+
+```java
+@Table
+class Publisher {
+    @PrimaryKey
+    public long id;
+    
+    public Book_Relation getBooks(OrmaDatabase orma) {
+        return orma.relationOfBook().publisherEq(this);
+    }
+}
+
+@Table
+class Book {
+
+    @Column(indexed = true)
+    public SingleAssociation<Publisher> publisher;
+
+}
+```
+
+
+## Type Adapters
+
+Orma models are able to have embedded objects with **type adapters**.
+
+Type adapters serializes and deserializes custom classes, for example as a JSON format.
 
 If you use type adapters, you can add them to `OrmaDatabase`:
 
@@ -438,9 +474,9 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .build();
 ```
 
-**The interface is experimental and are likely to change.**
+**The interface is experimental and are likely to change in v2.0.**
 
-## Built-In Type Adapters
+### Built-In Type Adapters
 
 There are a lot of built-in type adapter provided by default, which include:
 
@@ -451,6 +487,25 @@ There are a lot of built-in type adapter provided by default, which include:
 
 See [adapter/](library/src/main/java/com/github/gfx/android/orma/adapter)
 for all the adapters.
+
+## Migration
+
+Orma has pluggable migration mechanism via the `MigrationEngine` interface.
+
+The default migration engine is `SchemaDiffMigration`, which handles
+schema changes by making diff with old and new table definitions.
+
+You can set a custom migration engine to `OrmaDatabase` builders:
+
+```java
+class CustomMigrationEngine implements MigrationEngine { ... }
+
+OrmaDatabase orma = OrmaDatabase.builder(context)
+  .migrationEngine(new CustomMigrationEngine())
+  .build();
+```
+
+See [migration/README.md](migration/README.md) for details.
 
 ## Kotlin Support
 
