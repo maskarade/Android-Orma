@@ -138,6 +138,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return typeAdapterRegistry.get(sourceType);
     }
 
+    @Deprecated // because type adapter registry will become global, static object
     public TypeAdapterRegistry getTypeAdapterRegistry() {
         return typeAdapterRegistry;
     }
