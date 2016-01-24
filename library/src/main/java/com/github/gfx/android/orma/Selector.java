@@ -33,6 +33,7 @@ import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
+import rx.functions.FuncN;
 
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
@@ -146,6 +147,11 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return conn.count(schema, getWhereClause(), getBindArgs());
     }
 
+    /**
+     * Provided for {@link Observable#combineLatest(List, FuncN)}.
+     *
+     * @return An observable that yields {@link #count()}.
+     */
     @NonNull
     public Observable<Integer> countAsObservable() {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
@@ -155,6 +161,10 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
                 subscriber.onCompleted();
             }
         });
+    }
+
+    public boolean empty() {
+        return count() == 0;
     }
 
     @Nullable
