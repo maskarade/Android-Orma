@@ -16,8 +16,10 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
+import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.adapter.DateAdapter;
 import com.github.gfx.android.orma.adapter.UriAdapter;
+import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.After;
@@ -26,9 +28,11 @@ import org.junit.runner.RunWith;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -45,6 +49,28 @@ public class OrmaDatabaseTest {
     @After
     public void tearDown() throws Exception {
         getContext().deleteDatabase(NAME);
+    }
+
+    @Test
+    public void testResetDatabase() throws Exception {
+        OrmaDatabase db = OrmaDatabase.builder(getContext())
+                .name(NAME)
+                .trace(true)
+                .build();
+
+        db.prepareInsertIntoAuthor().execute(new ModelFactory<Author>() {
+            @Override
+            public Author call() {
+                Author author = new Author();
+                author.name = "Jack and Jill";
+                return author;
+            }
+        });
+
+        assertThat(db.selectFromAuthor().count(), is(1));
+        db.getConnection().close();
+        db.getConnection().resetDatabase();
+        assertThat(db.selectFromAuthor().count(), is(0));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)

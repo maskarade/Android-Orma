@@ -275,6 +275,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
             dropAllTables(db);
             createAllTables(db);
+
+            db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
             db.close();
