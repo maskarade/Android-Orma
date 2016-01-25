@@ -54,10 +54,10 @@ public class SchemaTest {
         Book_Schema schema = OrmaDatabase.schemaBook;
 
         assertThat(schema.getTableName(), is("Book"));
-        assertThat(schema.getPrimaryKey(), is((ColumnDef) Book_Schema.id));
+        assertThat(schema.getPrimaryKey(), is((ColumnDef) Book_Schema.bookId));
 
-        assertThat(Book_Schema.id.name, is("id"));
-        assertThat(Book_Schema.id.storageType, is("INTEGER"));
+        assertThat(Book_Schema.bookId.name, is("bookId"));
+        assertThat(Book_Schema.bookId.storageType, is("INTEGER"));
         assertThat(Book_Schema.title.name, is("title"));
         assertThat(Book_Schema.title.storageType, is("TEXT"));
         assertThat(Book_Schema.content.name, is("content"));
@@ -80,9 +80,9 @@ public class SchemaTest {
         assertThat(PublisherSchema.id.isAutoincremnt(), is(true));
         assertThat(PublisherSchema.id.isAutoValue(), is(true));
 
-        assertThat(Book_Schema.id.isPrimaryKey(), is(true));
-        assertThat(Book_Schema.id.isAutoincremnt(), is(false));
-        assertThat(Book_Schema.id.isAutoValue(), is(true));
+        assertThat(Book_Schema.bookId.isPrimaryKey(), is(true));
+        assertThat(Book_Schema.bookId.isAutoincremnt(), is(false));
+        assertThat(Book_Schema.bookId.isAutoValue(), is(true));
 
         assertThat(Author_Schema.name.isPrimaryKey(), is(true));
         assertThat(Author_Schema.name.isAutoincremnt(), is(false));
