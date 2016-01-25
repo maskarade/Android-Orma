@@ -192,8 +192,8 @@ public class QueryTest {
     public void testGet() throws Exception {
         Book_Selector rel = db.selectFromBook();
         List<Book> books = rel.toList();
-        assertThat(rel.get(0).id, is(books.get(0).id));
-        assertThat(rel.get(1).id, is(books.get(1).id));
+        assertThat(rel.get(0).bookId, is(books.get(0).bookId));
+        assertThat(rel.get(1).bookId, is(books.get(1).bookId));
     }
 
     @Test(expected = NoValueException.class)
@@ -205,7 +205,7 @@ public class QueryTest {
     public void testGetOrNull() throws Exception {
         Book book = db.selectFromBook().getOrNull(0);
         assert book != null;
-        assertThat(book.id, is(db.selectFromBook().get(0).id));
+        assertThat(book.bookId, is(db.selectFromBook().get(0).bookId));
         assertThat(db.selectFromBook().get(10), is(nullValue()));
     }
 
@@ -223,7 +223,7 @@ public class QueryTest {
 
     @Test
     public void executeWithColumns() throws Exception {
-        Cursor cursor = db.selectFromBook().executeWithColumns("max(id) as max_id, min(id) as min_id");
+        Cursor cursor = db.selectFromBook().executeWithColumns("max(bookId) as max_id, min(bookId) as min_id");
         cursor.moveToFirst();
 
         assertThat(cursor.getCount(), is(1));
@@ -284,7 +284,7 @@ public class QueryTest {
 
     @Test
     public void orderBy() throws Exception {
-        List<Book> books = db.selectFromBook().orderBy("id DESC").toList();
+        List<Book> books = db.selectFromBook().orderBy("bookId DESC").toList();
         assertThat(books, hasSize(2));
         assertThat(books.get(1).title, is("today"));
         assertThat(books.get(1).content, is("milk, banana"));

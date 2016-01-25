@@ -26,7 +26,7 @@ import android.support.annotation.Nullable;
 public class Book {
 
     @PrimaryKey
-    public long id;
+    public long bookId;
 
     @Column(indexed = true)
     public String title;

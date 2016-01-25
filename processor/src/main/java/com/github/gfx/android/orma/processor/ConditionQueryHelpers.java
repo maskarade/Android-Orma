@@ -30,6 +30,8 @@ import javax.lang.model.element.Modifier;
 
 public class ConditionQueryHelpers {
 
+    private final ProcessingContext context;
+
     private final SchemaDefinition schema;
 
     private final ClassName targetClassName;
@@ -37,6 +39,7 @@ public class ConditionQueryHelpers {
     private final SqlGenerator sql;
 
     public ConditionQueryHelpers(ProcessingContext context, SchemaDefinition schema, ClassName targetClassName) {
+        this.context = context;
         this.sql = new SqlGenerator(context);
         this.schema = schema;
         this.targetClassName = targetClassName;
@@ -65,13 +68,14 @@ public class ConditionQueryHelpers {
 
         CodeBlock serializedFieldExpr;
         if (isAssociation) {
-            ColumnDefinition primaryKey = schema.getPrimaryKey();
+            SchemaDefinition associatedSchema = context.getSchemaDef(type);
+            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
             if (primaryKey == null) {
-                throw new ProcessingException("Missing @PrimaryKey for " + schema.getModelClassName().simpleName(),
-                        schema.getElement());
+                throw new ProcessingException("Missing @PrimaryKey for " + associatedSchema.getModelClassName().simpleName(),
+                        associatedSchema.getElement());
             }
             serializedFieldExpr = CodeBlock.builder()
-                    .add("$L.$L", paramSpec.name, primaryKey.buildGetColumnExpr())
+                    .add("$L.$L /* primary key */", paramSpec.name, primaryKey.buildGetColumnExpr())
                     .build();
         } else {
             serializedFieldExpr = column.buildSerializeExpr("conn", paramSpec.name);
