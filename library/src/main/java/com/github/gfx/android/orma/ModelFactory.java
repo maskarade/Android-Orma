@@ -23,4 +23,5 @@ import rx.functions.Func0;
  * @param <T> Type of a model to create
  */
 public interface ModelFactory<T> extends Func0<T> {
+
 }

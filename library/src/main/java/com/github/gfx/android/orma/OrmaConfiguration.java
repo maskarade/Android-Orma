@@ -179,7 +179,7 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     /**
      * Sets {@link AccessThreadConstraint} for writing.
-
+     *
      * @param writeOnMainThread A constraint for writing
      * @return the receiver itself
      */

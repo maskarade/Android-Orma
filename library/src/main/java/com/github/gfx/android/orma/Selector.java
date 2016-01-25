@@ -38,6 +38,21 @@ import rx.functions.FuncN;
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
 
+    @Nullable
+    protected String groupBy;
+
+    @Nullable
+    protected String having;
+
+    @Nullable
+    protected String orderBy;
+
+    protected long limit = -1;
+
+    protected long offset = -1;
+
+    protected long page = -1;
+
     public Selector(@NonNull OrmaConnection conn, @NonNull Schema<Model> schema) {
         super(conn, schema);
     }
@@ -53,21 +68,6 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
             }
         }
     }
-
-    @Nullable
-    protected String groupBy;
-
-    @Nullable
-    protected String having;
-
-    @Nullable
-    protected String orderBy;
-
-    protected long limit = -1;
-
-    protected long offset = -1;
-
-    protected long page = -1;
 
     @Override
     public abstract S clone();

@@ -41,14 +41,6 @@ public class EquatableTypeWrapper implements Type {
         USE_TYPE_WRAPPER = JVM_TESTING || !a.equals(b);
     }
 
-    public static Type wrap(Type type) {
-        if (USE_TYPE_WRAPPER && type instanceof ParameterizedType) {
-            return new EquatableTypeWrapper(type);
-        } else {
-            return type;
-        }
-    }
-
     final Type type;
 
     final String stringRepresentation;
@@ -56,6 +48,14 @@ public class EquatableTypeWrapper implements Type {
     public EquatableTypeWrapper(Type type) {
         this.type = type;
         this.stringRepresentation = type.toString();
+    }
+
+    public static Type wrap(Type type) {
+        if (USE_TYPE_WRAPPER && type instanceof ParameterizedType) {
+            return new EquatableTypeWrapper(type);
+        } else {
+            return type;
+        }
     }
 
     @Override

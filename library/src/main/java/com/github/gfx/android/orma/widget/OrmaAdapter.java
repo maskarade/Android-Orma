@@ -36,13 +36,13 @@ import rx.functions.Action1;
  */
 public class OrmaAdapter<Model> {
 
-    int totalCount = 0;
-
     final Context context;
 
     final Relation<Model, ?> relation;
 
     final Handler handler = new Handler(Looper.getMainLooper());
+
+    int totalCount = 0;
 
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
