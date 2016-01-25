@@ -27,7 +27,7 @@ import android.util.SparseArray;
 import java.util.List;
 
 @SuppressLint("Assert")
-public class ManualStepMigration implements MigrationEngine {
+public class ManualStepMigration extends AbstractMigrationEngine {
 
     public static final String TAG = "ManualStepMigration";
 
@@ -46,8 +46,6 @@ public class ManualStepMigration implements MigrationEngine {
 
     static final String kSql = "sql";
 
-    final int version;
-
     final boolean trace;
 
     final SparseArray<Step> steps;
@@ -55,7 +53,7 @@ public class ManualStepMigration implements MigrationEngine {
     boolean tableCreated = false;
 
     public ManualStepMigration(int version, SparseArray<Step> steps, boolean trace) {
-        this.version = version;
+        super(version);
         this.trace = trace;
         this.steps = steps.clone();
     }
@@ -66,11 +64,6 @@ public class ManualStepMigration implements MigrationEngine {
 
     public void addStep(int version, @NonNull Step step) {
         steps.put(version, step);
-    }
-
-    @Override
-    public int getVersion() {
-        return version;
     }
 
     public int getDbVersion(SQLiteDatabase db) {
