@@ -1,8 +1,9 @@
 # Orma Migration Module
 
-`orma-migration` is a library which provides migration for `SQLiteDatabase`.
+`orma-migration` is a library which provides migration functionality
+for `SQLiteDatabase`.
 
-This is independent on `orma` module and available for
+This is independent from `orma` module and available for
 any Android `SQLiteDatabase` tools.
 
 ## MigrationEngine
@@ -62,33 +63,46 @@ Here is an example to use `OrmaMigration`:
 int VERSION_2;
 int VERSION_3;
 
-OrmaMigration migration = new OrmaMigration(context, BuildConfig.VERSION_CODE);
+OrmaMigration migration = OrmaMigration.builder(context)
+    .manualStepMigrationVersion(BuildConfig.VERSION_CODE)
+    // register up() / down() steps
+    .step(VERSION_2, new ManualStepMigration.Step() {
+        @Override
+        public void up(@NonNull ManualStepMigration.Helper helper) {
+            helper.execSQL("... upgrading ...");
+        }
 
-// register up() / down() steps
-migration.addStep(VERSION_2, new ManualStepMigration.Step() {
-    @Override
-    public void up(@NonNull ManualStepMigration.Helper helper) {
-        helper.execSQL("... upgrading ...");
-    }
+        @Override
+        public void down(@NonNull ManualStepMigration.Helper helper) {
+            helper.execSQL("... downgrading ...");
+        }
+    })
+    // register change(), which is used both in upgrade and downgrade
+    .step(VERSION_3, new ManualStepMigration.ChangeStep() {
+        @Override
+        public void change(@NonNull ManualStepMigration.Helper helper) {
+            Log.(TAG, helper.upgrade ? "upgrade" : "downgrade");
+            helper.execSQL("DROP TABLE foo");
+            helper.execSQL("DROP TABLE bar");
+        }
+    })
+    .build();
 
-    @Override
-    public void down(@NonNull ManualStepMigration.Helper helper) {
-        helper.execSQL("... downgrading ...");
-    }
-});
-
-// register change(), which is used both in upgrade and downgrade
-migration.addStep(VERSION_3, new ManualStepMigration.ChangeStep() {
-    @Override
-    public void change(@NonNull ManualStepMigration.Helper helper) {
-        Log.(TAG, helper.upgrade ? "upgrade" : "downgrade");
-        helper.execSQL("DROP TABLE foo");
-        helper.execSQL("DROP TABLE bar");
-    }
-});
+// pass migration to OrmaDatabase.Builder#migrationEngine()
 ```
 
 You can see migration logs in debug build, which are disabled in release build.
+
+### The Schema Version for SQLiteOpenHelper
+
+`OrmaDatabase` uses `SQLiteOpenHelper` internally, which requires an `int`
+value to control migration. This `int` value is the Schema Version.
+
+By default, `OrmaMigration` uses application's `BuildConfig.VERSION_CODE`
+for release build and `ApplicationInfo#lastUpdateTime` for debug build.
+
+Note that `ManualStepMigration`'s version is independent from the Schema
+Version.
 
 ## See Also
 
