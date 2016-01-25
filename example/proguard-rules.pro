@@ -1,6 +1,8 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
+-ignorewarnings
+
 # To make debug easier
 -keepattributes SourceFile,LineNumberTable
 
@@ -29,3 +31,4 @@
 
 # Android Support Library
 -keep class android.support.** { *; }
+-keep class android.databinding.** { *; }
