@@ -1,4 +1,4 @@
-The revision history of [Amdrpod-Orma](https://github.com/gfx/Android-Orma).
+The revision history of [Android-Orma](https://github.com/gfx/Android-Orma).
 
 The versioning follows [Semantic Versioning](http://semver.org/):
 
