@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -76,8 +77,19 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @NonNull
-    public Model get(int position) {
+    public Model get(@IntRange(from = 0) int position) {
         return selector().get(position);
+    }
+
+
+    @NonNull
+    public Model getOrCreate(@IntRange(from = 0) long position, @NonNull ModelFactory<Model> factory) {
+        Model model = selector().getOrNull(position);
+        if (model == null) {
+            return conn.createModel(schema, factory);
+        } else {
+            return model;
+        }
     }
 
     @NonNull
