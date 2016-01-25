@@ -54,13 +54,17 @@ public class ManualStepMigration implements MigrationEngine {
 
     boolean tableCreated = false;
 
-    public ManualStepMigration(int version, boolean trace) {
+    public ManualStepMigration(int version, SparseArray<Step> steps, boolean trace) {
         this.version = version;
         this.trace = trace;
-        this.steps = new SparseArray<>(0);
+        this.steps = steps.clone();
     }
 
-    public void addStep(int version, @NonNull ManualStepMigration.Step step) {
+    public ManualStepMigration(int version, boolean trace) {
+        this(version, new SparseArray<Step>(0), trace);
+    }
+
+    public void addStep(int version, @NonNull Step step) {
         steps.put(version, step);
     }
 
@@ -89,15 +93,15 @@ public class ManualStepMigration implements MigrationEngine {
 
         int oldVersion = getDbVersion(db);
 
-        Log.v(TAG, "Migration from " + oldVersion + " to " + version);
+        Log.i(TAG, "Migration from " + oldVersion + " to " + version);
 
         if (oldVersion == 0) {
-            Log.v(TAG, "Skip migration because there is no manual migration history");
+            Log.i(TAG, "Skip migration because there is no manual migration history");
             return;
         }
 
         if (oldVersion == version) {
-            Log.v(TAG, "No need to run migration");
+            Log.i(TAG, "No need to run migration");
             return;
         }
 
@@ -124,7 +128,7 @@ public class ManualStepMigration implements MigrationEngine {
             int version = steps.keyAt(i);
             if (oldVersion < version && version <= newVersion) {
                 if (trace) {
-                    Log.v(TAG, "upgrade step #" + version + " from " + oldVersion + " to " + newVersion);
+                    Log.i(TAG, "upgrade step #" + version + " from " + oldVersion + " to " + newVersion);
                 }
                 Step step = steps.valueAt(i);
                 step.up(new Helper(db, version, true));
@@ -141,7 +145,7 @@ public class ManualStepMigration implements MigrationEngine {
             int version = steps.keyAt(i);
             if (newVersion < version && version <= oldVersion) {
                 if (trace) {
-                    Log.v(TAG, "downgrade step #" + version + " from " + oldVersion + " to " + newVersion);
+                    Log.i(TAG, "downgrade step #" + version + " from " + oldVersion + " to " + newVersion);
                 }
                 Step step = steps.valueAt(i);
                 step.down(new Helper(db, version, false));
@@ -160,7 +164,7 @@ public class ManualStepMigration implements MigrationEngine {
 
     public void execStep(SQLiteDatabase db, int version, @Nullable String sql) {
         if (trace) {
-            Log.v(TAG, sql);
+            Log.i(TAG, sql);
         }
         db.execSQL(sql);
         saveStep(db, version, sql);
