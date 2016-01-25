@@ -15,13 +15,17 @@
  */
 package com.github.gfx.android.orma.example.activity;
 
+import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
+import com.github.gfx.android.orma.example.orma.Category;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
+
+import org.threeten.bp.ZonedDateTime;
 
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -37,6 +41,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -118,6 +123,7 @@ public class MainActivity extends AppCompatActivity
             public void run() {
                 try {
                     simpleCRUD();
+                    associations();
                 } catch (Exception e) {
                     largeLog("MainActivity", Log.getStackTraceString(e));
                 }
@@ -164,6 +170,20 @@ public class MainActivity extends AppCompatActivity
         orma.deleteFromTodo()
                 .where("done = ?", true)
                 .execute();
+    }
+
+    void associations() {
+        Category category = orma.selectFromCategory().getOrCreate(0, new ModelFactory<Category>() {
+            @Override
+            public Category call() {
+                return new Category("foo");
+            }
+        });
+
+        category.createItem(orma, ZonedDateTime.now().toString());
+
+        Log.d(TAG, "A category has many items (" + category.getItems(orma).count() + ")");
+        Log.d(TAG, TextUtils.join(", ", category.getItems(orma)));
     }
 
     @Override

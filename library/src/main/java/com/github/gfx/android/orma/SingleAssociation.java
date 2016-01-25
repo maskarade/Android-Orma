@@ -84,4 +84,10 @@ public class SingleAssociation<Model> {
     public Single<Model> single() {
         return single;
     }
+
+    @Override
+    public String toString() {
+        return "SingleAssociation{" +
+                "id=" + id + '}';
+    }
 }
