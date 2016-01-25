@@ -135,9 +135,9 @@ public class OrmaMigration extends AbstractMigrationEngine {
 
         final boolean debug;
 
-        int schemaVersion = 0;
+        int schemaVersion;
 
-        int manualStepMigrationVersion = 1;
+        int manualStepMigrationVersion ;
 
         boolean trace;
 
@@ -147,24 +147,16 @@ public class OrmaMigration extends AbstractMigrationEngine {
             this.context = context;
             debug = extractDebuggable(context);
             trace = debug;
-            autoSchemaVersion(true);
+            manualStepMigrationVersion = extractVersionCode(context);
+            if (debug) {
+                schemaVersion = extractLastUpdateTime(context);
+            } else {
+                schemaVersion = extractVersionCode(context);
+            }
         }
 
         public Builder schemaVersion(@IntRange(from = 1) int version) {
             schemaVersion = version;
-            return this;
-        }
-
-        public Builder autoSchemaVersion(boolean value) {
-            if (value) {
-                if (debug) {
-                    schemaVersion = extractLastUpdateTime(context);
-                } else {
-                    schemaVersion = extractVersionCode(context);
-                }
-            } else {
-                schemaVersion = 0;
-            }
             return this;
         }
 

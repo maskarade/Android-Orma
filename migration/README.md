@@ -64,7 +64,6 @@ int VERSION_2;
 int VERSION_3;
 
 OrmaMigration migration = OrmaMigration.builder(context)
-    .manualStepMigrationVersion(BuildConfig.VERSION_CODE)
     // register up() / down() steps
     .step(VERSION_2, new ManualStepMigration.Step() {
         @Override
