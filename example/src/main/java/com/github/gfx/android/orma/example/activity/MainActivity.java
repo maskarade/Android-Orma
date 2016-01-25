@@ -157,18 +157,18 @@ public class MainActivity extends AppCompatActivity
 
         // read
         todo = orma.selectFromTodo()
-                .where("title = ?", "buy")
+                .titleEq("buy")
                 .value();
 
         // update
         orma.updateTodo()
-                .where("title = ?", "buy")
+                .titleEq("buy")
                 .done(true)
                 .execute();
 
         // delete
         orma.deleteFromTodo()
-                .where("done = ?", true)
+                .doneEq(true)
                 .execute();
     }
 

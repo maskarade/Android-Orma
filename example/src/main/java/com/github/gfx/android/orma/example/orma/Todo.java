@@ -34,7 +34,7 @@ public class Todo {
     @Nullable
     public String content;
 
-    @Column(defaultExpr = "0")
+    @Column(indexed = true, defaultExpr = "0")
     public boolean done;
 
     @Column(indexed = true)
