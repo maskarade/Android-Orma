@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     void associations() {
-        Category category = orma.selectFromCategory().getOrCreate(0, new ModelFactory<Category>() {
+        Category category = orma.relationOfCategory().getOrCreate(0, new ModelFactory<Category>() {
             @Override
             public Category call() {
                 return new Category("foo");

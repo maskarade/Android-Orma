@@ -181,17 +181,6 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return model;
     }
 
-    @NonNull
-    public Model getOrCreate(@IntRange(from = 0) long position, @NonNull ModelFactory<Model> factory) {
-        Model model = conn.querySingle(schema, schema.getEscapedColumnNames(),
-                getWhereClause(), getBindArgs(), groupBy, having, orderBy, position);
-        if (model == null) {
-            return conn.createModel(schema, factory);
-        } else {
-            return model;
-        }
-    }
-
     @Nullable
     public Model getOrNull(@IntRange(from = 0) long position) {
         return conn.querySingle(schema, schema.getEscapedColumnNames(),
