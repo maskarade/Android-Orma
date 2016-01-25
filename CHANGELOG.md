@@ -1,4 +1,4 @@
-The revision history of Orma.
+The revision history of [Amdrpod-Orma](https://github.com/gfx/Android-Orma).
 
 The versioning follows [Semantic Versioning](http://semver.org/):
 
@@ -14,7 +14,7 @@ This release includes new features and bug fixes.
 
 ### Features
 
-* `OrmaMigration.Builder` [#128)
+* `OrmaMigration.Builder` (#128)
 * `Relation#getOrCreate(int, ModelFactory<T>)` (#127)
 * `Selector#empty()` to check a relation is empty or not (#120)
 * `DatabaseHandle` interface which `OrmaDatabase` implements (#118)
@@ -26,7 +26,7 @@ This release includes new features and bug fixes.
 
 ## v1.0.1 - 2016/01/16
 
-* No code change from v1.0.0
+No code change from v1.0.0.
 
 ### Bug Fixes
 
