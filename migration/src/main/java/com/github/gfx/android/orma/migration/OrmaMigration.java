@@ -16,20 +16,16 @@
 package com.github.gfx.android.orma.migration;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
- * A migration engine that uses both {@link ManualStepMigration} and {@link SchemaDiffMigration}.
+ * A migration engine that composes {@link ManualStepMigration} and {@link SchemaDiffMigration}.
  * </p>
  * <p>
  * By default, this class is in auto schema version mode,
@@ -40,10 +36,10 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * You can set the schema version manually by {@link OrmaMigration.Builder#schemaVersion(int)}.
  * </p>
+ *
+ * <p>Example: <code>OrmaMigration.builder(context).build()</code></p>
  */
-public class OrmaMigration implements MigrationEngine {
-
-    final int version;
+public class OrmaMigration extends AbstractMigrationEngine {
 
     final ManualStepMigration manualStepMigration;
 
@@ -62,26 +58,34 @@ public class OrmaMigration implements MigrationEngine {
      */
     protected OrmaMigration(int version,
             @NonNull ManualStepMigration manualStepMigration, @NonNull SchemaDiffMigration schemaDiffMigration) {
-        this.version = version;
+        super(version);
         this.manualStepMigration = manualStepMigration;
         this.schemaDiffMigration = schemaDiffMigration;
     }
 
+    /**
+     * Use {@link OrmaMigration#builder(Context)} instead.
+     *
+     * @param context -
+     * @param versionForManualStepMigration -
+     * @param trace -
+     */
     @Deprecated
     public OrmaMigration(@NonNull Context context, int versionForManualStepMigration, boolean trace) {
+        super(extractLastUpdateTime(context));
         manualStepMigration = new ManualStepMigration(versionForManualStepMigration, trace);
         schemaDiffMigration = new SchemaDiffMigration(context, trace);
-        version = schemaDiffMigration.getVersion(); // based on update/install time
     }
 
+    /**
+     * Use {@link OrmaMigration#builder(Context)} instead.
+     *
+     * @param context -
+     * @param versionForManualStepMigration -
+     */
     @Deprecated
     public OrmaMigration(@NonNull Context context, int versionForManualStepMigration) {
         this(context, versionForManualStepMigration, extractDebuggable(context));
-    }
-
-    protected static boolean extractDebuggable(Context context) {
-        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
-                == ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
     public ManualStepMigration getManualStepMigration() {
@@ -124,33 +128,6 @@ public class OrmaMigration implements MigrationEngine {
         schemaDiffMigration.start(db, schemas);
     }
 
-    @NonNull
-    static PackageInfo getPackageInfo(@NonNull Context context) {
-        PackageManager pm = context.getPackageManager();
-        try {
-            return pm.getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    protected static int extractRevisionByLastUpdateTime(@NonNull Context context) {
-        long milliseconds = getPackageInfo(context).lastUpdateTime;
-        if (milliseconds != 0) {
-            return (int)TimeUnit.MILLISECONDS.toMinutes(milliseconds);
-        } else {
-            return 1; // robolectric;
-        }
-    }
-
-    protected static int extractRevisionByVersionCode(@NonNull  Context context) {
-        int versionCode = getPackageInfo(context).versionCode;
-        if (versionCode != 0) {
-            return versionCode;
-        } else {
-            return 1; // robolectric
-        }
-    }
 
     public static class Builder {
 
@@ -181,9 +158,9 @@ public class OrmaMigration implements MigrationEngine {
         public Builder autoSchemaVersion(boolean value) {
             if (value) {
                 if (debug) {
-                    schemaVersion = extractRevisionByLastUpdateTime(context);
+                    schemaVersion = extractLastUpdateTime(context);
                 } else {
-                    schemaVersion = extractRevisionByVersionCode(context);
+                    schemaVersion = extractVersionCode(context);
                 }
             } else {
                 schemaVersion = 0;

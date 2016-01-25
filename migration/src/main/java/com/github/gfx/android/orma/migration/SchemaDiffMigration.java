@@ -20,7 +20,6 @@ import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -36,22 +35,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SchemaDiffMigration implements MigrationEngine {
+public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     static final String TAG = "SchemaDiffMigration";
 
     final boolean trace;
 
-    final int revision;
-
     final SqliteDdlBuilder util = new SqliteDdlBuilder();
 
     public SchemaDiffMigration(@NonNull Context context, boolean trace) {
-        this.revision = extractRevision(context);
+        super(extractVersion(context));
         this.trace = trace;
     }
 
@@ -59,23 +55,12 @@ public class SchemaDiffMigration implements MigrationEngine {
         this(context, BuildConfig.DEBUG);
     }
 
-    static int extractRevision(Context context) {
-        PackageManager pm = context.getPackageManager();
-        long t;
-        try {
-            t = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).lastUpdateTime;
-            if (t == 0) {
-                t = TimeUnit.MINUTES.toMillis(1); // robolectric
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new AssertionError(e);
+    static int extractVersion(Context context) {
+        if (extractDebuggable(context)) {
+            return extractLastUpdateTime(context);
+        } else {
+            return extractVersionCode(context);
         }
-        return (int) TimeUnit.MILLISECONDS.toMinutes(t);
-    }
-
-    @Override
-    public int getVersion() {
-        return revision;
     }
 
     @Override
