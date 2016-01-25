@@ -19,14 +19,31 @@ package com.github.gfx.android.orma.example.orma;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
+
+import android.support.annotation.NonNull;
 
 @Table
 public class Item {
 
     @PrimaryKey
-    public String name;
+    public final String name;
 
     @Column(indexed = true)
-    public SingleAssociation<Category> category;
+    public final SingleAssociation<Category> category;
+
+    @Setter
+    public Item(@NonNull String name, @NonNull SingleAssociation<Category> category) {
+        this.name = name;
+        this.category = category;
+    }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "name='" + name + '\'' +
+                ", category=" + category +
+                '}';
+    }
 }

@@ -16,21 +16,50 @@
 
 package com.github.gfx.android.orma.example.orma;
 
+import com.github.gfx.android.orma.ModelFactory;
+import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.Column;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
+
+import android.support.annotation.NonNull;
 
 @Table
 public class Category {
 
     @PrimaryKey
-    public long id;
+    public final long id;
 
-    @Column
-    public String name;
+    @Column(uniqueOnConflict = OnConflict.IGNORE)
+    public final  String name;
 
-    Item_Relation getItems(OrmaDatabase orma) {
+    @Setter
+    public Category(long id, @NonNull String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Category(@NonNull String name) {
+        this(0, name);
+    }
+
+    public Item_Relation getItems(OrmaDatabase orma) {
         return orma.relationOfItem().categoryEq(this);
     }
 
+    public Item createItem(OrmaDatabase orma, final String name) {
+        return orma.createItem(new ModelFactory<Item>() {
+            @Override
+            public Item call() {
+                return new Item(name, SingleAssociation.just(id, Category.this));
+            }
+        });
+    }
+
+    @Override
+    public String toString() {
+        return "Category:" + name;
+    }
 }
