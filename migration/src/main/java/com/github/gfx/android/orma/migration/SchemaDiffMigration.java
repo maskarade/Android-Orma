@@ -193,9 +193,9 @@ public class SchemaDiffMigration implements MigrationEngine {
                 intersectionColumns.size() != fromTable.getColumns().size() ||
                 !fromTable.getConstraints().equals(toTable.getConstraints())) {
             if (trace) {
-                Log.v(TAG, "tables differ:");
-                Log.v(TAG, "from: " + from);
-                Log.v(TAG, "to:   " + to);
+                Log.i(TAG, "tables differ:");
+                Log.i(TAG, "from: " + from);
+                Log.i(TAG, "to:   " + to);
             }
             return buildRecreateTable(fromTable, toTable, intersectionColumnNames);
         } else {
@@ -261,7 +261,7 @@ public class SchemaDiffMigration implements MigrationEngine {
         try {
             for (String statement : statements) {
                 if (trace) {
-                    Log.v(TAG, statement);
+                    Log.i(TAG, statement);
                 }
                 db.execSQL(statement);
             }

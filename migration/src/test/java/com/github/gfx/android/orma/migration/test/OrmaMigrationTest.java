@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.OrmaMigration;
+import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.test.util.SchemaData;
 
 import org.junit.Before;
@@ -32,6 +33,10 @@ import android.support.test.runner.AndroidJUnit4;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
 public class OrmaMigrationTest {
@@ -49,8 +54,57 @@ public class OrmaMigrationTest {
     @Before
     public void setUp() throws Exception {
         db = SQLiteDatabase.create(null);
+        db.setVersion(1);
 
-        migration = new OrmaMigration(getContext(), VERSION);
+        migration = OrmaMigration.builder(getContext())
+                .schemaVersion(2)
+                .manualStepMigrationVersion(VERSION)
+                .build();
+
+        migration.getManualStepMigration()
+                .execStep(db, 1, "CREATE TABLE dummy (id INTEGER PRIMARY KEY)");
+    }
+
+    @Test
+    public void testBuilder() throws Exception {
+        migration = OrmaMigration.builder(getContext())
+                .schemaVersion(2)
+                .manualStepMigrationVersion(VERSION)
+                .step(2, new ManualStepMigration.ChangeStep() {
+                    @Override
+                    public void change(@NonNull ManualStepMigration.Helper helper) {
+                        helper.execSQL("CREATE TABLE step_2 (id INTEGER PRIMARY KEY)");
+                    }
+                })
+                .step(4, new ManualStepMigration.ChangeStep() {
+                    @Override
+                    public void change(@NonNull ManualStepMigration.Helper helper) {
+                        helper.execSQL("CREATE TABLE step_4 (id INTEGER PRIMARY KEY)");
+                    }
+                })
+                .step(8, new ManualStepMigration.ChangeStep() {
+                    @Override
+                    public void change(@NonNull ManualStepMigration.Helper helper) {
+                        helper.execSQL("CREATE TABLE step_8 (id INTEGER PRIMARY KEY)");
+                    }
+                })
+                .step(16, new ManualStepMigration.ChangeStep() {
+                    @Override
+                    public void change(@NonNull ManualStepMigration.Helper helper) {
+                        helper.execSQL("CREATE TABLE step_16 (id INTEGER PRIMARY KEY)");
+                    }
+                })
+                .build();
+
+        migration.start(db, new ArrayList<SchemaData>());
+        migration.start(db, new ArrayList<SchemaData>());
+        migration.start(db, new ArrayList<SchemaData>());
+
+        Map<String, SQLiteMaster> tables = SQLiteMaster.loadTables(db);
+        assertThat(tables.containsKey("step_2"), is(true));
+        assertThat(tables.containsKey("step_4"), is(true));
+        assertThat(tables.containsKey("step_8"), is(true));
+        assertThat(tables.containsKey("step_16"), is(true));
     }
 
     @Test
@@ -84,6 +138,12 @@ public class OrmaMigrationTest {
         migration.start(db, new ArrayList<SchemaData>());
         migration.start(db, new ArrayList<SchemaData>());
         migration.start(db, new ArrayList<SchemaData>());
+
+        Map<String, SQLiteMaster> tables = SQLiteMaster.loadTables(db);
+        assertThat(tables.containsKey("step_2"), is(true));
+        assertThat(tables.containsKey("step_4"), is(true));
+        assertThat(tables.containsKey("step_8"), is(true));
+        assertThat(tables.containsKey("step_16"), is(true));
     }
 
     @Test
@@ -98,7 +158,7 @@ public class OrmaMigrationTest {
         };
 
         for (String s : initData) {
-            migration.getManualStepMigration().execStep(db, 1, s);
+            migration.getManualStepMigration().execStep(db, 2, s);
         }
 
         // define steps
@@ -117,5 +177,9 @@ public class OrmaMigrationTest {
 
         // start migration
         migration.start(db, schemas);
+
+        Map<String, SQLiteMaster> tables = SQLiteMaster.loadTables(db);
+        assertThat(tables.get("foo").sql, is(schemas.get(0).getCreateTableStatement()));
+        assertThat(tables.get("bar").sql, is(schemas.get(1).getCreateTableStatement()));
     }
 }

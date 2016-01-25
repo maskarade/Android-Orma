@@ -41,7 +41,10 @@ public class MigrationEngineTest {
 
     @Before
     public void setUp() throws Exception {
-        migration = new OrmaMigration(getContext(), 1, false);
+        migration = OrmaMigration.builder(getContext())
+                .manualStepMigrationVersion(1)
+                .build();
+
         conn = OrmaDatabase.builder(getContext())
                 .name(null)
                 .migrationEngine(migration)
