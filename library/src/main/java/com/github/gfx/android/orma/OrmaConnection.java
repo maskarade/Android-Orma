@@ -350,13 +350,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         long t0 = System.currentTimeMillis();
         if (trace) {
-            Log.v(TAG, "migration start from " + oldVersion + " to " + newVersion);
+            Log.i(TAG, "migration start from " + oldVersion + " to " + newVersion);
         }
 
         migration.start(db, schemas);
 
         if (trace) {
-            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+            Log.i(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
         }
     }
 
@@ -364,13 +364,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         long t0 = System.currentTimeMillis();
         if (trace) {
-            Log.v(TAG, "migration start from " + oldVersion + " to " + newVersion);
+            Log.i(TAG, "migration start from " + oldVersion + " to " + newVersion);
         }
 
         migration.start(db, schemas);
 
         if (trace) {
-            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+            Log.i(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
         }
     }
 }
