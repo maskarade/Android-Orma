@@ -25,6 +25,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.List;
+import java.util.Locale;
 
 @SuppressLint("Assert")
 public class ManualStepMigration extends AbstractMigrationEngine {
@@ -86,17 +87,17 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
         int oldVersion = getDbVersion(db);
 
-        Log.i(TAG, "Migration from " + oldVersion + " to " + version);
-
         if (oldVersion == 0) {
-            Log.i(TAG, "Skip migration because there is no manual migration history");
+            trace("skip migration: no manual migration history");
             return;
         }
 
         if (oldVersion == version) {
-            Log.i(TAG, "No need to run migration");
+            trace("skip migration: version matched");
             return;
         }
+
+        trace("start migration from %d to %d", oldVersion, version);
 
         if (oldVersion < version) {
             upgrade(db, oldVersion, version);
@@ -120,9 +121,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         for (int i = 0, size = steps.size(); i < size; i++) {
             int version = steps.keyAt(i);
             if (oldVersion < version && version <= newVersion) {
-                if (trace) {
-                    Log.i(TAG, "upgrade step #" + version + " from " + oldVersion + " to " + newVersion);
-                }
+                trace("%s step #%d from %d to %d", "upgrade", version, oldVersion, newVersion);
                 Step step = steps.valueAt(i);
                 step.up(new Helper(db, version, true));
             }
@@ -137,9 +136,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         for (int i = steps.size() - 1; i >= 0; i--) {
             int version = steps.keyAt(i);
             if (newVersion < version && version <= oldVersion) {
-                if (trace) {
-                    Log.i(TAG, "downgrade step #" + version + " from " + oldVersion + " to " + newVersion);
-                }
+                trace("%s step #%d from %d to %d", "downgrade", version, oldVersion, newVersion);
                 Step step = steps.valueAt(i);
                 step.down(new Helper(db, version, false));
             }
@@ -156,9 +153,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     }
 
     public void execStep(SQLiteDatabase db, int version, @Nullable String sql) {
-        if (trace) {
-            Log.i(TAG, sql);
-        }
+        trace("%s", sql);
         db.execSQL(sql);
         saveStep(db, version, sql);
     }
@@ -220,6 +215,13 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
         public void execSQL(@NonNull String sql) {
             execStep(db, upgrade ? version : version - 1, sql);
+        }
+    }
+
+    // TODO: replace it with a logging library
+    private void trace(String format, Object... args) {
+        if (trace) {
+            Log.i(TAG, String.format(Locale.US, format, args));
         }
     }
 }
