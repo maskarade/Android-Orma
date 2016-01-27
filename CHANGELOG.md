@@ -8,6 +8,13 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.1.2 - 2016/01/27
+
+### Bug Fixes
+
+* Follow the `trace` flag in all the logs (#130)
+* Use `info` log level for all the migration logs (#130)
+
 ## v1.1.1 - 2016/01/25
 
 ### Bug Fixes
