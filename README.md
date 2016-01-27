@@ -553,12 +553,13 @@ Check your toolchain. FYI here are my toolchain versions:
 * Android SDK Tools 24.4.1
 * Android SDK Platform Tools 23.1
 * Android SDK Build Tools 23.0.2
+* Android Gradle Plugin 1.5.0
 
 ### Is there a real-world example that uses Orma?
 
 [Android-Helium](https://github.com/gfx/Android-Helium) is an Android app which is released to Google Play Store.
 
-This uses Orma, as well as Google Dagger, Android DataBinding, Google Play Services etc.
+This uses Orma, as well as Google Dagger, Android DataBinding, Google Play Services, and etc.
 
 ## Support
 
