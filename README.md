@@ -531,6 +531,35 @@ as of Orma v0.9.0 and Realm 0.86.0:
 
 <img src="benchmark_v0.9.0_2015-12-10.png" alt="" width="443"/>
 
+## FAQ
+
+### Lint fails on InvalidPackage.
+
+As of v1.x, Orma uses [antlr4](https://github.com/antlr/antlr4) to parse SQL, and `antlr4-runtime` imports `java.awt.*`, which causes a lint violation on `InvalidPackage`. You can ignore this errors:
+
+```
+android {
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+}
+```
+
+### Can't build my project.
+
+Check your toolchain. FYI here are my toolchain versions:
+
+* JDK 1.8.0_66
+* Android SDK Tools 24.4.1
+* Android SDK Platform TOols 23.1
+* Android SDK Build Tools 23.0.2
+
+### Is there a real-world example that uses Orma?
+
+[Android-Helium](https://github.com/gfx/Android-Helium) is an Android app which is released to Google Play Store.
+
+This uses Orma, as well as Google Dagger, Android DataBinding, Google Play Services etc.
+
 ## Support
 
 * Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
