@@ -140,12 +140,22 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     }
 
 
+    /**
+     * {@code and()} changes the conjunction to {@code AND} (default).
+     *
+     * @return the receiver itself
+     */
     @SuppressWarnings("unchecked")
     public C and() {
         whereConjunction = " AND ";
         return (C) this;
     }
 
+    /**
+     * {@code or()} changes the conditional conjunction to {@code OR}.
+     *
+     * @return the receiver itself
+     */
     @SuppressWarnings("unchecked")
     public C or() {
         whereConjunction = " OR ";
