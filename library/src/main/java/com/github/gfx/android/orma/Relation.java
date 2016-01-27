@@ -72,6 +72,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return sb.toString();
     }
 
+    @IntRange(from = 0)
     public int count() {
         return selector().count();
     }
@@ -93,7 +94,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @NonNull
-    public Single<Model> getWithTransactionAsObservable(final int position) {
+    public Single<Model> getWithTransactionAsObservable(@IntRange(from = 0) final int position) {
         return Single.create(new Single.OnSubscribe<Model>() {
             @Override
             public void call(final SingleSubscriber<? super Model> subscriber) {
@@ -176,7 +177,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * @return A {@link Single} that yields the number of rows deleted.
      */
     @NonNull
-    public Single<Integer> truncateWithTransactionAsObservable(final int size) {
+    public Single<Integer> truncateWithTransactionAsObservable(@IntRange(from = 0) final int size) {
         return Single.create(new Single.OnSubscribe<Integer>() {
             @Override
             public void call(SingleSubscriber<? super Integer> subscriber) {

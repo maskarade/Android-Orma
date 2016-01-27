@@ -219,7 +219,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     }
 
     // TODO: replace it with a logging library
-    private void trace(String format, Object... args) {
+    private void trace(@NonNull String format, @NonNull Object... args) {
         if (trace) {
             Log.i(TAG, String.format(Locale.US, format, args));
         }

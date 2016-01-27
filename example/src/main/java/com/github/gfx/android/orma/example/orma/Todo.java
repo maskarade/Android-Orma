@@ -39,4 +39,5 @@ public class Todo {
 
     @Column(indexed = true)
     public long createdTimeMillis;
+
 }

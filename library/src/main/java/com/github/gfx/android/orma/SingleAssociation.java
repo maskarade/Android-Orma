@@ -33,12 +33,12 @@ public class SingleAssociation<Model> {
 
     final Single<Model> single;
 
-    public SingleAssociation(long id, Model model) {
+    public SingleAssociation(long id, @NonNull Model model) {
         this.id = id;
         this.single = Single.just(model);
     }
 
-    public SingleAssociation(long id, Single<Model> single) {
+    public SingleAssociation(long id, @NonNull Single<Model> single) {
         this.id = id;
         this.single = single;
     }
@@ -63,7 +63,7 @@ public class SingleAssociation<Model> {
         });
     }
 
-    public static <T> SingleAssociation<T> just(long id, T model) {
+    public static <T> SingleAssociation<T> just(long id, @NonNull T model) {
         return new SingleAssociation<>(id, model);
     }
 
