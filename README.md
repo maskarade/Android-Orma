@@ -551,7 +551,7 @@ Check your toolchain. FYI here are my toolchain versions:
 
 * JDK 1.8.0_66
 * Android SDK Tools 24.4.1
-* Android SDK Platform TOols 23.1
+* Android SDK Platform Tools 23.1
 * Android SDK Build Tools 23.0.2
 
 ### Is there a real-world example that uses Orma?
