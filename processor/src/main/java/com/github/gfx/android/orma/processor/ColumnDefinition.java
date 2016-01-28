@@ -68,6 +68,8 @@ public class ColumnDefinition {
 
     public final String storageType;
 
+    public final TypeAdapterDefinition typeAdapter;
+
     public ExecutableElement getter;
 
     public ExecutableElement setter;
@@ -84,7 +86,8 @@ public class ColumnDefinition {
         columnName = columnName(column, element);
 
         type = ClassName.get(element.asType());
-        storageType = storageType(column, type);
+        typeAdapter = schema.context.typeAdapterMap.get(type);
+        storageType = storageType(column, type, typeAdapter);
 
         if (column != null) {
             indexed = column.indexed();
@@ -118,21 +121,22 @@ public class ColumnDefinition {
     // to create primary key columns
     private ColumnDefinition(SchemaDefinition schema) {
         this.schema = schema;
-        this.element = null;
-        this.name = kDefaultPrimaryKeyName;
-        this.columnName = kDefaultPrimaryKeyName;
-        this.type = TypeName.LONG;
-        this.nullable = false;
-        this.primaryKey = true;
-        this.primaryKeyOnConflict = OnConflict.NONE;
-        this.autoincrement = false;
-        this.autoId = true;
-        this.indexed = false;
-        this.unique = false;
-        this.uniqueOnConflict = OnConflict.NONE;
-        this.defaultExpr = "";
-        this.collate = Column.Collate.BINARY;
-        this.storageType = storageType(null, type);
+        element = null;
+        name = kDefaultPrimaryKeyName;
+        columnName = kDefaultPrimaryKeyName;
+        type = TypeName.LONG;
+        nullable = false;
+        primaryKey = true;
+        primaryKeyOnConflict = OnConflict.NONE;
+        autoincrement = false;
+        autoId = true;
+        indexed = false;
+        unique = false;
+        uniqueOnConflict = OnConflict.NONE;
+        defaultExpr = "";
+        collate = Column.Collate.BINARY;
+        typeAdapter = schema.context.typeAdapterMap.get(type);
+        storageType = storageType(null, type, typeAdapter);
     }
 
     public static ColumnDefinition createDefaultPrimaryKey(SchemaDefinition schema) {
@@ -165,11 +169,15 @@ public class ColumnDefinition {
         return element.getSimpleName().toString();
     }
 
-    static String storageType(Column column, TypeName type) {
+    static String storageType(Column column, TypeName type, TypeAdapterDefinition typeAdapter) {
         if (column != null && !Strings.isEmpty(column.storageType())) {
             return column.storageType();
         } else {
-            return SqlTypes.getSqliteType(Types.asRawType(type));
+            if (typeAdapter != null) {
+                return SqlTypes.getSqliteType(typeAdapter.serializedType);
+            } else {
+                return SqlTypes.getSqliteType(Types.asRawType(type));
+            }
         }
     }
 
@@ -212,8 +220,24 @@ public class ColumnDefinition {
         return Types.asUnboxType(type);
     }
 
+    public TypeName getSerializedType() {
+        if (typeAdapter != null) {
+            return Types.asUnboxType(typeAdapter.serializedType);
+        } else {
+            return getUnboxType();
+        }
+    }
+
     public String getStorageType() {
         return storageType;
+    }
+
+    public boolean isNullableInSQL() {
+        return nullable;
+    }
+
+    public boolean isNullableInJava() {
+        return !type.isPrimitive() && nullable;
     }
 
     /**
@@ -235,11 +259,23 @@ public class ColumnDefinition {
         }
     }
 
-    public String buildGetColumnExpr() {
-        if (getter != null) {
-            return getter.getSimpleName() + "()";
+    public CodeBlock buildGetColumnExpr(String modelExpr) {
+        return CodeBlock.builder()
+                .add("$L.$L", modelExpr, getter != null ? getter.getSimpleName() + "()" : name)
+                .build();
+    }
+
+
+    public CodeBlock buildSerializedColumnExpr(String connectionExpr, String modelExpr) {
+        CodeBlock getColumnExpr = CodeBlock.builder()
+                .add("$L.$L", modelExpr, getter != null ? getter.getSimpleName() + "()" : name)
+                .build();
+        if (needsTypeAdapter()) {
+            return CodeBlock.builder()
+                    .add(buildSerializeExpr(connectionExpr, getColumnExpr))
+                    .build();
         } else {
-            return name;
+            return getColumnExpr;
         }
     }
 
@@ -253,17 +289,51 @@ public class ColumnDefinition {
                 .build();
     }
 
-    public CodeBlock buildSerializeExpr(String connectionExpr, String paramnExpr) {
-        CodeBlock.Builder expr = CodeBlock.builder();
-        if (needsTypeAdapter()) {
-            expr.add("$L.$L($L)",
-                    buildGetTypeAdapter(connectionExpr),
-                    nullable ? "serializeNullable" : "serialize",
-                    paramnExpr);
+    public CodeBlock buildSerializeExpr(String connectionExpr, String valueExpr) {
+        return buildSerializeExpr(connectionExpr, CodeBlock.builder().add("$L", valueExpr).build());
+    }
+
+    public CodeBlock buildSerializeExpr(String connectionExpr, CodeBlock valueExpr) {
+        if (typeAdapter != null) {
+            // static type adapters
+            return CodeBlock.builder()
+                    .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getSerializerName(), valueExpr)
+                    .build();
         } else {
-            expr.add(paramnExpr);
+            // dynamic type adapters
+            CodeBlock.Builder expr = CodeBlock.builder();
+            if (needsTypeAdapter()) {
+                expr.add("$L.$L($L)",
+                        buildGetTypeAdapter(connectionExpr),
+                        nullable ? "serializeNullable" : "serialize",
+                        valueExpr);
+            } else {
+                expr.add(valueExpr);
+            }
+            return expr.build();
         }
-        return expr.build();
+    }
+
+    public CodeBlock buildDeserializeExpr(String connectionExpr, String valueExpr) {
+        if (typeAdapter != null) {
+            // static type adapters
+            return CodeBlock.builder()
+                    .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr)
+                    .build();
+        } else {
+            // dynamic type adapters
+            CodeBlock.Builder expr = CodeBlock.builder();
+            if (needsTypeAdapter()) {
+                expr.add("$L.$L($L)",
+                        buildGetTypeAdapter(connectionExpr),
+                        nullable ? "deserializeNullable" : "deserialize",
+                        valueExpr);
+            } else {
+                expr.add("$L", valueExpr);
+            }
+
+            return expr.build();
+        }
     }
 
     public boolean needsTypeAdapter() {

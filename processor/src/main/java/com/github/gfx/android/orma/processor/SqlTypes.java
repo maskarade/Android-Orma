@@ -55,7 +55,7 @@ public class SqlTypes {
     }
 
     public static String getSqliteType(TypeName type) {
-        String t = javaToSqlite.get(type);
+        String t = javaToSqlite.get(Types.asUnboxType(type));
         return t != null ? t : "BLOB";
     }
 }

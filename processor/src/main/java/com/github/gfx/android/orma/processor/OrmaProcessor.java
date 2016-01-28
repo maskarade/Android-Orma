@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
 import com.squareup.javapoet.JavaFile;
@@ -48,6 +49,9 @@ public class OrmaProcessor extends AbstractProcessor {
         ProcessingContext context = new ProcessingContext(processingEnv);
 
         try {
+            buildTypeAdapters(context, roundEnv)
+                    .forEach(context::addTypeAdapterDefinition);
+
             buildTableSchemas(context, roundEnv)
                     .forEach(schema -> context.schemaMap.put(schema.getModelClassName(), schema));
 
@@ -82,6 +86,13 @@ public class OrmaProcessor extends AbstractProcessor {
         context.printErrors();
 
         return false;
+    }
+
+    public Stream<TypeAdapterDefinition> buildTypeAdapters(ProcessingContext context, RoundEnvironment roundEnv) {
+        return roundEnv
+                .getElementsAnnotatedWith(StaticTypeAdapter.class)
+                .stream()
+                .map(TypeAdapterDefinition::new);
     }
 
     public Stream<SchemaDefinition> buildTableSchemas(ProcessingContext context, RoundEnvironment roundEnv) {

@@ -21,6 +21,7 @@ import com.squareup.javapoet.TypeName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +40,17 @@ public class ProcessingContext {
 
     public final Map<TypeName, SchemaDefinition> schemaMap;
 
+    public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap;
+
     public ClassName OrmaDatabase;
 
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
         this.schemaMap = new LinkedHashMap<>(); // the order matters
+        this.typeAdapterMap = new HashMap<>();
+        for (TypeAdapterDefinition typeAdapterDefinition : TypeAdapterDefinition.BUILTINS) {
+            addTypeAdapterDefinition(typeAdapterDefinition);
+        }
     }
 
     public void addError(String message, Element element) {
@@ -59,6 +66,10 @@ public class ProcessingContext {
 
         errors.forEach(error -> messager.printMessage(
                 Diagnostic.Kind.ERROR, error.getMessage(), error.element));
+    }
+
+    public void addTypeAdapterDefinition(TypeAdapterDefinition typeAdapterDefinition) {
+        typeAdapterMap.put(typeAdapterDefinition.targetType, typeAdapterDefinition);
     }
 
     public SchemaDefinition getSchemaDef(TypeName modelClassName) {

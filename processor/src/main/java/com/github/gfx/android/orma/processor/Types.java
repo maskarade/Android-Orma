@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class Types {
 
@@ -124,6 +125,8 @@ public class Types {
 
     public static final ClassName NoValueException = ClassName.get(ormaPackageName + ".exception", "NoValueException");
 
+    public static final ClassName BuiltInSerializers = ClassName.get(ormaPackageName, "BuiltInSerializers");
+
     // helper methods
 
     public static ParameterizedTypeName getCollection(TypeName type) {
@@ -160,6 +163,10 @@ public class Types {
 
     public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concleteDeleterType) {
         return ParameterizedTypeName.get(Deleter, modelType, concleteDeleterType);
+    }
+
+    public static ParameterizedTypeName getSet(ClassName typeName) {
+        return ParameterizedTypeName.get(ClassName.get(Set.class), typeName);
     }
 
     public static ParameterizedTypeName getList(TypeName typeName) {

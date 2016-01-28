@@ -37,6 +37,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Date;
+
 import rx.schedulers.Schedulers;
 
 public class ListViewActivity extends AppCompatActivity {
@@ -75,7 +77,7 @@ public class ListViewActivity extends AppCompatActivity {
                         number++;
                         todo.title = "ListView item #" + number;
                         todo.content = ZonedDateTime.now().toString();
-                        todo.createdTimeMillis = System.currentTimeMillis();
+                        todo.createdTimeMillis = new Date();
                         return todo;
                     }
                 })

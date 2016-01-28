@@ -44,6 +44,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -224,7 +225,7 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                             todo.title = titlePrefix + i;
                             todo.content = contentPrefix + i;
-                            todo.createdTimeMillis = now;
+                            todo.createdTimeMillis = new Date(now);
 
                             statement.execute(todo);
                         }

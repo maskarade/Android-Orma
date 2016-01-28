@@ -13,33 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.example.orma;
 
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Table;
+package com.github.gfx.android.orma.annotation;
 
-import android.support.annotation.Nullable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.Date;
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.SOURCE)
+public @interface StaticTypeAdapter {
+    String serializer() default "serialize";
 
-@Table
-public class Todo {
+    String deserializer() default "deserialize";
 
-    @PrimaryKey
-    public long id;
+    Class<?> targetType();
 
-    @Column(indexed = true)
-    public String title;
-
-    @Column
-    @Nullable
-    public String content;
-
-    @Column(indexed = true, defaultExpr = "0")
-    public boolean done;
-
-    @Column(indexed = true)
-    public Date createdTimeMillis;
-
+    Class<?> serializedType();
 }
