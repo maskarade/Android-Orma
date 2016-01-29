@@ -95,10 +95,10 @@ orma.insertIntoTodo(todo);
 // prepared statements with transaction
 orma.transactionSync( // or transactionAsync() to execute tasks in background
 	new TransactionTask() {
-        @Override
-        public void execute() throws Exception {
-			Inserter<Todo> inserter = orma.prepareInsertIntoTodo();
-			inserter.execute(todo);
+	        @Override
+	        public void execute() throws Exception {
+				Inserter<Todo> inserter = orma.prepareInsertIntoTodo();
+				inserter.execute(todo);
         }
     });
 
