@@ -450,9 +450,15 @@ class Book {
 
 Orma models are able to have embedded objects with **type adapters**.
 
-Type adapters serializes and deserializes custom classes, for example as a JSON format.
+### Static Type Adapters
 
-If you use type adapters, you can add them to `OrmaDatabase`:
+TBD
+
+### Dynamic Type Adapters
+
+**This is deprecated and will be removed in v2.0.**
+
+If you use type adapters, you can add type serializer instances to `OrmaDatabase`.
 
 ```java
 class FooAdapter extends AbstractTypeAdapter<Foo> {
@@ -473,8 +479,6 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .addTypeAdapters(new FooAdapter())
     .build();
 ```
-
-**The interface is experimental and are likely to change in v2.0.**
 
 ### Built-In Type Adapters
 
