@@ -22,6 +22,7 @@ import java.sql.Time;
 /**
  * Handles {@link Time} as a string representation like {@code "12:30:45"}.
  */
+@Deprecated
 public class SqlTimeAdapter extends AbstractTypeAdapter<Time> {
 
     @NonNull

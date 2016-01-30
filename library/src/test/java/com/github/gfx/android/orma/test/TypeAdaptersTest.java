@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
+@SuppressWarnings("deprecated")
 public class TypeAdaptersTest {
 
     static final Type stringListType = new TypeHolder<List<String>>() {

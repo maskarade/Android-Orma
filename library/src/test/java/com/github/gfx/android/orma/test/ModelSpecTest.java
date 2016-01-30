@@ -358,5 +358,4 @@ public class ModelSpecTest {
         assertThat(db.selectFromModelWithConflictResolutions().count(), is(1));
         assertThat(db.selectFromModelWithConflictResolutions().value().primaryKeyOrIgnore, is(11L));
     }
-
 }

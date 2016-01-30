@@ -13,24 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.adapter;
 
-import android.support.annotation.NonNull;
+package com.github.gfx.android.orma.test.model;
 
-import java.util.Currency;
+import com.github.gfx.android.orma.annotation.Column;
+import com.github.gfx.android.orma.annotation.Table;
+import com.github.gfx.android.orma.test.toolbox.IntTuple2x;
 
-@Deprecated
-public class CurrencyAdapter extends AbstractTypeAdapter<Currency> {
+@Table
+public class ModelWithDeprecatedTypeAdapter {
 
-    @NonNull
-    @Override
-    public String serialize(@NonNull Currency source) {
-        return source.getCurrencyCode();
-    }
-
-    @NonNull
-    @Override
-    public Currency deserialize(@NonNull String serialized) {
-        return Currency.getInstance(serialized);
-    }
+    @Column
+    public IntTuple2x intTuple2;
 }

@@ -300,7 +300,8 @@ public class ColumnDefinition {
                     .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getSerializerName(), valueExpr)
                     .build();
         } else {
-            // dynamic type adapters
+            // TODO: remove this branch in v2.0
+            // dynamic type adapters (DEPRECATED)
             CodeBlock.Builder expr = CodeBlock.builder();
             if (needsTypeAdapter()) {
                 expr.add("$L.$L($L)",

@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import java.util.HashSet;
 import java.util.Set;
 
+@Deprecated
 public class StringSetAdapter extends AbstractTypeAdapter<Set<String>> {
 
     @NonNull

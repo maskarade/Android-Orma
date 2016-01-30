@@ -479,7 +479,10 @@ public class SchemaWriter extends BaseWriter {
             } else if (r != null && r.associationType.equals(Types.SingleAssociation)) {
                 builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
             } else {
-                throw new ProcessingException("No storage method found for " + serializedType, c.element);
+                builder.addStatement("statement.bindString($L, $L)", n, rhsExpr);
+
+                // TODO: throw the following errors in v2.0
+                // throw new ProcessingException("No storage method found for " + serializedType, c.element);
             }
 
             if (c.isNullableInJava()) {

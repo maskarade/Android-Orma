@@ -17,17 +17,15 @@
 package com.github.gfx.android.orma.test.toolbox;
 
 /**
- * A demo class to show how {@link com.github.gfx.android.orma.annotation.StaticTypeAdapter} works.
- *
- * @see com.github.gfx.android.orma.test.type_adapter.IntTuple2Adapter
+ * A demo class to show how the deprecated {@link com.github.gfx.android.orma.adapter.TypeAdapter} works.
  */
-public class IntTuple2 {
+public class IntTuple2x {
 
     public final int first;
 
     public final int second;
 
-    public IntTuple2(int first, int second) {
+    public IntTuple2x(int first, int second) {
         this.first = first;
         this.second = second;
     }
@@ -37,11 +35,11 @@ public class IntTuple2 {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof IntTuple2)) {
+        if (!(o instanceof IntTuple2x)) {
             return false;
         }
 
-        IntTuple2 intTuple2 = (IntTuple2) o;
+        IntTuple2x intTuple2 = (IntTuple2x) o;
 
         if (first != intTuple2.first) {
             return false;
