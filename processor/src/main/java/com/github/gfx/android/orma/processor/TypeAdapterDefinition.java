@@ -24,6 +24,7 @@ import android.support.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Currency;
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ public class TypeAdapterDefinition {
     public static TypeAdapterDefinition[] BUILTINS = {
             TypeAdapterDefinition.make(BigDecimal.class, String.class),
             TypeAdapterDefinition.make(BigInteger.class, String.class),
+            TypeAdapterDefinition.make(ByteBuffer.class, byte[].class),
             TypeAdapterDefinition.make(Currency.class, String.class),
             TypeAdapterDefinition.make(java.util.Date.class, long.class),
             TypeAdapterDefinition.make(java.sql.Date.class, String.class, "SqlDate"),

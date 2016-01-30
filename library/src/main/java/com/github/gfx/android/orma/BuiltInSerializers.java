@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashSet;
@@ -54,6 +55,16 @@ public class BuiltInSerializers {
     @NonNull
     public static BigInteger deserializeBigInteger(@NonNull String serialized) {
         return new BigInteger(serialized);
+    }
+
+    @NonNull
+    public static byte[] serializeByteBuffer(@NonNull ByteBuffer source) {
+        return source.array();
+    }
+
+    @NonNull
+    public static ByteBuffer deserializeByteBuffer(@NonNull byte[] serialized) {
+        return ByteBuffer.wrap(serialized);
     }
 
     @NonNull

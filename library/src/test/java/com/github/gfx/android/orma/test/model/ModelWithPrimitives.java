@@ -18,6 +18,11 @@ package com.github.gfx.android.orma.test.model;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.Table;
 
+/**
+ * @see ModelWithPrimitives_Schema
+ *
+ * @see ModelWithBoxTypes
+ */
 @Table
 public class ModelWithPrimitives {
 
@@ -41,5 +46,4 @@ public class ModelWithPrimitives {
 
     @Column
     public double doubleValue;
-
 }

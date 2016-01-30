@@ -25,6 +25,7 @@ import android.support.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
@@ -71,6 +72,9 @@ public class ModelWithTypeAdapters {
     public Currency currency;
 
     @Column(indexed = true)
+    public ByteBuffer byteBuffer;
+
+    @Column(indexed = true)
     public IntTuple2 intTuple2;
 
     @Nullable
@@ -92,4 +96,8 @@ public class ModelWithTypeAdapters {
     @Column(indexed = true)
     @Nullable
     public IntTuple2 nullableIntTuple2;
+
+    @Column(indexed = true)
+    @Nullable
+    public ByteBuffer nullableByteBuffer;
 }

@@ -18,6 +18,13 @@ package com.github.gfx.android.orma.test.model;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.Table;
 
+import android.support.annotation.Nullable;
+
+/**
+ * @see ModelWithBoxTypes_Schema
+ *
+ * @see ModelWithPrimitives
+ */
 @Table
 public class ModelWithBoxTypes {
 
@@ -41,5 +48,33 @@ public class ModelWithBoxTypes {
 
     @Column
     public Double doubleValue;
+
+    @Column
+    @Nullable
+    public Boolean nullableBooleanValue;
+
+    @Column
+    @Nullable
+    public Byte nullableByteValue;
+
+    @Column
+    @Nullable
+    public Short nullableShortValue;
+
+    @Column
+    @Nullable
+    public Integer nullableIntValue;
+
+    @Column
+    @Nullable
+    public Long nullableLongValue;
+
+    @Column
+    @Nullable
+    public Float nullableFloatValue;
+
+    @Column
+    @Nullable
+    public Double nullableDoubleValue;
 
 }
