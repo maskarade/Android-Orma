@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.SOURCE)
 public @interface StaticTypeAdapter {
+
     String serializer() default "serialize";
 
     String deserializer() default "deserialize";

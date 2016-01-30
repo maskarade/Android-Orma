@@ -25,6 +25,7 @@ import com.github.gfx.android.orma.test.model.ModelWithDefaults;
 import com.github.gfx.android.orma.test.model.ModelWithPrimitives;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -136,6 +137,7 @@ public class ModelSpecTest {
                 model.bigDecimal = bd;
                 model.bigInteger = bi;
                 model.currency = Currency.getInstance("JPY");
+                model.intTuple2 = new IntTuple2(-13, 17);
                 return model;
             }
         });
@@ -151,6 +153,8 @@ public class ModelSpecTest {
         assertThat(model.bigDecimal, is(bd));
         assertThat(model.bigInteger, is(bi));
         assertThat(model.currency, is(Currency.getInstance("JPY")));
+        assertThat(model.intTuple2, is(new IntTuple2(-13, 17)));
+        assertThat(model.nullableIntTuple2, is(nullValue()));
     }
 
     @Test

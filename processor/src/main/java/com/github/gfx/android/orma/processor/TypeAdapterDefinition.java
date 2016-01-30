@@ -27,6 +27,7 @@ import java.math.BigInteger;
 import java.util.Currency;
 import java.util.UUID;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -62,6 +63,7 @@ public class TypeAdapterDefinition {
     public static TypeAdapterDefinition make(Class<?> targetType, Class<?> serializedType) {
         return TypeAdapterDefinition.make(TypeName.get(targetType), TypeName.get(serializedType), targetType.getSimpleName());
     }
+
     public static TypeAdapterDefinition make(ClassName targetType, Class<?> serializedType) {
         return TypeAdapterDefinition.make(targetType, TypeName.get(serializedType), targetType.simpleName());
     }
@@ -84,13 +86,15 @@ public class TypeAdapterDefinition {
         this.typeAdapterImpl = ClassName.get(this.element);
 
         StaticTypeAdapter annotation = element.getAnnotation(StaticTypeAdapter.class);
+        AnnotationMirror annotationMirror = Mirrors.findAnnotationMirror(element, StaticTypeAdapter.class);
 
-        targetType =  TypeName.get(annotation.targetType());
-        serializedType = TypeName.get(annotation.serializedType());
+        // Can't access program class instances in annotation processing in , throwing MirroredTypeException
+        targetType =  TypeName.get(Mirrors.findAnnotationValueAsTypeMirror(annotationMirror, "targetType"));
+        serializedType = TypeName.get(Mirrors.findAnnotationValueAsTypeMirror(annotationMirror, "serializedType"));
         serializer = annotation.serializer();
         deserializer = annotation.deserializer();
-
     }
+
 
     public TypeAdapterDefinition(ClassName typeAdapter, TypeName targetType, TypeName serializedType,
             String serializer, String deserializer) {
@@ -108,5 +112,17 @@ public class TypeAdapterDefinition {
 
     public String getDeserializerName() {
         return deserializer;
+    }
+
+    @Override
+    public String toString() {
+        return "TypeAdapterDefinition{" +
+                "element=" + element +
+                ", typeAdapterImpl=" + typeAdapterImpl +
+                ", targetType=" + targetType +
+                ", serializedType=" + serializedType +
+                ", serializer='" + serializer + '\'' +
+                ", deserializer='" + deserializer + '\'' +
+                '}';
     }
 }
