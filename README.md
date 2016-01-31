@@ -452,7 +452,26 @@ Orma models are able to have embedded objects with **type adapters**.
 
 ### Static Type Adapters
 
-TBD
+Static type adapters are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options.
+
+```java
+@StaticTypeAdapter(
+        targetType = Foo.class,
+        serializedType = String.class
+)
+public class IntTuple2Adapter {
+
+    public static String serialize(@NonNull Foo source) {
+        return source.toStrng();
+    }
+
+    @NonNull
+    public static Foo deserialize(long serialized) {
+        return new Foo(serialized);
+    }
+}
+
+```
 
 ### Dynamic Type Adapters
 
