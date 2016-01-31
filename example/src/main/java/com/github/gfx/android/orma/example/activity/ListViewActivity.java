@@ -37,6 +37,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Date;
+
 import rx.schedulers.Schedulers;
 
 public class ListViewActivity extends AppCompatActivity {
@@ -62,7 +64,7 @@ public class ListViewActivity extends AppCompatActivity {
                 .readOnMainThread(AccessThreadConstraint.NONE)
                 .build();
 
-        adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeMillisAsc());
+        adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
 
         binding.fab.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +77,7 @@ public class ListViewActivity extends AppCompatActivity {
                         number++;
                         todo.title = "ListView item #" + number;
                         todo.content = ZonedDateTime.now().toString();
-                        todo.createdTimeMillis = System.currentTimeMillis();
+                        todo.createdTime = new Date();
                         return todo;
                     }
                 })

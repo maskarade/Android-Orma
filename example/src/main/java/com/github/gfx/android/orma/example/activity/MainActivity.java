@@ -49,6 +49,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -152,7 +153,7 @@ public class MainActivity extends AppCompatActivity
         Todo todo = new Todo();
         todo.title = "buy";
         todo.content = "milk banana apple";
-        todo.createdTimeMillis = System.currentTimeMillis();
+        todo.createdTime = new Date();
         orma.insertIntoTodo(todo);
 
         // read
