@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.migration.test.sqliteparser;
+package com.github.gfx.android.orma.migration.test.sqliteparser_test;
 
 
 import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
+import com.github.gfx.android.orma.migration.test.util.TestUtils;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,6 +34,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(AndroidJUnit4.class)
 public class SQLiteParserUtilsTest {
@@ -143,9 +144,10 @@ public class SQLiteParserUtilsTest {
         assertThat(createTableStatement.getConstraints(), hasSize(2));
     }
 
-    @Ignore("StackOverflowError is thrown if executed as androidTest")
     @Test
     public void testComplexTable() throws Exception {
+        assumeFalse(TestUtils.runOnAndroid()); // FIXME
+
         CreateTableStatement createTableStatement = SQLiteParserUtils.parseIntoCreateTableStatement(
                 "CREATE TABLE foo (title TEXT DEFAULT (''))"
         );

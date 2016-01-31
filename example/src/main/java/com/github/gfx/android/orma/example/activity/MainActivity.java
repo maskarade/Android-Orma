@@ -15,12 +15,17 @@
  */
 package com.github.gfx.android.orma.example.activity;
 
+import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
+import com.github.gfx.android.orma.example.orma.Category;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
+import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
+
+import org.threeten.bp.ZonedDateTime;
 
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -36,6 +41,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,6 +53,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    static final String TAG = MainActivity.class.getSimpleName();
 
     static final String ORMA_SITE = "https://github.com/gfx/Android-Orma/";
 
@@ -115,11 +123,16 @@ public class MainActivity extends AppCompatActivity
             public void run() {
                 try {
                     simpleCRUD();
+                    associations();
                 } catch (Exception e) {
                     largeLog("MainActivity", Log.getStackTraceString(e));
                 }
             }
         });
+
+        for (SQLiteMaster metadata : SQLiteMaster.loadTables(orma.getConnection().getReadableDatabase()).values()) {
+            Log.d(TAG, metadata.toString());
+        }
     }
 
     public static void largeLog(String tag, String content) {
@@ -144,19 +157,33 @@ public class MainActivity extends AppCompatActivity
 
         // read
         todo = orma.selectFromTodo()
-                .where("title = ?", "buy")
+                .titleEq("buy")
                 .value();
 
         // update
         orma.updateTodo()
-                .where("title = ?", "buy")
+                .titleEq("buy")
                 .done(true)
                 .execute();
 
         // delete
         orma.deleteFromTodo()
-                .where("done = ?", true)
+                .doneEq(true)
                 .execute();
+    }
+
+    void associations() {
+        Category category = orma.relationOfCategory().getOrCreate(0, new ModelFactory<Category>() {
+            @Override
+            public Category call() {
+                return new Category("foo");
+            }
+        });
+
+        category.createItem(orma, ZonedDateTime.now().toString());
+
+        Log.d(TAG, "A category has many items (" + category.getItems(orma).count() + ")");
+        Log.d(TAG, TextUtils.join(", ", category.getItems(orma)));
     }
 
     @Override
@@ -197,8 +224,10 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_todo) {
-            startActivity(TodoActivity.createIntent(this));
+        if (id == R.id.nav_recycler_view) {
+            startActivity(RecyclerViewActivity.createIntent(this));
+        } else if (id == R.id.nav_list_view) {
+            startActivity(ListViewActivity.createIntent(this));
         } else if (id == R.id.nav_benchmark) {
             startActivity(BenchmarkActivity.createIntent(this));
         } else if (id == R.id.nav_share) {

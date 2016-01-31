@@ -13,31 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.example.orma;
 
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Table;
+package com.github.gfx.android.orma.migration.test.util;
 
-import android.support.annotation.Nullable;
-
-@Table
-public class Todo {
-
-    @PrimaryKey
-    public long id;
-
-    @Column(indexed = true)
-    public String title;
-
-    @Column
-    @Nullable
-    public String content;
-
-    @Column(indexed = true, defaultExpr = "0")
-    public boolean done;
-
-    @Column(indexed = true)
-    public long createdTimeMillis;
-
+public class TestUtils {
+    public static boolean runOnAndroid() {
+        return System.getProperty("java.vm.name").equals("Dalvik");
+    }
 }

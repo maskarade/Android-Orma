@@ -33,22 +33,10 @@ import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
+import rx.functions.FuncN;
 
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
-
-    public Selector(@NonNull OrmaConnection conn, @NonNull Schema<Model> schema) {
-        super(conn, schema);
-    }
-
-    public Selector(@NonNull OrmaConditionBase<Model, ?> condition) {
-        super(condition);
-        if (condition instanceof Relation) {
-            @SuppressWarnings("unchecked")
-            Relation<Model, ?> relation = (Relation<Model, ?>) condition;
-            orderBy(relation.orderSpecs);
-        }
-    }
 
     @Nullable
     protected String groupBy;
@@ -64,6 +52,22 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     protected long offset = -1;
 
     protected long page = -1;
+
+    public Selector(@NonNull OrmaConnection conn, @NonNull Schema<Model> schema) {
+        super(conn, schema);
+    }
+
+    public Selector(@NonNull OrmaConditionBase<Model, ?> condition) {
+        super(condition);
+        if (condition instanceof Relation) {
+            @SuppressWarnings("unchecked")
+            Relation<Model, ?> relation = (Relation<Model, ?>) condition;
+            CharSequence orderByTerm = relation.buildOrderingTerms();
+            if (orderByTerm != null) {
+                orderBy(orderByTerm);
+            }
+        }
+    }
 
     @Override
     public abstract S clone();
@@ -82,33 +86,12 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @SuppressWarnings("unchecked")
-    public S orderBy(@NonNull String orderByTerm) {
+    public S orderBy(@NonNull CharSequence orderByTerm) {
         if (orderBy == null) {
-            orderBy = orderByTerm;
+            orderBy = orderByTerm.toString();
         } else {
-            orderBy = orderByTerm + ", " + orderBy;
+            orderBy += ", " + orderByTerm;
         }
-        return (S) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public S orderBy(@NonNull List<OrderSpec<Model>> orderSpecs) {
-        if (orderSpecs.isEmpty()) {
-            return (S) this;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (orderBy != null) {
-            sb.append(orderBy);
-            sb.append(", ");
-        }
-        for (OrderSpec<Model> orderSpec : orderSpecs) {
-            if (sb.length() != 0) {
-                sb.append(", ");
-            }
-            sb.append(orderSpec);
-        }
-        orderBy = sb.toString();
         return (S) this;
     }
 
@@ -164,6 +147,11 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return conn.count(schema, getWhereClause(), getBindArgs());
     }
 
+    /**
+     * Provided for {@link Observable#combineLatest(List, FuncN)}.
+     *
+     * @return An observable that yields {@link #count()}.
+     */
     @NonNull
     public Observable<Integer> countAsObservable() {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
@@ -173,6 +161,10 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
                 subscriber.onCompleted();
             }
         });
+    }
+
+    public boolean empty() {
+        return count() == 0;
     }
 
     @Nullable
@@ -235,6 +227,8 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     /**
      * Executes a query and calls {@code Action1<Model>#call} for each model}.
+     *
+     * @param action An action called for each model in the iteration.
      */
     public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = execute();

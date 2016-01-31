@@ -21,14 +21,14 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Relation;
+import com.github.gfx.android.orma.test.model.ModelWithMultipleSortableColumns;
+import com.github.gfx.android.orma.test.model.ModelWithMultipleSortableColumns_Relation;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -39,16 +39,9 @@ public class RelationTest {
 
     OrmaDatabase orma;
 
-    Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
-
     @Before
     public void setUp() throws Exception {
-        orma = OrmaDatabase.builder(getContext())
-                .trace(true)
-                .name(null)
-                .build();
+        orma = OrmaBuilder.create();
 
         Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
         inserter.execute(new ModelFactory<Author>() {
@@ -130,6 +123,100 @@ public class RelationTest {
         assertThat(rel.get(2).name, is("A"));
         assertThat(rel.get(1).name, is("B"));
         assertThat(rel.get(0).name, is("C"));
+    }
+
+    @Test
+    public void truncate_asc() throws Exception {
+        Relation<Author, ?> rel = rel().orderByNameAsc();
+        int deletedRows = rel.truncateWithTransactionAsObservable(2)
+                .toBlocking()
+                .value();
+
+        assertThat(deletedRows, is(1));
+        assertThat(rel.count(), is(2));
+        assertThat(rel.get(0).name, is("A"));
+        assertThat(rel.get(1).name, is("B"));
+    }
+
+    @Test
+    public void truncate_asc_overflow() throws Exception {
+        Relation<Author, ?> rel = rel().orderByNameAsc();
+        int deletedRows = rel.truncateWithTransactionAsObservable(10)
+                .toBlocking()
+                .value();
+
+        assertThat(deletedRows, is(0));
+        assertThat(rel.count(), is(3));
+        assertThat(rel.get(0).name, is("A"));
+        assertThat(rel.get(1).name, is("B"));
+        assertThat(rel.get(2).name, is("C"));
+    }
+
+    @Test
+    public void truncate_desc() throws Exception {
+        Relation<Author, ?> rel = rel().orderByNameDesc();
+        int deletedRows = rel.truncateWithTransactionAsObservable(10)
+                .toBlocking()
+                .value();
+
+        assertThat(deletedRows, is(0));
+        assertThat(rel.count(), is(3));
+        assertThat(rel.get(0).name, is("C"));
+        assertThat(rel.get(1).name, is("B"));
+        assertThat(rel.get(2).name, is("A"));
+    }
+
+    @Test
+    public void testMultipleOrderingTerms() throws Exception {
+        orma.createModelWithMultipleSortableColumns(new ModelFactory<ModelWithMultipleSortableColumns>() {
+            @Override
+            public ModelWithMultipleSortableColumns call() {
+                ModelWithMultipleSortableColumns m = new ModelWithMultipleSortableColumns();
+                m.id = 100;
+                m.first = 10;
+                m.second = 20;
+                return m;
+            }
+        });
+
+        orma.createModelWithMultipleSortableColumns(new ModelFactory<ModelWithMultipleSortableColumns>() {
+            @Override
+            public ModelWithMultipleSortableColumns call() {
+                ModelWithMultipleSortableColumns m = new ModelWithMultipleSortableColumns();
+                m.id = 200;
+                m.first = 10;
+                m.second = 30;
+                return m;
+            }
+        });
+
+        orma.createModelWithMultipleSortableColumns(new ModelFactory<ModelWithMultipleSortableColumns>() {
+            @Override
+            public ModelWithMultipleSortableColumns call() {
+                ModelWithMultipleSortableColumns m = new ModelWithMultipleSortableColumns();
+                m.id = 300;
+                m.first = 5;
+                m.second = 40;
+                return m;
+            }
+        });
+
+        ModelWithMultipleSortableColumns_Relation rel;
+        rel = orma.relationOfModelWithMultipleSortableColumns()
+                .orderByFirstAsc()
+                .orderBySecondDesc();
+
+        assertThat(rel.get(0).id, is(300L));
+        assertThat(rel.get(1).id, is(200L));
+        assertThat(rel.get(2).id, is(100L));
+
+        rel = orma.relationOfModelWithMultipleSortableColumns()
+                .orderByFirstDesc()
+                .orderBySecondDesc();
+
+        assertThat(rel.get(0).id, is(200L));
+        assertThat(rel.get(1).id, is(100L));
+        assertThat(rel.get(2).id, is(300L));
     }
 
     @Test

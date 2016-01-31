@@ -33,12 +33,12 @@ public class SingleAssociation<Model> {
 
     final Single<Model> single;
 
-    public SingleAssociation(long id, Model model) {
+    public SingleAssociation(long id, @NonNull Model model) {
         this.id = id;
         this.single = Single.just(model);
     }
 
-    public SingleAssociation(long id, Single<Model> single) {
+    public SingleAssociation(long id, @NonNull Single<Model> single) {
         this.id = id;
         this.single = single;
     }
@@ -49,7 +49,7 @@ public class SingleAssociation<Model> {
             @Override
             public void call(SingleSubscriber<? super Model> subscriber) {
                 ColumnDef<Model, ?> primaryKey = schema.getPrimaryKey();
-                String whereClause = "\"" + primaryKey.name + "\" = ?";
+                String whereClause = primaryKey.getEscapedName() + " = ?";
                 String[] whereArgs = {String.valueOf(id)};
                 Model model = conn.querySingle(schema, schema.getEscapedColumnNames(),
                         whereClause, whereArgs, null, null, null, 0);
@@ -63,7 +63,7 @@ public class SingleAssociation<Model> {
         });
     }
 
-    public static <T> SingleAssociation<T> just(long id, T model) {
+    public static <T> SingleAssociation<T> just(long id, @NonNull T model) {
         return new SingleAssociation<>(id, model);
     }
 
@@ -83,5 +83,11 @@ public class SingleAssociation<Model> {
     @NonNull
     public Single<Model> single() {
         return single;
+    }
+
+    @Override
+    public String toString() {
+        return "SingleAssociation{" +
+                "id=" + id + '}';
     }
 }

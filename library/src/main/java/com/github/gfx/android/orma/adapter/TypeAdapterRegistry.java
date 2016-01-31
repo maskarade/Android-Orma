@@ -58,7 +58,7 @@ public class TypeAdapterRegistry {
 
     @NonNull
     public <SourceType> TypeAdapter<SourceType> get(@NonNull Class<SourceType> sourceType) {
-        return get((Type)sourceType);
+        return get((Type) sourceType);
     }
 
     @NonNull

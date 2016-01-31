@@ -37,13 +37,13 @@ import rx.functions.Action1;
  */
 public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
-    protected final OrmaAdapterDelegate<Model> delegate;
+    protected final OrmaAdapter<Model> delegate;
 
     public OrmaRecyclerViewAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
-        this(new OrmaAdapterDelegate<>(context, relation));
+        this(new OrmaAdapter<>(context, relation));
     }
 
-    public OrmaRecyclerViewAdapter(@NonNull OrmaAdapterDelegate<Model> delegate) {
+    public OrmaRecyclerViewAdapter(@NonNull OrmaAdapter<Model> delegate) {
         this.delegate = delegate;
     }
 
@@ -69,7 +69,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
     }
 
     public void runOnUiThreadSync(@NonNull Runnable task) {
-        delegate.runOnUiThreadSync(task);
+        delegate.runOnUiThread(task);
     }
 
     @NonNull

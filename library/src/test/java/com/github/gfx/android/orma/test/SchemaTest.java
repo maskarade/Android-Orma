@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithStorageTypes_Schema;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.PublisherSchema;
 
@@ -42,6 +43,10 @@ public class SchemaTest {
         assertThat(PublisherSchema.name.name, is("name"));
         assertThat(PublisherSchema.startedYear.name, is("started_year"));
         assertThat(PublisherSchema.startedMonth.name, is("started_month"));
+
+        assertThat(schema.getCreateTableStatement(), is(
+                "CREATE TABLE \"publishers\" (\"id\" INTEGER PRIMARY KEY AUTOINCREMENT, \"name\" TEXT UNIQUE NOT NULL, \"started_year\" INTEGER NOT NULL, \"started_month\" INTEGER NOT NULL)"
+        ));
     }
 
     @Test
@@ -49,10 +54,10 @@ public class SchemaTest {
         Book_Schema schema = OrmaDatabase.schemaBook;
 
         assertThat(schema.getTableName(), is("Book"));
-        assertThat(schema.getPrimaryKey(), is((ColumnDef) Book_Schema.id));
+        assertThat(schema.getPrimaryKey(), is((ColumnDef) Book_Schema.bookId));
 
-        assertThat(Book_Schema.id.name, is("id"));
-        assertThat(Book_Schema.id.storageType, is("INTEGER"));
+        assertThat(Book_Schema.bookId.name, is("bookId"));
+        assertThat(Book_Schema.bookId.storageType, is("INTEGER"));
         assertThat(Book_Schema.title.name, is("title"));
         assertThat(Book_Schema.title.storageType, is("TEXT"));
         assertThat(Book_Schema.content.name, is("content"));
@@ -75,12 +80,21 @@ public class SchemaTest {
         assertThat(PublisherSchema.id.isAutoincremnt(), is(true));
         assertThat(PublisherSchema.id.isAutoValue(), is(true));
 
-        assertThat(Book_Schema.id.isPrimaryKey(), is(true));
-        assertThat(Book_Schema.id.isAutoincremnt(), is(false));
-        assertThat(Book_Schema.id.isAutoValue(), is(true));
+        assertThat(Book_Schema.bookId.isPrimaryKey(), is(true));
+        assertThat(Book_Schema.bookId.isAutoincremnt(), is(false));
+        assertThat(Book_Schema.bookId.isAutoValue(), is(true));
 
         assertThat(Author_Schema.name.isPrimaryKey(), is(true));
         assertThat(Author_Schema.name.isAutoincremnt(), is(false));
         assertThat(Author_Schema.name.isAutoValue(), is(false));
+    }
+
+    @Test
+    public void testColumnStorageTypes() throws Exception {
+        assertThat(ModelWithStorageTypes_Schema.date.storageType, is("INTEGER"));
+        assertThat(ModelWithStorageTypes_Schema.timestamp.storageType, is("DATETIME"));
+        assertThat(ModelWithStorageTypes_Schema.INSTANCE.getCreateTableStatement(), is(
+                "CREATE TABLE \"ModelWithStorageTypes\" (\"date\" INTEGER NOT NULL, \"timestamp\" DATETIME NOT NULL)"
+        ));
     }
 }

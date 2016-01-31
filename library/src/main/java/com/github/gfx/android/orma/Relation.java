@@ -18,8 +18,10 @@ package com.github.gfx.android.orma;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,17 +52,49 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     @SuppressWarnings("unchecked")
     public R orderBy(@NonNull OrderSpec<Model> orderSpec) {
-        orderSpecs.add(0, orderSpec);
+        orderSpecs.add(orderSpec);
         return (R) this;
     }
 
-    @NonNull
-    public Model get(int position) {
-        return selector().get(position);
+    @Nullable
+    protected String buildOrderingTerms() {
+        if (orderSpecs.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (OrderSpec<Model> orderSpec : orderSpecs) {
+            if (sb.length() != 0) {
+                sb.append(", ");
+            }
+            sb.append(orderSpec);
+        }
+        return sb.toString();
+    }
+
+    @IntRange(from = 0)
+    public int count() {
+        return selector().count();
     }
 
     @NonNull
-    public Single<Model> getWithTransactionAsObservable(final int position) {
+    public Model get(@IntRange(from = 0) int position) {
+        return selector().get(position);
+    }
+
+
+    @NonNull
+    public Model getOrCreate(@IntRange(from = 0) long position, @NonNull ModelFactory<Model> factory) {
+        Model model = selector().getOrNull(position);
+        if (model == null) {
+            return conn.createModel(schema, factory);
+        } else {
+            return model;
+        }
+    }
+
+    @NonNull
+    public Single<Model> getWithTransactionAsObservable(@IntRange(from = 0) final int position) {
         return Single.create(new Single.OnSubscribe<Model>() {
             @Override
             public void call(final SingleSubscriber<? super Model> subscriber) {
@@ -137,6 +171,27 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
+     * Truncates the table to the specified size. Operations are executed in a transaction.
+     *
+     * @param size Size to truncate the table
+     * @return A {@link Single} that yields the number of rows deleted.
+     */
+    @NonNull
+    public Single<Integer> truncateWithTransactionAsObservable(@IntRange(from = 0) final int size) {
+        return Single.create(new Single.OnSubscribe<Integer>() {
+            @Override
+            public void call(SingleSubscriber<? super Integer> subscriber) {
+                String select = SQLiteQueryBuilder.buildQueryString(
+                        false, schema.getEscapedTableName(), new String[]{schema.getPrimaryKey().toString()},
+                        getWhereClause(), null, null, buildOrderingTerms(), size + "," + Integer.MAX_VALUE);
+
+                int deletedRows = conn.delete(schema, schema.getPrimaryKey() + " IN (" + select + ")", getBindArgs());
+                subscriber.onSuccess(deletedRows);
+            }
+        });
+    }
+
+    /**
      * Inserts an item. Operations are executed in a transaction.
      *
      * @param factory A model to insert.
@@ -165,24 +220,6 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     @Override
     public abstract R clone();
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> groupBy(@NonNull String groupBy);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> having(@NonNull String having, @NonNull Object... args);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> limit(@IntRange(from = 1, to = Integer.MAX_VALUE) long limit);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> offset(@IntRange(from = 0) long offset);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> page(@IntRange(from = 1) long page);
-
-    @SuppressWarnings("unchecked")
-    public abstract Selector<Model, ?> per(@IntRange(from = 1, to = Integer.MAX_VALUE) long per);
 
     // Operation helpers
 

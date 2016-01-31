@@ -21,7 +21,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
-import com.github.gfx.android.orma.widget.OrmaAdapterDelegate;
+import com.github.gfx.android.orma.widget.OrmaAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,9 +36,9 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
-public class OrmaAdapterDelegateTest {
+public class OrmaAdapterTest {
 
-    OrmaAdapterDelegate<Author> adapter;
+    OrmaAdapter<Author> adapter;
 
     static Context getContext() {
         return InstrumentationRegistry.getTargetContext();
@@ -46,9 +46,7 @@ public class OrmaAdapterDelegateTest {
 
     @Before
     public void setUp() throws Exception {
-        OrmaDatabase orma = OrmaDatabase.builder(getContext())
-                .name(null)
-                .build();
+        OrmaDatabase orma = OrmaBuilder.create();
 
         Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
         inserter.execute(new ModelFactory<Author>() {
@@ -81,7 +79,7 @@ public class OrmaAdapterDelegateTest {
             }
         });
 
-        adapter = new OrmaAdapterDelegate<>(getContext(), orma.relationOfAuthor().orderByNameAsc());
+        adapter = new OrmaAdapter<>(getContext(), orma.relationOfAuthor().orderByNameAsc());
     }
 
     @Test
@@ -112,6 +110,13 @@ public class OrmaAdapterDelegateTest {
     }
 
     @Test
+    public void testGetItemAsObservable() throws Exception {
+        assertThat(adapter.getItemAsObservable(0).toBlocking().value().name, is("A"));
+        assertThat(adapter.getItemAsObservable(1).toBlocking().value().name, is("B"));
+        assertThat(adapter.getItemAsObservable(2).toBlocking().value().name, is("C"));
+    }
+
+    @Test
     public void testAddItemAsObservable() throws Exception {
         long id = adapter.addItemAsObservable(new ModelFactory<Author>() {
             @Override
@@ -138,5 +143,6 @@ public class OrmaAdapterDelegateTest {
     public void testClearAsObservable() throws Exception {
         int deletedCount = adapter.clearAsObservable().toBlocking().value();
         assertThat(deletedCount, is(3));
+        assertThat(adapter.getItemCount(), is(0));
     }
 }

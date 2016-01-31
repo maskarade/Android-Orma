@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
+import com.github.gfx.android.orma.migration.test.util.SchemaData;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +40,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
-public class SchemaDiffTest {
+public class SchemaDiffMigrationTest {
 
     List<SchemaData> schemas;
 
@@ -143,6 +144,19 @@ public class SchemaDiffTest {
         assertThat(statements, is(schemas.get(1).getCreateIndexStatements()));
     }
 
+    @Test
+    public void recreateTableWithIndes() throws Exception {
+        schemas.set(0, new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT, \"field03\" TEXT)",
+                "CREATE INDEX \"index_field01_on_foo\" ON \"foo\" (\"field01\")",
+                "CREATE INDEX \"index_field02_on_foo\" ON \"foo\" (\"field02\")"
+        ));
+        statements = migration.diffAll(metadata, schemas);
+
+        migration.executeStatements(db, statements);
+
+        assertThat(migration.diffAll(migration.loadMetadata(db, schemas), schemas), is(empty()));
+    }
+
     class OpenHelper extends SQLiteOpenHelper {
 
         public OpenHelper(Context context) {
@@ -167,5 +181,4 @@ public class SchemaDiffTest {
 
         }
     }
-
 }

@@ -27,9 +27,15 @@ import java.lang.reflect.Type;
 @SuppressWarnings("unused")
 public abstract class TypeHolder<T> {
 
+
     public Type getType() {
         Class<?> c = getClass();
-        ParameterizedType t = (ParameterizedType) c.getGenericSuperclass();
+        ParameterizedType t;
+        try {
+            t = (ParameterizedType) c.getGenericSuperclass();
+        } catch (ClassCastException e) {
+            throw new RuntimeException("No type signature found. Missing -keepattributes Signature in progurad-rules.pro?", e);
+        }
         return EquatableTypeWrapper.wrap(t.getActualTypeArguments()[0]);
     }
 }

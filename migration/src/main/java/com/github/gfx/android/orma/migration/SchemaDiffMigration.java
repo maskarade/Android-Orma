@@ -20,8 +20,6 @@ import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -36,22 +34,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SchemaDiffMigration implements MigrationEngine {
+public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     static final String TAG = "SchemaDiffMigration";
 
     final boolean trace;
 
-    final int revision;
-
     final SqliteDdlBuilder util = new SqliteDdlBuilder();
 
     public SchemaDiffMigration(@NonNull Context context, boolean trace) {
-        this.revision = extractRevision(context);
+        super(extractVersion(context));
         this.trace = trace;
     }
 
@@ -59,23 +55,12 @@ public class SchemaDiffMigration implements MigrationEngine {
         this(context, BuildConfig.DEBUG);
     }
 
-    static int extractRevision(Context context) {
-        PackageManager pm = context.getPackageManager();
-        long t;
-        try {
-            t = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA).lastUpdateTime;
-            if (t == 0) {
-                t = TimeUnit.MINUTES.toMillis(1); // robolectric
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new AssertionError(e);
+    static int extractVersion(Context context) {
+        if (extractDebuggable(context)) {
+            return extractLastUpdateTime(context);
+        } else {
+            return extractVersionCode(context);
         }
-        return (int) TimeUnit.MILLISECONDS.toMinutes(t);
-    }
-
-    @Override
-    public int getVersion() {
-        return revision;
     }
 
     @Override
@@ -86,54 +71,58 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     @NonNull
-    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> dbTables,
+    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> masterData,
             @NonNull List<? extends MigrationSchema> schemas) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database
         for (MigrationSchema schema : schemas) {
-            SQLiteMaster table = dbTables.get(schema.getTableName());
+            SQLiteMaster table = masterData.get(schema.getTableName());
             if (table == null) {
                 statements.add(schema.getCreateTableStatement());
                 statements.addAll(schema.getCreateIndexStatements());
             } else {
-                if (!table.sql.equals(schema.getCreateTableStatement())) {
-                    statements.addAll(tableDiff(table.sql, schema.getCreateTableStatement()));
+                List<String> tableDiffStatements = tableDiff(table.sql, schema.getCreateTableStatement());
+
+                if (tableDiffStatements.isEmpty()) {
+                    Set<String> schemaIndexes = new LinkedHashSet<>();
+                    Set<String> dbIndexes = new LinkedHashSet<>();
+
+                    schemaIndexes.addAll(schema.getCreateIndexStatements());
+
+                    for (SQLiteMaster index : table.indexes) {
+                        dbIndexes.add(index.sql);
+                    }
+                    statements.addAll(indexDiff(dbIndexes, schemaIndexes));
+                } else {
+                    // The table needs re-create, where all the indexes are also dropped.
+                    statements.addAll(tableDiffStatements);
+                    statements.addAll(schema.getCreateIndexStatements());
                 }
-
-                Set<String> schemaIndexes = new LinkedHashSet<>();
-                Set<String> dbIndexes = new LinkedHashSet<>();
-
-                schemaIndexes.addAll(schema.getCreateIndexStatements());
-
-                for (SQLiteMaster index : table.indexes) {
-                    dbIndexes.add(index.sql);
-                }
-                statements.addAll(indexDiff(schemaIndexes, dbIndexes));
             }
         }
         return statements;
     }
 
     /**
-     * @param schemaIndexes Set of "CREATE INDEX" statements which the code has
-     * @param dbIndexes Set of "CREATED INDEX" statements which the DB has
+     * @param sourceIndex Set of "CREATED INDEX" statements which the DB has
+     * @param destIndex   Set of "CREATE INDEX" statements which the code has
      * @return List of "CREATED INDEX" statements to apply to DB
      */
     @NonNull
-    public List<String> indexDiff(@NonNull Set<String> schemaIndexes, @NonNull Set<String> dbIndexes) {
+    public List<String> indexDiff(@NonNull Set<String> sourceIndex, @NonNull Set<String> destIndex) {
         List<String> createIndexStatements = new ArrayList<>();
 
         Map<SQLiteComponent, String> unionIndexes = new LinkedHashMap<>();
 
         Map<SQLiteComponent, String> fromIndexPairs = new LinkedHashMap<>();
-        for (String createIndexStatement : dbIndexes) {
+        for (String createIndexStatement : sourceIndex) {
             fromIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
         }
         unionIndexes.putAll(fromIndexPairs);
 
         Map<SQLiteComponent, String> toIndexPairs = new LinkedHashMap<>();
-        for (String createIndexStatement : schemaIndexes) {
+        for (String createIndexStatement : destIndex) {
             toIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
         }
         unionIndexes.putAll(toIndexPairs);
@@ -157,6 +146,10 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public List<String> tableDiff(String from, String to) {
+        if (from.equals(to)) {
+            return Collections.emptyList();
+        }
+
         CreateTableStatement fromTable = SQLiteParserUtils.parseIntoCreateTableStatement(from);
         CreateTableStatement toTable = SQLiteParserUtils.parseIntoCreateTableStatement(to);
 
@@ -184,6 +177,11 @@ public class SchemaDiffMigration implements MigrationEngine {
         if (intersectionColumns.size() != toTable.getColumns().size() ||
                 intersectionColumns.size() != fromTable.getColumns().size() ||
                 !fromTable.getConstraints().equals(toTable.getConstraints())) {
+            if (trace) {
+                Log.i(TAG, "tables differ:");
+                Log.i(TAG, "from: " + from);
+                Log.i(TAG, "to:   " + to);
+            }
             return buildRecreateTable(fromTable, toTable, intersectionColumnNames);
         } else {
             return Collections.emptyList();
@@ -218,7 +216,7 @@ public class SchemaDiffMigration implements MigrationEngine {
                     }
                 })));
 
-        statements.add(util.buildInsertFromSelect(tempTableName, fromTableName, columns));
+        statements.add(util.buildInsertFromSelect(tempTableName, fromTableName, columns)); // TODO: progressive migration
         statements.add(util.buildDropTable(fromTableName));
         statements.add(util.buildRenameTable(tempTableName, toTableName));
 
@@ -243,16 +241,13 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public void executeStatements(SQLiteDatabase db, List<String> statements) {
-        if (trace) {
-            for (String statement : statements) {
-                Log.v(TAG, statement);
-            }
-        }
-
         db.beginTransaction();
 
         try {
             for (String statement : statements) {
+                if (trace) {
+                    Log.i(TAG, statement);
+                }
                 db.execSQL(statement);
             }
             db.setTransactionSuccessful();
@@ -262,51 +257,18 @@ public class SchemaDiffMigration implements MigrationEngine {
     }
 
     public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<? extends MigrationSchema> schemas) {
-        List<String> tableNames = new ArrayList<>();
+        Map<String, SQLiteMaster> metadata = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        Set<String> tableNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         for (MigrationSchema schema : schemas) {
-            tableNames.add(SqliteDdlBuilder.ensureQuoted(schema.getTableName()));
+            tableNames.add(schema.getTableName());
         }
-        Cursor cursor = db.rawQuery(
-                "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE tbl_name IN "
-                        + "(" + TextUtils.join(", ", tableNames) + ")",
-                null);
 
-        Map<String, SQLiteMaster> tables = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        if (cursor.moveToFirst()) {
-            do {
-                String type = cursor.getString(0); // "table" or "index"
-                String name = cursor.getString(1); // table or index name
-                String tableName = cursor.getString(2);
-                String sql = cursor.getString(3);
-
-                SQLiteMaster meta = tables.get(tableName);
-                if (meta == null) {
-                    meta = new SQLiteMaster();
-                    tables.put(tableName, meta);
-                }
-
-                switch (type) {
-                    case "table":
-                        meta.type = type;
-                        meta.name = name;
-                        meta.tableName = tableName;
-                        meta.sql = sql;
-                        break;
-                    case "index":
-                        // sql=null for sqlite_autoindex_${table}_${columnIndex}
-                        if (sql != null) {
-                            meta.indexes.add(new SQLiteMaster(type, name, tableName, sql));
-                        }
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("FIXME: unsupported type: " + type);
-                }
-
-                tables.put(name, new SQLiteMaster(type, name, tableName, sql));
-            } while (cursor.moveToNext());
+        for (Map.Entry<String, SQLiteMaster> entry : SQLiteMaster.loadTables(db).entrySet()) {
+            if (tableNames.contains(entry.getKey())) {
+                metadata.put(entry.getKey(), entry.getValue());
+            }
         }
-        cursor.close();
-
-        return tables;
+        return metadata;
     }
 }

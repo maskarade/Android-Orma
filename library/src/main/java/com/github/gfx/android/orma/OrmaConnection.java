@@ -61,7 +61,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean foreignKeys;
 
-    final boolean debug;
+    final boolean tryParsingSql;
 
     final boolean trace;
 
@@ -79,7 +79,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         this.wal = configuration.wal;
         this.typeAdapterRegistry = configuration.typeAdapterRegistry;
 
-        this.debug = configuration.debug;
+        this.tryParsingSql = configuration.tryParsingSql;
         this.trace = configuration.trace;
         this.readOnMainThread = configuration.readOnMainThread;
         this.writeOnMainThread = configuration.readOnMainThread;
@@ -138,13 +138,14 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return typeAdapterRegistry.get(sourceType);
     }
 
+    @Deprecated // because type adapter registry will become global, static object
     public TypeAdapterRegistry getTypeAdapterRegistry() {
         return typeAdapterRegistry;
     }
 
-    public <T> T createModel(Schema<T> schema, ModelFactory<T> builder) {
+    public <T> T createModel(Schema<T> schema, ModelFactory<T> factory) {
         Inserter<T> sth = new Inserter<>(this, schema, schema.getInsertStatement(OnConflict.NONE));
-        long id = sth.execute(builder.call());
+        long id = sth.execute(factory.call());
 
         ColumnDef<T, ?> primaryKey = schema.getPrimaryKey();
         String whereClause = '"' + primaryKey.name + '"' + " = ?";
@@ -216,6 +217,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
         SQLiteDatabase db = getReadableDatabase();
+        trace("begin transaction (non exclusive)", null);
         db.beginTransactionNonExclusive();
 
         try {
@@ -225,6 +227,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
             task.onError(e);
         } finally {
             db.endTransaction();
+            trace("end transaction (non exclusive)", null);
         }
     }
 
@@ -240,6 +243,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     @WorkerThread
     public void transactionSync(@NonNull TransactionTask task) {
         SQLiteDatabase db = getWritableDatabase();
+        trace("begin transaction", null);
         db.beginTransaction();
 
         try {
@@ -249,6 +253,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
             task.onError(e);
         } finally {
             db.endTransaction();
+            trace("end transaction", null);
         }
     }
 
@@ -271,6 +276,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
             dropAllTables(db);
             createAllTables(db);
+
+            db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
             db.close();
@@ -291,7 +298,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     void createAllTables(SQLiteDatabase db) {
         for (Schema<?> schema : schemas) {
-            if (debug) {
+            if (tryParsingSql) {
                 SQLiteParserUtils.parse(schema.getCreateTableStatement());
             }
             execSQL(db, schema.getCreateTableStatement());
@@ -309,10 +316,11 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     void trace(@NonNull String sql, @Nullable Object[] bindArgs) {
         if (trace) {
+            String prefix = "[" + Thread.currentThread().getName() + "] ";
             if (bindArgs == null) {
-                Log.v(TAG + '@' + Thread.currentThread().getName(), sql);
+                Log.v(TAG, prefix + sql);
             } else {
-                Log.v(TAG + '@' + Thread.currentThread().getName(), sql + " - " + Arrays.deepToString(bindArgs));
+                Log.v(TAG, prefix + sql + " - " + Arrays.deepToString(bindArgs));
             }
         }
     }
@@ -342,13 +350,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         long t0 = System.currentTimeMillis();
         if (trace) {
-            Log.v(TAG, "migration start from " + oldVersion + " to " + newVersion);
+            Log.i(TAG, "migration start from " + oldVersion + " to " + newVersion);
         }
 
         migration.start(db, schemas);
 
         if (trace) {
-            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+            Log.i(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
         }
     }
 
@@ -356,13 +364,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         long t0 = System.currentTimeMillis();
         if (trace) {
-            Log.v(TAG, "migration start from " + oldVersion + " to " + newVersion);
+            Log.i(TAG, "migration start from " + oldVersion + " to " + newVersion);
         }
 
         migration.start(db, schemas);
 
         if (trace) {
-            Log.v(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
+            Log.i(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
         }
     }
 }

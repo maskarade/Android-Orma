@@ -1,8 +1,9 @@
 # Orma Migration Module
 
-`orma-migration` is a library which provides migration for `SQLiteDatabase`.
+`orma-migration` is a library which provides migration functionality
+for `SQLiteDatabase`.
 
-This is independent on `orma` module and available for
+This is independent from `orma` module and available for
 any Android `SQLiteDatabase` tools.
 
 ## MigrationEngine
@@ -13,24 +14,97 @@ any Android `SQLiteDatabase` tools.
 
 `SchemaDiffMigration` can make SQL statements from two different schemas.
 
-TBD
+For example, given there is a table:
+
+```sql
+CREATE TABLE Book (name TEXT NOT NULL, author TEXT NOT NULL)
+```
+
+and there is another table:
+
+```sql
+CREATE TABLE Book (name TEXT NOT NULL, author TEXT NOT NULL, published_date DATE)
+```
+
+Then, `SchemaDiffMigration` generates the following statements:
+
+```sql
+CREATE __temp_Book (name TEXT NOT NULL, author TEXT NOT NULL, published_date DATE);
+INSERT INTO __temp_Book (name, author) SELECT name, author FROM Book;
+DROP TABLE Book;
+ALTER TABLE __temp_Book RENAME TO Book;
+```
+
+Because [SQLite's ALTER TABLE](https://www.sqlite.org/lang_altertable.html)
+is limited, `SchemaDiffMigration` always re-creates tables if two tables differs.
 
 ## ManualStepMigration
 
-``ManualStepMigration`` provides a way to handle hand-written migration steps.
+`ManualStepMigration` provides a way to handle hand-written migration steps.
 
-TBD
+[ManualStepMigrationTest.java](src/test/java/com/github/gfx/android/orma/migration/test/ManualStepMigrationTest.java)
+is an example.
 
 ## OrmaMigration
 
 This is a composite class with `ManualStepMigration` and `SchemaDiffMigration`.
 
-## How To Define Migration Steps
+It invokes `ManualStepMigration` at first, and then invokes `SchemaDiffMigration`.
 
-[ManualStepMigrationTest.java](src/test/java/com/github/gfx/android/orma/migration/test/ManualStepMigrationTest.java)
-is an example.
+### How To Define Migration Steps
+
+* Use `OrmaMigration` which has both `ManualStepMigration` and `SchemaDiffMigration` functions
+* Use `BuildConfig.VERSION_CODE` for the database version
+* Hand-written migration steps are saved in `ManualStepMigration.MIGRATION_STEPS_TABLE` for debugging
+
+Here is an example to use `OrmaMigration`:
+
+```java
+int VERSION_2;
+int VERSION_3;
+
+OrmaMigration migration = OrmaMigration.builder(context)
+    // register up() / down() steps
+    .step(VERSION_2, new ManualStepMigration.Step() {
+        @Override
+        public void up(@NonNull ManualStepMigration.Helper helper) {
+            helper.execSQL("... upgrading ...");
+        }
+
+        @Override
+        public void down(@NonNull ManualStepMigration.Helper helper) {
+            helper.execSQL("... downgrading ...");
+        }
+    })
+    // register change(), which is used both in upgrade and downgrade
+    .step(VERSION_3, new ManualStepMigration.ChangeStep() {
+        @Override
+        public void change(@NonNull ManualStepMigration.Helper helper) {
+            Log.(TAG, helper.upgrade ? "upgrade" : "downgrade");
+            helper.execSQL("DROP TABLE foo");
+            helper.execSQL("DROP TABLE bar");
+        }
+    })
+    .build();
+
+// pass migration to OrmaDatabase.Builder#migrationEngine()
+```
+
+You can see migration logs in debug build, which are disabled in release build.
+
+### The Schema Version for SQLiteOpenHelper
+
+`OrmaDatabase` uses `SQLiteOpenHelper` internally, which requires an `int`
+value to control migration. This `int` value is the Schema Version.
+
+By default, `OrmaMigration` uses application's `BuildConfig.VERSION_CODE`
+for release build and `ApplicationInfo#lastUpdateTime` for debug build.
+
+Note that `ManualStepMigration`'s version is independent from the Schema
+Version.
 
 ## See Also
 
-* `SQLite.g4``, is originated from [bkiers/sqlite-parser](https://github.com/bkiers/sqlite-parser)
+* `SQLite.g4` is originated from [bkiers/sqlite-parser](https://github.com/bkiers/sqlite-parser)
 * [CREATE TABLE - SQLite](https://www.sqlite.org/lang_createtable.html)
+* [SQL::Translator::Diff in Perl](https://metacpan.org/pod/SQL::Translator::Diff)

@@ -18,26 +18,23 @@ package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.exception.OrmaException;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 
-import java.util.concurrent.CountDownLatch;
-
 import rx.Observable;
-import rx.Scheduler;
 import rx.Single;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
-public class OrmaAdapterDelegate<Model> {
-
-    int totalCount = 0;
+/**
+ * A helper class to provide Adapter method implementations.
+ *
+ * @param <Model> An Orma model class
+ */
+public class OrmaAdapter<Model> {
 
     final Context context;
 
@@ -45,9 +42,9 @@ public class OrmaAdapterDelegate<Model> {
 
     final Handler handler = new Handler(Looper.getMainLooper());
 
-    final Scheduler background = Schedulers.from(AsyncTask.SERIAL_EXECUTOR);
+    int totalCount = 0;
 
-    public OrmaAdapterDelegate(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
+    public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
         this.relation = relation;
         totalCount = relation.selector().count();
@@ -73,38 +70,23 @@ public class OrmaAdapterDelegate<Model> {
         return (Relation<Model, T>) relation;
     }
 
-    public void runOnUiThreadSync(@NonNull final Runnable task) {
-        if (handler.getLooper().getThread() == Thread.currentThread()) {
-            task.run();
-        } else {
-            final CountDownLatch latch = new CountDownLatch(1);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    latch.countDown();
-                    task.run();
-                }
-            });
-
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                throw new OrmaException(e);
-            }
-        }
+    public void runOnUiThread(@NonNull final Runnable task) {
+        handler.post(task);
     }
 
     @NonNull
     public Model getItem(int position) {
-        return relation.getWithTransactionAsObservable(position)
-                .subscribeOn(background)
-                .toBlocking()
-                .value();
+        return getItemAsObservable(position).toBlocking().value();
     }
 
+    @NonNull
+    public Single<Model> getItemAsObservable(int position) {
+        return relation.getWithTransactionAsObservable(position);
+    }
+
+    @NonNull
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
         return relation.insertWithTransactionAsObservable(factory)
-                .subscribeOn(background)
                 .doOnSuccess(new Action1<Long>() {
                     @Override
                     public void call(Long rowId) {
@@ -113,9 +95,9 @@ public class OrmaAdapterDelegate<Model> {
                 });
     }
 
+    @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
         return relation.deleteWithTransactionAsObservable(item)
-                .subscribeOn(background)
                 .doOnNext(new Action1<Integer>() {
                     @Override
                     public void call(final Integer deletedPosition) {
@@ -124,14 +106,14 @@ public class OrmaAdapterDelegate<Model> {
                 });
     }
 
+    @NonNull
     public Single<Integer> clearAsObservable() {
         return relation.deleter()
                 .executeAsObservable()
-                .subscribeOn(background)
                 .doOnSuccess(new Action1<Integer>() {
                     @Override
                     public void call(Integer deletedItems) {
-                        totalCount = getItemCount();
+                        totalCount = 0;
                     }
                 });
     }

@@ -13,31 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.example.orma;
 
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Table;
+package com.github.gfx.android.orma.test;
 
-import android.support.annotation.Nullable;
+import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
-@Table
-public class Todo {
+import android.support.test.InstrumentationRegistry;
 
-    @PrimaryKey
-    public long id;
+public class OrmaBuilder {
 
-    @Column(indexed = true)
-    public String title;
-
-    @Column
-    @Nullable
-    public String content;
-
-    @Column(indexed = true, defaultExpr = "0")
-    public boolean done;
-
-    @Column(indexed = true)
-    public long createdTimeMillis;
-
+    public static OrmaDatabase create() {
+        return OrmaDatabase.builder(InstrumentationRegistry.getTargetContext())
+                .name(null)
+                .tryParsingSql(false)
+                .build();
+    }
 }

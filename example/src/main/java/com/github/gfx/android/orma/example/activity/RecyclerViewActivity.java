@@ -19,11 +19,13 @@ import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.example.R;
-import com.github.gfx.android.orma.example.databinding.ActivityTodoBinding;
+import com.github.gfx.android.orma.example.databinding.ActivityRecyclerViewBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.widget.OrmaRecyclerViewAdapter;
+
+import org.threeten.bp.ZonedDateTime;
 
 import android.content.Context;
 import android.content.Intent;
@@ -36,24 +38,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class TodoActivity extends AppCompatActivity {
+import rx.schedulers.Schedulers;
+
+public class RecyclerViewActivity extends AppCompatActivity {
 
     OrmaDatabase orma;
 
-    ActivityTodoBinding binding;
+    ActivityRecyclerViewBinding binding;
 
     Adapter adapter;
 
     int number = 0;
 
     public static Intent createIntent(Context context) {
-        return new Intent(context, TodoActivity.class);
+        return new Intent(context, RecyclerViewActivity.class);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_todo);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_recycler_view);
 
         orma = OrmaDatabase.builder(this)
                 .readOnMainThread(AccessThreadConstraint.NONE)
@@ -70,12 +74,14 @@ public class TodoActivity extends AppCompatActivity {
                     public Todo call() {
                         Todo todo = new Todo();
                         number++;
-                        todo.title = "todo #" + number;
-                        todo.content = "content #" + number;
+                        todo.title = "RecyclerView item #" + number;
+                        todo.content = ZonedDateTime.now().toString();
                         todo.createdTimeMillis = System.currentTimeMillis();
                         return todo;
                     }
-                }).subscribe();
+                })
+                        .subscribeOn(Schedulers.io())
+                        .subscribe();
             }
         });
     }
@@ -112,7 +118,9 @@ public class TodoActivity extends AppCompatActivity {
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    removeItemAsObservable(todo).subscribe();
+                    removeItemAsObservable(todo)
+                            .subscribeOn(Schedulers.io())
+                            .subscribe();
                 }
             });
         }

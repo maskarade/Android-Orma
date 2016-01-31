@@ -13,31 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.example.orma;
 
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Table;
+package com.github.gfx.android.orma;
 
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 
-@Table
-public class Todo {
+import java.util.List;
 
-    @PrimaryKey
-    public long id;
+/**
+ * The Orma database handle interface which {@code OrmaDatabase} implements.
+ */
+public interface DatabaseHandle {
 
-    @Column(indexed = true)
-    public String title;
+    @NonNull
+    List<Schema<?>> getSchemas();
 
-    @Column
-    @Nullable
-    public String content;
-
-    @Column(indexed = true, defaultExpr = "0")
-    public boolean done;
-
-    @Column(indexed = true)
-    public long createdTimeMillis;
+    @NonNull
+    OrmaConnection getConnection();
 
 }

@@ -51,7 +51,7 @@ dependencies {
     compile 'org.antlr:antlr4-runtime:4.5.1'
 
     compile 'com.android.support:support-annotations:23.1.1'
-    testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.0.2'
+    testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.0.6'
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
@@ -62,7 +62,7 @@ dependencies {
 
 publish {
     artifactId = 'orma-migration'
-    desc = 'An smart SQLiteDatabase migration engine for Orma'
+    desc = 'A smart SQLiteDatabase migration engine'
 
     def metadata = rootProject.ext.metadata
     groupId = metadata.groupId

@@ -13,31 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.example.orma;
+
+package com.github.gfx.android.orma.test.model;
 
 import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
-import android.support.annotation.Nullable;
+import java.sql.Timestamp;
+import java.util.Date;
 
 @Table
-public class Todo {
+public class ModelWithStorageTypes {
 
-    @PrimaryKey
-    public long id;
+    @Column(storageType = "INTEGER")
+    public Date date;
 
-    @Column(indexed = true)
-    public String title;
-
-    @Column
-    @Nullable
-    public String content;
-
-    @Column(indexed = true, defaultExpr = "0")
-    public boolean done;
-
-    @Column(indexed = true)
-    public long createdTimeMillis;
-
+    @Column(storageType = "DATETIME")
+    public Timestamp timestamp;
 }

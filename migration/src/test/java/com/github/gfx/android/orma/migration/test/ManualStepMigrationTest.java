@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.ManualStepMigration;
+import com.github.gfx.android.orma.migration.test.util.SchemaData;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,7 +44,7 @@ public class ManualStepMigrationTest {
 
     SQLiteDatabase db;
 
-    ManualStepMigration engine;
+    ManualStepMigration migration;
 
     List<StepContext> seq;
 
@@ -51,15 +52,15 @@ public class ManualStepMigrationTest {
     public void setUp() throws Exception {
         db = SQLiteDatabase.create(null);
 
-        engine = new ManualStepMigration(VERSION, true);
-        engine.imprintStep(db, 1, null);
+        migration = new ManualStepMigration(VERSION, true);
+        migration.saveStep(db, 1, null);
 
         seq = new ArrayList<>();
         setupSteps();
     }
 
     void setupSteps() {
-        engine.addStep(2, new ManualStepMigration.Step() {
+        migration.addStep(2, new ManualStepMigration.Step() {
             @Override
             public void up(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
@@ -76,7 +77,7 @@ public class ManualStepMigrationTest {
                 helper.execSQL("DROP TABLE step_2_1");
             }
         });
-        engine.addStep(4, new ManualStepMigration.Step() {
+        migration.addStep(4, new ManualStepMigration.Step() {
             @Override
             public void up(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
@@ -93,7 +94,7 @@ public class ManualStepMigrationTest {
                 helper.execSQL("DROP TABLE step_4_1");
             }
         });
-        engine.addStep(8, new ManualStepMigration.Step() {
+        migration.addStep(8, new ManualStepMigration.Step() {
             @Override
             public void up(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
@@ -111,7 +112,7 @@ public class ManualStepMigrationTest {
             }
         });
 
-        engine.addStep(16, new ManualStepMigration.Step() {
+        migration.addStep(16, new ManualStepMigration.Step() {
             @Override
             public void up(@NonNull ManualStepMigration.Helper helper) {
                 seq.add(new StepContext(helper.version, helper.upgrade));
@@ -137,16 +138,16 @@ public class ManualStepMigrationTest {
 
     @Test
     public void testIdempotenceWithNop() throws Exception {
-        engine.start(db, new ArrayList<SchemaData>());
-        engine.start(db, new ArrayList<SchemaData>());
-        engine.start(db, new ArrayList<SchemaData>());
+        migration.start(db, new ArrayList<SchemaData>());
+        migration.start(db, new ArrayList<SchemaData>());
+        migration.start(db, new ArrayList<SchemaData>());
     }
 
     @Test
     public void upgradeFull() throws Exception {
-        engine.upgrade(db, 1, 100);
+        migration.upgrade(db, 1, 100);
 
-        assertThat(engine.getDbVersion(db), is(16));
+        assertThat(migration.getDbVersion(db), is(16));
 
         assertThat(seq.size(), is(4));
 
@@ -165,9 +166,9 @@ public class ManualStepMigrationTest {
 
     @Test
     public void upgradeBoundary() throws Exception {
-        engine.upgrade(db, 2, 8);
+        migration.upgrade(db, 2, 8);
 
-        assertThat(engine.getDbVersion(db), is(8));
+        assertThat(migration.getDbVersion(db), is(8));
 
         assertThat(seq.size(), is(2));
 
@@ -180,12 +181,12 @@ public class ManualStepMigrationTest {
 
     @Test
     public void downgradeFull() throws Exception {
-        engine.upgrade(db, 1, 100);
+        migration.upgrade(db, 1, 100);
         seq.clear();
 
-        engine.downgrade(db, 100, 1);
+        migration.downgrade(db, 100, 1);
 
-        assertThat(engine.getDbVersion(db), lessThan(4));
+        assertThat(migration.getDbVersion(db), lessThan(4));
 
         assertThat(seq.size(), is(4));
 
@@ -204,12 +205,12 @@ public class ManualStepMigrationTest {
 
     @Test
     public void downgradeBoundary() throws Exception {
-        engine.upgrade(db, 1, 100);
+        migration.upgrade(db, 1, 100);
         seq.clear();
 
-        engine.downgrade(db, 8, 2);
+        migration.downgrade(db, 8, 2);
 
-        assertThat(engine.getDbVersion(db), lessThan(4));
+        assertThat(migration.getDbVersion(db), lessThan(4));
 
         assertThat(seq.size(), is(2));
 
@@ -223,10 +224,10 @@ public class ManualStepMigrationTest {
     @Test
     public void upgradeAndDowngrade() throws Exception {
         {
-            engine = new ManualStepMigration(100, true);
+            migration = new ManualStepMigration(100, true);
             setupSteps();
-            engine.imprintStep(db, 1, null);
-            engine.start(db, new ArrayList<SchemaData>());
+            migration.saveStep(db, 1, null);
+            migration.start(db, new ArrayList<SchemaData>());
 
             assertThat(seq.size(), is(4));
 
@@ -246,9 +247,9 @@ public class ManualStepMigrationTest {
         seq.clear();
 
         {
-            engine = new ManualStepMigration(1, true);
+            migration = new ManualStepMigration(1, true);
             setupSteps();
-            engine.start(db, new ArrayList<SchemaData>());
+            migration.start(db, new ArrayList<SchemaData>());
 
             assertThat(seq.size(), is(4));
 

@@ -22,8 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -34,13 +32,9 @@ public class ReservedWordsTest {
 
     OrmaDatabase db;
 
-    Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
-    }
-
     @Before
     public void setUp() throws Exception {
-        db = OrmaDatabase.builder(getContext()).name(null).build();
+        db = OrmaBuilder.create();
     }
 
     @Test

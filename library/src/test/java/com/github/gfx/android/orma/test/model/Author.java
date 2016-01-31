@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.annotation.Table;
 
 import android.support.annotation.Nullable;
 
+// A class that has the String primary key
 @Table
 public class Author {
 
