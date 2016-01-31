@@ -47,8 +47,8 @@ task cleanupAntlrTemporaryFiles(type: Delete, dependsOn: generateParserSources) 
 tasks.preBuild.dependsOn(cleanupAntlrTemporaryFiles)
 
 dependencies {
-    antlr 'org.antlr:antlr4:4.5.1'
-    compile 'org.antlr:antlr4-runtime:4.5.1'
+    antlr 'com.tunnelvisionlabs:antlr4:4.5'
+    compile 'com.tunnelvisionlabs:antlr4-runtime:4.5'
 
     compile 'com.android.support:support-annotations:23.1.1'
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.0.6'
