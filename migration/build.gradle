@@ -48,7 +48,10 @@ tasks.preBuild.dependsOn(cleanupAntlrTemporaryFiles)
 
 dependencies {
     antlr 'com.tunnelvisionlabs:antlr4:4.5'
-    compile 'com.tunnelvisionlabs:antlr4-runtime:4.5'
+    compile('com.tunnelvisionlabs:antlr4-runtime:4.5') {
+        exclude group: 'com.tunnelvisionlabs', module: 'antlr4-annotations'
+    }
+    provided 'com.tunnelvisionlabs:antlr4-annotations:4.5'
 
     compile 'com.android.support:support-annotations:23.1.1'
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.0.6'
