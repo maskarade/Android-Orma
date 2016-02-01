@@ -452,15 +452,16 @@ Orma models are able to have embedded objects with **type adapters**.
 
 ### Static Type Adapters
 
-Static type adapters are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options.
+Static type adapters are used to serialize and deserialize a object on inserting a model or selecting a model, respectively.
+
+They are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options:
 
 ```java
 @StaticTypeAdapter(
         targetType = Foo.class,
         serializedType = String.class
 )
-public class IntTuple2Adapter {
-
+public class FooAdapter {
     public static String serialize(@NonNull Foo source) {
         return source.toStrng();
     }
@@ -472,6 +473,21 @@ public class IntTuple2Adapter {
 }
 
 ```
+
+Target type must be integers, floating point numbers, `boolean`, `String`, or `byte[]`.
+
+Each target type has a corresponding SQLite storage type:
+
+| Java Type | SQLite Type |
+|:---------:|:-----------:|
+| int       | INTEGER     |
+| short     | INTEGER     |
+| long      | INTEGER     |
+| boolean   | INTEGER     |
+| float     | REAL        |
+| double    | REAL        |
+| String    | TEXT        |
+| byte[]    | BLOB        |
 
 ### Dynamic Type Adapters
 
@@ -499,17 +515,21 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .build();
 ```
 
-### Built-In Type Adapters
+## Built-In Type Adapters
 
-There are a lot of built-in type adapter provided by default, which include:
+There are built-in type adapters:
 
-* `StringListAdapter` for `List<String>`
-* `StringSetAdapter` for `Set<String>`
-* `DateAdapter` for `Date`
-* `UriAdapter` for `Uri`
 
-See [adapter/](library/src/main/java/com/github/gfx/android/orma/adapter)
-for all the adapters.
+* `java.math.BigDecimal`
+* `java.math.BigInteger`
+* `java.nio.ByteBuffer`
+* `java.util.Currency`
+* `java.util.List<String>`
+* `java.util.Set<String>`
+* `java.util.UUID`
+* `android.net.Uri`
+
+More classes? Patches welcome!
 
 ## Migration
 
