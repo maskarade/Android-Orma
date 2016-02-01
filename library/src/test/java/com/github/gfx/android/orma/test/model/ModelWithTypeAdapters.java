@@ -18,12 +18,14 @@ package com.github.gfx.android.orma.test.model;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
+import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
@@ -69,6 +71,12 @@ public class ModelWithTypeAdapters {
     @Column(indexed = true)
     public Currency currency;
 
+    @Column(indexed = true)
+    public ByteBuffer byteBuffer;
+
+    @Column(indexed = true)
+    public IntTuple2 intTuple2;
+
     @Nullable
     @Column(indexed = true)
     public List<String> nullableList;
@@ -84,4 +92,12 @@ public class ModelWithTypeAdapters {
     @Nullable
     @Column(indexed = true)
     public Date nullableDate;
+
+    @Column(indexed = true)
+    @Nullable
+    public IntTuple2 nullableIntTuple2;
+
+    @Column(indexed = true)
+    @Nullable
+    public ByteBuffer nullableByteBuffer;
 }

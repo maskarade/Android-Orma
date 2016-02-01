@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class StringListAdapter extends AbstractTypeAdapter<List<String>> {
 
     @NonNull

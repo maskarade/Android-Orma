@@ -39,6 +39,7 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
     @Nullable
     String name;
 
+    @SuppressWarnings("deprecated")
     TypeAdapterRegistry typeAdapterRegistry;
 
     MigrationEngine migrationEngine;
@@ -96,6 +97,8 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
      * @param typeAdapters Custom type adapters to add
      * @return the receiver itself
      */
+    @Deprecated
+    @SuppressWarnings("deprecated")
     public T typeAdapters(@NonNull TypeAdapter<?>... typeAdapters) {
         if (typeAdapterRegistry == null) {
             typeAdapterRegistry = new TypeAdapterRegistry();
@@ -188,6 +191,7 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
         return (T) this;
     }
 
+    @SuppressWarnings("deprecated")
     protected T fillDefaults() {
 
         if (migrationEngine == null) {

@@ -23,6 +23,12 @@ import android.support.annotation.Nullable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+/**
+ * Deprecated; use {@link com.github.gfx.android.orma.annotation.StaticTypeAdapter} instead.
+ *
+ * @param <SourceType> the target type
+ */
+@Deprecated
 public abstract class AbstractTypeAdapter<SourceType> implements TypeAdapter<SourceType> {
 
     @NonNull

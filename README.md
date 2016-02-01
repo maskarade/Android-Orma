@@ -450,9 +450,50 @@ class Book {
 
 Orma models are able to have embedded objects with **type adapters**.
 
-Type adapters serializes and deserializes custom classes, for example as a JSON format.
+### Static Type Adapters
 
-If you use type adapters, you can add them to `OrmaDatabase`:
+Static type adapters are used to serialize and deserialize a object on inserting a model or selecting a model, respectively.
+
+They are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options:
+
+```java
+@StaticTypeAdapter(
+        targetType = Foo.class,
+        serializedType = String.class
+)
+public class FooAdapter {
+    public static String serialize(@NonNull Foo source) {
+        return source.toStrng();
+    }
+
+    @NonNull
+    public static Foo deserialize(long serialized) {
+        return new Foo(serialized);
+    }
+}
+
+```
+
+Target type must be integers, floating point numbers, `boolean`, `String`, or `byte[]`.
+
+Each target type has a corresponding SQLite storage type:
+
+| Java Type | SQLite Type |
+|:---------:|:-----------:|
+| int       | INTEGER     |
+| short     | INTEGER     |
+| long      | INTEGER     |
+| boolean   | INTEGER     |
+| float     | REAL        |
+| double    | REAL        |
+| String    | TEXT        |
+| byte[]    | BLOB        |
+
+### Dynamic Type Adapters
+
+**This is deprecated and will be removed in v2.0.**
+
+If you use type adapters, you can add type serializer instances to `OrmaDatabase`.
 
 ```java
 class FooAdapter extends AbstractTypeAdapter<Foo> {
@@ -474,19 +515,21 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .build();
 ```
 
-**The interface is experimental and are likely to change in v2.0.**
+## Built-In Type Adapters
 
-### Built-In Type Adapters
+There are built-in type adapters:
 
-There are a lot of built-in type adapter provided by default, which include:
 
-* `StringListAdapter` for `List<String>`
-* `StringSetAdapter` for `Set<String>`
-* `DateAdapter` for `Date`
-* `UriAdapter` for `Uri`
+* `java.math.BigDecimal`
+* `java.math.BigInteger`
+* `java.nio.ByteBuffer`
+* `java.util.Currency`
+* `java.util.List<String>`
+* `java.util.Set<String>`
+* `java.util.UUID`
+* `android.net.Uri`
 
-See [adapter/](library/src/main/java/com/github/gfx/android/orma/adapter)
-for all the adapters.
+More classes? Patches welcome!
 
 ## Migration
 

@@ -125,10 +125,9 @@ public class UpdaterWriter extends BaseWriter {
                                         ParameterSpec.builder(r.modelType, column.name)
                                                 .build()
                                 )
-                                .addStatement("contents.put($S, $L.$L)",
+                                .addStatement("contents.put($S, $L)",
                                         sql.quoteIdentifier(column.columnName),
-                                        column.name,
-                                        modelSchema.getPrimaryKey().buildGetColumnExpr())
+                                        modelSchema.getPrimaryKey().buildGetColumnExpr(column.name))
                                 .addStatement("return this")
                                 .build()
                 );

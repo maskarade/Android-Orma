@@ -75,7 +75,7 @@ public class ConditionQueryHelpers {
                         associatedSchema.getElement());
             }
             serializedFieldExpr = CodeBlock.builder()
-                    .add("$L.$L /* primary key */", paramSpec.name, primaryKey.buildGetColumnExpr())
+                    .add("$L /* primary key */", primaryKey.buildGetColumnExpr(paramSpec.name))
                     .build();
         } else {
             serializedFieldExpr = column.buildSerializeExpr("conn", paramSpec.name);

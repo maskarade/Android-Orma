@@ -37,7 +37,8 @@ public abstract class ColumnDef<Model, T> {
 
     public final String name;
 
-    public final Type type;
+    @Deprecated
+    public final Type type; // TODO: will be removed in v2.0
 
     public final String storageType;
 

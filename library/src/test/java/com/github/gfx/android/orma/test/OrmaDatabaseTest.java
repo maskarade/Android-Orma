@@ -17,8 +17,6 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.adapter.DateAdapter;
-import com.github.gfx.android.orma.adapter.UriAdapter;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
@@ -76,7 +74,6 @@ public class OrmaDatabaseTest {
     public void testCreateInstance() throws Exception {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
                 .name(NAME)
-                .typeAdapters(new UriAdapter(), new DateAdapter())
                 .readOnMainThread(AccessThreadConstraint.NONE)
                 .writeOnMainThread(AccessThreadConstraint.NONE)
                 .tryParsingSql(false)

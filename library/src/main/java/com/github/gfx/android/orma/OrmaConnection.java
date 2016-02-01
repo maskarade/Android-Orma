@@ -65,6 +65,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean trace;
 
+    @SuppressWarnings("deprecated")
+    @Deprecated
     final TypeAdapterRegistry typeAdapterRegistry;
 
     final AccessThreadConstraint readOnMainThread;
@@ -133,12 +135,20 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return super.getReadableDatabase();
     }
 
+    @Deprecated
+    @SuppressWarnings("deprecated")
     @NonNull
     public <SourceType> TypeAdapter<SourceType> getTypeAdapter(Type sourceType) {
         return typeAdapterRegistry.get(sourceType);
     }
 
-    @Deprecated // because type adapter registry will become global, static object
+    /**
+     * Use {@link com.github.gfx.android.orma.annotation.StaticTypeAdapter} instead.
+     *
+     * @return the instance of TypeAdapterRegistry
+     */
+    @Deprecated
+    @SuppressWarnings("deprecated")
     public TypeAdapterRegistry getTypeAdapterRegistry() {
         return typeAdapterRegistry;
     }
