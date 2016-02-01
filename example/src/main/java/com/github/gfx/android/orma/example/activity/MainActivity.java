@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity
         Todo todo = new Todo();
         todo.title = "buy";
         todo.content = "milk banana apple";
-        todo.createdTimeMillis = new Date();
+        todo.createdTime = new Date();
         orma.insertIntoTodo(todo);
 
         // read

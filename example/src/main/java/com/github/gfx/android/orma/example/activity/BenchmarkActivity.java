@@ -225,7 +225,7 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                             todo.title = titlePrefix + i;
                             todo.content = contentPrefix + i;
-                            todo.createdTimeMillis = new Date(now);
+                            todo.createdTime = new Date(now);
 
                             statement.execute(todo);
                         }
@@ -255,7 +255,7 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                             todo.setTitle(titlePrefix + i);
                             todo.setContent(contentPrefix + i);
-                            todo.setCreatedTimeMillis(now);
+                            todo.setCreatedTime(new Date(now));
                         }
                     }
                 });
@@ -275,7 +275,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 db.beginTransaction();
 
                 SQLiteStatement inserter = db.compileStatement(
-                        "INSERT INTO todo (title, content, done, createdTimeMillis) VALUES (?, ?, ?, ?)");
+                        "INSERT INTO todo (title, content, done, createdTime) VALUES (?, ?, ?, ?)");
 
                 long now = System.currentTimeMillis();
 
@@ -284,7 +284,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                             titlePrefix + i, // title
                             contentPrefix + i, // content
                             "0", // done
-                            String.valueOf(now), // createdTimeMillis
+                            String.valueOf(now), // createdTime
                     });
                     inserter.executeInsert();
                 }
@@ -306,13 +306,16 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 final AtomicInteger count = new AtomicInteger();
 
-                Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeMillisAsc();
+                Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeAsc();
 
                 for (Todo todo : todos) {
                     @SuppressWarnings("unused")
                     String title = todo.title;
                     @SuppressWarnings("unused")
                     String content = todo.content;
+                    @SuppressWarnings("unused")
+                    Date createdTime = todo.createdTime;
+
                     count.incrementAndGet();
                 }
 
@@ -335,12 +338,15 @@ public class BenchmarkActivity extends AppCompatActivity {
                 AtomicInteger count = new AtomicInteger();
 
                 RealmResults<RealmTodo> results = realm.allObjectsSorted(
-                        RealmTodo.class, "createdTimeMillis", Sort.ASCENDING);
-                for (@SuppressWarnings("unused") RealmTodo todo : results) {
+                        RealmTodo.class, "createdTime", Sort.ASCENDING);
+                for (RealmTodo todo : results) {
                     @SuppressWarnings("unused")
                     String title = todo.getTitle();
                     @SuppressWarnings("unused")
                     String content = todo.getContent();
+                    @SuppressWarnings("unused")
+                    Date createdTime = todo.getCreatedTime();
+
                     count.incrementAndGet();
                 }
                 if (results.size() != count.get()) {
@@ -363,16 +369,22 @@ public class BenchmarkActivity extends AppCompatActivity {
                 SQLiteDatabase db = hw.getReadableDatabase();
                 Cursor cursor = db.query(
                         "todo",
-                        new String[]{"id, title, content, done, createdTimeMillis"},
-                        null, null, null, null, "createdTimeMillis ASC" // whereClause, whereArgs, groupBy, having, orderBy
+                        new String[]{"id, title, content, done, createdTime"},
+                        null, null, null, null, "createdTime ASC" // whereClause, whereArgs, groupBy, having, orderBy
                 );
 
                 if (cursor.moveToFirst()) {
+                    int titleIndex = cursor.getColumnIndexOrThrow("title");
+                    int contentIndex = cursor.getColumnIndexOrThrow("content");
+                    int createdTimeIndex = cursor.getColumnIndexOrThrow("createdTime");
                     do {
                         @SuppressWarnings("unused")
-                        String title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
+                        String title = cursor.getString(titleIndex);
                         @SuppressWarnings("unused")
-                        String content = cursor.getString(cursor.getColumnIndexOrThrow("content"));
+                        String content = cursor.getString(contentIndex);
+                        @SuppressWarnings("unused")
+                        Date createdTime = new Date(cursor.getLong(createdTimeIndex));
+
                         count.incrementAndGet();
                     } while (cursor.moveToNext());
                 }
