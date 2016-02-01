@@ -21,6 +21,8 @@ import com.github.gfx.android.orma.annotation.Table;
 
 import android.support.annotation.Nullable;
 
+import java.util.Date;
+
 @Table
 public class Todo {
 
@@ -34,10 +36,10 @@ public class Todo {
     @Nullable
     public String content;
 
-    @Column(indexed = true, defaultExpr = "0")
+    @Column(indexed = true)
     public boolean done;
 
     @Column(indexed = true)
-    public long createdTimeMillis;
+    public Date createdTime;
 
 }

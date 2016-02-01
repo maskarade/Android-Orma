@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma.example.realm;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 import io.realm.annotations.Index;
 
@@ -30,7 +32,7 @@ public class RealmTodo extends RealmObject {
     private boolean done;
 
     @Index
-    private long createdTimeMillis;
+    private Date createdTime;
 
     public RealmTodo() {
     }
@@ -67,11 +69,11 @@ public class RealmTodo extends RealmObject {
         this.done = done;
     }
 
-    public long getCreatedTimeMillis() {
-        return createdTimeMillis;
+    public Date getCreatedTime() {
+        return createdTime;
     }
 
-    public void setCreatedTimeMillis(long createdTimeMillis) {
-        this.createdTimeMillis = createdTimeMillis;
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
     }
 }
