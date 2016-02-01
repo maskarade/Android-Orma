@@ -8,6 +8,16 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## NEXT
+
+### New Features
+
+* Introduce Static type adapters by `@StaticTypeAdapter` (#131)
+  * The best-matched SQLite storage type is adapted
+    * e.g. `INTEGER` for `java.util.Date`, `BLOB` for `java.nio.ByteBuffer`
+  * Custom binary classes (e.g. `ByteBuffer`, `Bitmap`) are handled correctly
+    * v1.0.0 can't use binary objects except for `byte[]`
+
 ## v1.1.3 - 2016/01/31
 
 ### Bug Fixes
