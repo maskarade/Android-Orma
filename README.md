@@ -9,8 +9,9 @@ generating helper classes at compile time with **annotation processing**, inspir
 Orma has the following features:
 
 * Fast as hand-written code with `SQLiteOpenHelper`
-* Annotation-based schema definitions with POJO classes
-* Semi-automatic migration, as well as hand-written migration
+* Annotation-based schema definitions with POJO model classes
+* Semi-automatic migration, as well as hand-written, step-by-step migration
+* Code generation by annotation processing
 
 ## Getting Started
 
@@ -371,7 +372,7 @@ public class KeyValuePair {
 }
 ```
 
-Can be declared with custom names:
+It can be declared with custom names:
 
 ```java
 @Table
@@ -445,14 +446,14 @@ class Book {
 }
 ```
 
-
 ## Type Adapters
 
 Orma models are able to have embedded objects with **type adapters**.
 
 ### Static Type Adapters
 
-Static type adapters are used to serialize and deserialize a object on inserting a model or selecting a model, respectively.
+Static type adapters are used to adapt a class to an SQLite storage type, which
+are resolved in compile time.
 
 They are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options.
 
@@ -465,10 +466,13 @@ For example, here is a static type adapter for [LatLng](https://developers.googl
 )
 public class LatLngAdapter {
 
+    // SerializedType serialize(TargetType source)
+    @NonNull
     public static String serialize(@NonNull LatLng source) {
         return source.latitude + "," + source.longitude
     }
 
+    // TargetType deserialize(SerializedType serialized)
     @NonNull
     public static Location deserialize(@NonNull String serialized) {
         String[] values = serialized.split(",");
@@ -554,10 +558,6 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
 ```
 
 See [migration/README.md](migration/README.md) for details.
-
-## Kotlin Support
-
-Orma works with Kotlin. Yey!
 
 ## Example
 
