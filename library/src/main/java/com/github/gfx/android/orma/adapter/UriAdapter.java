@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.adapter;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+@Deprecated
 public class UriAdapter extends AbstractTypeAdapter<Uri> {
 
     @NonNull

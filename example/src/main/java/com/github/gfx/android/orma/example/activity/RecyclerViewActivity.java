@@ -38,6 +38,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Date;
+
 import rx.schedulers.Schedulers;
 
 public class RecyclerViewActivity extends AppCompatActivity {
@@ -63,7 +65,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
                 .readOnMainThread(AccessThreadConstraint.NONE)
                 .build();
 
-        adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeMillisAsc());
+        adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
 
         binding.fab.setOnClickListener(new View.OnClickListener() {
@@ -76,7 +78,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
                         number++;
                         todo.title = "RecyclerView item #" + number;
                         todo.content = ZonedDateTime.now().toString();
-                        todo.createdTimeMillis = System.currentTimeMillis();
+                        todo.createdTime = new Date();
                         return todo;
                     }
                 })

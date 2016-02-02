@@ -25,6 +25,7 @@ import com.github.gfx.android.orma.test.model.ModelWithDefaults;
 import com.github.gfx.android.orma.test.model.ModelWithPrimitives;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +38,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
@@ -111,7 +113,7 @@ public class ModelSpecTest {
     }
 
     @Test
-    public void testObjectMapping() throws Exception {
+    public void testModelWithTypeAdapters() throws Exception {
         final long now = System.currentTimeMillis();
         final UUID uuid = UUID.randomUUID();
         final BigDecimal bd = BigDecimal.valueOf(Long.MAX_VALUE).add(BigDecimal.ONE);
@@ -136,6 +138,8 @@ public class ModelSpecTest {
                 model.bigDecimal = bd;
                 model.bigInteger = bi;
                 model.currency = Currency.getInstance("JPY");
+                model.intTuple2 = new IntTuple2(-13, 17);
+                model.byteBuffer = ByteBuffer.wrap(new byte[]{0, 1, 2, 3});
                 return model;
             }
         });
@@ -151,6 +155,13 @@ public class ModelSpecTest {
         assertThat(model.bigDecimal, is(bd));
         assertThat(model.bigInteger, is(bi));
         assertThat(model.currency, is(Currency.getInstance("JPY")));
+        assertThat(model.intTuple2, is(new IntTuple2(-13, 17)));
+        assertThat(model.byteBuffer, is(ByteBuffer.wrap(new byte[]{0, 1, 2, 3})));
+
+        // nullable
+        assertThat(model.nullableUri, is(nullValue())); // TEXT
+        assertThat(model.nullableIntTuple2, is(nullValue())); // INTEGER
+        assertThat(model.nullableByteBuffer, is(nullValue())); // BLOB
     }
 
     @Test
@@ -354,5 +365,4 @@ public class ModelSpecTest {
         assertThat(db.selectFromModelWithConflictResolutions().count(), is(1));
         assertThat(db.selectFromModelWithConflictResolutions().value().primaryKeyOrIgnore, is(11L));
     }
-
 }

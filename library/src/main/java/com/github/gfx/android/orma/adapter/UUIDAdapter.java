@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 
 import java.util.UUID;
 
+@Deprecated
 public class UUIDAdapter extends AbstractTypeAdapter<UUID> {
 
     @NonNull

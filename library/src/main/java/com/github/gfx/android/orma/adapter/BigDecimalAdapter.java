@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 
 import java.math.BigDecimal;
 
+@Deprecated
 public class BigDecimalAdapter extends AbstractTypeAdapter<BigDecimal> {
 
     @NonNull

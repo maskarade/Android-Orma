@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.adapter;
+
+package com.github.gfx.android.orma.test.type_adapter;
+
+import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
+import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 
 import android.support.annotation.NonNull;
 
-import java.util.Currency;
+@StaticTypeAdapter(
+        targetType = IntTuple2.class,
+        serializedType = long.class
+)
+public class IntTuple2Adapter {
 
-@Deprecated
-public class CurrencyAdapter extends AbstractTypeAdapter<Currency> {
-
-    @NonNull
-    @Override
-    public String serialize(@NonNull Currency source) {
-        return source.getCurrencyCode();
+    public static long serialize(@NonNull IntTuple2 tuple) {
+        return ((long) tuple.first << 32) | (long) tuple.second;
     }
 
     @NonNull
-    @Override
-    public Currency deserialize(@NonNull String serialized) {
-        return Currency.getInstance(serialized);
+    public static IntTuple2 deserialize(long serialized) {
+        return new IntTuple2((int) (serialized >> 32), (int) serialized);
     }
 }

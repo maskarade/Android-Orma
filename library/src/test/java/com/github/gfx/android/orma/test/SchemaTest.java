@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithStorageTypes_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters_Schema;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.PublisherSchema;
 
@@ -97,4 +98,14 @@ public class SchemaTest {
                 "CREATE TABLE \"ModelWithStorageTypes\" (\"date\" INTEGER NOT NULL, \"timestamp\" DATETIME NOT NULL)"
         ));
     }
+
+    @Test
+    public void testStaticTypeAdapterStorageTypes() throws Exception {
+        assertThat(ModelWithTypeAdapters_Schema.date.storageType, is("INTEGER"));
+        assertThat(ModelWithTypeAdapters_Schema.sqlDate.storageType, is("TEXT"));
+        assertThat(ModelWithTypeAdapters_Schema.sqlTime.storageType, is("TEXT"));
+        assertThat(ModelWithTypeAdapters_Schema.sqlTimestamp.storageType, is("TEXT"));
+        assertThat(ModelWithTypeAdapters_Schema.intTuple2.storageType, is("INTEGER"));
+    }
+
 }

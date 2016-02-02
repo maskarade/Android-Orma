@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class TypeAdapterRegistry {
 
     final Map<Type, TypeAdapter<?>> adapters = new HashMap<>();

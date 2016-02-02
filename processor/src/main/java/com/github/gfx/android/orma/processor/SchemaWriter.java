@@ -152,7 +152,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotation(Specs.nonNullAnnotationSpec())
                         .build());
         if (c.element != null) {
-            getBuilder.addStatement("return model.$L", c.buildGetColumnExpr());
+            getBuilder.addStatement("return $L", c.buildGetColumnExpr("model"));
         } else {
             getBuilder.addStatement("throw new $T($S)", Types.NoValueException, "Missing @PrimaryKey definition");
         }
@@ -424,27 +424,6 @@ public class SchemaWriter extends BaseWriter {
         return methodSpecs;
     }
 
-    private CodeBlock buildGetField() {
-        CodeBlock.Builder builder = CodeBlock.builder();
-
-        builder.beginControlFlow("switch (column.name)");
-
-        for (ColumnDefinition column : schema.getColumns()) {
-            if (column.type.isPrimitive()) {
-                builder.addStatement("case $S: return ($T)($T)model.$L",
-                        column.columnName, Types.T, column.getBoxType(), column.buildGetColumnExpr());
-            } else {
-                builder.addStatement("case $S: return ($T)model.$L",
-                        column.columnName, Types.T, column.buildGetColumnExpr());
-            }
-        }
-
-        builder.addStatement("default: throw new $T()", AssertionError.class);
-        builder.endControlFlow();
-
-        return builder.build();
-    }
-
     private CodeBlock buildConvertToArgs() {
         CodeBlock.Builder builder = CodeBlock.builder();
 
@@ -453,30 +432,16 @@ public class SchemaWriter extends BaseWriter {
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
-            TypeName type = c.getUnboxType();
             AssociationDefinition r = c.getAssociation();
 
-            if (type.equals(TypeName.BOOLEAN)) {
-                if (c.nullable) {
-                    builder.beginControlFlow("if (model.$L != null)", c.buildGetColumnExpr());
-                }
-                builder.addStatement("args[$L] = model.$L ? 1 : 0", i, c.buildGetColumnExpr());
-                if (c.nullable) {
-                    builder.endControlFlow();
-                }
-            } else if (Types.looksLikeIntegerType(type)) {
-                builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
-            } else if (Types.looksLikeFloatType(type)) {
-                builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
-            } else if (type.equals(Types.ByteArray)) {
-                builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
-            } else if (type.equals(Types.String)) {
-                builder.addStatement("args[$L] = model.$L", i, c.buildGetColumnExpr());
-            } else if (r != null && r.associationType.equals(Types.SingleAssociation)) {
-                builder.addStatement("args[$L] = model.$L.getId()", i, c.buildGetColumnExpr());
+            CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+
+            if (r != null && r.associationType.equals(Types.SingleAssociation)) {
+                builder.addStatement("args[$L] = $L.getId()", i, c.buildGetColumnExpr("model"));
+            } else if (c.getSerializedType().equals(TypeName.BOOLEAN)) {
+                builder.addStatement("args[$L] = $L ? 1 : 0", i, rhsExpr);
             } else {
-                builder.addStatement("args[$L] = $L",
-                        i, c.buildSerializeExpr("conn", "model." + c.buildGetColumnExpr()));
+                builder.addStatement("args[$L] = $L", i, rhsExpr);
             }
         }
 
@@ -492,32 +457,35 @@ public class SchemaWriter extends BaseWriter {
         for (int i = 0; i < columns.size(); i++) {
             int n = i + 1; // bind index starts 1
             ColumnDefinition c = columns.get(i);
-            TypeName type = c.getUnboxType();
+            TypeName serializedType = c.getSerializedType();
             AssociationDefinition r = c.getAssociation();
-            boolean nullable = !c.getType().isPrimitive() && c.nullable;
 
-            if (nullable) {
-                builder.beginControlFlow("if (model.$L != null)", c.buildGetColumnExpr());
+            if (c.isNullableInJava()) {
+                builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
             }
 
-            if (type.equals(TypeName.BOOLEAN)) {
-                builder.addStatement("statement.bindLong($L, model.$L ? 1 : 0)", n, c.buildGetColumnExpr());
-            } else if (Types.looksLikeIntegerType(type)) {
-                builder.addStatement("statement.bindLong($L, model.$L)", n, c.buildGetColumnExpr());
-            } else if (Types.looksLikeFloatType(type)) {
-                builder.addStatement("statement.bindDouble($L, model.$L)", n, c.buildGetColumnExpr());
-            } else if (type.equals(Types.ByteArray)) {
-                builder.addStatement("statement.bindBlob($L, model.$L)", n, c.buildGetColumnExpr());
-            } else if (type.equals(Types.String)) {
-                builder.addStatement("statement.bindString($L, model.$L)", n, c.buildGetColumnExpr());
+            CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+
+            if (serializedType.equals(TypeName.BOOLEAN)) {
+                builder.addStatement("statement.bindLong($L, $L ? 1 : 0)", n, rhsExpr);
+            } else if (Types.looksLikeIntegerType(serializedType)) {
+                builder.addStatement("statement.bindLong($L, $L)", n, rhsExpr);
+            } else if (Types.looksLikeFloatType(serializedType)) {
+                builder.addStatement("statement.bindDouble($L, $L)", n, rhsExpr);
+            } else if (serializedType.equals(Types.ByteArray)) {
+                builder.addStatement("statement.bindBlob($L, $L)", n, rhsExpr);
+            } else if (serializedType.equals(Types.String)) {
+                builder.addStatement("statement.bindString($L, $L)", n, rhsExpr);
             } else if (r != null && r.associationType.equals(Types.SingleAssociation)) {
-                builder.addStatement("statement.bindLong($L, model.$L.getId())", n, c.buildGetColumnExpr());
+                builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
             } else {
-                builder.addStatement("statement.bindString($L, $L)",
-                        n, c.buildSerializeExpr("conn", "model." + c.buildGetColumnExpr()));
+                builder.addStatement("statement.bindString($L, $L)", n, rhsExpr);
+
+                // TODO: throw the following errors in v2.0
+                // throw new ProcessingException("No storage method found for " + serializedType, c.element);
             }
 
-            if (nullable) {
+            if (c.isNullableInJava()) {
                 builder.endControlFlow();
                 builder.beginControlFlow("else");
                 builder.addStatement("statement.bindNull($L)", n);
@@ -547,18 +515,14 @@ public class SchemaWriter extends BaseWriter {
                                 r.associationType, context.getSchemaInstanceExpr(r.modelType), i);
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             } else {
-                CodeBlock.Builder getRhsExpr = CodeBlock.builder();
-                if (Types.needsTypeAdapter(type)) {
-                    getRhsExpr.add("$L.$L($L)",
-                            c.buildGetTypeAdapter("conn"),
-                            c.nullable ? "deserializeNullable" : "deserialize",
-                            cursorGetter(c, i));
-                } else {
-                    getRhsExpr.add("$L",
-                            cursorGetter(c, i));
+                if (c.isNullableInSQL()) {
+                    builder.beginControlFlow("if (!cursor.isNull($L))", i);
                 }
-
-                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
+                CodeBlock getRhsExpr = c.buildDeserializeExpr("conn", cursorGetter(c, i));
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr));
+                if (c.isNullableInSQL()) {
+                    builder.endControlFlow();
+                }
             }
         }
         return builder.build();
@@ -597,7 +561,7 @@ public class SchemaWriter extends BaseWriter {
     }
 
     private String cursorGetter(ColumnDefinition column, int position) {
-        TypeName type = column.getUnboxType();
+        TypeName type = column.getSerializedType();
         if (type.equals(TypeName.BOOLEAN)) {
             return "cursor.getLong(" + position + ") != 0";
         } else if (type.equals(TypeName.BYTE)) {

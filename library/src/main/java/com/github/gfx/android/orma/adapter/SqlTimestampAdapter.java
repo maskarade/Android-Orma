@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 /**
  * Handles {@link Timestamp} as a string representation like {@code "2015-12-23 18:23:45"}.
  */
+@Deprecated
 public class SqlTimestampAdapter extends AbstractTypeAdapter<Timestamp> {
 
     @NonNull

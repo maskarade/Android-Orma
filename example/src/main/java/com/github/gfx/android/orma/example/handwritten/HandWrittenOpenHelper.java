@@ -34,10 +34,10 @@ public class HandWrittenOpenHelper extends SQLiteOpenHelper {
                 + "title TEXT NOT NULL,"
                 + "content TEXT NULL,"
                 + "done BOOLEAN NOT NULL,"
-                + "createdTimeMillis INTEGER NOT NULL"
+                + "createdTime INTEGER NOT NULL"
                 + ")");
         db.execSQL("CREATE INDEX title_on_todo ON todo (title)");
-        db.execSQL("CREATE INDEX createdTimeMillis_on_todo ON todo (createdTimeMillis)");
+        db.execSQL("CREATE INDEX createdTimeMillis_on_todo ON todo (createdTime)");
     }
 
     @Override

@@ -9,8 +9,9 @@ generating helper classes at compile time with **annotation processing**, inspir
 Orma has the following features:
 
 * Fast as hand-written code with `SQLiteOpenHelper`
-* Annotation-based schema definitions with POJO classes
-* Semi-automatic migration, as well as hand-written migration
+* Annotation-based schema definitions with POJO model classes
+* Semi-automatic migration, as well as hand-written, step-by-step migration
+* Code generation by annotation processing
 
 ## Getting Started
 
@@ -35,8 +36,8 @@ apply plugin: 'com.neenbedankt.android-apt'
 // To use orma in your Android applications or libraries
 
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:1.1.2'
-    compile 'com.github.gfx.android.orma:orma:1.1.2'
+    apt 'com.github.gfx.android.orma:orma-processor:1.1.3'
+    compile 'com.github.gfx.android.orma:orma:1.1.3'
 }
 ```
 
@@ -371,7 +372,7 @@ public class KeyValuePair {
 }
 ```
 
-Can be declared with custom names:
+It can be declared with custom names:
 
 ```java
 @Table
@@ -430,7 +431,7 @@ Has-many associations are not directly supported but you can define a method to 
 class Publisher {
     @PrimaryKey
     public long id;
-    
+
     public Book_Relation getBooks(OrmaDatabase orma) {
         return orma.relationOfBook().publisherEq(this);
     }
@@ -445,14 +446,63 @@ class Book {
 }
 ```
 
-
 ## Type Adapters
 
 Orma models are able to have embedded objects with **type adapters**.
 
-Type adapters serializes and deserializes custom classes, for example as a JSON format.
+### Static Type Adapters
 
-If you use type adapters, you can add them to `OrmaDatabase`:
+Static type adapters are used to adapt a class to an SQLite storage type, which
+are resolved in compile time.
+
+They are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options.
+
+For example, here is a static type adapter for [LatLng](https://developers.google.com/android/reference/com/google/android/gms/maps/model/LatLng):
+
+```java
+@StaticTypeAdapter(
+        targetType = LatLng.class,
+        serializedType = String.class
+)
+public class LatLngAdapter {
+
+    // SerializedType serialize(TargetType source)
+    @NonNull
+    public static String serialize(@NonNull LatLng source) {
+        return source.latitude + "," + source.longitude
+    }
+
+    // TargetType deserialize(SerializedType serialized)
+    @NonNull
+    public static Location deserialize(@NonNull String serialized) {
+        String[] values = serialized.split(",");
+        return new LatLng(
+            Double.parseDouble(values[0]),
+            Double.parseDouble(values[1]));
+    }
+}
+```
+
+Target type must be integers, floating point numbers, `boolean`, `String`, or `byte[]`.
+
+Each target type has a corresponding SQLite storage type:
+
+| Java Type | SQLite Type |
+|:---------:|:-----------:|
+| int       | INTEGER     |
+| short     | INTEGER     |
+| long      | INTEGER     |
+| boolean   | INTEGER     |
+| float     | REAL        |
+| double    | REAL        |
+| String    | TEXT        |
+| byte[]    | BLOB        |
+
+### Dynamic Type Adapters
+
+**This is deprecated and will be removed in v2.0.**
+
+If you use type adapters, you can add type serializer instances to `OrmaDatabase`.
 
 ```java
 class FooAdapter extends AbstractTypeAdapter<Foo> {
@@ -474,19 +524,21 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .build();
 ```
 
-**The interface is experimental and are likely to change in v2.0.**
+## Built-In Type Adapters
 
-### Built-In Type Adapters
+There are built-in type adapters:
 
-There are a lot of built-in type adapter provided by default, which include:
 
-* `StringListAdapter` for `List<String>`
-* `StringSetAdapter` for `Set<String>`
-* `DateAdapter` for `Date`
-* `UriAdapter` for `Uri`
+* `java.math.BigDecimal`
+* `java.math.BigInteger`
+* `java.nio.ByteBuffer`
+* `java.util.Currency`
+* `java.util.List<String>`
+* `java.util.Set<String>`
+* `java.util.UUID`
+* `android.net.Uri`
 
-See [adapter/](library/src/main/java/com/github/gfx/android/orma/adapter)
-for all the adapters.
+More classes? Patches welcome!
 
 ## Migration
 
@@ -506,10 +558,6 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
 ```
 
 See [migration/README.md](migration/README.md) for details.
-
-## Kotlin Support
-
-Orma works with Kotlin. Yey!
 
 ## Example
 

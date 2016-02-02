@@ -22,6 +22,7 @@ import java.sql.Date;
 /**
  * Handles {@link Date} as a string representation like {@code "2015-12-23"}.
  */
+@Deprecated
 public class SqlDateAdapter extends AbstractTypeAdapter<Date> {
 
     @NonNull

@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 
 import java.math.BigInteger;
 
+@Deprecated
 public class BigIntegerAdapter extends AbstractTypeAdapter<BigInteger> {
 
     @NonNull
