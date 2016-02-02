@@ -535,6 +535,7 @@ public class SchemaWriter extends BaseWriter {
             builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.builder().add("model.").build()));
             builder.addStatement("return model");
         } else {
+
             if (schema.getColumns().size() != schema.constructorElement.getParameters().size()) {
                 // FIXME: check the parameters more strictly
                 context.addError("The @Setter constructor parameters must satisfy @Column fields", schema.constructorElement);
@@ -554,7 +555,7 @@ public class SchemaWriter extends BaseWriter {
 
     private String extractColumnNameFromParameterElement(VariableElement parameterElement) {
         Setter setter = parameterElement.getAnnotation(Setter.class);
-        if (setter != null && Strings.isEmpty(setter.value())) {
+        if (setter != null && !Strings.isEmpty(setter.value())) {
             return setter.value();
         }
         return parameterElement.getSimpleName().toString();
