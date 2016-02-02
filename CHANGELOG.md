@@ -12,7 +12,7 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 ### Bug Fixes
 
-* Make `@Setter(name)` for constructors work (#139)
+* Make `@Setter(name)` for constructors work (#139, #140)
 * Workaround for Kotlin apt (kapt) issues (#138)
 
 ### New Features
