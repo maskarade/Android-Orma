@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.example_kotlin
 
 import com.github.gfx.android.orma.annotation.Column
 import com.github.gfx.android.orma.annotation.PrimaryKey
+import com.github.gfx.android.orma.annotation.Setter
 import com.github.gfx.android.orma.annotation.Table
 import java.sql.Timestamp
 
@@ -25,11 +26,23 @@ import java.sql.Timestamp
 class Item {
 
     @PrimaryKey(autoincrement = true)
-    public var id = 0L;
+    public val id: Long
 
     @Column
-    public var content = ""
+    public val content: String
 
     @Column
-    public var createdTime = Timestamp(System.currentTimeMillis())
+    public val createdTime: Timestamp
+
+    constructor(@Setter("id") id: Long, @Setter("content") content: String, @Setter("createdTime") createdTime: Timestamp) {
+        this.id = id
+        this.content = content
+        this.createdTime = createdTime
+    }
+
+    constructor(id: Long, content: String) {
+        this.id = id
+        this.content = content
+        this.createdTime = Timestamp(System.currentTimeMillis())
+    }
 }

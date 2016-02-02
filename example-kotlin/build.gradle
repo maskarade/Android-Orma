@@ -11,6 +11,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'kotlin-android'
 
 android {
@@ -47,6 +48,7 @@ kapt {
 
 dependencies {
     kapt project(':processor')
+    apt project(':processor')
     compile project(':library')
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:cardview-v7:23.1.1'

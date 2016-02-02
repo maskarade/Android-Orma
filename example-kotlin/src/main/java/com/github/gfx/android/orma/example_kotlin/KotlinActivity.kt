@@ -28,6 +28,7 @@ import com.github.gfx.android.orma.Relation
 import com.github.gfx.android.orma.example_kotlin.databinding.ActivityKotlinBinding
 import com.github.gfx.android.orma.example_kotlin.databinding.ItemBinding
 import com.github.gfx.android.orma.widget.OrmaListAdapter
+import java.sql.Timestamp
 
 class KotlinActivity : AppCompatActivity() {
 
@@ -47,9 +48,7 @@ class KotlinActivity : AppCompatActivity() {
 
         binding.fab.setOnClickListener {
             adapter.addItemAsObservable({
-                val item = Item()
-                item.content = "content #" + orma.selectFromItem().count()
-                item
+                Item(0, "content #" + orma.selectFromItem().count())
             })
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({
