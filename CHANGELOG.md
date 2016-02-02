@@ -8,7 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
-## NEXT
+## v1.2.0 - 2016/02/03
+
+### Bug Fixes
+
+* Make `@Setter(name)` for constructors work (#139)
+* Workaround for Kotlin apt (kapt) issues (#138)
 
 ### New Features
 
@@ -17,6 +22,7 @@ The versioning follows [Semantic Versioning](http://semver.org/):
     * e.g. `INTEGER` for `java.util.Date`, `BLOB` for `java.nio.ByteBuffer`
   * Custom binary classes (e.g. `ByteBuffer`, `Bitmap`) are handled correctly
     * v1.0.0 can't use binary objects except for `byte[]`
+  * See `README.md` for details
 
 ## v1.1.3 - 2016/01/31
 
