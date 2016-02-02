@@ -430,7 +430,7 @@ Has-many associations are not directly supported but you can define a method to 
 class Publisher {
     @PrimaryKey
     public long id;
-    
+
     public Book_Relation getBooks(OrmaDatabase orma) {
         return orma.relationOfBook().publisherEq(this);
     }
@@ -454,24 +454,29 @@ Orma models are able to have embedded objects with **type adapters**.
 
 Static type adapters are used to serialize and deserialize a object on inserting a model or selecting a model, respectively.
 
-They are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options:
+They are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options.
+
+For example, here is a static type adapter for [LatLng](https://developers.google.com/android/reference/com/google/android/gms/maps/model/LatLng):
 
 ```java
 @StaticTypeAdapter(
-        targetType = Foo.class,
+        targetType = LatLng.class,
         serializedType = String.class
 )
-public class FooAdapter {
-    public static String serialize(@NonNull Foo source) {
-        return source.toStrng();
+public class LatLngAdapter {
+
+    public static String serialize(@NonNull LatLng source) {
+        return source.latitude + "," + source.longitude
     }
 
     @NonNull
-    public static Foo deserialize(long serialized) {
-        return new Foo(serialized);
+    public static Location deserialize(@NonNull String serialized) {
+        String[] values = serialized.split(",");
+        return new LatLng(
+            Double.parseDouble(values[0]),
+            Double.parseDouble(values[1]));
     }
 }
-
 ```
 
 Target type must be integers, floating point numbers, `boolean`, `String`, or `byte[]`.
