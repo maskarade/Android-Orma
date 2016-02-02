@@ -33,7 +33,7 @@ import java.lang.annotation.RetentionPolicy;
         OnConflict.REPLACE,
         OnConflict.ROLLBACK,
 })
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface OnConflict {
 
     int NONE = 0;
