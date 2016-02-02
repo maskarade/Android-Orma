@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * See https://www.sqlite.org/fts3.html for details.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface VirtualTable {
 
     /**
