@@ -39,9 +39,9 @@ public class ModelWithNamedSetterConstructor {
     @Column(kValue)
     public final String value;
 
-    public ModelWithNamedSetterConstructor(@Setter(kId) long id, @Setter(kKey) String key, @Setter(kValue) String value) {
-        this.id = id;
-        this.key = key;
-        this.value = value;
+    public ModelWithNamedSetterConstructor(@Setter(kId) long anId, @Setter(kKey) String aKey, @Setter(kValue) String aValue) {
+        this.id = anId;
+        this.key = aKey;
+        this.value = aValue;
     }
 }

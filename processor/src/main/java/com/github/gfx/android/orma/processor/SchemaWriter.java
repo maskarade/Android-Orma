@@ -556,7 +556,9 @@ public class SchemaWriter extends BaseWriter {
     private String extractColumnNameFromParameterElement(VariableElement parameterElement) {
         Setter setter = parameterElement.getAnnotation(Setter.class);
         if (setter != null && !Strings.isEmpty(setter.value())) {
-            return setter.value();
+            return schema.findColumnByColumnName(setter.value())
+                    .map(column -> column.name)
+                    .orElseGet(() -> parameterElement.getSimpleName().toString());
         }
         return parameterElement.getSimpleName().toString();
     }
