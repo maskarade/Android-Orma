@@ -1,4 +1,8 @@
-# Orma for Android [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/)
+# Android Orma [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/)
+
+<p align="center">
+<img src="Orma.png" width="256" height="256"  alt="Android Orma" />
+</p>
 
 > Easy things should be easy, and hard things should be possible
 -- [Larry Wall](http://www.amazon.com/gp/feature.html?ie=UTF8&docId=7137)
@@ -36,8 +40,8 @@ apply plugin: 'com.neenbedankt.android-apt'
 // To use orma in your Android applications or libraries
 
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:1.1.3'
-    compile 'com.github.gfx.android.orma:orma:1.1.3'
+    apt 'com.github.gfx.android.orma:orma-processor:1.2.0'
+    compile 'com.github.gfx.android.orma:orma:1.2.0'
 }
 ```
 

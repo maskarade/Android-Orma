@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  * {@link StaticTypeAdapter} defines how a type is stored in a database column.
  */
 @Target({ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface StaticTypeAdapter {
 
     /**
