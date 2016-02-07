@@ -30,17 +30,10 @@ public class SchemaValidatorTest {
 
     @Test
     public void testDuplicateColumnNames() throws Exception {
-        JavaFileObject classModelWithDuplicateColumnNames = JavaFileObjects
-                .forSourceString("ModelWithDuplicateColumnNames",
-                        "import com.github.gfx.android.orma.annotation.*;\n"
-                                + "@Table\n"
-                                + "public class ModelWithDuplicateColumnNames {\n"
-                                + "@Column(\"foo\") String foo;\n"
-                                + "@Column(\"foo\") String bar;\n"
-                                + "}\n");
+        JavaFileObject modelFile = JavaFileObjects.forResource("ColumnNameDuplication.java");
 
         assert_().about(javaSource())
-                .that(classModelWithDuplicateColumnNames)
+                .that(modelFile)
                 .processedWith(new OrmaProcessor())
                 .failsToCompile()
                 .withErrorCount(2)
@@ -49,17 +42,10 @@ public class SchemaValidatorTest {
 
     @Test
     public void testDuplicateColumnNamesCaseInsensitive() throws Exception {
-        JavaFileObject classModelWithDuplicateColumnNames = JavaFileObjects
-                .forSourceString("ModelWithDuplicateColumnNames",
-                        "import com.github.gfx.android.orma.annotation.*;\n"
-                                + "@Table\n"
-                                + "public class ModelWithDuplicateColumnNames {\n"
-                                + "@Column String foo;\n"
-                                + "@Column String FOO;\n"
-                                + "}\n");
+        JavaFileObject modelFile = JavaFileObjects.forResource("CaseInsensitiveDuplication.java");
 
         assert_().about(javaSource())
-                .that(classModelWithDuplicateColumnNames)
+                .that(modelFile)
                 .processedWith(new OrmaProcessor())
                 .failsToCompile()
                 .withErrorCount(2)
@@ -68,17 +54,10 @@ public class SchemaValidatorTest {
 
     @Test
     public void testDuplicateColumnNamesIncludingPrimaryKey() throws Exception {
-        JavaFileObject classModelWithDuplicateColumnNames = JavaFileObjects
-                .forSourceString("ModelWithDuplicateColumnNames",
-                        "import com.github.gfx.android.orma.annotation.*;\n"
-                                + "@Table\n"
-                                + "public class ModelWithDuplicateColumnNames {\n"
-                                + "@PrimaryKey String foo;\n"
-                                + "@Column(\"foo\") String bar;\n"
-                                + "}\n");
+        JavaFileObject modelFile = JavaFileObjects.forResource("PrimaryKeyAndColumnNamesDuplication.java");
 
         assert_().about(javaSource())
-                .that(classModelWithDuplicateColumnNames)
+                .that(modelFile)
                 .processedWith(new OrmaProcessor())
                 .failsToCompile()
                 .withErrorCount(2)
@@ -87,20 +66,13 @@ public class SchemaValidatorTest {
 
     @Test
     public void testNoColumnInTable() throws Exception {
-        JavaFileObject classModelWithDuplicateColumnNames = JavaFileObjects
-                .forSourceString("NoColumnInTable",
-                        "import com.github.gfx.android.orma.annotation.*;\n"
-                                + "@Table\n"
-                                + "public class NoColumnInTable {\n"
-                                + "String foo;\n"
-                                + "String bar;\n"
-                                + "}\n");
+        JavaFileObject modelFile = JavaFileObjects.forResource("NoColumn.java");
 
         assert_().about(javaSource())
-                .that(classModelWithDuplicateColumnNames)
+                .that(modelFile)
                 .processedWith(new OrmaProcessor())
                 .failsToCompile()
                 .withErrorCount(1)
-                .withErrorContaining("No @Column nor @PrimaryKey is defined in NoColumnInTable");
+                .withErrorContaining("No @Column nor @PrimaryKey is defined in NoColumn");
     }
 }

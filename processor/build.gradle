@@ -4,9 +4,16 @@ apply plugin: 'com.novoda.bintray-release'
 targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
 
+task copyTestResources(type: Copy) {
+    from "${projectDir}/src/test/resources"
+    into "${buildDir}/classes/test"
+}
+processTestResources.dependsOn copyTestResources
+
 dependencies {
     compile project(':annotations')
     compile 'com.squareup:javapoet:1.5.1'
+    testCompile project.rootProject.ext.ANDROID_JAR_23
     testCompile 'junit:junit:4.12'
     testCompile 'com.google.testing.compile:compile-testing:0.8'
 }
