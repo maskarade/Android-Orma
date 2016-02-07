@@ -22,6 +22,8 @@ import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 import com.squareup.javapoet.ClassName;
 
+import android.support.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,13 +85,13 @@ public class SchemaDefinition {
      * @param typeElement the target class element
      * @return null if it has the default constructor
      */
+    @Nullable
     static ExecutableElement findConstructor(TypeElement typeElement) {
-        List<ExecutableElement> constructors = findConstructors(typeElement);
-
+        List<ExecutableElement> constructors = collectConstructors(typeElement);
         if (constructors.isEmpty()) {
             return null;
         } else if (constructors.stream().anyMatch(element -> element.getParameters().isEmpty())) {
-            return null;
+            return null; // default constructor
         } else if (constructors.size() == 1) {
             return constructors.get(0);
         } else {
@@ -105,7 +107,7 @@ public class SchemaDefinition {
         }
     }
 
-    static List<ExecutableElement> findConstructors(TypeElement typeElement) {
+    static List<ExecutableElement> collectConstructors(TypeElement typeElement) {
         return typeElement.getEnclosedElements()
                 .stream()
                 .filter(SchemaDefinition::isConstructor)
