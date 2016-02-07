@@ -537,7 +537,6 @@ public class SchemaWriter extends BaseWriter {
         } else {
 
             if (schema.getColumns().size() != schema.constructorElement.getParameters().size()) {
-                // FIXME: check the parameters more strictly
                 context.addError("The @Setter constructor parameters must satisfy all the @Column fields",
                         schema.constructorElement);
             }
