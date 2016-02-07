@@ -78,7 +78,7 @@ public class SchemaDefinition {
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
         this.columns = collectColumns(typeElement);
-        this.constructorElement = findConstructor(typeElement);
+        this.constructorElement = findConstructor(context, typeElement);
     }
 
     /**
@@ -86,24 +86,19 @@ public class SchemaDefinition {
      * @return null if it has the default constructor
      */
     @Nullable
-    static ExecutableElement findConstructor(TypeElement typeElement) {
+    static ExecutableElement findConstructor(ProcessingContext context, TypeElement typeElement) {
         List<ExecutableElement> constructors = collectConstructors(typeElement);
-        if (constructors.isEmpty()) {
+
+        List<ExecutableElement> setterConstructors = collectSetterConstructors(constructors);
+
+        if (setterConstructors.isEmpty()) {
+            // use the default constructor
             return null;
-        } else if (constructors.stream().anyMatch(element -> element.getParameters().isEmpty())) {
-            return null; // default constructor
-        } else if (constructors.size() == 1) {
-            return constructors.get(0);
+        } else if (setterConstructors.size() != 1) {
+            context.addError("Too many @Setter constructors", typeElement);
+            return null;
         } else {
-            return constructors.stream()
-                    .filter(executableElement -> executableElement.getAnnotation(Setter.class) != null)
-                    .findFirst()
-                    .orElseGet(() -> constructors.stream()
-                            .filter(executableElement -> executableElement.getParameters()
-                                    .stream()
-                                    .anyMatch(variableElement -> variableElement.getAnnotation(Setter.class) != null))
-                            .findFirst()
-                            .orElse(null));
+            return setterConstructors.get(0);
         }
     }
 
@@ -112,6 +107,14 @@ public class SchemaDefinition {
                 .stream()
                 .filter(SchemaDefinition::isConstructor)
                 .map(element -> (ExecutableElement) element)
+                .collect(Collectors.toList());
+    }
+
+    static List<ExecutableElement> collectSetterConstructors(List<ExecutableElement> constructors) {
+        return constructors.stream()
+                .filter(constructor -> constructor.getAnnotation(Setter.class) != null || constructor.getParameters()
+                        .stream()
+                        .anyMatch(param -> param.getAnnotation(Setter.class) != null))
                 .collect(Collectors.toList());
     }
 

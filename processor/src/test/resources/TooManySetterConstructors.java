@@ -20,7 +20,7 @@ import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 
 @Table
-public class UnsatisfiedConstructor {
+public class TooManySetterConstructors {
 
     @PrimaryKey
     public final String foo;
@@ -29,8 +29,13 @@ public class UnsatisfiedConstructor {
     public final String bar;
 
     @Setter
-    public UnsatisfiedConstructor() {
+    public TooManySetterConstructors() {
         foo = String.valueOf(System.currentTimeMillis());
         this.bar = "";
+    }
+
+    public TooManySetterConstructors(@Setter String bar) {
+        foo = String.valueOf(System.currentTimeMillis());
+        this.bar = bar;
     }
 }

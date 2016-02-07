@@ -55,7 +55,7 @@ public class SchemaValidator {
                 .findAny();
 
         if (!any.isPresent()) {
-            error("No @Column nor @PrimaryKey is defined in " + typeElement.getSimpleName(), typeElement);
+            error("No @Column nor @PrimaryKey is defined", typeElement);
         }
     }
 

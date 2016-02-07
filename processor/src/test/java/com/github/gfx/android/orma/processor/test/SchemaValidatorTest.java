@@ -73,7 +73,7 @@ public class SchemaValidatorTest {
                 .processedWith(new OrmaProcessor())
                 .failsToCompile()
                 .withErrorCount(1)
-                .withErrorContaining("No @Column nor @PrimaryKey is defined in NoColumn");
+                .withErrorContaining("No @Column nor @PrimaryKey is defined");
     }
 
     @Test
@@ -86,6 +86,18 @@ public class SchemaValidatorTest {
                 .failsToCompile()
                 .withErrorCount(1)
                 .withErrorContaining("The @Setter constructor parameters must satisfy all the @Column fields");
+    }
+
+    @Test
+    public void tooManySetterConstructors() throws Exception {
+        JavaFileObject modelFile = JavaFileObjects.forResource("TooManySetterConstructors.java");
+
+        assert_().about(javaSource())
+                .that(modelFile)
+                .processedWith(new OrmaProcessor())
+                .failsToCompile()
+                .withErrorCount(1)
+                .withErrorContaining("Too many @Setter constructors");
     }
 
 }
