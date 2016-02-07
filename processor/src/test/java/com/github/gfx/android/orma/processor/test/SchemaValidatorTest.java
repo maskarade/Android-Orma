@@ -75,4 +75,17 @@ public class SchemaValidatorTest {
                 .withErrorCount(1)
                 .withErrorContaining("No @Column nor @PrimaryKey is defined in NoColumn");
     }
+
+    @Test
+    public void testUnsatisfiedConstructor() throws Exception {
+        JavaFileObject modelFile = JavaFileObjects.forResource("UnsatisfiedConstructor.java");
+
+        assert_().about(javaSource())
+                .that(modelFile)
+                .processedWith(new OrmaProcessor())
+                .failsToCompile()
+                .withErrorCount(1)
+                .withErrorContaining("The @Setter constructor parameters must satisfy all the @Column fields");
+    }
+
 }
