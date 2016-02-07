@@ -2,16 +2,29 @@ import java.util.regex.Pattern
 
 apply from: project.file('metadata.gradle')
 
-final ANDROID_SUPPORT_REPOSITORY = {
-    // to use android support libraries in Java projects
+final ANDROID_SDK_PATH = {
     final localProperties = new Properties()
     localProperties.load(new FileInputStream("${project.rootProject.projectDir}/local.properties"))
     def androidSdkPath = localProperties['sdk.dir'] ?: System.getenv('ANDROID_HOME')
     if (!androidSdkPath) {
         throw new RuntimeException("Missing local.properties")
     }
-    "${androidSdkPath}/extras/android/m2repository"
+    androidSdkPath
 }()
+final ANDROID_SUPPORT_REPOSITORY = "${ANDROID_SDK_PATH}/extras/android/m2repository"
+
+ext {
+    ANDROID_JAR_23 = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-23/", include: 'android.jar')
+
+    versionFile = project.file("version.properties")
+
+    versionName = {
+        def versionProps = getVersionProps()
+        "${versionProps['major']}.${versionProps['minor']}.${versionProps['patch']}"
+    }
+
+    metadata.version = versionName()
+}
 
 buildscript {
     repositories {
@@ -46,17 +59,6 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-
-ext {
-    versionFile = project.file("version.properties")
-
-    versionName = {
-        def versionProps = getVersionProps()
-        "${versionProps['major']}.${versionProps['minor']}.${versionProps['patch']}"
-    }
-
-    metadata.version = versionName()
 }
 
 def updateReadme(oldVersion, newVersion) {
