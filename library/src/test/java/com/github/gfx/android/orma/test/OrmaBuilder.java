@@ -25,6 +25,7 @@ public class OrmaBuilder {
     public static OrmaDatabase.Builder builder() {
         return OrmaDatabase.builder(InstrumentationRegistry.getTargetContext())
                 .name(null)
+                .trace(true)
                 .tryParsingSql(false);
     }
 
