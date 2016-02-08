@@ -58,6 +58,7 @@ public class SetterAndGetterTest {
         assertThat(model.getId(), is(not(0L)));
         assertThat(model.getKey(), is("key"));
         assertThat(model.getValue(), is("value"));
+        assertThat(model.isDone(), is(nullValue()));
     }
 
     @Test
