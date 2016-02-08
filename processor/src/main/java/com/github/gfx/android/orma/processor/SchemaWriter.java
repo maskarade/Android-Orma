@@ -434,6 +434,10 @@ public class SchemaWriter extends BaseWriter {
             ColumnDefinition c = columns.get(i);
             AssociationDefinition r = c.getAssociation();
 
+            if (c.isNullableInJava()) {
+                builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
+            }
+
             CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
 
             if (r != null && r.associationType.equals(Types.SingleAssociation)) {
@@ -442,6 +446,10 @@ public class SchemaWriter extends BaseWriter {
                 builder.addStatement("args[$L] = $L ? 1 : 0", i, rhsExpr);
             } else {
                 builder.addStatement("args[$L] = $L", i, rhsExpr);
+            }
+
+            if (c.isNullableInJava()) {
+                builder.endControlFlow();
             }
         }
 
