@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.ModelWithAccessors;
 import com.github.gfx.android.orma.test.model.ModelWithNamedSetterConstructor;
 import com.github.gfx.android.orma.test.model.ModelWithSetterConstructor;
+import com.github.gfx.android.orma.test.model.ModelWithSetterConstructorAndNullable;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import org.junit.Before;
@@ -88,6 +89,38 @@ public class SetterAndGetterTest {
         assertThat(model.id, is(not(0L)));
         assertThat(model.key, is("key"));
         assertThat(model.value, is("value"));
+    }
+
+    @Test
+    public void testSetterConstructorAndNullable0() throws Exception {
+        ModelWithSetterConstructorAndNullable model = db
+                .createModelWithSetterConstructorAndNullable(new ModelFactory<ModelWithSetterConstructorAndNullable>() {
+                    @NonNull
+                    @Override
+                    public ModelWithSetterConstructorAndNullable call() {
+                        return new ModelWithSetterConstructorAndNullable(0, "key", "value");
+                    }
+                });
+
+        assertThat(model.id, is(not(0L)));
+        assertThat(model.key, is("key"));
+        assertThat(model.value, is("value"));
+    }
+
+    @Test
+    public void testSetterConstructorAndNullable1() throws Exception {
+        ModelWithSetterConstructorAndNullable model = db
+                .createModelWithSetterConstructorAndNullable(new ModelFactory<ModelWithSetterConstructorAndNullable>() {
+                    @NonNull
+                    @Override
+                    public ModelWithSetterConstructorAndNullable call() {
+                        return new ModelWithSetterConstructorAndNullable(0, "key", null);
+                    }
+                });
+
+        assertThat(model.id, is(not(0L)));
+        assertThat(model.key, is("key"));
+        assertThat(model.value, is(nullValue()));
     }
 
 }

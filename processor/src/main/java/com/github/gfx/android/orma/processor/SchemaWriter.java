@@ -515,14 +515,13 @@ public class SchemaWriter extends BaseWriter {
                                 r.associationType, context.getSchemaInstanceExpr(r.modelType), i);
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             } else {
+                CodeBlock.Builder rhsExprBuilder = CodeBlock.builder();
                 if (c.isNullableInSQL()) {
-                    builder.beginControlFlow("if (!cursor.isNull($L))", i);
+                    rhsExprBuilder.add("cursor.isNull($L) ? null : $L", i, c.buildDeserializeExpr("conn", cursorGetter(c, i)));
+                } else {
+                    rhsExprBuilder.add(c.buildDeserializeExpr("conn", cursorGetter(c, i)));
                 }
-                CodeBlock getRhsExpr = c.buildDeserializeExpr("conn", cursorGetter(c, i));
-                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr));
-                if (c.isNullableInSQL()) {
-                    builder.endControlFlow();
-                }
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(rhsExprBuilder.build()));
             }
         }
         return builder.build();
