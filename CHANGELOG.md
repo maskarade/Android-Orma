@@ -8,6 +8,13 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.2.1 - 2016/02/08
+
+### Bug Fixes
+
+* `@Setter` constructors with `@Nullable` fields did not work (#146, #147)
+* Empty `@Setter` constructors should have made compile errors (#145)
+
 ## v1.2.0 - 2016/02/03
 
 ### Bug Fixes
