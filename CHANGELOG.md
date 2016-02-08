@@ -8,6 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.2.2 - 2016/02/09
+
+### Bug Fixes
+
+* Fix an NPE when a `@Nullable Boolean field` is `null` (#148)
+
 ## v1.2.1 - 2016/02/08
 
 ### Bug Fixes
