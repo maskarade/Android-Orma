@@ -22,11 +22,14 @@ import android.support.test.InstrumentationRegistry;
 
 public class OrmaBuilder {
 
-    public static OrmaDatabase create() {
+    public static OrmaDatabase.Builder builder() {
         return OrmaDatabase.builder(InstrumentationRegistry.getTargetContext())
                 .name(null)
-                .tryParsingSql(false)
                 .trace(true)
-                .build();
+                .tryParsingSql(false);
+    }
+
+    public static OrmaDatabase create() {
+        return builder().build();
     }
 }
