@@ -94,21 +94,11 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @NonNull
-    public Single<Model> getWithTransactionAsObservable(@IntRange(from = 0) final int position) {
+    public Single<Model> getAsObservable(@IntRange(from = 0) final int position) {
         return Single.create(new Single.OnSubscribe<Model>() {
             @Override
             public void call(final SingleSubscriber<? super Model> subscriber) {
-                conn.transactionNonExclusiveSync(new TransactionTask() {
-                    @Override
-                    public void execute() throws Exception {
-                        subscriber.onSuccess(get(position));
-                    }
-
-                    @Override
-                    public void onError(@NonNull Exception exception) {
-                        subscriber.onError(exception);
-                    }
-                });
+                subscriber.onSuccess(get(position));
             }
         });
     }
@@ -141,7 +131,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * @return An {@link Observable} that yields the position of the deleted item if the item is deleted.
      */
     @NonNull
-    public Observable<Integer> deleteWithTransactionAsObservable(@NonNull final Model item) {
+    public Observable<Integer> deleteAsObservable(@NonNull final Model item) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
@@ -177,7 +167,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * @return A {@link Single} that yields the number of rows deleted.
      */
     @NonNull
-    public Single<Integer> truncateWithTransactionAsObservable(@IntRange(from = 0) final int size) {
+    public Single<Integer> truncateAsObservable(@IntRange(from = 0) final int size) {
         return Single.create(new Single.OnSubscribe<Integer>() {
             @Override
             public void call(SingleSubscriber<? super Integer> subscriber) {
@@ -198,22 +188,12 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * @return An {@link Single} that yields the newly inserted row id.
      */
     @NonNull
-    public Single<Long> insertWithTransactionAsObservable(@NonNull final ModelFactory<Model> factory) {
+    public Single<Long> insertAsObservable(@NonNull final ModelFactory<Model> factory) {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
             public void call(final SingleSubscriber<? super Long> subscriber) {
-                conn.transactionSync(new TransactionTask() {
-                    @Override
-                    public void execute() throws Exception {
-                        long rowId = inserter().execute(factory);
-                        subscriber.onSuccess(rowId);
-                    }
-
-                    @Override
-                    public void onError(@NonNull Exception exception) {
-                        subscriber.onError(exception);
-                    }
-                });
+                long rowId = inserter().execute(factory);
+                subscriber.onSuccess(rowId);
             }
         });
     }

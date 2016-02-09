@@ -128,7 +128,7 @@ public class RelationTest {
     @Test
     public void truncate_asc() throws Exception {
         Relation<Author, ?> rel = rel().orderByNameAsc();
-        int deletedRows = rel.truncateWithTransactionAsObservable(2)
+        int deletedRows = rel.truncateAsObservable(2)
                 .toBlocking()
                 .value();
 
@@ -141,7 +141,7 @@ public class RelationTest {
     @Test
     public void truncate_asc_overflow() throws Exception {
         Relation<Author, ?> rel = rel().orderByNameAsc();
-        int deletedRows = rel.truncateWithTransactionAsObservable(10)
+        int deletedRows = rel.truncateAsObservable(10)
                 .toBlocking()
                 .value();
 
@@ -155,7 +155,7 @@ public class RelationTest {
     @Test
     public void truncate_desc() throws Exception {
         Relation<Author, ?> rel = rel().orderByNameDesc();
-        int deletedRows = rel.truncateWithTransactionAsObservable(10)
+        int deletedRows = rel.truncateAsObservable(10)
                 .toBlocking()
                 .value();
 
