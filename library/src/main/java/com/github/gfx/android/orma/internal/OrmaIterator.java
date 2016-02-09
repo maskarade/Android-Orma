@@ -19,7 +19,6 @@ package com.github.gfx.android.orma.internal;
 import com.github.gfx.android.orma.Selector;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -43,15 +42,11 @@ public class OrmaIterator<Model> implements Iterator<Model> {
     public OrmaIterator(Selector<Model, ?> selector) {
         this.selector = selector;
         this.totalCount = selector.count();
-        selector.getConnection().getReadableDatabase().beginTransactionNonExclusive();
         fill();
     }
 
     void finish() {
         cursor.close();
-        SQLiteDatabase db = selector.getConnection().getReadableDatabase();
-        db.setTransactionSuccessful();
-        db.endTransaction();
     }
 
     void fill() {
