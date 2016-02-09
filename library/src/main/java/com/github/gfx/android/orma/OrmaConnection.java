@@ -281,9 +281,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
      */
     public void resetDatabase() {
         SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
         try {
-            db.beginTransaction();
-
             dropAllTables(db);
             createAllTables(db);
 
