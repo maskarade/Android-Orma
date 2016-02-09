@@ -81,12 +81,12 @@ public class OrmaAdapter<Model> {
 
     @NonNull
     public Single<Model> getItemAsObservable(int position) {
-        return relation.getWithTransactionAsObservable(position);
+        return relation.getAsObservable(position);
     }
 
     @NonNull
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
-        return relation.insertWithTransactionAsObservable(factory)
+        return relation.insertAsObservable(factory)
                 .doOnSuccess(new Action1<Long>() {
                     @Override
                     public void call(Long rowId) {
@@ -97,7 +97,7 @@ public class OrmaAdapter<Model> {
 
     @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
-        return relation.deleteWithTransactionAsObservable(item)
+        return relation.deleteAsObservable(item)
                 .doOnNext(new Action1<Integer>() {
                     @Override
                     public void call(final Integer deletedPosition) {
