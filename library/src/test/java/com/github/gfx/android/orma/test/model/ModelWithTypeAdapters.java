@@ -22,12 +22,15 @@ import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.ArraySet;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -43,6 +46,12 @@ public class ModelWithTypeAdapters {
 
     @Column(indexed = true)
     public Set<String> set;
+
+    @Column(indexed = true)
+    public ArrayList<String> arrayList;
+
+    @Column(indexed = true)
+    public HashSet<String> hashSet;
 
     @Column(indexed = true)
     public Uri uri;

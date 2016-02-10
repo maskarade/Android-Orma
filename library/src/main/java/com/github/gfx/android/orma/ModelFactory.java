@@ -24,4 +24,6 @@ import rx.functions.Func0;
  */
 public interface ModelFactory<T> extends Func0<T> {
 
+    @Override
+    T call();
 }

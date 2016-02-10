@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -39,13 +40,9 @@ public class Types {
 
     public static final ClassName String = ClassName.get(String.class);
 
-    public static final TypeName ObjectArray = ArrayTypeName.of(TypeName.OBJECT);
-
     public static final ArrayTypeName StringArray = ArrayTypeName.of(String);
 
     public static final ArrayTypeName ByteArray = ArrayTypeName.of(TypeName.BYTE);
-
-    public static final ClassName ArrayList = ClassName.get(ArrayList.class);
 
     public static final ClassName List = ClassName.get(List.class);
 
@@ -171,6 +168,15 @@ public class Types {
 
     public static ParameterizedTypeName getList(TypeName typeName) {
         return ParameterizedTypeName.get(List, typeName);
+    }
+
+
+    public static TypeName getArrayList(ClassName typeName) {
+        return ParameterizedTypeName.get(ClassName.get(ArrayList.class), typeName);
+    }
+
+    public static TypeName getHashSet(ClassName typeName) {
+        return ParameterizedTypeName.get(ClassName.get(HashSet.class), typeName);
     }
 
     public static ParameterizedTypeName getInserter(TypeName typeName) {
