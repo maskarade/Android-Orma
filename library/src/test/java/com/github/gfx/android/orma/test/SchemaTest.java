@@ -45,8 +45,9 @@ public class SchemaTest {
         assertThat(PublisherSchema.startedYear.name, is("started_year"));
         assertThat(PublisherSchema.startedMonth.name, is("started_month"));
 
-        assertThat(schema.getCreateTableStatement(), is(
-                "CREATE TABLE \"publishers\" (\"id\" INTEGER PRIMARY KEY AUTOINCREMENT, \"name\" TEXT UNIQUE NOT NULL, \"started_year\" INTEGER NOT NULL, \"started_month\" INTEGER NOT NULL)"
+        assertThat("PRIMARY KEY is placed in the last",
+                schema.getCreateTableStatement(), is(
+                "CREATE TABLE \"publishers\" (\"name\" TEXT UNIQUE NOT NULL, \"started_year\" INTEGER NOT NULL, \"started_month\" INTEGER NOT NULL, \"id\" INTEGER PRIMARY KEY AUTOINCREMENT)"
         ));
     }
 

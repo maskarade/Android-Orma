@@ -332,7 +332,7 @@ public class DatabaseWriter extends BaseWriter {
                                     schema.getModelClassName())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(Types.getInserter(schema.getModelClassName()))
-                            .addStatement("return prepareInsertInto$L($T.NONE)",
+                            .addStatement("return prepareInsertInto$L($T.NONE, true)",
                                     simpleModelName,
                                     OnConflict.class
                             )
@@ -347,13 +347,29 @@ public class DatabaseWriter extends BaseWriter {
                                     .addAnnotation(OnConflict.class)
                                     .build())
                             .returns(Types.getInserter(schema.getModelClassName()))
-                            .addStatement("return new $T($L, $L, $L.getInsertStatement(onConflictAlgorithm))",
+                            .addStatement("return prepareInsertInto$L(onConflictAlgorithm, true)",
+                                    simpleModelName
+                            )
+                            .build());
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
+                            .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
+                                    schema.getModelClassName())
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                    .addAnnotation(OnConflict.class)
+                                    .build())
+                            .addParameter(ParameterSpec.builder(boolean.class, "withoutAutoId")
+                                    .build())
+                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .addStatement("return new $T($L, $L, onConflictAlgorithm, withoutAutoId)",
                                     Types.getInserter(schema.getModelClassName()),
                                     connection,
-                                    schemaInstance,
                                     schemaInstance
                             )
                             .build());
+
         });
 
         return methodSpecs;

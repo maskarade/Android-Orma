@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.annotation.OnConflict;
+
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
@@ -33,16 +35,23 @@ public class Inserter<Model> {
 
     final Schema<Model> schema;
 
+    final boolean withoutAutoId;
+
     final SQLiteStatement statement;
 
     final String sql;
 
-    public Inserter(OrmaConnection conn, Schema<Model> schema, String insertStatement) {
+    public Inserter(OrmaConnection conn, Schema<Model> schema, @OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
         SQLiteDatabase db = conn.getWritableDatabase();
         this.conn = conn;
         this.schema = schema;
-        this.statement = db.compileStatement(insertStatement);
-        this.sql = insertStatement;
+        this.withoutAutoId = withoutAutoId;
+        sql = schema.getInsertStatement(onConflictAlgorithm, withoutAutoId);
+        statement = db.compileStatement(sql);
+    }
+
+    public Inserter(OrmaConnection conn, Schema<Model> schema) {
+        this(conn, schema, OnConflict.NONE, true);
     }
 
     /**
@@ -54,9 +63,9 @@ public class Inserter<Model> {
      */
     public long execute(@NonNull Model model) {
         if (conn.trace) {
-            conn.trace(sql, schema.convertToArgs(conn, model));
+            conn.trace(sql, schema.convertToArgs(conn, model, withoutAutoId));
         }
-        schema.bindArgs(conn, statement, model);
+        schema.bindArgs(conn, statement, model, withoutAutoId, 0);
         return statement.executeInsert();
     }
 
