@@ -39,10 +39,12 @@ import android.support.test.runner.AndroidJUnit4;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -125,10 +127,12 @@ public class ModelSpecTest {
             public ModelWithTypeAdapters call() {
                 ModelWithTypeAdapters model = new ModelWithTypeAdapters();
                 model.list = Arrays.asList("foo", "bar", "baz");
-                model.set = new HashSet<>();
+                model.arrayList = new ArrayList<>(model.list);
+                model.set = new LinkedHashSet<>();
                 model.set.add("foo");
                 model.set.add("bar");
                 model.set.add("baz");
+                model.hashSet = new HashSet<>(model.set);
                 model.uri = Uri.parse("http://example.com");
                 model.date = new Date(now);
                 model.sqlDate = new java.sql.Date(now);
@@ -145,7 +149,9 @@ public class ModelSpecTest {
         });
 
         assertThat(model.list, contains("foo", "bar", "baz"));
+        assertThat(model.arrayList, contains("foo", "bar", "baz"));
         assertThat(model.set, containsInAnyOrder("foo", "bar", "baz"));
+        assertThat(model.hashSet, containsInAnyOrder("foo", "bar", "baz"));
         assertThat(model.uri, is(Uri.parse("http://example.com")));
         assertThat(model.date, is(new Date(now)));
         assertThat(model.sqlDate.toString(), is(new java.sql.Date(now).toString()));

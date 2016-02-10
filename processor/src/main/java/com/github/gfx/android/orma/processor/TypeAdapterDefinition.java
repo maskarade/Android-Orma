@@ -45,6 +45,8 @@ public class TypeAdapterDefinition {
             TypeAdapterDefinition.make(java.sql.Timestamp.class, String.class, "SqlTimestamp"),
             TypeAdapterDefinition.make(Types.getList(Types.String), String.class, "StringList"),
             TypeAdapterDefinition.make(Types.getSet(Types.String), String.class, "StringSet"),
+            TypeAdapterDefinition.make(Types.getArrayList(Types.String), String.class, "StringArrayList"),
+            TypeAdapterDefinition.make(Types.getHashSet(Types.String), String.class, "StringHashSet"),
             TypeAdapterDefinition.make(ClassName.get("android.net", "Uri"), String.class),
             TypeAdapterDefinition.make(UUID.class, String.class),
     };
