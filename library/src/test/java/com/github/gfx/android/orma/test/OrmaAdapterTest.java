@@ -46,7 +46,7 @@ public class OrmaAdapterTest {
 
     @Before
     public void setUp() throws Exception {
-        OrmaDatabase orma = OrmaBuilder.create();
+        OrmaDatabase orma = OrmaFactory.create();
 
         Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
         inserter.execute(new ModelFactory<Author>() {

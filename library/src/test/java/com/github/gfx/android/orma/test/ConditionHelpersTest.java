@@ -41,7 +41,7 @@ public class ConditionHelpersTest {
 
     @Before
     public void setUp() throws Exception {
-        db = OrmaBuilder.create();
+        db = OrmaFactory.create();
 
         db.transactionSync(new TransactionTask() {
             @Override

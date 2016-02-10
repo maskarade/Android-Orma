@@ -20,7 +20,7 @@ import com.github.gfx.android.orma.test.model.OrmaDatabase;
 
 import android.support.test.InstrumentationRegistry;
 
-public class OrmaBuilder {
+public class OrmaFactory {
 
     public static OrmaDatabase create() {
         return OrmaDatabase.builder(InstrumentationRegistry.getTargetContext())

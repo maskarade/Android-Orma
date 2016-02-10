@@ -42,7 +42,7 @@ public class ForeignKeysTest {
 
     @Before
     public void setUp() throws Exception {
-        db = OrmaBuilder.create();
+        db = OrmaFactory.create();
 
         publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull

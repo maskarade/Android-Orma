@@ -39,7 +39,7 @@ public class SetterAndGetterTest {
 
     @Before
     public void setUp() throws Exception {
-        db = OrmaBuilder.create();
+        db = OrmaFactory.create();
     }
 
     @Test

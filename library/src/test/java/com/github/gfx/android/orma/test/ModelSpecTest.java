@@ -58,7 +58,7 @@ public class ModelSpecTest {
 
     @Before
     public void setUp() throws Exception {
-        db = OrmaBuilder.create();
+        db = OrmaFactory.create();
     }
 
     @Test
@@ -95,9 +95,9 @@ public class ModelSpecTest {
         three.nocaseField = "FOO";
         db.insertIntoModelWithCollation(three);
 
-        assertThat(db.selectFromModelWithCollation().where("rtrimField = ?", "foo ").count(), is(2));
-        assertThat(db.selectFromModelWithCollation().where("nocaseField = ?", "foo").count(), is(2));
-        assertThat(db.selectFromModelWithCollation().where("binaryField = ?", "foo").count(), is(1));
+        assertThat(db.selectFromModelWithCollation().rtrimFieldEq("foo ").count(), is(2));
+        assertThat(db.selectFromModelWithCollation().nocaseFieldEq("foo").count(), is(2));
+        assertThat(db.selectFromModelWithCollation().binaryFieldEq("foo").count(), is(1));
     }
 
     @Test

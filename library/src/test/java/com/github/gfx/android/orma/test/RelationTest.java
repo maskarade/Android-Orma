@@ -41,7 +41,7 @@ public class RelationTest {
 
     @Before
     public void setUp() throws Exception {
-        orma = OrmaBuilder.create();
+        orma = OrmaFactory.create();
 
         Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
         inserter.execute(new ModelFactory<Author>() {
