@@ -77,6 +77,10 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return selector().count();
     }
 
+    public boolean isEmpty() {
+        return selector().isEmpty();
+    }
+
     @NonNull
     public Model get(@IntRange(from = 0) int position) {
         return selector().get(position);
