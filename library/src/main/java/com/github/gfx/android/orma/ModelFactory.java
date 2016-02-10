@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma;
 
+import android.support.annotation.NonNull;
+
 import rx.functions.Func0;
 
 /**
@@ -25,5 +27,6 @@ import rx.functions.Func0;
 public interface ModelFactory<T> extends Func0<T> {
 
     @Override
+    @NonNull
     T call();
 }
