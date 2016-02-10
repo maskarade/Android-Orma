@@ -163,8 +163,13 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         });
     }
 
-    public boolean empty() {
+    public boolean isEmpty() {
         return count() == 0;
+    }
+
+    @Deprecated // TODO: remove it in v2.0
+    public boolean empty() {
+        return isEmpty();
     }
 
     @Nullable

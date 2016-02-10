@@ -94,6 +94,16 @@ public class RelationTest {
     }
 
     @Test
+    public void count() throws Exception {
+        assertThat(rel().count(), is(3));
+    }
+
+    @Test
+    public void isEmpty() throws Exception {
+        assertThat(rel().isEmpty(), is(false));
+    }
+
+    @Test
     public void indexOf_in_asc() throws Exception {
         Relation<Author, ?> rel = rel().orderByNameAsc();
         assertThat(rel.indexOf(find("A")), is(0));
