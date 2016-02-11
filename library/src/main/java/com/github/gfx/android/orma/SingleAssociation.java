@@ -67,6 +67,10 @@ public class SingleAssociation<Model> {
         return new SingleAssociation<>(id, model);
     }
 
+    public static <T> SingleAssociation<T> just(@NonNull  Schema<T> schema, @NonNull T model) {
+        return new SingleAssociation<>((long)(Object)schema.getPrimaryKey().get(model), model);
+    }
+
     public static <T> SingleAssociation<T> id(final long id) {
         return new SingleAssociation<>(id, Single.create(new Single.OnSubscribe<T>() {
             @Override
@@ -80,9 +84,26 @@ public class SingleAssociation<Model> {
         return id;
     }
 
+    @Deprecated
     @NonNull
     public Single<Model> single() {
         return single;
+    }
+
+    @NonNull
+    public Single<Model> observable() {
+        return single;
+    }
+
+    /**
+     * A shortcut of {@code singleAssociation.single().toBlocking().value()}.
+     *
+     * @return A model value the {@code SingleAssociation<T>} refers to.
+     * @throws NoValueException
+     */
+    @NonNull
+    public Model value() throws NoValueException {
+        return single.toBlocking().value();
     }
 
     @Override

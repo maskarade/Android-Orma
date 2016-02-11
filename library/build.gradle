@@ -40,6 +40,7 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.0'
     compile 'com.android.support:support-annotations:23.1.1'
     provided 'com.android.support:recyclerview-v7:23.1.1'
+    provided 'com.google.code.gson:gson:2.5'
     testApt project(':processor')
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.0.6'
     testCompile 'junit:junit:4.12'
