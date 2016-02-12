@@ -567,18 +567,8 @@ See [migration/README.md](migration/README.md) for details.
 
 ### Gson
 
-There is `SingleAssociationTypeAdapterFactory` to serialize `SingleAssociation<T>` with
-[Google Gson](https://github.com/google/gson).
-
-Give its instance to `GsonBuilder#registerTypeAdapterFactory()`:
-
-```java
-OrmaDatabase orma;
-
-Gson gson = new GsonBuilder()
-  .registerTypeAdapterFactory(new SingleAssociationTypeAdapterFactory(orma))
-  .create();
-```
+There is `SingleAssociationTypeAdapterFactory` to serialize and deserialize `SingleAssociation<T>` with
+[Google Gson](https://github.com/google/gson). No registration to `GsonBuilder` is required.
 
 ## Example
 
