@@ -563,14 +563,29 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
 
 See [migration/README.md](migration/README.md) for details.
 
+## Cooperation with Serialization Libraries
+
+### Gson
+
+There is `SingleAssociationTypeAdapterFactory` to serialize `SingleAssociation<T>` with
+[Google Gson](https://github.com/google/gson).
+
+Give its instance to `GsonBuilder#registerTypeAdapterFactory()`:
+
+```java
+OrmaDatabase orma;
+
+Gson gson = new GsonBuilder()
+  .registerTypeAdapterFactory(new SingleAssociationTypeAdapterFactory(orma))
+  .create();
+```
+
 ## Example
 
-There is an example app to demonstrate what Orma does.
+There is [an example app](example/) to demonstrate what Orma does.
 
 It also includes a simple benchmark with Realm and hand-written SQLiteDatabase
 operations.
-
-See [example/](example/) for details.
 
 ## Benchmark
 
@@ -609,9 +624,12 @@ Check your toolchain. FYI here are my toolchain versions:
 
 ### Is there a real-world example that uses Orma?
 
-[Android-Helium](https://github.com/gfx/Android-Helium) is an Android app which is released to Google Play Store.
+* [gfx/Android-Helium]
+* [konifar/droidkaigi2016](https://github.com/konifar/droidkaigi2016)
 
-This uses Orma, as well as Google Dagger, Android DataBinding, Google Play Services, and etc.
+They are Android apps which uses Orma and are released to Google Play.
+
+They also uses Google Dagger, Android DataBinding, Google Play Services, and etc.
 
 ## Support
 
