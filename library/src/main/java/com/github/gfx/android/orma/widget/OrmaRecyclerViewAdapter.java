@@ -107,6 +107,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      */
     public Single<Long> addItemAsObservable(@NonNull final Model item) {
         return addItemAsObservable(new ModelFactory<Model>() {
+            @NonNull
             @Override
             public Model call() {
                 return item;

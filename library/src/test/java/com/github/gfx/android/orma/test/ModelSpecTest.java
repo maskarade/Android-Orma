@@ -307,6 +307,7 @@ public class ModelSpecTest {
     @Test
     public void testPrimaryKeyOnConflict() throws Exception {
         db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+            @NonNull
             @Override
             public ModelWithConflictResolutions call() {
                 ModelWithConflictResolutions model = new ModelWithConflictResolutions();
@@ -321,6 +322,7 @@ public class ModelSpecTest {
         });
 
         db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+            @NonNull
             @Override
             public ModelWithConflictResolutions call() {
                 ModelWithConflictResolutions model = new ModelWithConflictResolutions();
@@ -340,6 +342,7 @@ public class ModelSpecTest {
     @Test
     public void testUniqueOnConflict() throws Exception {
         db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+            @NonNull
             @Override
             public ModelWithConflictResolutions call() {
                 ModelWithConflictResolutions model = new ModelWithConflictResolutions();
@@ -354,6 +357,7 @@ public class ModelSpecTest {
         });
 
         db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+            @NonNull
             @Override
             public ModelWithConflictResolutions call() {
                 ModelWithConflictResolutions model = new ModelWithConflictResolutions();

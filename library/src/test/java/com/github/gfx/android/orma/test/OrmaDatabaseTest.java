@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -55,6 +56,7 @@ public class OrmaDatabaseTest {
                 .build();
 
         db.prepareInsertIntoAuthor().execute(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();

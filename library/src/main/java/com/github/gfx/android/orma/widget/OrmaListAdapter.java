@@ -109,6 +109,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
      */
     public Single<Long> addItemAsObservable(final Model item) {
         return addItemAsObservable(new ModelFactory<Model>() {
+            @NonNull
             @Override
             public Model call() {
                 return item;

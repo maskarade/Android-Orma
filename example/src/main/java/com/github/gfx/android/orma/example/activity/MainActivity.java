@@ -33,6 +33,7 @@ import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -175,6 +176,7 @@ public class MainActivity extends AppCompatActivity
 
     void associations() {
         Category category = orma.relationOfCategory().getOrCreate(0, new ModelFactory<Category>() {
+            @NonNull
             @Override
             public Category call() {
                 return new Category("foo");

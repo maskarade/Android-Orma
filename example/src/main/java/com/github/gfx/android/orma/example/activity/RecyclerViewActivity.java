@@ -72,6 +72,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 adapter.addItemAsObservable(new ModelFactory<Todo>() {
+                    @NonNull
                     @Override
                     public Todo call() {
                         Todo todo = new Todo();

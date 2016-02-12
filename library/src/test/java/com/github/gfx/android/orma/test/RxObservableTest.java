@@ -101,6 +101,7 @@ public class RxObservableTest {
     public void inserterObservable() throws Exception {
         long rowid = db.prepareInsertIntoBook()
                 .executeAsObservable(new ModelFactory<Book>() {
+                    @NonNull
                     @Override
                     public Book call() {
                         Book book = new Book();

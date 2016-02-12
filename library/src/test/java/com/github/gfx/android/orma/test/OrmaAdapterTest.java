@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.LayoutInflater;
@@ -50,6 +51,7 @@ public class OrmaAdapterTest {
 
         Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
         inserter.execute(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();
@@ -60,6 +62,7 @@ public class OrmaAdapterTest {
         });
 
         inserter.execute(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();
@@ -70,6 +73,7 @@ public class OrmaAdapterTest {
         });
 
         inserter.execute(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();
@@ -119,6 +123,7 @@ public class OrmaAdapterTest {
     @Test
     public void testAddItemAsObservable() throws Exception {
         long id = adapter.addItemAsObservable(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();

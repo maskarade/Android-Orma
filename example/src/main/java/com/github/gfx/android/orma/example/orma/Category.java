@@ -51,6 +51,7 @@ public class Category {
 
     public Item createItem(OrmaDatabase orma, final String name) {
         return orma.createItem(new ModelFactory<Item>() {
+            @NonNull
             @Override
             public Item call() {
                 return new Item(name, SingleAssociation.just(id, Category.this));

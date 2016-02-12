@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -45,6 +46,7 @@ public class RelationTest {
 
         Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
         inserter.execute(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();
@@ -55,6 +57,7 @@ public class RelationTest {
         });
 
         inserter.execute(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();
@@ -65,6 +68,7 @@ public class RelationTest {
         });
 
         inserter.execute(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();
@@ -75,6 +79,7 @@ public class RelationTest {
         });
 
         inserter.execute(new ModelFactory<Author>() {
+            @NonNull
             @Override
             public Author call() {
                 Author author = new Author();
@@ -179,6 +184,7 @@ public class RelationTest {
     @Test
     public void testMultipleOrderingTerms() throws Exception {
         orma.createModelWithMultipleSortableColumns(new ModelFactory<ModelWithMultipleSortableColumns>() {
+            @NonNull
             @Override
             public ModelWithMultipleSortableColumns call() {
                 ModelWithMultipleSortableColumns m = new ModelWithMultipleSortableColumns();
@@ -190,6 +196,7 @@ public class RelationTest {
         });
 
         orma.createModelWithMultipleSortableColumns(new ModelFactory<ModelWithMultipleSortableColumns>() {
+            @NonNull
             @Override
             public ModelWithMultipleSortableColumns call() {
                 ModelWithMultipleSortableColumns m = new ModelWithMultipleSortableColumns();
@@ -201,6 +208,7 @@ public class RelationTest {
         });
 
         orma.createModelWithMultipleSortableColumns(new ModelFactory<ModelWithMultipleSortableColumns>() {
+            @NonNull
             @Override
             public ModelWithMultipleSortableColumns call() {
                 ModelWithMultipleSortableColumns m = new ModelWithMultipleSortableColumns();
