@@ -614,7 +614,7 @@ Check your toolchain. FYI here are my toolchain versions:
 
 ### Is there a real-world example that uses Orma?
 
-* [gfx/Android-Helium]
+* [gfx/Android-Helium](https://github.com/gfx/Android-Helium)
 * [konifar/droidkaigi2016](https://github.com/konifar/droidkaigi2016)
 
 They are Android apps which uses Orma and are released to Google Play.
