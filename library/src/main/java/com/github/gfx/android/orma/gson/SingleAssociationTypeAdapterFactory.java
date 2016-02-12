@@ -23,11 +23,9 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import com.github.gfx.android.orma.DatabaseHandle;
 import com.github.gfx.android.orma.Schema;
+import com.github.gfx.android.orma.internal.Schemas;
 import com.github.gfx.android.orma.SingleAssociation;
-
-import android.support.annotation.NonNull;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -37,23 +35,6 @@ import java.lang.reflect.ParameterizedType;
  */
 public class SingleAssociationTypeAdapterFactory implements TypeAdapterFactory {
 
-    final DatabaseHandle orma;
-
-    public SingleAssociationTypeAdapterFactory(@NonNull DatabaseHandle orma) {
-        this.orma = orma;
-    }
-
-    @NonNull
-    Schema<?> findSchema(Class<?> modelClass) {
-        for (Schema<?> schema : orma.getSchemas()) {
-            if (schema.getModelClass().equals(modelClass)) {
-                return schema;
-            }
-        }
-        throw new RuntimeException("No schema found for " + modelClass);
-    }
-
-    @SuppressWarnings("raw")
     @Override
     public <T> TypeAdapter<T> create(final Gson gson, TypeToken<T> typeToken) {
         if (!typeToken.getRawType().isAssignableFrom(SingleAssociation.class)) {
@@ -66,7 +47,7 @@ public class SingleAssociationTypeAdapterFactory implements TypeAdapterFactory {
         final Class<?> modelType = (Class<?>) ((ParameterizedType) typeToken.getType())
                 .getActualTypeArguments()[0];
 
-        final Schema schema = findSchema(modelType);
+        final Schema<?> schema = Schemas.get(modelType);
 
         return new TypeAdapter<T>() {
 
@@ -80,7 +61,7 @@ public class SingleAssociationTypeAdapterFactory implements TypeAdapterFactory {
             @SuppressWarnings("unchecked")
             public T read(JsonReader in) throws IOException {
                 Object model = gson.fromJson(in, modelType);
-                return (T) SingleAssociation.just(schema, model);
+                return (T) SingleAssociation.just((Schema<Object>)schema, model);
             }
         };
     }

@@ -124,6 +124,8 @@ public class Types {
 
     public static final ClassName BuiltInSerializers = ClassName.get(ormaPackageName, "BuiltInSerializers");
 
+    public static final ClassName Schemas = ClassName.get(ormaPackageName + ".internal", "Schemas");
+
     // helper methods
 
     public static ParameterizedTypeName getCollection(TypeName type) {

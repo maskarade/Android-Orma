@@ -21,7 +21,6 @@ import com.google.gson.GsonBuilder;
 
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
-import com.github.gfx.android.orma.gson.SingleAssociationTypeAdapterFactory;
 import com.github.gfx.android.orma.test.model.Book;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
@@ -50,9 +49,7 @@ public class GsonTypeAdapterTest {
 
         db = OrmaFactory.create();
 
-        gson = new GsonBuilder()
-                .registerTypeAdapterFactory(new SingleAssociationTypeAdapterFactory(db))
-                .create();
+        gson = new GsonBuilder().create();
 
         publisher = db.createPublisher(new ModelFactory<Publisher>() {
             @NonNull

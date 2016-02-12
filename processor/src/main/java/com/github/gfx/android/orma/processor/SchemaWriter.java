@@ -79,7 +79,7 @@ public class SchemaWriter extends BaseWriter {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
 
         fieldSpecs.add(FieldSpec.builder(schema.getSchemaClassName(), "INSTANCE", publicStaticFinal)
-                .initializer("new $T()", schema.getSchemaClassName())
+                .initializer("$T.register(new $T())", Types.Schemas, schema.getSchemaClassName())
                 .build());
 
         List<FieldSpec> columns = new ArrayList<>();
