@@ -18,6 +18,7 @@ package com.github.gfx.android.orma;
 import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
+import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
@@ -152,14 +153,26 @@ public class OrmaConnection extends SQLiteOpenHelper {
         return typeAdapterRegistry;
     }
 
+    @NonNull
     public <T> T createModel(Schema<T> schema, ModelFactory<T> factory) {
+        T model = factory.call();
         Inserter<T> sth = new Inserter<>(this, schema);
-        long id = sth.execute(factory.call());
+        long id = sth.execute(model);
 
         ColumnDef<T, ?> primaryKey = schema.getPrimaryKey();
-        String whereClause = '"' + primaryKey.name + '"' + " = ?";
-        String[] whereArgs = {String.valueOf(id)};
-        return querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null, 0);
+        String whereClause = primaryKey.getEscapedName() + " = ?";
+        String primaryKeyValue;
+        if (primaryKey.isAutoValue()) {
+            primaryKeyValue = Long.toString(id);
+        } else {
+            primaryKeyValue = String.valueOf(primaryKey.get(model));
+        }
+        String[] whereArgs = {primaryKeyValue};
+        T createdModel = querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null, 0);
+        if (createdModel == null) {
+            throw new NoValueException("Can't retrieve the created model for " + model + " (rowid=" + id + ")");
+        }
+        return createdModel;
     }
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
