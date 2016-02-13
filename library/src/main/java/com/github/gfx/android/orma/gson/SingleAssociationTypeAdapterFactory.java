@@ -24,8 +24,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import com.github.gfx.android.orma.Schema;
-import com.github.gfx.android.orma.internal.Schemas;
 import com.github.gfx.android.orma.SingleAssociation;
+import com.github.gfx.android.orma.internal.Schemas;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -61,7 +61,7 @@ public class SingleAssociationTypeAdapterFactory implements TypeAdapterFactory {
             @SuppressWarnings("unchecked")
             public T read(JsonReader in) throws IOException {
                 Object model = gson.fromJson(in, modelType);
-                return (T) SingleAssociation.just((Schema<Object>)schema, model);
+                return (T) SingleAssociation.just((Schema<Object>) schema, model);
             }
         };
     }

@@ -22,7 +22,6 @@ import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.util.ArraySet;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

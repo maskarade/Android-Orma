@@ -33,11 +33,6 @@ public abstract class AbstractMigrationEngine implements MigrationEngine {
         this.version = version;
     }
 
-    @Override
-    public int getVersion() {
-        return version;
-    }
-
     protected static boolean extractDebuggable(Context context) {
         return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
                 == ApplicationInfo.FLAG_DEBUGGABLE;
@@ -62,13 +57,18 @@ public abstract class AbstractMigrationEngine implements MigrationEngine {
         }
     }
 
-    protected static int extractVersionCode(@NonNull  Context context) {
+    protected static int extractVersionCode(@NonNull Context context) {
         int versionCode = getPackageInfo(context).versionCode;
         if (versionCode != 0) {
             return versionCode;
         } else {
             return 1; // robolectric
         }
+    }
+
+    @Override
+    public int getVersion() {
+        return version;
     }
 
 }

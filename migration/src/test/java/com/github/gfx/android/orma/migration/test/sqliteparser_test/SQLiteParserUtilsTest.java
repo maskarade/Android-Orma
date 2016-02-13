@@ -59,7 +59,7 @@ public class SQLiteParserUtilsTest {
 
     @Test
     public void testSQLiteComponent() throws Exception {
-        String sql =  "CREATE TABLE foo (\n"
+        String sql = "CREATE TABLE foo (\n"
                 + "id INTEGER,\n"
                 + "title TEXT\n"
                 + ")";

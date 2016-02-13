@@ -17,6 +17,7 @@
 package com.github.gfx.android.orma.migration.test.util;
 
 public class TestUtils {
+
     public static boolean runOnAndroid() {
         return System.getProperty("java.vm.name").equals("Dalvik");
     }

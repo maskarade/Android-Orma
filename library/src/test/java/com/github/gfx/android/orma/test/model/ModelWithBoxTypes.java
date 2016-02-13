@@ -22,7 +22,6 @@ import android.support.annotation.Nullable;
 
 /**
  * @see ModelWithBoxTypes_Schema
- *
  * @see ModelWithPrimitives
  */
 @Table

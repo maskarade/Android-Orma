@@ -64,6 +64,15 @@ public class MainActivity extends AppCompatActivity
 
     OrmaDatabase orma;
 
+    public static void largeLog(String tag, String content) {
+        if (content.length() > 2000) {
+            Log.e(tag, content.substring(0, 2000));
+            largeLog(tag, content.substring(2000));
+        } else {
+            Log.e(tag, content);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,15 +143,6 @@ public class MainActivity extends AppCompatActivity
 
         for (SQLiteMaster metadata : SQLiteMaster.loadTables(orma.getConnection().getReadableDatabase()).values()) {
             Log.d(TAG, metadata.toString());
-        }
-    }
-
-    public static void largeLog(String tag, String content) {
-        if (content.length() > 2000) {
-            Log.e(tag, content.substring(0, 2000));
-            largeLog(tag, content.substring(2000));
-        } else {
-            Log.e(tag, content);
         }
     }
 

@@ -196,7 +196,6 @@ public class SqlGenerator {
         CodeBlock.Builder codeBuilder = CodeBlock.builder();
         codeBuilder.addStatement("$T s = new $T()", StringBuilder.class, StringBuilder.class);
 
-
         codeBuilder.addStatement("s.append($S)", "INSERT");
 
         codeBuilder.beginControlFlow("switch ($L)", onConflictAlgorithmParamName)

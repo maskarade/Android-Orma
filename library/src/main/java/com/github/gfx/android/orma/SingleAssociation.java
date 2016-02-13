@@ -71,8 +71,8 @@ public class SingleAssociation<Model> {
         return new SingleAssociation<>(id, model);
     }
 
-    public static <T> SingleAssociation<T> just(@NonNull  Schema<T> schema, @NonNull T model) {
-        return new SingleAssociation<>((long)(Object)schema.getPrimaryKey().get(model), model);
+    public static <T> SingleAssociation<T> just(@NonNull Schema<T> schema, @NonNull T model) {
+        return new SingleAssociation<>((long) (Object) schema.getPrimaryKey().get(model), model);
     }
 
     public static <T> SingleAssociation<T> id(final long id) {
@@ -103,7 +103,6 @@ public class SingleAssociation<Model> {
      * A shortcut of {@code singleAssociation.single().toBlocking().value()}.
      *
      * @return A model value the {@code SingleAssociation<T>} refers to.
-     * @throws NoValueException
      */
     @NonNull
     public Model value() throws NoValueException {

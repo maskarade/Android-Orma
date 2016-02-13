@@ -31,7 +31,7 @@ import java.util.List;
  * By default, this class is in auto schema version mode,
  * where {@code BuildConfig.VERSION_CODE} is used as the {@code schemaVersion} on release build,
  * or the application updated time is used as the {@code schemaVersion} on debug build.
- *</p>
+ * </p>
  *
  * <p>
  * You can set the schema version manually by {@link OrmaMigration.Builder#schemaVersion(int)}.
@@ -45,14 +45,10 @@ public class OrmaMigration extends AbstractMigrationEngine {
 
     final SchemaDiffMigration schemaDiffMigration;
 
-    public static Builder builder(@NonNull Context context) {
-        return new Builder(context);
-    }
-
     /**
      * To control the schema version, use this constructor.
      *
-     * @param version The database schema version used in {@link android.database.sqlite.SQLiteOpenHelper}.
+     * @param version             The database schema version used in {@link android.database.sqlite.SQLiteOpenHelper}.
      * @param manualStepMigration Used to control manual-step migration
      * @param schemaDiffMigration Used to control automatic migration
      */
@@ -66,9 +62,9 @@ public class OrmaMigration extends AbstractMigrationEngine {
     /**
      * Use {@link OrmaMigration#builder(Context)} instead.
      *
-     * @param context -
+     * @param context                       -
      * @param versionForManualStepMigration -
-     * @param trace -
+     * @param trace                         -
      */
     @Deprecated
     public OrmaMigration(@NonNull Context context, int versionForManualStepMigration, boolean trace) {
@@ -80,12 +76,16 @@ public class OrmaMigration extends AbstractMigrationEngine {
     /**
      * Use {@link OrmaMigration#builder(Context)} instead.
      *
-     * @param context -
+     * @param context                       -
      * @param versionForManualStepMigration -
      */
     @Deprecated
     public OrmaMigration(@NonNull Context context, int versionForManualStepMigration) {
         this(context, versionForManualStepMigration, extractDebuggable(context));
+    }
+
+    public static Builder builder(@NonNull Context context) {
+        return new Builder(context);
     }
 
     public ManualStepMigration getManualStepMigration() {
@@ -98,8 +98,9 @@ public class OrmaMigration extends AbstractMigrationEngine {
 
     /**
      * Delegates to {@link ManualStepMigration#addStep(int, ManualStepMigration.Step)}.
+     *
      * @param version A target version for the step
-     * @param step A migration step task for {@code version}
+     * @param step    A migration step task for {@code version}
      */
     public void addStep(int version, @NonNull ManualStepMigration.Step step) {
         manualStepMigration.addStep(version, step);
@@ -119,7 +120,7 @@ public class OrmaMigration extends AbstractMigrationEngine {
      * Starts migration process, invoking {@link ManualStepMigration#start(SQLiteDatabase, List)} first, and then
      * invoking {@link SchemaDiffMigration#start(SQLiteDatabase, List)}.
      *
-     * @param db A writable database
+     * @param db      A writable database
      * @param schemas Destination schemas
      */
     @Override
@@ -137,7 +138,7 @@ public class OrmaMigration extends AbstractMigrationEngine {
 
         int schemaVersion;
 
-        int manualStepMigrationVersion ;
+        int manualStepMigrationVersion;
 
         boolean trace;
 

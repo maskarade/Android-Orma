@@ -265,7 +265,8 @@ public class DatabaseWriter extends BaseWriter {
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("relationOf" + simpleModelName)
-                            .addJavadoc("Creates a relation of {@code $T}, which is an entry point of all the operations.\n", schema.getModelClassName())
+                            .addJavadoc("Creates a relation of {@code $T}, which is an entry point of all the operations.\n",
+                                    schema.getModelClassName())
                             .addAnnotation(Specs.nonNullAnnotationSpec())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getRelationClassName())

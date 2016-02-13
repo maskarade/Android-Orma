@@ -20,7 +20,6 @@ import com.github.gfx.android.orma.annotation.Table;
 
 /**
  * @see ModelWithPrimitives_Schema
- *
  * @see ModelWithBoxTypes
  */
 @Table

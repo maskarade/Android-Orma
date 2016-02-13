@@ -158,6 +158,13 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         saveStep(db, version, sql);
     }
 
+    // TODO: replace it with a logging library
+    private void trace(@NonNull String format, @NonNull Object... args) {
+        if (trace) {
+            Log.i(TAG, String.format(Locale.US, format, args));
+        }
+    }
+
     /**
      * A migration step which handles {@code down()}, and {@code change()}.
      */
@@ -215,13 +222,6 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
         public void execSQL(@NonNull String sql) {
             execStep(db, upgrade ? version : version - 1, sql);
-        }
-    }
-
-    // TODO: replace it with a logging library
-    private void trace(@NonNull String format, @NonNull Object... args) {
-        if (trace) {
-            Log.i(TAG, String.format(Locale.US, format, args));
         }
     }
 }

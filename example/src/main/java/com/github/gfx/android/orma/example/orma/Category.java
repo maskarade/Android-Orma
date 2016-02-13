@@ -33,7 +33,7 @@ public class Category {
     public final long id;
 
     @Column(uniqueOnConflict = OnConflict.IGNORE)
-    public final  String name;
+    public final String name;
 
     @Setter
     public Category(long id, @NonNull String name) {

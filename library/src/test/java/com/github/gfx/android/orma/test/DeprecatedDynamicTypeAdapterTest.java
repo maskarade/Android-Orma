@@ -58,7 +58,7 @@ public class DeprecatedDynamicTypeAdapterTest {
                 })
                 .build();
 
-       ModelWithDeprecatedTypeAdapter model = orma.createModelWithDeprecatedTypeAdapter(
+        ModelWithDeprecatedTypeAdapter model = orma.createModelWithDeprecatedTypeAdapter(
                 new ModelFactory<ModelWithDeprecatedTypeAdapter>() {
                     @NonNull
                     @Override

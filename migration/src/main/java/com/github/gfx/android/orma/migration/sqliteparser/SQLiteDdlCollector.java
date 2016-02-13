@@ -36,98 +36,6 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     CreateTableStatement createTableStatement;
 
-    @Override
-    public void enterCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
-        createTableStatement = new CreateTableStatement();
-    }
-
-    @Override
-    public void exitCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
-        if (ctx.K_AS() != null) {
-            createTableStatement.selectStatement = new SelectStatement();
-            appendTokenList(createTableStatement.selectStatement, ctx);
-        }
-
-        appendTokenList(createTableStatement, ctx);
-    }
-
-    @Override
-    public void exitTable_name(SQLiteParser.Table_nameContext ctx) {
-        createTableStatement.tableName = new SQLiteComponent.Name(ctx.getText());
-    }
-
-    @Override
-    public void enterColumn_def(SQLiteParser.Column_defContext ctx) {
-        columnDef = new CreateTableStatement.ColumnDef();
-        createTableStatement.columns.add(columnDef);
-    }
-
-    @Override
-    public void exitColumn_def(SQLiteParser.Column_defContext ctx) {
-        appendTokenList(columnDef, ctx);
-        columnDef = null;
-    }
-
-    @Override
-    public void exitColumn_name(SQLiteParser.Column_nameContext ctx) {
-        if (columnDef != null) {
-            columnDef.name = new SQLiteComponent.Name(ctx.getText());
-        }
-    }
-
-    @Override
-    public void exitType_name(SQLiteParser.Type_nameContext ctx) {
-        StringBuilder name = new StringBuilder();
-        for (SQLiteParser.NameContext nameContext : ctx.name()) {
-            if (name.length() != 0) {
-                name.append(' ');
-            }
-            name.append(nameContext.getText());
-        }
-        columnDef.type = name.toString();
-    }
-
-
-    @Override
-    public void exitColumn_constraint(SQLiteParser.Column_constraintContext ctx) {
-        CreateTableStatement.ColumnDef.Constraint constraint = new CreateTableStatement.ColumnDef.Constraint();
-
-        if (ctx.K_PRIMARY() != null) {
-            constraint.primaryKey = true;
-        } else if (ctx.K_NOT() != null) {
-            constraint.nullable = false;
-        } else if (ctx.K_NULL() != null) {
-            constraint.nullable = true;
-        } else if (ctx.K_DEFAULT() != null) {
-            List<ParseTree> nodes = ctx.children.subList(1, ctx.children.size());
-            for (ParseTree node : nodes) {
-                if (constraint.defaultExpr == null) {
-                    constraint.defaultExpr = combineParseTree(node);
-                } else {
-                    constraint.defaultExpr += " " + combineParseTree(node);
-                }
-            }
-        }
-
-        appendTokenList(constraint, ctx);
-
-        columnDef.constraints.add(constraint);
-    }
-
-    @Override
-    public void exitTable_constraint(SQLiteParser.Table_constraintContext ctx) {
-        CreateTableStatement.Constraint constraint = new CreateTableStatement.Constraint();
-
-        if (ctx.K_CONSTRAINT() != null) {
-            constraint.name = new SQLiteComponent.Name(ctx.name().getText());
-        }
-        appendTokenList(constraint, ctx);
-
-        createTableStatement.constraints.add(constraint);
-    }
-
-    // utils
-
     static void appendTokenList(final SQLiteComponent component, ParseTree node) {
         node.accept(new AbstractParseTreeVisitor<Void>() {
             @Override
@@ -172,5 +80,96 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
                 return sb;
             }
         }).toString();
+    }
+
+    @Override
+    public void enterCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
+        createTableStatement = new CreateTableStatement();
+    }
+
+    @Override
+    public void exitCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
+        if (ctx.K_AS() != null) {
+            createTableStatement.selectStatement = new SelectStatement();
+            appendTokenList(createTableStatement.selectStatement, ctx);
+        }
+
+        appendTokenList(createTableStatement, ctx);
+    }
+
+    @Override
+    public void exitTable_name(SQLiteParser.Table_nameContext ctx) {
+        createTableStatement.tableName = new SQLiteComponent.Name(ctx.getText());
+    }
+
+    @Override
+    public void enterColumn_def(SQLiteParser.Column_defContext ctx) {
+        columnDef = new CreateTableStatement.ColumnDef();
+        createTableStatement.columns.add(columnDef);
+    }
+
+    @Override
+    public void exitColumn_def(SQLiteParser.Column_defContext ctx) {
+        appendTokenList(columnDef, ctx);
+        columnDef = null;
+    }
+
+    @Override
+    public void exitColumn_name(SQLiteParser.Column_nameContext ctx) {
+        if (columnDef != null) {
+            columnDef.name = new SQLiteComponent.Name(ctx.getText());
+        }
+    }
+
+    // utils
+
+    @Override
+    public void exitType_name(SQLiteParser.Type_nameContext ctx) {
+        StringBuilder name = new StringBuilder();
+        for (SQLiteParser.NameContext nameContext : ctx.name()) {
+            if (name.length() != 0) {
+                name.append(' ');
+            }
+            name.append(nameContext.getText());
+        }
+        columnDef.type = name.toString();
+    }
+
+    @Override
+    public void exitColumn_constraint(SQLiteParser.Column_constraintContext ctx) {
+        CreateTableStatement.ColumnDef.Constraint constraint = new CreateTableStatement.ColumnDef.Constraint();
+
+        if (ctx.K_PRIMARY() != null) {
+            constraint.primaryKey = true;
+        } else if (ctx.K_NOT() != null) {
+            constraint.nullable = false;
+        } else if (ctx.K_NULL() != null) {
+            constraint.nullable = true;
+        } else if (ctx.K_DEFAULT() != null) {
+            List<ParseTree> nodes = ctx.children.subList(1, ctx.children.size());
+            for (ParseTree node : nodes) {
+                if (constraint.defaultExpr == null) {
+                    constraint.defaultExpr = combineParseTree(node);
+                } else {
+                    constraint.defaultExpr += " " + combineParseTree(node);
+                }
+            }
+        }
+
+        appendTokenList(constraint, ctx);
+
+        columnDef.constraints.add(constraint);
+    }
+
+    @Override
+    public void exitTable_constraint(SQLiteParser.Table_constraintContext ctx) {
+        CreateTableStatement.Constraint constraint = new CreateTableStatement.Constraint();
+
+        if (ctx.K_CONSTRAINT() != null) {
+            constraint.name = new SQLiteComponent.Name(ctx.name().getText());
+        }
+        appendTokenList(constraint, ctx);
+
+        createTableStatement.constraints.add(constraint);
     }
 }

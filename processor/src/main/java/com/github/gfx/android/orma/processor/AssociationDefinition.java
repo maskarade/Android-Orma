@@ -25,13 +25,13 @@ public class AssociationDefinition {
 
     final ClassName modelType;
 
+    public AssociationDefinition(ClassName associationType, TypeName modelType) {
+        this.associationType = associationType;
+        this.modelType = (ClassName) modelType;
+    }
+
     public static AssociationDefinition create(TypeName type) {
         ParameterizedTypeName pt = (ParameterizedTypeName) type;
         return new AssociationDefinition(pt.rawType, pt.typeArguments.get(0));
-    }
-
-    public AssociationDefinition(ClassName associationType, TypeName modelType) {
-        this.associationType = associationType;
-        this.modelType = (ClassName)modelType;
     }
 }

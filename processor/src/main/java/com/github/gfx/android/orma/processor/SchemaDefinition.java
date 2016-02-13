@@ -145,6 +145,15 @@ public class SchemaDefinition {
         throw new AssertionError("No non-empty string found");
     }
 
+    static ColumnDefinition findPrimaryKey(List<ColumnDefinition> columns) {
+        for (ColumnDefinition c : columns) {
+            if (c.primaryKey) {
+                return c;
+            }
+        }
+        return null;
+    }
+
     List<ColumnDefinition> collectColumns(TypeElement typeElement) {
         Map<String, ExecutableElement> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         Map<String, ExecutableElement> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -189,15 +198,6 @@ public class SchemaDefinition {
                     return column;
                 })
                 .collect(Collectors.toList());
-    }
-
-    static ColumnDefinition findPrimaryKey(List<ColumnDefinition> columns) {
-        for (ColumnDefinition c : columns) {
-            if (c.primaryKey) {
-                return c;
-            }
-        }
-        return null;
     }
 
     private String extractNameFromGetter(Getter getter, ExecutableElement getterElement) {

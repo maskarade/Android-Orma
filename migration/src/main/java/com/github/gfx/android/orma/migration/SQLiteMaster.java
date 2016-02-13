@@ -48,20 +48,6 @@ public class SQLiteMaster {
         this.sql = sql;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
-        s.append(sql);
-        s.append("; ");
-
-        for (SQLiteMaster index : indexes) {
-            s.append(index);
-            s.append("; ");
-        }
-        s.setLength(s.length() - "; ".length());
-        return s.toString();
-    }
-
     public static Map<String, SQLiteMaster> loadTables(SQLiteDatabase db) {
         Cursor cursor = db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master", null);
 
@@ -100,5 +86,19 @@ public class SQLiteMaster {
         cursor.close();
 
         return tables;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append(sql);
+        s.append("; ");
+
+        for (SQLiteMaster index : indexes) {
+            s.append(index);
+            s.append("; ");
+        }
+        s.setLength(s.length() - "; ".length());
+        return s.toString();
     }
 }
