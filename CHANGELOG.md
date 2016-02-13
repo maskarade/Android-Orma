@@ -8,6 +8,26 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v1.3.0 - 2016/02/13
+
+There are lots of changes in this version:
+
+* https://github.com/gfx/Android-Orma/compare/v1.2.2...v1.3.0
+
+### Bug Fixes
+
+* Removed useless transactions, which might cause dead locks (#150)
+* `OrmaConnection#createModel()` did not work for models with non-auto
+  primary keys (#159)
+
+### New Features
+
+* Built-in type adapters: `ArrayList<String>` and `HashSet<String>` (#151)
+* Added `Selector#isEmpty()` and deprecated `Selector#empty()` (#152)
+* `SingleAssociation<T>` is now Gson-serializable (#155, #156)
+* `SingleAssociation<T>` is now Parcelable (#160)
+* `UPSERT` support, including `Relation#upserter()` (#158)
+
 ## v1.2.2 - 2016/02/09
 
 ### Bug Fixes
