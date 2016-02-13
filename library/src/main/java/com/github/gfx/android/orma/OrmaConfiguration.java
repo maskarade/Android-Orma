@@ -195,7 +195,7 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
     protected T fillDefaults() {
 
         if (migrationEngine == null) {
-            migrationEngine = new SchemaDiffMigration(context, debug);
+            migrationEngine = new SchemaDiffMigration(context, trace);
         }
 
         if (typeAdapterRegistry == null) {
