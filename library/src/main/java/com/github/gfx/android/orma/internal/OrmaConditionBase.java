@@ -18,7 +18,6 @@ package com.github.gfx.android.orma.internal;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
-import com.github.gfx.android.orma.adapter.TypeAdapter;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,6 +25,8 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import rx.functions.Func1;
 
 public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model, ?>> {
 
@@ -109,7 +110,7 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     }
 
     @SuppressWarnings("unchecked")
-    protected <ColumnType> C in(boolean not, @NonNull String columnName, @NonNull Collection<ColumnType> values) {
+    protected C in(boolean not, @NonNull String columnName, @NonNull Collection<?> values) {
         StringBuilder clause = new StringBuilder();
 
         clause.append(columnName);
@@ -130,11 +131,11 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     }
 
     @SuppressWarnings("unchecked")
-    protected <ColumnType> C in(boolean not, @NonNull String columnName, @NonNull Collection<ColumnType> values,
-            TypeAdapter<ColumnType> typeAdapter) {
-        List<String> serializedValues = new ArrayList<>(values.size());
+    protected <ColumnType, SerializedType> C in(boolean not, @NonNull String columnName,
+            @NonNull Collection<ColumnType> values, Func1<ColumnType, SerializedType> serializer) {
+        List<SerializedType> serializedValues = new ArrayList<>(values.size());
         for (ColumnType value : values) {
-            serializedValues.add(typeAdapter.serializeNullable(value));
+            serializedValues.add(serializer.call(value));
         }
         return in(not, columnName, serializedValues);
     }

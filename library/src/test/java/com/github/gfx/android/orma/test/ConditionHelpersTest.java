@@ -117,6 +117,8 @@ public class ConditionHelpersTest {
         assertThat(selector().floatValueIn(Arrays.asList((float) 1, (float) 2)).count(), is(2));
         assertThat(selector().doubleValueIn(Arrays.asList((double) 1, (double) 2)).count(), is(2));
         assertThat(selector().dateValueIn(Arrays.asList(new Date(1), new Date(2))).count(), is(2));
+
+        assertThat(selector().dateValueIn(new Date(1), new Date(2)).count(), is(2));
     }
 
     @Test
@@ -131,6 +133,8 @@ public class ConditionHelpersTest {
         assertThat(selector().floatValueNotIn(Arrays.asList((float) 1, (float) 2)).count(), is(8));
         assertThat(selector().doubleValueNotIn(Arrays.asList((double) 1, (double) 2)).count(), is(8));
         assertThat(selector().dateValueNotIn(Arrays.asList(new Date(1), new Date(2))).count(), is(8));
+
+        assertThat(selector().dateValueNotIn(new Date(1), new Date(2)).count(), is(8));
     }
 
     @Test

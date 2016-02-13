@@ -228,6 +228,14 @@ public class ColumnDefinition {
         }
     }
 
+    public TypeName getSerializedBoxType() {
+        if (typeAdapter != null) {
+            return typeAdapter.serializedType.box();
+        } else {
+            return type.box();
+        }
+    }
+
     public String getStorageType() {
         return storageType;
     }

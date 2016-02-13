@@ -16,11 +16,13 @@
 package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -125,6 +127,18 @@ public class ConditionQueryHelpers {
         );
 
         if (column.needsTypeAdapter()) {
+            TypeSpec serializerFunction = TypeSpec.anonymousClassBuilder("")
+                    .superclass(Types.getFunc1(type.box(), column.getSerializedBoxType()))
+                    .addMethod(
+                            MethodSpec.methodBuilder("call")
+                                    .addAnnotation(Specs.overrideAnnotationSpec())
+                                    .addModifiers(Modifier.PUBLIC)
+                                    .returns(column.getSerializedBoxType())
+                                    .addParameter(ParameterSpec.builder(type.box(), "value").build())
+                                    .addStatement("return $L", column.buildSerializeExpr("conn", "value"))
+                                    .build())
+                    .build();
+
             methodSpecs.add(
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
@@ -133,7 +147,7 @@ public class ConditionQueryHelpers {
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(false, $S, values, $L)",
-                                    sql.quoteIdentifier(column.columnName), column.buildGetTypeAdapter("conn"))
+                                    sql.quoteIdentifier(column.columnName), serializerFunction)
                             .build()
             );
 
@@ -145,9 +159,10 @@ public class ConditionQueryHelpers {
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(true, $S, values, $L)",
-                                    sql.quoteIdentifier(column.columnName), column.buildGetTypeAdapter("conn"))
+                                    sql.quoteIdentifier(column.columnName), serializerFunction)
                             .build()
             );
+
         } else {
             methodSpecs.add(
                     MethodSpec.methodBuilder(column.name + "In")
@@ -173,6 +188,33 @@ public class ConditionQueryHelpers {
                             .build()
             );
         }
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder(column.name + "In")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
+                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .build())
+                        .varargs(true)
+                        .returns(targetClassName)
+                        .addStatement("return $L($T.asList(values))",
+                                column.name + "In", Types.Arrays)
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder(column.name + "NotIn")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
+                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .build())
+                        .varargs(true)
+                        .returns(targetClassName)
+                        .addStatement("return $L($T.asList(values))",
+                                column.name + "NotIn", Types.Arrays)
+                        .build()
+        );
+
 
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "Lt")

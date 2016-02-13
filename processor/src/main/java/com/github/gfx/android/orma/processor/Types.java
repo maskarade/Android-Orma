@@ -70,6 +70,8 @@ public class Types {
 
     public static final ClassName Observable = ClassName.get("rx", "Observable");
 
+    public static final ClassName Func1 = ClassName.get("rx.functions", "Func1");
+
     public static final TypeVariableName T = TypeVariableName.get("T");
 
     // Orma types
@@ -191,6 +193,10 @@ public class Types {
 
     public static ParameterizedTypeName getObservable(TypeName typeName) {
         return ParameterizedTypeName.get(Observable, typeName);
+    }
+
+    public static ParameterizedTypeName getFunc1(TypeName argType, TypeName returnType) {
+        return ParameterizedTypeName.get(Func1, argType, returnType);
     }
 
     public static ParameterizedTypeName getModelFactory(TypeName typeName) {
