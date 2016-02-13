@@ -621,6 +621,26 @@ They are Android apps which uses Orma and are released to Google Play.
 
 They also uses Google Dagger, Android DataBinding, Google Play Services, and etc.
 
+### How can I enable debug logging on release build?
+
+Call `OrmaDatabase.Builder#trace(boolean)` with `true`:
+
+```java
+OrmaDatabase orma = OrmaDatabase.builder(context)
+    .trace(true)
+    .create();
+```
+
+This option also enables logging in the default migration engine.
+
+If you give a custom migration engine to the orma builder, you have to enable
+`trace` flag to its constructor:
+
+```java
+boolean trace = true;
+SchemaDiffMigration migration = new SchemaDiffMigration(context, trace);
+```
+
 ## Support
 
 * Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
