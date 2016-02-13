@@ -26,6 +26,7 @@ import com.github.gfx.android.orma.annotation.Table;
 
 import android.support.annotation.NonNull;
 
+
 @Table
 public class Category {
 
@@ -49,6 +50,7 @@ public class Category {
         return orma.relationOfItem().categoryEq(this);
     }
 
+    @NonNull
     public Item createItem(OrmaDatabase orma, final String name) {
         return orma.createItem(new ModelFactory<Item>() {
             @NonNull

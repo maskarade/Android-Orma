@@ -17,9 +17,13 @@ package com.github.gfx.android.orma;
 
 import com.google.gson.annotations.JsonAdapter;
 
+import com.github.gfx.android.orma.exception.InvalidModelException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.gson.SingleAssociationTypeAdapterFactory;
+import com.github.gfx.android.orma.internal.Schemas;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import rx.Single;
@@ -31,7 +35,7 @@ import rx.SingleSubscriber;
  * @param <Model> The type of a model to relate.
  */
 @JsonAdapter(SingleAssociationTypeAdapterFactory.class)
-public class SingleAssociation<Model> {
+public class SingleAssociation<Model> implements Parcelable {
 
     final long id;
 
@@ -65,6 +69,12 @@ public class SingleAssociation<Model> {
                 }
             }
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> SingleAssociation<T> just(@NonNull T model) {
+        Schema<T> schema = Schemas.get((Class<T>)model.getClass());
+        return just(schema, model);
     }
 
     public static <T> SingleAssociation<T> just(long id, @NonNull T model) {
@@ -113,5 +123,41 @@ public class SingleAssociation<Model> {
     public String toString() {
         return "SingleAssociation{" +
                 "id=" + id + '}';
+    }
+
+    // Parcelable
+
+    public static Parcelable.ClassLoaderCreator<SingleAssociation<?>> CREATOR = new ClassLoaderCreator<SingleAssociation<?>>() {
+        @Override
+        public SingleAssociation<?> createFromParcel(Parcel source) {
+            return createFromParcel(source, null);
+        }
+
+        @Override
+        public SingleAssociation<?>[] newArray(int size) {
+            return new SingleAssociation<?>[size];
+        }
+
+        @Override
+        public SingleAssociation<?> createFromParcel(Parcel source, ClassLoader loader) {
+            long id = source.readLong();
+            Parcelable parcelable = source.readParcelable(loader);
+            return new SingleAssociation<>(id, parcelable);
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        Model model = single.toBlocking().value();
+        if (!(model instanceof Parcelable)) {
+            throw new InvalidModelException("Orma model " + model.getClass() + " is not a Parcelable");
+        }
+        dest.writeLong(id);
+        dest.writeParcelable((Parcelable) model, flags);
     }
 }

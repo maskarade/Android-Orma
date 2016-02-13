@@ -13,24 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.test.model;
 
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Table;
+package com.github.gfx.android.orma.exception;
 
-import android.os.Parcelable;
-import android.support.annotation.Nullable;
+public class InvalidModelException extends OrmaException {
 
-// A class that has the String primary key
-@Table
-public class Author {
+    public InvalidModelException(String detailMessage) {
+        super(detailMessage);
+    }
 
-    @PrimaryKey(auto = false)
-    public String name;
+    public InvalidModelException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
+    }
 
-    @Column
-    @Nullable
-    public String note;
-
+    public InvalidModelException(Throwable throwable) {
+        super(throwable);
+    }
 }

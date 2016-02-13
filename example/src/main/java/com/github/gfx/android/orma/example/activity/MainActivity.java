@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
 import com.github.gfx.android.orma.example.orma.Category;
+import com.github.gfx.android.orma.example.orma.Item;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
@@ -175,6 +176,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     void associations() {
+        orma.deleteFromCategory().execute();
+        orma.deleteFromItem().execute();
+
         Category category = orma.relationOfCategory().getOrCreate(0, new ModelFactory<Category>() {
             @NonNull
             @Override
@@ -183,7 +187,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        category.createItem(orma, ZonedDateTime.now().toString());
+        Item item = category.createItem(orma, ZonedDateTime.now().toString());
+        Log.d(TAG, "created: " + item);
 
         Log.d(TAG, "A category has many items (" + category.getItems(orma).count() + ")");
         Log.d(TAG, TextUtils.join(", ", category.getItems(orma)));
