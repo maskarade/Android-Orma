@@ -643,7 +643,6 @@ public class QueryTest {
         assertThat(db.selectFromBook().bookIdEq(book.bookId).value().content, is("modified"));
     }
 
-
     @Test
     public void inserterExecuteAll() throws Exception {
         Inserter<Book> inserter = db.prepareInsertIntoBook();

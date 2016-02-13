@@ -238,6 +238,16 @@ public class RelationTest {
     }
 
     @Test
+    public void upserter() throws Exception {
+        Author author = rel().selector().nameEq("A").value();
+        author.note = "modified";
+
+        rel().upserter().execute(author);
+
+        assertThat(rel().nameEq(author.name).selector().value().note, is("modified"));
+    }
+
+    @Test
     public void iterable() throws Exception {
         Relation<Author, ?> rel = rel().orderByNameAsc();
 
