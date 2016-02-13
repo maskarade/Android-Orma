@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.ModelFactory;
+import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.ModelWithBlob;
 import com.github.gfx.android.orma.test.model.ModelWithBoxTypes;
 import com.github.gfx.android.orma.test.model.ModelWithCollation;
@@ -73,6 +74,22 @@ public class ModelSpecTest {
 
         assertThat(model.s, is("foo"));
         assertThat(model.i, is(10L));
+    }
+
+    @Test
+    public void testCreateModelWithStringPrimaryKey() throws Exception {
+        Author author = db.createAuthor(new ModelFactory<Author>() {
+            @NonNull
+            @Override
+            public Author call() {
+                Author author = new Author();
+                author.name = "A";
+
+                return author;
+            }
+        });
+
+        assertThat(author.name, is("A"));
     }
 
     @Test
