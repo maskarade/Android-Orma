@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -218,12 +219,32 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     @NonNull
     public Inserter<Model> inserter() {
-        return inserter(OnConflict.NONE);
+        return inserter(OnConflict.NONE, true);
     }
 
     @NonNull
     public Inserter<Model> inserter(@OnConflict int onConflictAlgorithm) {
-        return new Inserter<>(conn, schema, schema.getInsertStatement(onConflictAlgorithm));
+        return new Inserter<>(conn, schema, onConflictAlgorithm, true);
+    }
+
+    /**
+     * @param onConflictAlgorithm {@link OnConflict} algorithm
+     * @param withoutAutoId if true, {@link PrimaryKey#auto()} is omitted in the {@code INSERT} statement.
+     * @return An {@link Inserter} instance, or a prepared statement to {@code INSERT}.
+     */
+    @NonNull
+    public Inserter<Model> inserter(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
+        return new Inserter<>(conn, schema, onConflictAlgorithm, withoutAutoId);
+    }
+
+    /**
+     * Equivalent to {@code relation.inserter(OnConflict.REPLACE, false)}.
+     *
+     * @return An {@code Inserter} instance to upsert rows.
+     */
+    @NonNull
+    public Inserter<Model> upserter() {
+        return inserter(OnConflict.REPLACE, false);
     }
 
     // Iterator<Model>

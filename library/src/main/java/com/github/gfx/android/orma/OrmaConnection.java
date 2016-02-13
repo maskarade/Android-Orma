@@ -17,7 +17,6 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
-import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
@@ -154,7 +153,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     public <T> T createModel(Schema<T> schema, ModelFactory<T> factory) {
-        Inserter<T> sth = new Inserter<>(this, schema, schema.getInsertStatement(OnConflict.NONE));
+        Inserter<T> sth = new Inserter<>(this, schema);
         long id = sth.execute(factory.call());
 
         ColumnDef<T, ?> primaryKey = schema.getPrimaryKey();

@@ -19,6 +19,8 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.squareup.javapoet.CodeBlock;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -189,7 +191,8 @@ public class SqlGenerator {
     }
 
 
-    public CodeBlock buildInsertStatementCode(SchemaDefinition schema, String onConflictAlgorithmParamName) {
+    public CodeBlock buildInsertStatementCode(SchemaDefinition schema,
+            String onConflictAlgorithmParamName, String withoutAutoValuesParamName) {
         CodeBlock.Builder codeBuilder = CodeBlock.builder();
         codeBuilder.addStatement("$T s = new $T()", StringBuilder.class, StringBuilder.class);
 
@@ -205,41 +208,55 @@ public class SqlGenerator {
                 .addStatement("case $T.ROLLBACK: s.append($S); break", OnConflict.class, " OR ROLLBACK")
                 .endControlFlow();
 
+        String insertWithoutAutoId = buildInsertComponent(schema, true);
+        String insertWithAutoId = buildInsertComponent(schema, false);
+
+        if (insertWithoutAutoId.equals(insertWithAutoId)) {
+            codeBuilder.addStatement("s.append($S)", insertWithoutAutoId);
+        } else {
+            codeBuilder.beginControlFlow("if ($L)", withoutAutoValuesParamName);
+            codeBuilder.addStatement("s.append($S)", insertWithoutAutoId);
+            codeBuilder.endControlFlow();
+            codeBuilder.beginControlFlow("else");
+            codeBuilder.addStatement("s.append($S)", insertWithAutoId);
+            codeBuilder.endControlFlow();
+        }
+        codeBuilder.addStatement("return s.toString()");
+
+        return codeBuilder.build();
+    }
+
+    @NonNull
+    public String buildInsertComponent(SchemaDefinition schema, boolean withoutAutoId) {
         StringBuilder sb = new StringBuilder();
         sb.append(" INTO ");
         appendIdentifier(sb, schema.getTableName());
         sb.append(" (");
 
-        List<ColumnDefinition> columns = schema.getColumns();
+        List<ColumnDefinition> columns = withoutAutoId ? schema.getColumnsWithoutAutoId() : schema.getColumns();
+
         int nColumns = columns.size();
+        boolean first = true;
         for (int i = 0; i < nColumns; i++) {
-            ColumnDefinition c = columns.get(i);
-            if (c.autoId) {
-                continue;
-            }
-            appendIdentifier(sb, c.columnName);
-            if ((i + 1) != nColumns && !columns.get(i + 1).autoId) {
+            if (!first) {
                 sb.append(',');
             }
+            ColumnDefinition c = columns.get(i);
+            appendIdentifier(sb, c.columnName);
+            first = false;
         }
         sb.append(')');
         sb.append(" VALUES (");
+        first = true;
         for (int i = 0; i < nColumns; i++) {
-            ColumnDefinition c = columns.get(i);
-            if (c.autoId) {
-                continue;
-            }
-            sb.append('?');
-            if ((i + 1) != nColumns && !columns.get(i + 1).autoId) {
+            if (!first) {
                 sb.append(',');
             }
+            sb.append('?');
+            first = false;
         }
         sb.append(')');
-
-        codeBuilder.addStatement("s.append($S)", sb.toString());
-        codeBuilder.addStatement("return s.toString()");
-
-        return codeBuilder.build();
+        return sb.toString();
     }
 
 

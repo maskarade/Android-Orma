@@ -54,11 +54,12 @@ public interface Schema<Model> extends MigrationSchema {
     List<String> getCreateIndexStatements();
 
     @NonNull
-    String getInsertStatement(@OnConflict int onConflictAlgorithm);
+    String getInsertStatement(@OnConflict int onConflictAlgorithm, boolean withoutAutoId);
 
-    Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Model model);
+    Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Model mode, boolean withoutAutoId);
 
-    void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model);
+    void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model,
+            boolean withoutAutoId, int offset);
 
     @NonNull
     Model newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor);

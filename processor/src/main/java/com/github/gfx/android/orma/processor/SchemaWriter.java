@@ -48,6 +48,12 @@ public class SchemaWriter extends BaseWriter {
 
     static final String ESCAPED_COLUMN_NAMES = "$ESCAPED_COLUMN_NAMES";
 
+    static final String onConflictAlgorithm = "onConflictAlgorithm";
+
+    static final String withoutAutoId = "withoutAutoId";
+
+    static final String offset = "offset";
+
     static final Modifier[] publicStaticFinal = {
             Modifier.PUBLIC,
             Modifier.STATIC,
@@ -357,11 +363,13 @@ public class SchemaWriter extends BaseWriter {
                 MethodSpec.methodBuilder("getInsertStatement")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                        .addParameter(ParameterSpec.builder(int.class, onConflictAlgorithm)
                                 .addAnnotation(OnConflict.class)
                                 .build())
+                        .addParameter(ParameterSpec.builder(boolean.class, withoutAutoId)
+                                .build())
                         .returns(Types.String)
-                        .addCode(sql.buildInsertStatementCode(schema, "onConflictAlgorithm"))
+                        .addCode(sql.buildInsertStatementCode(schema, onConflictAlgorithm, withoutAutoId))
                         .build()
         );
 
@@ -379,6 +387,7 @@ public class SchemaWriter extends BaseWriter {
                                 ParameterSpec.builder(schema.getModelClassName(), "model")
                                         .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
+                        .addParameter(boolean.class, withoutAutoId)
                         .addCode(buildConvertToArgs())
                         .build()
         );
@@ -400,6 +409,8 @@ public class SchemaWriter extends BaseWriter {
                                 ParameterSpec.builder(schema.getModelClassName(), "model")
                                         .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
+                        .addParameter(boolean.class, withoutAutoId)
+                        .addParameter(int.class, offset)
                         .addCode(buildBindArgs())
                         .build()
         );
@@ -427,8 +438,15 @@ public class SchemaWriter extends BaseWriter {
     private CodeBlock buildConvertToArgs() {
         CodeBlock.Builder builder = CodeBlock.builder();
 
-        List<ColumnDefinition> columns = schema.getColumnsWithoutAutoId();
-        builder.addStatement("$T args = new $T[$L]", ArrayTypeName.of(TypeName.OBJECT), TypeName.OBJECT, columns.size());
+        List<ColumnDefinition> columns = schema.getColumns();
+        List<ColumnDefinition> columnsWithoutAutoId = schema.getColumnsWithoutAutoId();
+
+        if (columns.size() == columnsWithoutAutoId.size()) {
+            builder.addStatement("$T args = new $T[$L]", ArrayTypeName.of(TypeName.OBJECT), TypeName.OBJECT, columns.size());
+        } else {
+            builder.addStatement("$T args = new $T[$L ? $L : $L]", ArrayTypeName.of(TypeName.OBJECT), TypeName.OBJECT,
+                    withoutAutoId, columnsWithoutAutoId.size(), columns.size());
+        }
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
@@ -436,6 +454,9 @@ public class SchemaWriter extends BaseWriter {
 
             if (c.isNullableInJava()) {
                 builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
+            }
+            if (c.autoId) {
+                builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
             CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
@@ -448,7 +469,12 @@ public class SchemaWriter extends BaseWriter {
                 builder.addStatement("args[$L] = $L", i, rhsExpr);
             }
 
+            if (c.autoId) {
+                builder.endControlFlow();
+            }
             if (c.isNullableInJava()) {
+                builder.endControlFlow();
+                builder.beginControlFlow("else");
                 builder.endControlFlow();
             }
         }
@@ -461,7 +487,7 @@ public class SchemaWriter extends BaseWriter {
     private CodeBlock buildBindArgs() {
         CodeBlock.Builder builder = CodeBlock.builder();
 
-        List<ColumnDefinition> columns = schema.getColumnsWithoutAutoId();
+        List<ColumnDefinition> columns = schema.getColumns();
         for (int i = 0; i < columns.size(); i++) {
             int n = i + 1; // bind index starts 1
             ColumnDefinition c = columns.get(i);
@@ -471,32 +497,38 @@ public class SchemaWriter extends BaseWriter {
             if (c.isNullableInJava()) {
                 builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
             }
+            if (c.autoId) {
+                builder.beginControlFlow("if (!$L)", withoutAutoId);
+            }
 
             CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
 
             if (serializedType.equals(TypeName.BOOLEAN)) {
-                builder.addStatement("statement.bindLong($L, $L ? 1 : 0)", n, rhsExpr);
+                builder.addStatement("statement.bindLong($L + $L, $L ? 1 : 0)", offset, n, rhsExpr);
             } else if (Types.looksLikeIntegerType(serializedType)) {
-                builder.addStatement("statement.bindLong($L, $L)", n, rhsExpr);
+                builder.addStatement("statement.bindLong($L + $L, $L)", offset, n, rhsExpr);
             } else if (Types.looksLikeFloatType(serializedType)) {
-                builder.addStatement("statement.bindDouble($L, $L)", n, rhsExpr);
+                builder.addStatement("statement.bindDouble($L + $L, $L)", offset, n, rhsExpr);
             } else if (serializedType.equals(Types.ByteArray)) {
-                builder.addStatement("statement.bindBlob($L, $L)", n, rhsExpr);
+                builder.addStatement("statement.bindBlob($L + $L, $L)", offset, n, rhsExpr);
             } else if (serializedType.equals(Types.String)) {
-                builder.addStatement("statement.bindString($L, $L)", n, rhsExpr);
+                builder.addStatement("statement.bindString($L + $L, $L)", offset, n, rhsExpr);
             } else if (r != null && r.associationType.equals(Types.SingleAssociation)) {
-                builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
+                builder.addStatement("statement.bindLong($L + $L, $L.getId())", offset, n, c.buildGetColumnExpr("model"));
             } else {
-                builder.addStatement("statement.bindString($L, $L)", n, rhsExpr);
+                builder.addStatement("statement.bindString($L + $L, $L)", offset, n, rhsExpr);
 
                 // TODO: throw the following errors in v2.0
                 // throw new ProcessingException("No storage method found for " + serializedType, c.element);
             }
 
+            if (c.autoId) {
+                builder.endControlFlow();
+            }
             if (c.isNullableInJava()) {
                 builder.endControlFlow();
                 builder.beginControlFlow("else");
-                builder.addStatement("statement.bindNull($L)", n);
+                builder.addStatement("statement.bindNull($L + $L)", n, offset);
                 builder.endControlFlow();
             }
         }

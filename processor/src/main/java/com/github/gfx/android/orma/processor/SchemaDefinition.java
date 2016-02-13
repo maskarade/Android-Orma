@@ -24,6 +24,7 @@ import com.squareup.javapoet.ClassName;
 
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,6 +62,8 @@ public class SchemaDefinition {
 
     final List<ColumnDefinition> columns;
 
+    final ColumnDefinition primaryKey;
+
     final ExecutableElement constructorElement; // null if it has a default constructor
 
     public SchemaDefinition(ProcessingContext context, TypeElement typeElement) {
@@ -78,6 +81,7 @@ public class SchemaDefinition {
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
         this.columns = collectColumns(typeElement);
+        this.primaryKey = findPrimaryKey(columns);
         this.constructorElement = findConstructor(context, typeElement);
     }
 
@@ -145,8 +149,20 @@ public class SchemaDefinition {
         Map<String, ExecutableElement> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         Map<String, ExecutableElement> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
+        List<VariableElement> primaryKeyElements = new ArrayList<>(); // 0 or 1 items
+        List<VariableElement> columnElements = new ArrayList<>();
+
         typeElement.getEnclosedElements()
                 .forEach(element -> {
+                    if (element instanceof VariableElement) {
+                        if (element.getAnnotation(PrimaryKey.class) != null) {
+                            primaryKeyElements.add((VariableElement) element);
+                        } else if (element.getAnnotation(Column.class) != null) {
+                            columnElements.add((VariableElement) element);
+                        }
+                        return;
+                    }
+
                     if (!(element instanceof ExecutableElement)) {
                         return;
                     }
@@ -159,20 +175,29 @@ public class SchemaDefinition {
                     Getter getter = element.getAnnotation(Getter.class);
                     Setter setter = element.getAnnotation(Setter.class);
 
-                    getters.put(extractNameFromGetter(getter,  executableElement), executableElement);
-                    setters.put(extractNameFromSetter(setter,  executableElement), executableElement);
+                    getters.put(extractNameFromGetter(getter, executableElement), executableElement);
+                    setters.put(extractNameFromSetter(setter, executableElement), executableElement);
                 });
 
-        return typeElement.getEnclosedElements()
-                .stream()
-                .filter(element -> element.getAnnotation(Column.class) != null
-                        || element.getAnnotation(PrimaryKey.class) != null)
+        // insert primaryKey as the last item in columns (see the bindArgs() generator in SchemaWriter)
+        columnElements.addAll(primaryKeyElements);
+
+        return columnElements.stream()
                 .map((element) -> {
-                    ColumnDefinition column = new ColumnDefinition(this, (VariableElement)element);
+                    ColumnDefinition column = new ColumnDefinition(this, element);
                     column.initGetterAndSetter(getters.get(column.columnName), setters.get(column.columnName));
                     return column;
                 })
                 .collect(Collectors.toList());
+    }
+
+    static ColumnDefinition findPrimaryKey(List<ColumnDefinition> columns) {
+        for (ColumnDefinition c : columns) {
+            if (c.primaryKey) {
+                return c;
+            }
+        }
+        return null;
     }
 
     private String extractNameFromGetter(Getter getter, ExecutableElement getterElement) {
@@ -265,16 +290,10 @@ public class SchemaDefinition {
     }
 
     public ColumnDefinition getPrimaryKey() {
-        for (ColumnDefinition c : columns) {
-            if (c.primaryKey) {
-                return c;
-            }
-        }
-        return null;
+        return primaryKey;
     }
 
     public String getPrimaryKeyName() {
-        ColumnDefinition primaryKey = getPrimaryKey();
         return primaryKey != null ? primaryKey.columnName : ColumnDefinition.kDefaultPrimaryKeyName;
     }
 
