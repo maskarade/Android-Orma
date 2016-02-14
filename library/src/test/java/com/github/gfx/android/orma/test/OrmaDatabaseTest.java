@@ -49,6 +49,12 @@ public class OrmaDatabaseTest {
     }
 
     @Test
+    public void testSchemaMetadata() throws Exception {
+        assertThat(OrmaDatabase.SCHEMA_TIMESTAMP, is(greaterThan(0L)));
+        assertThat(OrmaDatabase.SCHEMA_HASH, is(not(isEmptyOrNullString())));
+    }
+
+    @Test
     public void testResetDatabase() throws Exception {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
                 .name(NAME)

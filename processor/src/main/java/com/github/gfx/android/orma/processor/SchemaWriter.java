@@ -337,7 +337,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return $S", sql.buildCreateTableStatement(schema))
+                        .addStatement("return $S", schema.getCreateTableStatement())
                         .build()
         );
 
@@ -346,7 +346,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getList(Types.String))
-                        .addCode(sql.buildCreateIndexStatements(schema))
+                        .addCode(sql.buildCreateIndexStatementsExpr(schema))
                         .build()
         );
 
