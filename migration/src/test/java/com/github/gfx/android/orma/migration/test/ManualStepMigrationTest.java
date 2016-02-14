@@ -149,7 +149,7 @@ public class ManualStepMigrationTest {
     public void upgradeFull() throws Exception {
         migration.upgrade(db, 1, 100);
 
-        assertThat(migration.fetchCurrentVersion(db), is(16));
+        assertThat(migration.fetchDbVersion(db), is(16));
 
         assertThat(seq.size(), is(4));
 
@@ -170,7 +170,7 @@ public class ManualStepMigrationTest {
     public void upgradeBoundary() throws Exception {
         migration.upgrade(db, 2, 8);
 
-        assertThat(migration.fetchCurrentVersion(db), is(8));
+        assertThat(migration.fetchDbVersion(db), is(8));
 
         assertThat(seq.size(), is(2));
 
@@ -188,7 +188,7 @@ public class ManualStepMigrationTest {
 
         migration.downgrade(db, 100, 1);
 
-        assertThat(migration.fetchCurrentVersion(db), lessThan(4));
+        assertThat(migration.fetchDbVersion(db), lessThan(4));
 
         assertThat(seq.size(), is(4));
 
@@ -212,7 +212,7 @@ public class ManualStepMigrationTest {
 
         migration.downgrade(db, 8, 2);
 
-        assertThat(migration.fetchCurrentVersion(db), lessThan(4));
+        assertThat(migration.fetchDbVersion(db), lessThan(4));
 
         assertThat(seq.size(), is(2));
 

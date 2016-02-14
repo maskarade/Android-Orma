@@ -28,11 +28,6 @@ import java.util.List;
  * <p>
  * A migration engine that composes {@link ManualStepMigration} and {@link SchemaDiffMigration}.
  * </p>
- * <p>
- * By default, this class is in auto schema version mode,
- * where {@code BuildConfig.VERSION_CODE} is used as the {@code schemaVersion} on release build,
- * or the application updated time is used as the {@code schemaVersion} on debug build.
- * </p>
  *
  * <pre>Example:
  * <code>
@@ -50,17 +45,20 @@ public class OrmaMigration extends AbstractMigrationEngine {
     final SchemaDiffMigration schemaDiffMigration;
 
     /**
-     * To control the schema version, use this constructor.
+     * Use {@link #builder(Context)} to create an instance.
      *
      * @param manualStepMigration Used to control manual-step migration
      * @param schemaDiffMigration Used to control automatic migration
      */
     protected OrmaMigration(ManualStepMigration manualStepMigration, SchemaDiffMigration schemaDiffMigration) {
-
         this.manualStepMigration = manualStepMigration;
         this.schemaDiffMigration = schemaDiffMigration;
     }
 
+    /**
+     * @param context A context to get application information.
+     * @return A new Builder instance
+     */
     public static Builder builder(@NonNull Context context) {
         return new Builder(context);
     }

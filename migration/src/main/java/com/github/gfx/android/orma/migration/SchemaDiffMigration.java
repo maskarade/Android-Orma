@@ -97,22 +97,22 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     @Override
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         if (isSchemaChanged(db)) {
+
             Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
             List<String> statements = diffAll(metadata, schemas);
+
             executeStatements(db, statements);
         }
     }
 
     private boolean isSchemaChanged(SQLiteDatabase db) {
-        ensureHistoryTableExists(db);
-
-        String oldSchemaHash = getCurrentSchemaHash(db);
-
+        String oldSchemaHash = fetchDbSchemaHash(db);
         return !schemaHash.equals(oldSchemaHash);
     }
 
     @Nullable
-    private String getCurrentSchemaHash(SQLiteDatabase db) {
+    private String fetchDbSchemaHash(SQLiteDatabase db) {
+        ensureHistoryTableExists(db);
         Cursor cursor = db.query(SCHEMA_DIFF_TABLE, new String[]{kSchemaHash},
                 null, null, null, null, kId + " DESC", "1");
         try {
@@ -328,8 +328,11 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     public void executeStatements(SQLiteDatabase db, List<String> statements) {
-        db.beginTransaction();
+        if (statements.isEmpty()) {
+            return;
+        }
 
+        db.beginTransaction();
         try {
             for (String statement : statements) {
                 if (trace) {
@@ -338,6 +341,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
                 db.execSQL(statement);
                 saveStep(db, statement);
             }
+
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();

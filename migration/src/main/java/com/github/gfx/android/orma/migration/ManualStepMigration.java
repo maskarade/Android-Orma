@@ -76,7 +76,8 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         steps.put(version, step);
     }
 
-    public int fetchCurrentVersion(SQLiteDatabase db) {
+    public int fetchDbVersion(SQLiteDatabase db) {
+        ensureHistoryTableExists(db);
         Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kVersion},
                 null, null, null, null, kId + " DESC", "1");
         try {
@@ -92,30 +93,29 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     @Override
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
-        createMigrationHistoryTable(db);
+        int dbVersion = fetchDbVersion(db);
 
-        int oldVersion = fetchCurrentVersion(db);
-
-        if (oldVersion == 0) {
-            trace("skip migration: no manual migration history");
+        if (dbVersion == 0 || dbVersion == version) {
+            trace("skip migration: dbVersion=" + dbVersion + ", version=" + version);
             return;
         }
 
-        if (oldVersion == version) {
-            trace("skip migration: version matched");
-            return;
-        }
+        db.beginTransaction();
+        try {
+            trace("start migration from %d to %d", dbVersion, version);
 
-        trace("start migration from %d to %d", oldVersion, version);
-
-        if (oldVersion < version) {
-            upgrade(db, oldVersion, version);
-        } else {
-            downgrade(db, oldVersion, version);
+            if (dbVersion < version) {
+                upgrade(db, dbVersion, version);
+            } else {
+                downgrade(db, dbVersion, version);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
 
-    void createMigrationHistoryTable(SQLiteDatabase db) {
+    void ensureHistoryTableExists(SQLiteDatabase db) {
         if (!tableCreated) {
             db.execSQL(MIGRATION_STEPS_DDL);
             tableCreated = true;
@@ -125,7 +125,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     public void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         assert oldVersion < newVersion;
 
-        createMigrationHistoryTable(db);
+        ensureHistoryTableExists(db);
 
         for (int i = 0, size = steps.size(); i < size; i++) {
             int version = steps.keyAt(i);
@@ -140,7 +140,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     public void downgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         assert oldVersion > newVersion;
 
-        createMigrationHistoryTable(db);
+        ensureHistoryTableExists(db);
 
         for (int i = steps.size() - 1; i >= 0; i--) {
             int version = steps.keyAt(i);
@@ -153,7 +153,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     }
 
     public void saveStep(SQLiteDatabase db, int version, @Nullable String sql) {
-        createMigrationHistoryTable(db);
+        ensureHistoryTableExists(db);
 
         ContentValues values = new ContentValues();
         values.put(kVersion, version);
