@@ -98,6 +98,16 @@ public class DatabaseWriter extends BaseWriter {
                 .addStatement("super(context)")
                 .build());
 
+        builder.addMethod(
+                MethodSpec.methodBuilder("getSchemaHash")
+                        .addModifiers(Modifier.PROTECTED)
+                        .addAnnotation(Specs.overrideAnnotationSpec())
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .returns(Types.String)
+                        .addStatement("return SCHEMA_HASH")
+                        .build()
+        );
+
         builder.addMethod(MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(getPackageName(), kClassName))

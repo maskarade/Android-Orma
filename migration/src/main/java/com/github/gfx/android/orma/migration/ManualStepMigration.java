@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.migration;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
@@ -34,18 +35,24 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     public static final String MIGRATION_STEPS_TABLE = "orma_migration_steps";
 
-    static final String MIGRATION_HISTORY_DDL = "CREATE TABLE IF NOT EXISTS "
-            + MIGRATION_STEPS_TABLE + " ("
-            + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + "version INTEGER NOT NULL, "
-            + "sql TEXT NULL, "
-            + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
-
     static final String kId = "id";
 
     static final String kVersion = "version";
 
     static final String kSql = "sql";
+
+    public static final String MIGRATION_STEPS_DDL = "CREATE TABLE IF NOT EXISTS "
+            + MIGRATION_STEPS_TABLE + " ("
+            + kId + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + kVersion + " INTEGER NOT NULL, "
+            + kSql + " TEXT NULL, "
+            + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
+
+    final String versionName; // TODO: save it to MIGRATION_STEPS_TABLE
+
+    final int versionCode; // TODO: save it to MIGRATION_STEPS_TABLE
+
+    final int version;
 
     final boolean trace;
 
@@ -53,21 +60,23 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     boolean tableCreated = false;
 
-    public ManualStepMigration(int version, SparseArray<Step> steps, boolean trace) {
-        super(version);
+    public ManualStepMigration(Context context, int version, SparseArray<Step> steps, boolean trace) {
+        this.versionName = extractVersionName(context);
+        this.versionCode = extractVersionCode(context);
+        this.version = version;
         this.trace = trace;
         this.steps = steps.clone();
     }
 
-    public ManualStepMigration(int version, boolean trace) {
-        this(version, new SparseArray<Step>(0), trace);
+    public ManualStepMigration(Context context, int version, boolean trace) {
+        this(context, version, new SparseArray<Step>(0), trace);
     }
 
     public void addStep(int version, @NonNull Step step) {
         steps.put(version, step);
     }
 
-    public int getDbVersion(SQLiteDatabase db) {
+    public int fetchCurrentVersion(SQLiteDatabase db) {
         Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kVersion},
                 null, null, null, null, kId + " DESC", "1");
         try {
@@ -85,7 +94,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         createMigrationHistoryTable(db);
 
-        int oldVersion = getDbVersion(db);
+        int oldVersion = fetchCurrentVersion(db);
 
         if (oldVersion == 0) {
             trace("skip migration: no manual migration history");
@@ -108,7 +117,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     void createMigrationHistoryTable(SQLiteDatabase db) {
         if (!tableCreated) {
-            db.execSQL(MIGRATION_HISTORY_DDL);
+            db.execSQL(MIGRATION_STEPS_DDL);
             tableCreated = true;
         }
     }

@@ -42,7 +42,8 @@ public class MigrationEngineTest {
     @Before
     public void setUp() throws Exception {
         migration = OrmaMigration.builder(getContext())
-                .manualStepMigrationVersion(1)
+                .versionForManualStepMigration(1)
+                .schemaHashForSchemaDiffMigration(OrmaDatabase.SCHEMA_HASH)
                 .build();
 
         conn = OrmaDatabase.builder(getContext())

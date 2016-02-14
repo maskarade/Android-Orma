@@ -20,18 +20,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractMigrationEngine implements MigrationEngine {
-
-    protected final int version;
-
-    public AbstractMigrationEngine(@IntRange(from = 1) int version) {
-        this.version = version;
-    }
 
     protected static boolean extractDebuggable(Context context) {
         return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
@@ -53,7 +46,17 @@ public abstract class AbstractMigrationEngine implements MigrationEngine {
         if (milliseconds != 0) {
             return (int) TimeUnit.MILLISECONDS.toMinutes(milliseconds);
         } else {
-            return 1; // robolectric;
+            return 1; // non-zero integer for robolectric
+        }
+    }
+
+    @NonNull
+    protected static String extractVersionName(@NonNull Context context) {
+        String versionCode = getPackageInfo(context).versionName;
+        if (versionCode != null) {
+            return versionCode;
+        } else {
+            return "1"; // non-empty string for robolectric
         }
     }
 
@@ -62,13 +65,7 @@ public abstract class AbstractMigrationEngine implements MigrationEngine {
         if (versionCode != 0) {
             return versionCode;
         } else {
-            return 1; // robolectric
+            return 1; // non-zero integer for robolectric
         }
     }
-
-    @Override
-    public int getVersion() {
-        return version;
-    }
-
 }

@@ -23,8 +23,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
@@ -38,21 +40,21 @@ public class ManualStepMigrationTest {
 
     static int VERSION = 100;
 
-    static {
-        //System.setProperty("robolectric.logging", "stdout");
-    }
-
     SQLiteDatabase db;
 
     ManualStepMigration migration;
 
     List<StepContext> seq;
 
+    Context getContext() {
+        return InstrumentationRegistry.getTargetContext();
+    }
+
     @Before
     public void setUp() throws Exception {
         db = SQLiteDatabase.create(null);
 
-        migration = new ManualStepMigration(VERSION, true);
+        migration = new ManualStepMigration(getContext(), VERSION, true);
         migration.saveStep(db, 1, null);
 
         seq = new ArrayList<>();
@@ -147,7 +149,7 @@ public class ManualStepMigrationTest {
     public void upgradeFull() throws Exception {
         migration.upgrade(db, 1, 100);
 
-        assertThat(migration.getDbVersion(db), is(16));
+        assertThat(migration.fetchCurrentVersion(db), is(16));
 
         assertThat(seq.size(), is(4));
 
@@ -168,7 +170,7 @@ public class ManualStepMigrationTest {
     public void upgradeBoundary() throws Exception {
         migration.upgrade(db, 2, 8);
 
-        assertThat(migration.getDbVersion(db), is(8));
+        assertThat(migration.fetchCurrentVersion(db), is(8));
 
         assertThat(seq.size(), is(2));
 
@@ -186,7 +188,7 @@ public class ManualStepMigrationTest {
 
         migration.downgrade(db, 100, 1);
 
-        assertThat(migration.getDbVersion(db), lessThan(4));
+        assertThat(migration.fetchCurrentVersion(db), lessThan(4));
 
         assertThat(seq.size(), is(4));
 
@@ -210,7 +212,7 @@ public class ManualStepMigrationTest {
 
         migration.downgrade(db, 8, 2);
 
-        assertThat(migration.getDbVersion(db), lessThan(4));
+        assertThat(migration.fetchCurrentVersion(db), lessThan(4));
 
         assertThat(seq.size(), is(2));
 
@@ -224,7 +226,7 @@ public class ManualStepMigrationTest {
     @Test
     public void upgradeAndDowngrade() throws Exception {
         {
-            migration = new ManualStepMigration(100, true);
+            migration = new ManualStepMigration(getContext(), 100, true);
             setupSteps();
             migration.saveStep(db, 1, null);
             migration.start(db, new ArrayList<SchemaData>());
@@ -247,7 +249,7 @@ public class ManualStepMigrationTest {
         seq.clear();
 
         {
-            migration = new ManualStepMigration(1, true);
+            migration = new ManualStepMigration(getContext(), 1, true);
             setupSteps();
             migration.start(db, new ArrayList<SchemaData>());
 

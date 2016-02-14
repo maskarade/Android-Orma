@@ -16,6 +16,7 @@
 
 package com.github.gfx.android.orma.exception;
 
+@SuppressWarnings("serial")
 public class InvalidModelException extends OrmaException {
 
     public InvalidModelException(String detailMessage) {

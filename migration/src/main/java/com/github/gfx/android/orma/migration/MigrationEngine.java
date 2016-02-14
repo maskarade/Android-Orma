@@ -22,7 +22,5 @@ import java.util.List;
 
 public interface MigrationEngine {
 
-    int getVersion();
-
     void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas);
 }
