@@ -47,7 +47,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     static final String TAG = "SchemaDiffMigration";
 
-    public static final String SCHEMA_DIFF_TABLE = "orma_schema_diff_migration_steps";
+    public static final String MIGRATION_STEPS_TABLE = "orma_schema_diff_migration_steps";
 
     static final String kId = "id";
 
@@ -62,7 +62,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     static final String kArgs = "args";
 
     public static final String SCHEMA_DIFF_DDL = "CREATE TABLE IF NOT EXISTS "
-            + SCHEMA_DIFF_TABLE + " ("
+            + MIGRATION_STEPS_TABLE + " ("
             + kId + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + kVersionName + " TEXT NOT NULL, "
             + kVersionCode + " INTEGER NOT NULL, "
@@ -113,7 +113,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     @Nullable
     private String fetchDbSchemaHash(SQLiteDatabase db) {
         ensureHistoryTableExists(db);
-        Cursor cursor = db.query(SCHEMA_DIFF_TABLE, new String[]{kSchemaHash},
+        Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kSchemaHash},
                 null, null, null, null, kId + " DESC", "1");
         try {
             if (cursor.moveToFirst()) {
@@ -312,7 +312,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         values.put(kSchemaHash, schemaHash);
         values.put(kSql, sql);
         values.put(kArgs, serializeArgs(args));
-        db.insertOrThrow(SCHEMA_DIFF_TABLE, null, values);
+        db.insertOrThrow(MIGRATION_STEPS_TABLE, null, values);
     }
 
     private String serializeArgs(@NonNull Object[] args) {
