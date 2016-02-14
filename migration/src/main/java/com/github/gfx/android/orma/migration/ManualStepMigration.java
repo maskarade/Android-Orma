@@ -25,6 +25,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -100,18 +101,12 @@ public class ManualStepMigration extends AbstractMigrationEngine {
             return;
         }
 
-        db.beginTransaction();
-        try {
-            trace("start migration from %d to %d", dbVersion, version);
+        trace("start migration from %d to %d", dbVersion, version);
 
-            if (dbVersion < version) {
-                upgrade(db, dbVersion, version);
-            } else {
-                downgrade(db, dbVersion, version);
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
+        if (dbVersion < version) {
+            upgrade(db, dbVersion, version);
+        } else {
+            downgrade(db, dbVersion, version);
         }
     }
 
@@ -127,14 +122,22 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
         ensureHistoryTableExists(db);
 
+        List<Runnable> tasks = new ArrayList<>();
         for (int i = 0, size = steps.size(); i < size; i++) {
-            int version = steps.keyAt(i);
+            final int version = steps.keyAt(i);
             if (oldVersion < version && version <= newVersion) {
-                trace("%s step #%d from %d to %d", "upgrade", version, oldVersion, newVersion);
-                Step step = steps.valueAt(i);
-                step.up(new Helper(db, version, true));
+                final Step step = steps.valueAt(i);
+                final Helper helper = new Helper(db, version, true);
+                tasks.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        trace("%s step #%d", "upgrade", version);
+                        step.up(helper);
+                    }
+                });
             }
         }
+        runTasksInTransaction(db, tasks);
     }
 
     public void downgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -142,13 +145,37 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
         ensureHistoryTableExists(db);
 
+        List<Runnable> tasks = new ArrayList<>();
         for (int i = steps.size() - 1; i >= 0; i--) {
-            int version = steps.keyAt(i);
+            final int version = steps.keyAt(i);
             if (newVersion < version && version <= oldVersion) {
-                trace("%s step #%d from %d to %d", "downgrade", version, oldVersion, newVersion);
-                Step step = steps.valueAt(i);
-                step.down(new Helper(db, version, false));
+                final Step step = steps.valueAt(i);
+                final Helper helper = new Helper(db, version, false);
+                tasks.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        trace("%s step #%d", "downgrade", version);
+                        step.down(helper);
+                    }
+                });
             }
+        }
+        runTasksInTransaction(db, tasks);
+    }
+
+    private void runTasksInTransaction(SQLiteDatabase db, List<Runnable> tasks) {
+        if (tasks.isEmpty()) {
+            return;
+        }
+
+        db.beginTransaction();
+        try {
+            for (Runnable task : tasks) {
+                task.run();
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
 
