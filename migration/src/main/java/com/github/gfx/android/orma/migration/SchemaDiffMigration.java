@@ -19,9 +19,14 @@ import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
+import org.json.JSONArray;
+
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -42,32 +47,90 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     static final String TAG = "SchemaDiffMigration";
 
+    public static final String MIGRATION_STEPS_TABLE = "orma_schema_diff_migration_steps";
+
+    static final String kId = "id";
+
+    static final String kVersionName = "version_name";
+
+    static final String kVersionCode = "version_code";
+
+    static final String kSchemaHash = "schema_hash";
+
+    static final String kSql = "sql";
+
+    static final String kArgs = "args";
+
+    public static final String SCHEMA_DIFF_DDL = "CREATE TABLE IF NOT EXISTS "
+            + MIGRATION_STEPS_TABLE + " ("
+            + kId + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + kVersionName + " TEXT NOT NULL, "
+            + kVersionCode + " INTEGER NOT NULL, "
+            + kSchemaHash + " TEXT NOT NULL, "
+            + kSql + " TEXT NULL, "
+            + kArgs + " TEXT NULL, "
+            + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
+
+    final String versionName;
+
+    final int versionCode;
+
+    final String schemaHash;
+
     final boolean trace;
 
     final SqliteDdlBuilder util = new SqliteDdlBuilder();
 
-    public SchemaDiffMigration(@NonNull Context context, boolean trace) {
-        super(extractVersion(context));
+    private boolean tableCreated = false;
+
+    public SchemaDiffMigration(@NonNull Context context, @NonNull String schemaHash, boolean trace) {
+        this.versionName = extractVersionName(context);
+        this.versionCode = extractVersionCode(context);
+        this.schemaHash = schemaHash;
         this.trace = trace;
     }
 
-    public SchemaDiffMigration(@NonNull Context context) {
-        this(context, BuildConfig.DEBUG);
-    }
-
-    static int extractVersion(Context context) {
-        if (extractDebuggable(context)) {
-            return extractLastUpdateTime(context);
-        } else {
-            return extractVersionCode(context);
-        }
+    public SchemaDiffMigration(@NonNull Context context, @NonNull String schemaHash) {
+        this(context, schemaHash, extractDebuggable(context));
     }
 
     @Override
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
-        Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
-        List<String> statements = diffAll(metadata, schemas);
-        executeStatements(db, statements);
+        if (isSchemaChanged(db)) {
+
+            Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
+            List<String> statements = diffAll(metadata, schemas);
+
+            executeStatements(db, statements);
+        }
+    }
+
+    private boolean isSchemaChanged(SQLiteDatabase db) {
+        String oldSchemaHash = fetchDbSchemaHash(db);
+        return !schemaHash.equals(oldSchemaHash);
+    }
+
+    @Nullable
+    private String fetchDbSchemaHash(SQLiteDatabase db) {
+        ensureHistoryTableExists(db);
+        Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kSchemaHash},
+                null, null, null, null, kId + " DESC", "1");
+        try {
+            if (cursor.moveToFirst()) {
+                return cursor.getString(0);
+            } else {
+                return null;
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
+    void ensureHistoryTableExists(SQLiteDatabase db) {
+        if (!tableCreated) {
+            db.execSQL(SCHEMA_DIFF_DDL);
+            tableCreated = true;
+        }
     }
 
     @NonNull
@@ -240,16 +303,45 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         }
     }
 
-    public void executeStatements(SQLiteDatabase db, List<String> statements) {
-        db.beginTransaction();
+    public void saveStep(SQLiteDatabase db, @Nullable String sql, @NonNull Object... args) {
+        ensureHistoryTableExists(db);
 
+        ContentValues values = new ContentValues();
+        values.put(kVersionName, versionName);
+        values.put(kVersionCode, versionCode);
+        values.put(kSchemaHash, schemaHash);
+        values.put(kSql, sql);
+        values.put(kArgs, serializeArgs(args));
+        db.insertOrThrow(MIGRATION_STEPS_TABLE, null, values);
+    }
+
+    private String serializeArgs(@NonNull Object[] args) {
+        if (args.length == 0) {
+            return "[]";
+        }
+
+        JSONArray array = new JSONArray();
+        for (Object arg : args) {
+            array.put(arg);
+        }
+        return array.toString();
+    }
+
+    public void executeStatements(SQLiteDatabase db, List<String> statements) {
+        if (statements.isEmpty()) {
+            return;
+        }
+
+        db.beginTransaction();
         try {
             for (String statement : statements) {
                 if (trace) {
                     Log.i(TAG, statement);
                 }
                 db.execSQL(statement);
+                saveStep(db, statement);
             }
+
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();

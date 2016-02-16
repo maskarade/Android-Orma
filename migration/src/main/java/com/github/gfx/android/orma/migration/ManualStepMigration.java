@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.migration;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
@@ -24,6 +25,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,18 +36,24 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     public static final String MIGRATION_STEPS_TABLE = "orma_migration_steps";
 
-    static final String MIGRATION_HISTORY_DDL = "CREATE TABLE IF NOT EXISTS "
-            + MIGRATION_STEPS_TABLE + " ("
-            + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + "version INTEGER NOT NULL, "
-            + "sql TEXT NULL, "
-            + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
-
     static final String kId = "id";
 
     static final String kVersion = "version";
 
     static final String kSql = "sql";
+
+    public static final String MIGRATION_STEPS_DDL = "CREATE TABLE IF NOT EXISTS "
+            + MIGRATION_STEPS_TABLE + " ("
+            + kId + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + kVersion + " INTEGER NOT NULL, "
+            + kSql + " TEXT NULL, "
+            + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
+
+    final String versionName; // TODO: save it to MIGRATION_STEPS_TABLE
+
+    final int versionCode; // TODO: save it to MIGRATION_STEPS_TABLE
+
+    final int version;
 
     final boolean trace;
 
@@ -53,21 +61,24 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     boolean tableCreated = false;
 
-    public ManualStepMigration(int version, SparseArray<Step> steps, boolean trace) {
-        super(version);
+    public ManualStepMigration(Context context, int version, SparseArray<Step> steps, boolean trace) {
+        this.versionName = extractVersionName(context);
+        this.versionCode = extractVersionCode(context);
+        this.version = version;
         this.trace = trace;
         this.steps = steps.clone();
     }
 
-    public ManualStepMigration(int version, boolean trace) {
-        this(version, new SparseArray<Step>(0), trace);
+    public ManualStepMigration(Context context, int version, boolean trace) {
+        this(context, version, new SparseArray<Step>(0), trace);
     }
 
     public void addStep(int version, @NonNull Step step) {
         steps.put(version, step);
     }
 
-    public int getDbVersion(SQLiteDatabase db) {
+    public int fetchDbVersion(SQLiteDatabase db) {
+        ensureHistoryTableExists(db);
         Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kVersion},
                 null, null, null, null, kId + " DESC", "1");
         try {
@@ -83,32 +94,25 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     @Override
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
-        createMigrationHistoryTable(db);
+        int dbVersion = fetchDbVersion(db);
 
-        int oldVersion = getDbVersion(db);
-
-        if (oldVersion == 0) {
-            trace("skip migration: no manual migration history");
+        if (dbVersion == 0 || dbVersion == version) {
+            trace("skip migration: dbVersion=" + dbVersion + ", version=" + version);
             return;
         }
 
-        if (oldVersion == version) {
-            trace("skip migration: version matched");
-            return;
-        }
+        trace("start migration from %d to %d", dbVersion, version);
 
-        trace("start migration from %d to %d", oldVersion, version);
-
-        if (oldVersion < version) {
-            upgrade(db, oldVersion, version);
+        if (dbVersion < version) {
+            upgrade(db, dbVersion, version);
         } else {
-            downgrade(db, oldVersion, version);
+            downgrade(db, dbVersion, version);
         }
     }
 
-    void createMigrationHistoryTable(SQLiteDatabase db) {
+    void ensureHistoryTableExists(SQLiteDatabase db) {
         if (!tableCreated) {
-            db.execSQL(MIGRATION_HISTORY_DDL);
+            db.execSQL(MIGRATION_STEPS_DDL);
             tableCreated = true;
         }
     }
@@ -116,35 +120,67 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     public void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         assert oldVersion < newVersion;
 
-        createMigrationHistoryTable(db);
+        ensureHistoryTableExists(db);
 
+        List<Runnable> tasks = new ArrayList<>();
         for (int i = 0, size = steps.size(); i < size; i++) {
-            int version = steps.keyAt(i);
+            final int version = steps.keyAt(i);
             if (oldVersion < version && version <= newVersion) {
-                trace("%s step #%d from %d to %d", "upgrade", version, oldVersion, newVersion);
-                Step step = steps.valueAt(i);
-                step.up(new Helper(db, version, true));
+                final Step step = steps.valueAt(i);
+                final Helper helper = new Helper(db, version, true);
+                tasks.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        trace("%s step #%d", "upgrade", version);
+                        step.up(helper);
+                    }
+                });
             }
         }
+        runTasksInTransaction(db, tasks);
     }
 
     public void downgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         assert oldVersion > newVersion;
 
-        createMigrationHistoryTable(db);
+        ensureHistoryTableExists(db);
 
+        List<Runnable> tasks = new ArrayList<>();
         for (int i = steps.size() - 1; i >= 0; i--) {
-            int version = steps.keyAt(i);
+            final int version = steps.keyAt(i);
             if (newVersion < version && version <= oldVersion) {
-                trace("%s step #%d from %d to %d", "downgrade", version, oldVersion, newVersion);
-                Step step = steps.valueAt(i);
-                step.down(new Helper(db, version, false));
+                final Step step = steps.valueAt(i);
+                final Helper helper = new Helper(db, version, false);
+                tasks.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        trace("%s step #%d", "downgrade", version);
+                        step.down(helper);
+                    }
+                });
             }
+        }
+        runTasksInTransaction(db, tasks);
+    }
+
+    private void runTasksInTransaction(SQLiteDatabase db, List<Runnable> tasks) {
+        if (tasks.isEmpty()) {
+            return;
+        }
+
+        db.beginTransaction();
+        try {
+            for (Runnable task : tasks) {
+                task.run();
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
 
     public void saveStep(SQLiteDatabase db, int version, @Nullable String sql) {
-        createMigrationHistoryTable(db);
+        ensureHistoryTableExists(db);
 
         ContentValues values = new ContentValues();
         values.put(kVersion, version);

@@ -31,6 +31,8 @@ import static org.hamcrest.Matchers.*;
 @RunWith(AndroidJUnit4.class)
 public class IndexDiffTest {
 
+    static final String SCHEMA_HASH = "abc";
+
     SchemaDiffMigration migration;
 
     Context getContext() {
@@ -39,7 +41,7 @@ public class IndexDiffTest {
 
     @Before
     public void setUp() throws Exception {
-        migration = new SchemaDiffMigration(getContext());
+        migration = new SchemaDiffMigration(getContext(), SCHEMA_HASH);
     }
 
 

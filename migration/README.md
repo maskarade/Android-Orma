@@ -38,12 +38,26 @@ ALTER TABLE __temp_Book RENAME TO Book;
 Because [SQLite's ALTER TABLE](https://www.sqlite.org/lang_altertable.html)
 is limited, `SchemaDiffMigration` always re-creates tables if two tables differs.
 
+### Schema Version Control
+
+`SchemaDiffMigration` uses a string key, or `schemaHash`, to invoke migrations.
+
+The typical key is `OrmaDatabase.SCHEMA_HASH`.
+
 ## ManualStepMigration
 
-`ManualStepMigration` provides a way to handle hand-written migration steps.
+`SchemaDiffMigration` can't handle **renaming**. If you want rename tables
+or columns, you have to define migration steps with `ManualStepMigration`.
+
+`ManualStepMigration` provides a way to handle hand-written migration steps,
+typically used via `OrmaMigration`.
 
 [ManualStepMigrationTest.java](src/test/java/com/github/gfx/android/orma/migration/test/ManualStepMigrationTest.java)
 is an example.
+
+### Schema Version Control
+
+`ManualStepMigration` uses host application's `VERSION_CODE` by default.
 
 ## OrmaMigration
 
@@ -53,9 +67,9 @@ It invokes `ManualStepMigration` at first, and then invokes `SchemaDiffMigration
 
 ### How To Define Migration Steps
 
-* Use `OrmaMigration` which has both `ManualStepMigration` and `SchemaDiffMigration` functions
-* Use `BuildConfig.VERSION_CODE` for the database version
-* Hand-written migration steps are saved in `ManualStepMigration.MIGRATION_STEPS_TABLE` for debugging
+* Use `OrmaMigration` which has both `ManualStepMigration` and `SchemaDiffMigration` functionalities.
+* `ManualStepMigration` writes steps in `ManualStepMigration.MIGRATION_STEPS_TABLE`
+* `SchemaDiffMigration` writes steps in `SchemaDiffMigration.MIGRATION_STEPS_TABLE`
 
 Here is an example to use `OrmaMigration`:
 
@@ -64,6 +78,7 @@ int VERSION_2;
 int VERSION_3;
 
 OrmaMigration migration = OrmaMigration.builder(context)
+    .schemaHashForSchemaDiffMigration(OrmaDatabase.SCHEMA_HASH)
     // register up() / down() steps
     .step(VERSION_2, new ManualStepMigration.Step() {
         @Override
@@ -91,17 +106,6 @@ OrmaMigration migration = OrmaMigration.builder(context)
 ```
 
 You can see migration logs in debug build, which are disabled in release build.
-
-### The Schema Version for SQLiteOpenHelper
-
-`OrmaDatabase` uses `SQLiteOpenHelper` internally, which requires an `int`
-value to control migration. This `int` value is the Schema Version.
-
-By default, `OrmaMigration` uses application's `BuildConfig.VERSION_CODE`
-for release build and `ApplicationInfo#lastUpdateTime` for debug build.
-
-Note that `ManualStepMigration`'s version is independent from the Schema
-Version.
 
 ## See Also
 

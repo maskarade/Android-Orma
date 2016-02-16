@@ -191,11 +191,14 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
         return (T) this;
     }
 
+    @NonNull
+    protected abstract String getSchemaHash();
+
     @SuppressWarnings("deprecated")
     protected T fillDefaults() {
 
         if (migrationEngine == null) {
-            migrationEngine = new SchemaDiffMigration(context, trace);
+            migrationEngine = new SchemaDiffMigration(context, getSchemaHash(), trace);
         }
 
         if (typeAdapterRegistry == null) {

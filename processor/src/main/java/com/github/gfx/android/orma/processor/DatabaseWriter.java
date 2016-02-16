@@ -24,6 +24,11 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,6 +99,16 @@ public class DatabaseWriter extends BaseWriter {
                 .addStatement("super(context)")
                 .build());
 
+        builder.addMethod(
+                MethodSpec.methodBuilder("getSchemaHash")
+                        .addModifiers(Modifier.PROTECTED)
+                        .addAnnotation(Specs.overrideAnnotationSpec())
+                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .returns(Types.String)
+                        .addStatement("return SCHEMA_HASH")
+                        .build()
+        );
+
         builder.addMethod(MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(getPackageName(), kClassName))
@@ -105,6 +120,24 @@ public class DatabaseWriter extends BaseWriter {
 
     public List<FieldSpec> buildFieldSpecs() {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
+
+        Clock now = Clock.systemDefaultZone();
+        fieldSpecs.add(
+                FieldSpec.builder(long.class, "SCHEMA_TIMESTAMP", Modifier.PUBLIC, Modifier.STATIC)
+                        .addJavadoc(
+                                "The time at which the schema was built. Units are as per {@link System#currentTimeMillis()}.\n")
+                        .initializer("$LL /* $L */",
+                                now.millis(), ZonedDateTime.now(now).toString())
+                        .build()
+        );
+
+        fieldSpecs.add(
+                FieldSpec.builder(String.class, "SCHEMA_HASH", Modifier.PUBLIC, Modifier.STATIC)
+                        .addJavadoc(
+                                "The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.\n")
+                        .initializer("$S", buildSchemaSha256())
+                        .build()
+        );
 
         List<FieldSpec> schemaFields = new ArrayList<>();
 
@@ -129,6 +162,36 @@ public class DatabaseWriter extends BaseWriter {
                         .build());
 
         return fieldSpecs;
+    }
+
+    private String buildSchemaSha256() {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError("never reached", e);
+        }
+        Charset utf8 = Charset.forName("UTF-8");
+
+        context.schemaMap.values().forEach(schema -> {
+            md.update(schema.createTableStatement.getBytes(utf8));
+            schema.createIndexStatements.forEach(statement -> md.update(statement.getBytes(utf8)));
+        });
+
+        return bytesToHex(md.digest());
+    }
+
+    // http://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
+    public static String bytesToHex(byte[] bytes) {
+        final char[] HEX_TABLE = "0123456789ABCDEF".toCharArray();
+
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_TABLE[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_TABLE[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 
     private CodeBlock buildSchemasInitializer(List<FieldSpec> schemaFields) {

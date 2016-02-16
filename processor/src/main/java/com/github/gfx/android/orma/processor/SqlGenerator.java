@@ -61,7 +61,6 @@ public class SqlGenerator {
         sb.append(')');
 
         return sb.toString();
-
     }
 
     public void appendColumnDef(StringBuilder sb, ColumnDefinition column) {
@@ -141,36 +140,39 @@ public class SqlGenerator {
         return sb.toString();
     }
 
-    public CodeBlock buildCreateIndexStatements(SchemaDefinition schema) {
+    public List<String> buildCreateIndexStatements(SchemaDefinition schema) {
+        return schema.getColumns().stream()
+                .filter(column -> column.indexed && !column.primaryKey)
+                .map(column -> {
+                    StringBuilder sb = new StringBuilder();
+
+                    sb.append("CREATE INDEX ");
+                    appendIdentifier(sb, "index_" + column.columnName + "_on_" + schema.getTableName());
+                    sb.append(" ON ");
+                    appendIdentifier(sb, schema.getTableName());
+                    sb.append(" (");
+                    appendIdentifier(sb, column.columnName);
+                    sb.append(")");
+
+                    return sb.toString();
+                })
+                .collect(Collectors.toList());
+    }
+
+
+    public CodeBlock buildCreateIndexStatementsExpr(SchemaDefinition schema) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
-        List<ColumnDefinition> indexedColumns = new ArrayList<>();
-        schema.getColumns().forEach(column -> {
-            if (column.indexed && !column.primaryKey) {
-                indexedColumns.add(column);
-            }
-        });
-
-        if (indexedColumns.isEmpty()) {
+        List<String> createIndexStatements = schema.getCreateIndexStatements();
+        if (createIndexStatements.isEmpty()) {
             return builder.addStatement("return $T.emptyList()", Types.Collections).build();
         }
 
         builder.add("return $T.asList(\n", Types.Arrays).indent();
 
-        int nColumns = indexedColumns.size();
+        int nColumns = createIndexStatements.size();
         for (int i = 0; i < nColumns; i++) {
-            ColumnDefinition column = indexedColumns.get(i);
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("CREATE INDEX ");
-            appendIdentifier(sb, "index_" + column.columnName + "_on_" + schema.getTableName());
-            sb.append(" ON ");
-            appendIdentifier(sb, schema.getTableName());
-            sb.append(" (");
-            appendIdentifier(sb, column.columnName);
-            sb.append(")");
-
-            builder.add("$S", sb);
+            builder.add("$S", createIndexStatements.get(i));
 
             if ((i + 1) != nColumns) {
                 builder.add(",\n");

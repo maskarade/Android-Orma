@@ -51,6 +51,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     static final String TAG = "Orma";
 
+    static final int SCHEMA_VERSION = 1;
+
     static final String[] countSelections = {"COUNT(*)"};
 
     final List<Schema<?>> schemas;
@@ -74,7 +76,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     final AccessThreadConstraint writeOnMainThread;
 
     public OrmaConnection(@NonNull OrmaConfiguration<?> configuration, List<Schema<?>> schemas) {
-        super(configuration.context, configuration.name, null, configuration.migrationEngine.getVersion());
+        super(configuration.context, configuration.name, null, SCHEMA_VERSION);
         this.schemas = schemas;
         this.migration = configuration.migrationEngine;
         this.foreignKeys = configuration.foreignKeys;
@@ -368,10 +370,10 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onOpen(SQLiteDatabase db) {
         long t0 = System.currentTimeMillis();
         if (trace) {
-            Log.i(TAG, "migration start from " + oldVersion + " to " + newVersion);
+            Log.i(TAG, "migration started");
         }
 
         migration.start(db, schemas);
@@ -382,16 +384,12 @@ public class OrmaConnection extends SQLiteOpenHelper {
     }
 
     @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // nothing to do
+    }
+
+    @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        long t0 = System.currentTimeMillis();
-        if (trace) {
-            Log.i(TAG, "migration start from " + oldVersion + " to " + newVersion);
-        }
-
-        migration.start(db, schemas);
-
-        if (trace) {
-            Log.i(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
-        }
+        // nothing to do
     }
 }

@@ -42,6 +42,8 @@ import static org.hamcrest.Matchers.*;
 @RunWith(AndroidJUnit4.class)
 public class SchemaDiffMigrationTest {
 
+    static final String SCHEMA_HASH = "aaa";
+
     List<SchemaData> schemas;
 
     List<String> initialData;
@@ -77,7 +79,7 @@ public class SchemaDiffMigrationTest {
 
         openHelper = new OpenHelper(getContext());
         db = openHelper.getWritableDatabase();
-        migration = new SchemaDiffMigration(getContext());
+        migration = new SchemaDiffMigration(getContext(), SCHEMA_HASH);
         metadata = migration.loadMetadata(db, schemas);
     }
 

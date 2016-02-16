@@ -41,6 +41,8 @@ import static org.hamcrest.Matchers.*;
 @RunWith(AndroidJUnit4.class)
 public class OrmaMigrationTest {
 
+    static String SCHEMA_HASH = "aaa";
+
     static int VERSION = 100;
 
     SQLiteDatabase db;
@@ -57,8 +59,9 @@ public class OrmaMigrationTest {
         db.setVersion(1);
 
         migration = OrmaMigration.builder(getContext())
-                .schemaVersion(2)
-                .manualStepMigrationVersion(VERSION)
+                .schemaHashForSchemaDiffMigration(SCHEMA_HASH)
+                .versionForManualStepMigration(VERSION)
+                .trace(true)
                 .build();
 
         migration.getManualStepMigration()
@@ -68,8 +71,8 @@ public class OrmaMigrationTest {
     @Test
     public void testBuilder() throws Exception {
         migration = OrmaMigration.builder(getContext())
-                .schemaVersion(2)
-                .manualStepMigrationVersion(VERSION)
+                .schemaHashForSchemaDiffMigration(SCHEMA_HASH)
+                .versionForManualStepMigration(VERSION)
                 .step(2, new ManualStepMigration.ChangeStep() {
                     @Override
                     public void change(@NonNull ManualStepMigration.Helper helper) {
@@ -179,6 +182,8 @@ public class OrmaMigrationTest {
         migration.start(db, schemas);
 
         Map<String, SQLiteMaster> tables = SQLiteMaster.loadTables(db);
+        assertThat(tables, hasKey("foo"));
+        assertThat(tables, hasKey("bar"));
         assertThat(tables.get("foo").sql, is(schemas.get(0).getCreateTableStatement()));
         assertThat(tables.get("bar").sql, is(schemas.get(1).getCreateTableStatement()));
     }

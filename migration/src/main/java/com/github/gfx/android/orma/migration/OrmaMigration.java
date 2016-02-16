@@ -19,6 +19,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
 import java.util.List;
@@ -27,17 +28,15 @@ import java.util.List;
  * <p>
  * A migration engine that composes {@link ManualStepMigration} and {@link SchemaDiffMigration}.
  * </p>
- * <p>
- * By default, this class is in auto schema version mode,
- * where {@code BuildConfig.VERSION_CODE} is used as the {@code schemaVersion} on release build,
- * or the application updated time is used as the {@code schemaVersion} on debug build.
- * </p>
  *
- * <p>
- * You can set the schema version manually by {@link OrmaMigration.Builder#schemaVersion(int)}.
- * </p>
- *
- * <p>Example: <code>OrmaMigration.builder(context).build()</code></p>
+ * <pre>Example:
+ * <code>
+ *      OrmaMigration.builder(context)
+ *          .trace(true) // optional
+ *          .versionForManualStepMigration(BuildConfig.VERSION_CODE) // optional
+ *          .schemaHashForSchemaDiffMigration(OrmaDatabase.SHCEMA_HASH) // required
+ *          .build()
+ * </code></pre>
  */
 public class OrmaMigration extends AbstractMigrationEngine {
 
@@ -46,44 +45,20 @@ public class OrmaMigration extends AbstractMigrationEngine {
     final SchemaDiffMigration schemaDiffMigration;
 
     /**
-     * To control the schema version, use this constructor.
+     * Use {@link #builder(Context)} to create an instance.
      *
-     * @param version             The database schema version used in {@link android.database.sqlite.SQLiteOpenHelper}.
      * @param manualStepMigration Used to control manual-step migration
      * @param schemaDiffMigration Used to control automatic migration
      */
-    protected OrmaMigration(int version,
-            @NonNull ManualStepMigration manualStepMigration, @NonNull SchemaDiffMigration schemaDiffMigration) {
-        super(version);
+    protected OrmaMigration(ManualStepMigration manualStepMigration, SchemaDiffMigration schemaDiffMigration) {
         this.manualStepMigration = manualStepMigration;
         this.schemaDiffMigration = schemaDiffMigration;
     }
 
     /**
-     * Use {@link OrmaMigration#builder(Context)} instead.
-     *
-     * @param context                       -
-     * @param versionForManualStepMigration -
-     * @param trace                         -
+     * @param context A context to get application information.
+     * @return A new Builder instance
      */
-    @Deprecated
-    public OrmaMigration(@NonNull Context context, int versionForManualStepMigration, boolean trace) {
-        super(extractLastUpdateTime(context));
-        manualStepMigration = new ManualStepMigration(versionForManualStepMigration, trace);
-        schemaDiffMigration = new SchemaDiffMigration(context, trace);
-    }
-
-    /**
-     * Use {@link OrmaMigration#builder(Context)} instead.
-     *
-     * @param context                       -
-     * @param versionForManualStepMigration -
-     */
-    @Deprecated
-    public OrmaMigration(@NonNull Context context, int versionForManualStepMigration) {
-        this(context, versionForManualStepMigration, extractDebuggable(context));
-    }
-
     public static Builder builder(@NonNull Context context) {
         return new Builder(context);
     }
@@ -97,23 +72,13 @@ public class OrmaMigration extends AbstractMigrationEngine {
     }
 
     /**
-     * Delegates to {@link ManualStepMigration#addStep(int, ManualStepMigration.Step)}.
+     * Use {@link Builder#step(int, ManualStepMigration.Step)} instead.
      *
      * @param version A target version for the step
      * @param step    A migration step task for {@code version}
      */
     public void addStep(int version, @NonNull ManualStepMigration.Step step) {
         manualStepMigration.addStep(version, step);
-    }
-
-    /**
-     * Delegates to {@link SchemaDiffMigration#getVersion()}.
-     *
-     * @return The current version of the database.
-     */
-    @Override
-    public int getVersion() {
-        return version;
     }
 
     /**
@@ -129,16 +94,16 @@ public class OrmaMigration extends AbstractMigrationEngine {
         schemaDiffMigration.start(db, schemas);
     }
 
-
     public static class Builder {
 
         final Context context;
 
         final boolean debug;
 
-        int schemaVersion;
+        int versionForManualStepMigration = 0;
 
-        int manualStepMigrationVersion;
+        @Nullable
+        String schemaHashForSchemaDiffMigration = null;
 
         boolean trace;
 
@@ -148,21 +113,15 @@ public class OrmaMigration extends AbstractMigrationEngine {
             this.context = context;
             debug = extractDebuggable(context);
             trace = debug;
-            manualStepMigrationVersion = extractVersionCode(context);
-            if (debug) {
-                schemaVersion = extractLastUpdateTime(context);
-            } else {
-                schemaVersion = extractVersionCode(context);
-            }
         }
 
-        public Builder schemaVersion(@IntRange(from = 1) int version) {
-            schemaVersion = version;
+        public Builder versionForManualStepMigration(@IntRange(from = 1) int version) {
+            versionForManualStepMigration = version;
             return this;
         }
 
-        public Builder manualStepMigrationVersion(@IntRange(from = 1) int version) {
-            manualStepMigrationVersion = version;
+        public Builder schemaHashForSchemaDiffMigration(@NonNull String schemaHash) {
+            schemaHashForSchemaDiffMigration = schemaHash;
             return this;
         }
 
@@ -177,13 +136,19 @@ public class OrmaMigration extends AbstractMigrationEngine {
         }
 
         public OrmaMigration build() {
-            if (schemaVersion == 0) {
-                throw new IllegalArgumentException("no schemaVersion(int) nor autoSchemaVersion(boolean) is supplied");
+            if (versionForManualStepMigration == 0) {
+                versionForManualStepMigration = extractVersionCode(context);
             }
 
-            ManualStepMigration manualStepMigration = new ManualStepMigration(manualStepMigrationVersion, steps, trace);
-            SchemaDiffMigration schemaDiffMigration = new SchemaDiffMigration(context, trace);
-            return new OrmaMigration(schemaVersion, manualStepMigration, schemaDiffMigration);
+            if (schemaHashForSchemaDiffMigration == null) {
+                throw new IllegalStateException("You must set OrmaDatabase.SCHEMA_HASH to schemaHashForSchemaDiffMigration.");
+            }
+
+            ManualStepMigration manualStepMigration = new ManualStepMigration(context, versionForManualStepMigration, steps,
+                    trace);
+            SchemaDiffMigration schemaDiffMigration = new SchemaDiffMigration(context, schemaHashForSchemaDiffMigration,
+                    trace);
+            return new OrmaMigration(manualStepMigration, schemaDiffMigration);
         }
     }
 }

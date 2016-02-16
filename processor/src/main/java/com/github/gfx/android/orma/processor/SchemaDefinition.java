@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 import com.squareup.javapoet.ClassName;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -65,6 +66,10 @@ public class SchemaDefinition {
     final ColumnDefinition primaryKey;
 
     final ExecutableElement constructorElement; // null if it has a default constructor
+
+    String createTableStatement = null;
+
+    List<String> createIndexStatements = null;
 
     public SchemaDefinition(ProcessingContext context, TypeElement typeElement) {
         this.context = context;
@@ -295,6 +300,28 @@ public class SchemaDefinition {
 
     public String getPrimaryKeyName() {
         return primaryKey != null ? primaryKey.columnName : ColumnDefinition.kDefaultPrimaryKeyName;
+    }
+
+    private void buildStatements() {
+        SqlGenerator sql = new SqlGenerator(context);
+        createTableStatement = sql.buildCreateTableStatement(this);
+        createIndexStatements = sql.buildCreateIndexStatements(this);
+    }
+
+    @NonNull
+    public synchronized String getCreateTableStatement() {
+        if (createIndexStatements == null) {
+            buildStatements();
+        }
+        return createTableStatement;
+    }
+
+    @NonNull
+    public List<String> getCreateIndexStatements() {
+        if (createIndexStatements == null) {
+            buildStatements();
+        }
+        return createIndexStatements;
     }
 
     @Override

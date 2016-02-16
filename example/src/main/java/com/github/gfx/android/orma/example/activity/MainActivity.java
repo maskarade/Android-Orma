@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity
         activityMain.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
 
         orma = OrmaDatabase.builder(this)
-                .migrationEngine(new SchemaDiffMigration(this) {
+                .migrationEngine(new SchemaDiffMigration(this, OrmaDatabase.SCHEMA_HASH) {
                     @Override
                     public void executeStatements(SQLiteDatabase db, final List<String> statements) {
                         runOnUiThread(new Runnable() {
