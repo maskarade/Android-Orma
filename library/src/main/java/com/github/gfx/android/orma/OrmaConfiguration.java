@@ -17,11 +17,14 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.adapter.TypeAdapter;
 import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
+import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.MigrationEngine;
+import com.github.gfx.android.orma.migration.OrmaMigration;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -51,6 +54,8 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
     boolean trace;
 
     boolean tryParsingSql;
+
+    OrmaMigration.Builder ormaMigrationBuilder;
 
     AccessThreadConstraint readOnMainThread;
 
@@ -110,11 +115,16 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     /**
      * Replaces the migration engine with your own. {@link SchemaDiffMigration} is the default.
+     * If you just need version-to-version migration steps, use {@link #migrationStep(int, ManualStepMigration.Step)}
+     * instead.
      *
      * @param migrationEngine A migration engine to replace the default.
      * @return the receiver itself
      */
     public T migrationEngine(@NonNull MigrationEngine migrationEngine) {
+        if (ormaMigrationBuilder != null) {
+            throw new IllegalArgumentException("migrationStep() is already set");
+        }
         this.migrationEngine = migrationEngine;
         return (T) this;
     }
@@ -140,6 +150,40 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
      */
     public T foreignKeys(boolean foreignKeys) {
         this.foreignKeys = foreignKeys;
+        return (T) this;
+    }
+
+    private void prepareOrmaMigrationBuilder() {
+        if (migrationEngine != null) {
+            throw new IllegalArgumentException("migrationEngine() is already set");
+        }
+        if (ormaMigrationBuilder == null) {
+            ormaMigrationBuilder = OrmaMigration.builder(context);
+        }
+    }
+
+    /**
+     * Just calls {@link OrmaMigration.Builder#step(int, ManualStepMigration.Step)}.
+     *
+     * @param schemaVersion A {@code VERSION_CODE} for the step
+     * @param step A migration step
+     * @return the receiver itself
+     */
+    public T migrationStep(@IntRange(from = 1) int schemaVersion, @NonNull ManualStepMigration.Step step) {
+        prepareOrmaMigrationBuilder();
+        ormaMigrationBuilder.step(schemaVersion, step);
+        return (T) this;
+    }
+
+    /**
+     * Just calls {@link OrmaMigration.Builder#versionForManualStepMigration(int)}.
+     *
+     * @param schemaVersion schema version for {@link ManualStepMigration}
+     * @return the receiver itself
+     */
+    public T versionForManualStepMigration(@IntRange(from = 1) int schemaVersion) {
+        prepareOrmaMigrationBuilder();
+        ormaMigrationBuilder.versionForManualStepMigration(schemaVersion);
         return (T) this;
     }
 
@@ -196,8 +240,9 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     @SuppressWarnings("deprecated")
     protected T fillDefaults() {
-
-        if (migrationEngine == null) {
+        if (ormaMigrationBuilder != null) {
+            migrationEngine = ormaMigrationBuilder.schemaHashForSchemaDiffMigration(getSchemaHash()).build();
+        } else if (migrationEngine == null) {
             migrationEngine = new SchemaDiffMigration(context, getSchemaHash(), trace);
         }
 

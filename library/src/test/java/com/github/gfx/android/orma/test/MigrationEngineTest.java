@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.OrmaConnection;
+import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.OrmaMigration;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -25,15 +26,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+
 @RunWith(AndroidJUnit4.class)
 public class MigrationEngineTest {
-
-    MigrationEngine migration;
-
-    OrmaConnection conn;
 
     Context getContext() {
         return InstrumentationRegistry.getTargetContext();
@@ -41,23 +44,51 @@ public class MigrationEngineTest {
 
     @Before
     public void setUp() throws Exception {
-        migration = OrmaMigration.builder(getContext())
+    }
+
+    @Test
+    public void startEmpty() throws Exception {
+        MigrationEngine migration = OrmaMigration.builder(getContext())
                 .versionForManualStepMigration(1)
                 .schemaHashForSchemaDiffMigration(OrmaDatabase.SCHEMA_HASH)
                 .build();
 
-        conn = OrmaDatabase.builder(getContext())
+        OrmaConnection conn = OrmaDatabase.builder(getContext())
                 .name(null)
                 .migrationEngine(migration)
                 .tryParsingSql(false)
                 .build()
                 .getConnection();
+
+        migration.start(conn.getWritableDatabase(), conn.getSchemas());
+        migration.start(conn.getWritableDatabase(), conn.getSchemas());
+        migration.start(conn.getWritableDatabase(), conn.getSchemas());
     }
 
     @Test
-    public void startEmpty() throws Exception {
-        migration.start(conn.getWritableDatabase(), conn.getSchemas());
-        migration.start(conn.getWritableDatabase(), conn.getSchemas());
-        migration.start(conn.getWritableDatabase(), conn.getSchemas());
+    public void justRun() throws Exception {
+        final AtomicInteger value = new AtomicInteger();
+
+        OrmaDatabase orma = OrmaDatabase.builder(getContext())
+                .trace(true)
+                .versionForManualStepMigration(100)
+                .migrationStep(10, new ManualStepMigration.ChangeStep() {
+                    @Override
+                    public void change(@NonNull ManualStepMigration.Helper helper) {
+                        value.addAndGet(10);
+                    }
+                })
+                .migrationStep(11, new ManualStepMigration.ChangeStep() {
+                    @Override
+                    public void change(@NonNull ManualStepMigration.Helper helper) {
+                        value.addAndGet(11);
+                    }
+                })
+                .name(null)
+                .build();
+
+        orma.selectFromBook().count(); // to invoke initialization
+
+        assertThat("No migration on initialization", value.get(), is(0));
     }
 }
