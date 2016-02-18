@@ -40,6 +40,8 @@ import java.util.List;
  */
 public class OrmaMigration extends AbstractMigrationEngine {
 
+    public static final String TAG = "OrmaMigration";
+
     final ManualStepMigration manualStepMigration;
 
     final SchemaDiffMigration schemaDiffMigration;
@@ -50,9 +52,16 @@ public class OrmaMigration extends AbstractMigrationEngine {
      * @param manualStepMigration Used to control manual-step migration
      * @param schemaDiffMigration Used to control automatic migration
      */
-    protected OrmaMigration(ManualStepMigration manualStepMigration, SchemaDiffMigration schemaDiffMigration) {
+    protected OrmaMigration(ManualStepMigration manualStepMigration, SchemaDiffMigration schemaDiffMigration, TraceListener traceListener) {
+        super(traceListener);
         this.manualStepMigration = manualStepMigration;
         this.schemaDiffMigration = schemaDiffMigration;
+    }
+
+    @NonNull
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     /**
@@ -105,14 +114,14 @@ public class OrmaMigration extends AbstractMigrationEngine {
         @Nullable
         String schemaHashForSchemaDiffMigration = null;
 
-        boolean trace;
+        TraceListener traceListener;
 
         SparseArray<ManualStepMigration.Step> steps = new SparseArray<>();
 
         Builder(Context context) {
             this.context = context;
             debug = extractDebuggable(context);
-            trace = debug;
+            trace(debug);
         }
 
         public Builder versionForManualStepMigration(@IntRange(from = 1) int version) {
@@ -126,7 +135,12 @@ public class OrmaMigration extends AbstractMigrationEngine {
         }
 
         public Builder trace(boolean value) {
-            trace = value;
+            traceListener = value ? TraceListener.LOGCAT : TraceListener.EMPTY;
+            return this;
+        }
+
+        public Builder trace(@NonNull  TraceListener traceListener) {
+            this.traceListener = traceListener;
             return this;
         }
 
@@ -145,10 +159,10 @@ public class OrmaMigration extends AbstractMigrationEngine {
             }
 
             ManualStepMigration manualStepMigration = new ManualStepMigration(context, versionForManualStepMigration, steps,
-                    trace);
+                    traceListener);
             SchemaDiffMigration schemaDiffMigration = new SchemaDiffMigration(context, schemaHashForSchemaDiffMigration,
-                    trace);
-            return new OrmaMigration(manualStepMigration, schemaDiffMigration);
+                    traceListener);
+            return new OrmaMigration(manualStepMigration, schemaDiffMigration, traceListener);
         }
     }
 }

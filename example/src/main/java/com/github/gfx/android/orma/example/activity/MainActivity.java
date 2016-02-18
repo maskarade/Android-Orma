@@ -23,13 +23,13 @@ import com.github.gfx.android.orma.example.orma.Category;
 import com.github.gfx.android.orma.example.orma.Item;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
+import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
-import com.github.gfx.android.orma.migration.SchemaDiffMigration;
+import com.github.gfx.android.orma.migration.TraceListener;
 
 import org.threeten.bp.ZonedDateTime;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -52,7 +52,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -115,17 +115,18 @@ public class MainActivity extends AppCompatActivity
         activityMain.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
 
         orma = OrmaDatabase.builder(this)
-                .migrationEngine(new SchemaDiffMigration(this, OrmaDatabase.SCHEMA_HASH) {
+                .migrationTraceListener(new TraceListener() {
                     @Override
-                    public void executeStatements(SQLiteDatabase db, final List<String> statements) {
+                    public void onTrace(@NonNull MigrationEngine engine, @NonNull final String format,
+                            @NonNull final Object[] args) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                logsAdapter.addAll(statements);
+                                logsAdapter.addAll(String.format(Locale.getDefault(), format, args));
                             }
                         });
 
-                        super.executeStatements(db, statements);
+                        TraceListener.LOGCAT.onTrace(engine, format, args);
                     }
                 })
                 .build();

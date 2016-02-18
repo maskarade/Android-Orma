@@ -26,6 +26,13 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractMigrationEngine implements MigrationEngine {
 
+    @NonNull
+    private final TraceListener traceListener;
+
+    protected AbstractMigrationEngine(@NonNull TraceListener traceListener) {
+        this.traceListener = traceListener;
+    }
+
     protected static boolean extractDebuggable(Context context) {
         return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
                 == ApplicationInfo.FLAG_DEBUGGABLE;
@@ -68,4 +75,9 @@ public abstract class AbstractMigrationEngine implements MigrationEngine {
             return 1; // non-zero integer for robolectric
         }
     }
+
+    public void trace(@NonNull String format, @NonNull Object... args) {
+        traceListener.onTrace(this, format, args);
+    }
+
 }

@@ -41,5 +41,4 @@ public class Todo {
 
     @Column(indexed = true)
     public Date createdTime;
-
 }
