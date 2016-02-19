@@ -34,6 +34,10 @@ buildscript {
 }
 
 apply plugin: 'com.neenbedankt.android-apt'
+
+repositories {
+    jcenter()
+}
 ```
 
 ```groovy
