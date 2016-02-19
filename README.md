@@ -399,7 +399,7 @@ public class KeyValuePair {
 
 ## Associations
 
-Tow orma models can be associated with Association mechanism. There are two type of association: has-one and has-many.
+Two orma models can be associated with Association mechanism. There are two type of association: has-one and has-many.
 
 ### Has-One Associations
 
