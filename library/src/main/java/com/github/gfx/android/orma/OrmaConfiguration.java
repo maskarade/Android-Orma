@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.OrmaMigration;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
+import com.github.gfx.android.orma.migration.TraceListener;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -52,6 +53,8 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
     boolean wal = true;
 
     boolean trace;
+
+    TraceListener migrationTraceListener;
 
     boolean tryParsingSql;
 
@@ -126,6 +129,11 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
             throw new IllegalArgumentException("migrationStep() is already set");
         }
         this.migrationEngine = migrationEngine;
+        return (T) this;
+    }
+
+    public T migrationTraceListener(@NonNull TraceListener traceListener) {
+        migrationTraceListener = traceListener;
         return (T) this;
     }
 
@@ -210,6 +218,9 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
      */
     public T trace(boolean trace) {
         this.trace = trace;
+        if (migrationTraceListener == null) {
+            migrationTraceListener = trace ? TraceListener.LOGCAT : TraceListener.EMPTY;
+        }
         return (T) this;
     }
 
@@ -241,9 +252,15 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
     @SuppressWarnings("deprecated")
     protected T fillDefaults() {
         if (ormaMigrationBuilder != null) {
-            migrationEngine = ormaMigrationBuilder.schemaHashForSchemaDiffMigration(getSchemaHash()).build();
+            if (migrationTraceListener == null) {
+                migrationTraceListener = trace ? TraceListener.LOGCAT : TraceListener.EMPTY;
+            }
+            migrationEngine = ormaMigrationBuilder
+                    .trace(migrationTraceListener)
+                    .schemaHashForSchemaDiffMigration(getSchemaHash())
+                    .build();
         } else if (migrationEngine == null) {
-            migrationEngine = new SchemaDiffMigration(context, getSchemaHash(), trace);
+            migrationEngine = new SchemaDiffMigration(context, getSchemaHash(), migrationTraceListener);
         }
 
         if (typeAdapterRegistry == null) {

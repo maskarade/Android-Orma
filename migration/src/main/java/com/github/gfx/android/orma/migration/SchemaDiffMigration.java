@@ -28,7 +28,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,21 +76,25 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     final String schemaHash;
 
-    final boolean trace;
-
     final SqliteDdlBuilder util = new SqliteDdlBuilder();
 
     private boolean tableCreated = false;
 
-    public SchemaDiffMigration(@NonNull Context context, @NonNull String schemaHash, boolean trace) {
+    public SchemaDiffMigration(@NonNull Context context, @NonNull String schemaHash, TraceListener traceListener) {
+        super(traceListener);
         this.versionName = extractVersionName(context);
         this.versionCode = extractVersionCode(context);
         this.schemaHash = schemaHash;
-        this.trace = trace;
     }
 
     public SchemaDiffMigration(@NonNull Context context, @NonNull String schemaHash) {
-        this(context, schemaHash, extractDebuggable(context));
+        this(context, schemaHash, extractDebuggable(context) ? TraceListener.LOGCAT : TraceListener.EMPTY);
+    }
+
+    @NonNull
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     @Override
@@ -240,11 +243,8 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         if (intersectionColumns.size() != toTable.getColumns().size() ||
                 intersectionColumns.size() != fromTable.getColumns().size() ||
                 !fromTable.getConstraints().equals(toTable.getConstraints())) {
-            if (trace) {
-                Log.i(TAG, "tables differ:");
-                Log.i(TAG, "from: " + from);
-                Log.i(TAG, "to:   " + to);
-            }
+            trace("from: %s", from);
+            trace("to:   %s", to);
             return buildRecreateTable(fromTable, toTable, intersectionColumnNames);
         } else {
             return Collections.emptyList();
@@ -335,9 +335,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         db.beginTransaction();
         try {
             for (String statement : statements) {
-                if (trace) {
-                    Log.i(TAG, statement);
-                }
+                trace("%s", statement);
                 db.execSQL(statement);
                 saveStep(db, statement);
             }

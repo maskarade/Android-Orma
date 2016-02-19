@@ -22,12 +22,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @SuppressLint("Assert")
 public class ManualStepMigration extends AbstractMigrationEngine {
@@ -55,22 +53,30 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     final int version;
 
-    final boolean trace;
-
     final SparseArray<Step> steps;
 
     boolean tableCreated = false;
 
-    public ManualStepMigration(Context context, int version, SparseArray<Step> steps, boolean trace) {
+    public ManualStepMigration(Context context, int version, SparseArray<Step> steps, @NonNull TraceListener traceListener) {
+        super(traceListener);
         this.versionName = extractVersionName(context);
         this.versionCode = extractVersionCode(context);
         this.version = version;
-        this.trace = trace;
         this.steps = steps.clone();
     }
 
+    public ManualStepMigration(Context context, int version, @NonNull TraceListener traceListener) {
+        this(context, version, new SparseArray<Step>(0), traceListener);
+    }
+
     public ManualStepMigration(Context context, int version, boolean trace) {
-        this(context, version, new SparseArray<Step>(0), trace);
+        this(context, version, new SparseArray<Step>(0), trace ? TraceListener.LOGCAT : TraceListener.EMPTY);
+    }
+
+    @NonNull
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     public void addStep(int version, @NonNull Step step) {
@@ -97,7 +103,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         int dbVersion = fetchDbVersion(db);
 
         if (dbVersion == 0 || dbVersion == version) {
-            trace("skip migration: dbVersion=" + dbVersion + ", version=" + version);
+            trace("skip migration: dbVersion=%d, version=%d", dbVersion, version);
             return;
         }
 
@@ -189,16 +195,11 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     }
 
     public void execStep(SQLiteDatabase db, int version, @Nullable String sql) {
-        trace("%s", sql);
+        if (sql != null) {
+            trace("%s", sql);
+        }
         db.execSQL(sql);
         saveStep(db, version, sql);
-    }
-
-    // TODO: replace it with a logging library
-    private void trace(@NonNull String format, @NonNull Object... args) {
-        if (trace) {
-            Log.i(TAG, String.format(Locale.US, format, args));
-        }
     }
 
     /**
