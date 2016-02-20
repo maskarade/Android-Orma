@@ -508,7 +508,7 @@ Each target type has a corresponding SQLite storage type:
 
 ### Dynamic Type Adapters
 
-**This is deprecated and will be removed in v2.0.**
+**This is removed in v2.0.**
 
 If you use type adapters, you can add type serializer instances to `OrmaDatabase`.
 
