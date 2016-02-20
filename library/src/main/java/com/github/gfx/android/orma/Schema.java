@@ -32,6 +32,9 @@ public interface Schema<Model> extends MigrationSchema {
     @NonNull
     String getTableName();
 
+    @NonNull
+    String getEscapedTableName();
+
     /**
      * @return The escaped table name, which may includes {@code JOIN} clauses
      */

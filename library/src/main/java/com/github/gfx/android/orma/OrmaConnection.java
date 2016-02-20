@@ -153,7 +153,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
-        return db.update(schema.getFromClause(), values, whereClause, whereArgs);
+        return db.update(schema.getEscapedTableName(), values, whereClause, whereArgs);
     }
 
     @NonNull
@@ -201,7 +201,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public int delete(@NonNull Schema<?> schema, @Nullable String whereClause, @Nullable String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
 
-        String sql = "DELETE FROM " + schema.getFromClause()
+        String sql = "DELETE FROM " + schema.getEscapedTableName()
                 + (!TextUtils.isEmpty(whereClause) ? " WHERE " + whereClause : "");
         trace(sql, whereArgs);
         SQLiteStatement statement = db.compileStatement(sql);

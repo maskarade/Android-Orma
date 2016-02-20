@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.example.orma;
 
-import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Setter;
@@ -31,10 +30,10 @@ public class Item {
     public final String name;
 
     @Column(indexed = true)
-    public final SingleAssociation<Category> category;
+    public final Category category;
 
     @Setter
-    public Item(@NonNull String name, @NonNull SingleAssociation<Category> category) {
+    public Item(@NonNull String name, @NonNull Category category) {
         this.name = name;
         this.category = category;
     }

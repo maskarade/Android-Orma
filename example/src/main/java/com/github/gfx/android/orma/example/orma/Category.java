@@ -17,7 +17,6 @@
 package com.github.gfx.android.orma.example.orma;
 
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
@@ -56,7 +55,7 @@ public class Category {
             @NonNull
             @Override
             public Item call() {
-                return new Item(name, SingleAssociation.just(id, Category.this));
+                return new Item(name, Category.this);
             }
         });
     }

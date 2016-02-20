@@ -42,8 +42,6 @@ import javax.lang.model.element.VariableElement;
  */
 public class SchemaWriter extends BaseWriter {
 
-    static final String TABLE_NAME = "$TABLE_NAME";
-
     static final String COLUMNS = "$COLUMNS";
 
     static final String DEFAULT_RESULT_COLUMNS = "$DEFAULT_RESULT_COLUMNS";
@@ -105,13 +103,6 @@ public class SchemaWriter extends BaseWriter {
         }
 
         fieldSpecs.addAll(columns);
-
-        fieldSpecs.add(
-                FieldSpec.builder(Types.String, TABLE_NAME)
-                        .addModifiers(publicStaticFinal)
-                        .initializer("$S", schema.tableName)
-                        .build()
-        );
 
         fieldSpecs.add(
                 FieldSpec.builder(Types.getColumnDefList(schema.getModelClassName()), COLUMNS)
@@ -318,7 +309,16 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return $L", TABLE_NAME)
+                        .addStatement("return $S", schema.getTableName())
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getEscapedTableName")
+                        .addAnnotations(overrideAndNonNull)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return $S", sql.quoteIdentifier(schema.getTableName()))
                         .build()
         );
 

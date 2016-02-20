@@ -80,7 +80,6 @@ public class DirectAssociationsTest {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                         model.title = "foo";
                         model.author = author1;
-                        //model.author2 = author2; // TODO
                         model.note = "SQLite rocks";
                         return model;
                     }
@@ -91,6 +90,57 @@ public class DirectAssociationsTest {
         assertThat(model.author, is(notNullValue()));
         assertThat(model.author.name, is(author1.name));
         assertThat(model.author.note, is(author1.note));
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        orma.createModelWithDirectAssociation(
+                new ModelFactory<ModelWithDirectAssociation>() {
+                    @NonNull
+                    @Override
+                    public ModelWithDirectAssociation call() {
+                        ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                        model.title = "foo";
+                        model.author = author1;
+                        model.note = "SQLite rocks";
+                        return model;
+                    }
+                });
+
+        orma.updateModelWithDirectAssociation()
+                .authorEq(author1)
+                .author(author2)
+                .execute();
+
+        ModelWithDirectAssociation model = orma.selectFromModelWithDirectAssociation().value();
+
+        assertThat(model.title, is("foo"));
+        assertThat(model.note, is("SQLite rocks"));
+        assertThat(model.author, is(notNullValue()));
+        assertThat(model.author.name, is(author2.name));
+        assertThat(model.author.note, is(author2.note));
+    }
+
+    @Test
+    public void testDelete() throws Exception {
+        orma.createModelWithDirectAssociation(
+                new ModelFactory<ModelWithDirectAssociation>() {
+                    @NonNull
+                    @Override
+                    public ModelWithDirectAssociation call() {
+                        ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                        model.title = "foo";
+                        model.author = author1;
+                        model.note = "SQLite rocks";
+                        return model;
+                    }
+                });
+
+        orma.deleteFromModelWithDirectAssociation()
+                .authorEq(author1)
+                .execute();
+
+        assertThat(orma.selectFromModelWithDirectAssociation().isEmpty(), is(true));
     }
 
     @Test
