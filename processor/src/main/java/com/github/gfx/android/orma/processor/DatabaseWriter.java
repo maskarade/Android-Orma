@@ -238,6 +238,17 @@ public class DatabaseWriter extends BaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("migrate")
+                        .addJavadoc("<p>{@code migrate()} invokes database migration, which will takes several seconds.</p>\n"
+                                + "<p>This is completely optional and migration is invoked on the first access of the database, anyway.</p>\n\n"
+                                + "@throws SQLiteConstraintException migration information is not sufficient.\n")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addException(Types.SQLiteConstraintException)
+                        .addStatement("$L.getWritableDatabase()", connection)
+                        .build()
+        );
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("getConnection")
                         .addAnnotation(Specs.overrideAnnotationSpec())
                         .addAnnotation(Specs.nonNullAnnotationSpec())

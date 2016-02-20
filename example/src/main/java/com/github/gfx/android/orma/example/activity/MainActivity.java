@@ -24,7 +24,6 @@ import com.github.gfx.android.orma.example.orma.Item;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.migration.MigrationEngine;
-import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.TraceListener;
 
 import org.threeten.bp.ZonedDateTime;
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity
 
     OrmaDatabase orma;
 
-    public static void largeLog(String tag, String content) {
+    public void largeLog(String tag, final String content) {
         if (content.length() > 2000) {
             Log.e(tag, content.substring(0, 2000));
             largeLog(tag, content.substring(2000));
@@ -135,17 +134,22 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void run() {
                 try {
+                    orma.migrate(); // may throws SQLiteConstraintException
+
                     simpleCRUD();
                     associations();
-                } catch (Exception e) {
-                    largeLog("MainActivity", Log.getStackTraceString(e));
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    largeLog(TAG, Log.getStackTraceString(e));
                 }
             }
         });
-
-        for (SQLiteMaster metadata : SQLiteMaster.loadTables(orma.getConnection().getReadableDatabase()).values()) {
-            Log.d(TAG, metadata.toString());
-        }
     }
 
     /**
