@@ -53,10 +53,8 @@ public class MigrationEngineTest {
                 .schemaHashForSchemaDiffMigration(OrmaDatabase.SCHEMA_HASH)
                 .build();
 
-        OrmaConnection conn = OrmaDatabase.builder(getContext())
-                .name(null)
+        OrmaConnection conn = OrmaFactory.builder()
                 .migrationEngine(migration)
-                .tryParsingSql(false)
                 .build()
                 .getConnection();
 
@@ -69,8 +67,7 @@ public class MigrationEngineTest {
     public void justRun() throws Exception {
         final AtomicInteger value = new AtomicInteger();
 
-        OrmaDatabase orma = OrmaDatabase.builder(getContext())
-                .trace(true)
+        OrmaDatabase orma = OrmaFactory.builder()
                 .versionForManualStepMigration(100)
                 .migrationStep(10, new ManualStepMigration.ChangeStep() {
                     @Override
@@ -84,7 +81,6 @@ public class MigrationEngineTest {
                         value.addAndGet(11);
                     }
                 })
-                .name(null)
                 .build();
 
         orma.migrate();

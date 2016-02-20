@@ -59,6 +59,7 @@ public class OrmaDatabaseTest {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
                 .name(NAME)
                 .trace(true)
+                .tryParsingSql(false)
                 .build();
 
         db.prepareInsertIntoAuthor().execute(new ModelFactory<Author>() {
