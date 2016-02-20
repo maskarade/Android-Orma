@@ -512,7 +512,7 @@ public class SchemaWriter extends BaseWriter {
                     builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
                 } else { // direct association
                     SchemaDefinition schema = context.getSchemaDef(r.modelType);
-                    builder.addStatement("statement.bindLong($L, $L)", i,
+                    builder.addStatement("statement.bindLong($L, $L)", n,
                             schema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model")));
                 }
             } else {
