@@ -24,6 +24,7 @@ import com.github.gfx.android.orma.test.model.Author_Relation;
 import com.github.gfx.android.orma.test.model.ModelWithMultipleSortableColumns;
 import com.github.gfx.android.orma.test.model.ModelWithMultipleSortableColumns_Relation;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
 import org.junit.Test;

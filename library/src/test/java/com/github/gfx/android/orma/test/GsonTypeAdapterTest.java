@@ -24,6 +24,7 @@ import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.test.model.Book;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
+import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
 import org.junit.Test;

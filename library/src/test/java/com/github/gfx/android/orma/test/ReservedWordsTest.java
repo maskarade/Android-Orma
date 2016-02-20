@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Where;
+import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
 import org.junit.Test;

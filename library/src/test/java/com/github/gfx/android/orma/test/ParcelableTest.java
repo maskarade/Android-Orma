@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.test.model.ModelParcelable;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
 import org.junit.Test;

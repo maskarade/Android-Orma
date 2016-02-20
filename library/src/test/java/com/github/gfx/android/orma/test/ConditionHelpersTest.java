@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.test.model.ModelWithConditionHelpers;
 import com.github.gfx.android.orma.test.model.ModelWithConditionHelpers_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
 import org.junit.Test;

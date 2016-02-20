@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 import com.github.gfx.android.orma.widget.OrmaAdapter;
 
 import org.junit.Before;

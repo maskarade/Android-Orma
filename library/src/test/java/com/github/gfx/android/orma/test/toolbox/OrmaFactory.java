@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.test;
+package com.github.gfx.android.orma.test.toolbox;
 
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 

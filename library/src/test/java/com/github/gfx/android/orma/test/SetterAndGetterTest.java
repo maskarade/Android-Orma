@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.test.model.ModelWithNamedSetterConstructor;
 import com.github.gfx.android.orma.test.model.ModelWithSetterConstructor;
 import com.github.gfx.android.orma.test.model.ModelWithSetterConstructorAndNullable;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
 import org.junit.Test;
