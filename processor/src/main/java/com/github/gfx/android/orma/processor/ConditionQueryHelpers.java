@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.processor;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -25,7 +24,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -59,13 +57,14 @@ public class ConditionQueryHelpers {
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
 
         boolean isAssociation = Types.isSingleAssociation(column.getType());
+        AssociationDefinition r = column.getAssociation();
 
-        TypeName type = isAssociation ? column.getAssociation().modelType : column.getType();
+        TypeName type = r != null ? r.modelType : column.getType();
 
         TypeName collectionType = Types.getCollection(type.box());
 
         ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
-                .addAnnotations(nullabilityAnnotations(column))
+                .addAnnotations(column.nullabilityAnnotations())
                 .build();
 
         CodeBlock serializedFieldExpr;
@@ -257,17 +256,4 @@ public class ConditionQueryHelpers {
                         .build()
         );
     }
-
-    public List<AnnotationSpec> nullabilityAnnotations(ColumnDefinition column) {
-        if (column.getType().isPrimitive()) {
-            return Collections.emptyList();
-        }
-
-        if (column.nullable) {
-            return Collections.singletonList(Specs.nullableAnnotation());
-        } else {
-            return Collections.singletonList(Specs.nonNullAnnotationSpec());
-        }
-    }
-
 }

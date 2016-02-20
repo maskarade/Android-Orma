@@ -19,19 +19,32 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 public class AssociationDefinition {
 
+    @Nullable
     final ClassName associationType;
 
+    @NonNull
     final ClassName modelType;
 
-    public AssociationDefinition(ClassName associationType, TypeName modelType) {
+    public AssociationDefinition(@Nullable ClassName associationType, TypeName modelType) {
         this.associationType = associationType;
         this.modelType = (ClassName) modelType;
     }
 
-    public static AssociationDefinition create(TypeName type) {
+    public static AssociationDefinition createSingleAssociation(TypeName type) {
         ParameterizedTypeName pt = (ParameterizedTypeName) type;
         return new AssociationDefinition(pt.rawType, pt.typeArguments.get(0));
+    }
+
+    public static AssociationDefinition createDirectAssociation(TypeName type) {
+        return new AssociationDefinition(null, type);
+    }
+
+    public boolean isSingleAssociation() {
+        return Types.SingleAssociation.equals(associationType);
     }
 }

@@ -25,6 +25,6 @@ public class ModelWithDirectAssociation {
     @Column
     public String title;
 
-    //@Column // TODO direct association
+    @Column
     public Book book;
 }

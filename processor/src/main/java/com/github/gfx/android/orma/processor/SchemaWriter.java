@@ -459,8 +459,14 @@ public class SchemaWriter extends BaseWriter {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
-            if (r != null && r.associationType.equals(Types.SingleAssociation)) {
-                builder.addStatement("args[$L] = $L.getId()", i, c.buildGetColumnExpr("model"));
+            if (r != null) {
+                if (r.isSingleAssociation()) {
+                    builder.addStatement("args[$L] = $L.getId()", i, c.buildGetColumnExpr("model"));
+                } else { // direct association
+                    SchemaDefinition schema = context.getSchemaDef(r.modelType);
+                    builder.addStatement("args[$L] = $L", i,
+                            schema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model")));
+                }
             } else {
                 CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
                 if (c.getSerializedType().equals(TypeName.BOOLEAN)) {
@@ -502,8 +508,14 @@ public class SchemaWriter extends BaseWriter {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
-            if (r != null && r.associationType.equals(Types.SingleAssociation)) {
-                builder.addStatement("statement.bindLong($L + $L, $L.getId())", offset, n, c.buildGetColumnExpr("model"));
+            if (r != null) {
+                if (r.isSingleAssociation()) {
+                    builder.addStatement("statement.bindLong($L + $L, $L.getId())", offset, n, c.buildGetColumnExpr("model"));
+                } else { // direct association
+                    SchemaDefinition schema = context.getSchemaDef(r.modelType);
+                    builder.addStatement("statement.bindLong($L + $L, $L)", offset, i,
+                            schema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model")));
+                }
             } else {
                 CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
 
@@ -545,11 +557,23 @@ public class SchemaWriter extends BaseWriter {
             TypeName type = c.getUnboxType();
 
             if (Types.isDirectAssociation(context, type)) {
-                ClassName className = (ClassName) type;
-                String singleAssocType = "SingleAssociation<" + className.simpleName() + ">";
-                context.addError("Direct association is not yet supported. Use " + singleAssocType + " instead.", c.element);
+                AssociationDefinition r = c.getAssociation();
+                assert r != null;
+
+                SchemaDefinition schema = context.getSchemaDef(r.modelType);
+                // FIXME: offset
+                CodeBlock createAssociatedModelExpr = CodeBlock.builder()
+                        .add("$T.INSTANCE.newModelFromCursor(conn, cursor /* FIXME: offset */)", schema.getSchemaClassName())
+                        .build();
+
+                // Given a "Book has-a Publisher" association. The following expression should be created:
+                // book.publisher = Publisher_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset)
+                // NOTE: lhsBaseGen.apply(c) makes, e.g. "model.", ignoring the parameter "c".
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(createAssociatedModelExpr));
+
             } else if (Types.isSingleAssociation(type)) {
                 AssociationDefinition r = c.getAssociation();
+                assert r != null;
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder()
                         .add("new $T<>(conn, $L, cursor.getLong($L))",
                                 r.associationType, context.getSchemaInstanceExpr(r.modelType), i);

@@ -18,11 +18,16 @@ package com.github.gfx.android.orma.processor;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
+import android.support.annotation.Nullable;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -35,6 +40,8 @@ import javax.lang.model.element.VariableElement;
 public class ColumnDefinition {
 
     public static final String kDefaultPrimaryKeyName = "_rowid_";
+
+    public final ProcessingContext context;
 
     public final SchemaDefinition schema;
 
@@ -77,6 +84,7 @@ public class ColumnDefinition {
     public ColumnDefinition(SchemaDefinition schema, VariableElement element) {
         this.schema = schema;
         this.element = element;
+        context = schema.context;
 
         // See https://www.sqlite.org/lang_createtable.html for full specification
         Column column = element.getAnnotation(Column.class);
@@ -121,6 +129,7 @@ public class ColumnDefinition {
     // to create primary key columns
     private ColumnDefinition(SchemaDefinition schema) {
         this.schema = schema;
+        context = schema.context;
         element = null;
         name = kDefaultPrimaryKeyName;
         columnName = kDefaultPrimaryKeyName;
@@ -200,12 +209,14 @@ public class ColumnDefinition {
         }
     }
 
+    @Nullable
     public AssociationDefinition getAssociation() {
         if (Types.isSingleAssociation(type)) {
-            return AssociationDefinition.create(type);
+            return AssociationDefinition.createSingleAssociation(type);
+        } else if (Types.isDirectAssociation(context, type)) {
+            return AssociationDefinition.createDirectAssociation(type);
         }
         return null;
-
     }
 
     public TypeName getType() {
@@ -268,11 +279,14 @@ public class ColumnDefinition {
     }
 
     public CodeBlock buildGetColumnExpr(String modelExpr) {
+        return buildGetColumnExpr(CodeBlock.builder().add("$L", modelExpr).build());
+    }
+
+    public CodeBlock buildGetColumnExpr(CodeBlock modelExpr) {
         return CodeBlock.builder()
                 .add("$L.$L", modelExpr, getter != null ? getter.getSimpleName() + "()" : name)
                 .build();
     }
-
 
     public CodeBlock buildSerializedColumnExpr(String connectionExpr, String modelExpr) {
         CodeBlock getColumnExpr = CodeBlock.builder()
@@ -326,5 +340,17 @@ public class ColumnDefinition {
 
     public boolean needsTypeAdapter() {
         return Types.needsTypeAdapter(getUnboxType());
+    }
+
+    public Collection<AnnotationSpec> nullabilityAnnotations() {
+        if (type.isPrimitive()) {
+            return Collections.emptyList();
+        }
+
+        if (nullable) {
+            return Collections.singletonList(Specs.nullableAnnotation());
+        } else {
+            return Collections.singletonList(Specs.nonNullAnnotationSpec());
+        }
     }
 }
