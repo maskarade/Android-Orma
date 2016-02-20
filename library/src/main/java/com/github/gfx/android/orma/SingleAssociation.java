@@ -98,19 +98,13 @@ public class SingleAssociation<Model> implements Parcelable {
         return id;
     }
 
-    @Deprecated
-    @NonNull
-    public Single<Model> single() {
-        return single;
-    }
-
     @NonNull
     public Single<Model> observable() {
         return single;
     }
 
     /**
-     * A shortcut of {@code singleAssociation.single().toBlocking().value()}.
+     * A shortcut of {@code singleAssociation.observable().toBlocking().value()}.
      *
      * @return A model value the {@code SingleAssociation<T>} refers to.
      */

@@ -86,7 +86,7 @@ public class ForeignKeysTest {
 
     @Test
     public void testHasOne() throws Exception {
-        Publisher publisher = db.selectFromBook().value().publisher.single().toBlocking().value();
+        Publisher publisher = db.selectFromBook().value().publisher.observable().toBlocking().value();
         assertThat(publisher.name, is("foo bar"));
         assertThat(publisher.startedYear, is(2015));
         assertThat(publisher.startedMonth, is(12));
@@ -168,7 +168,7 @@ public class ForeignKeysTest {
         assertThat(count, is(1));
 
         Book book = db.selectFromBook().where("title = ?", "today").value();
-        assertThat(book.publisher.single().toBlocking().value().name, is("The Nova"));
+        assertThat(book.publisher.observable().toBlocking().value().name, is("The Nova"));
     }
 
     @Test
@@ -193,7 +193,7 @@ public class ForeignKeysTest {
         assertThat(count, is(1));
 
         Book book = db.selectFromBook().where("title = ?", "today").value();
-        assertThat(book.publisher.single().toBlocking().value().name, is("The Nova"));
+        assertThat(book.publisher.observable().toBlocking().value().name, is("The Nova"));
     }
 
     @Test(expected = SQLiteException.class)
