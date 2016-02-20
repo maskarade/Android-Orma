@@ -87,7 +87,7 @@ public class MigrationEngineTest {
                 .name(null)
                 .build();
 
-        orma.selectFromBook().count(); // to invoke initialization
+        orma.migrate();
 
         assertThat("No migration on initialization", value.get(), is(0));
     }
