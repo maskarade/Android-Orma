@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import rx.Observable;
+import rx.Single;
+import rx.SingleSubscriber;
 import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.FuncN;
@@ -153,23 +155,17 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
      * @return An observable that yields {@link #count()}.
      */
     @NonNull
-    public Observable<Integer> countAsObservable() {
-        return Observable.create(new Observable.OnSubscribe<Integer>() {
+    public Single<Integer> countAsObservable() {
+        return Single.create(new Single.OnSubscribe<Integer>() {
             @Override
-            public void call(Subscriber<? super Integer> subscriber) {
-                subscriber.onNext(count());
-                subscriber.onCompleted();
+            public void call(SingleSubscriber<? super Integer> singleSubscriber) {
+                singleSubscriber.onSuccess(count());
             }
         });
     }
 
     public boolean isEmpty() {
         return count() == 0;
-    }
-
-    @Deprecated // TODO: remove it in v2.0
-    public boolean empty() {
-        return isEmpty();
     }
 
     @Nullable

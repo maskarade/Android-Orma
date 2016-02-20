@@ -110,12 +110,12 @@ public class QueryTest {
 
     @Test
     public void empty() throws Exception {
-        assertThat(db.selectFromBook().empty(), is(false));
+        assertThat(db.selectFromBook().isEmpty(), is(false));
     }
 
     @Test
     public void countAsObservable() throws Exception {
-        assertThat(db.selectFromBook().countAsObservable().toBlocking().single(), is(2));
+        assertThat(db.selectFromBook().countAsObservable().toBlocking().value(), is(2));
     }
 
     @Test
