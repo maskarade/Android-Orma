@@ -317,11 +317,15 @@ public class SchemaDefinition {
     }
 
     @NonNull
-    public List<String> getCreateIndexStatements() {
+    public synchronized List<String> getCreateIndexStatements() {
         if (createIndexStatements == null) {
             buildStatements();
         }
         return createIndexStatements;
+    }
+
+    public boolean hasDirectAssociations() {
+        return columns.stream().anyMatch(ColumnDefinition::isDirectAssociation);
     }
 
     @Override

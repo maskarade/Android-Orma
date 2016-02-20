@@ -32,14 +32,20 @@ public interface Schema<Model> extends MigrationSchema {
     @NonNull
     String getTableName();
 
+    /**
+     * @return The escaped table name, which may includes {@code JOIN} clauses
+     */
     @NonNull
-    String getEscapedTableName();
+    String getFromClause();
 
     @NonNull
     ColumnDef<Model, ?> getPrimaryKey();
 
+    /**
+     * @return The escaped column names, which may includes joined table's columns.
+     */
     @NonNull
-    String[] getEscapedColumnNames();
+    String[] getDefaultResultColumns();
 
     @NonNull
     List<ColumnDef<Model, ?>> getColumns();
@@ -62,5 +68,5 @@ public interface Schema<Model> extends MigrationSchema {
             boolean withoutAutoId);
 
     @NonNull
-    Model newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor);
+    Model newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int offset);
 }

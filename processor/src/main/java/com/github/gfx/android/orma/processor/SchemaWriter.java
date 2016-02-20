@@ -46,13 +46,11 @@ public class SchemaWriter extends BaseWriter {
 
     static final String COLUMNS = "$COLUMNS";
 
-    static final String ESCAPED_COLUMN_NAMES = "$ESCAPED_COLUMN_NAMES";
+    static final String DEFAULT_RESULT_COLUMNS = "$DEFAULT_RESULT_COLUMNS";
 
     static final String onConflictAlgorithm = "onConflictAlgorithm";
 
     static final String withoutAutoId = "withoutAutoId";
-
-    static final String offset = "offset";
 
     static final Modifier[] publicStaticFinal = {
             Modifier.PUBLIC,
@@ -123,13 +121,35 @@ public class SchemaWriter extends BaseWriter {
         );
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.StringArray, ESCAPED_COLUMN_NAMES)
+                FieldSpec.builder(Types.StringArray, DEFAULT_RESULT_COLUMNS)
                         .addModifiers(publicStaticFinal)
-                        .initializer(buildEscapedColumnNamesInitializer())
+                        .initializer("{\n$L}", buildEscapedColumnNamesInitializer(schema, schema.hasDirectAssociations()))
                         .build()
         );
 
         return fieldSpecs;
+    }
+
+    private String buildFromClause() {
+        StringBuilder sb = new StringBuilder();
+        sql.appendIdentifier(sb, schema.getTableName());
+
+        sb.append(schema.getColumns().stream()
+                .filter(ColumnDefinition::isDirectAssociation)
+                .map(column -> {
+                    StringBuilder sb1 = new StringBuilder();
+                    SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
+                    sb1.append(" JOIN ");
+                    sql.appendIdentifier(sb1, associatedSchema.getTableName());
+                    sb1.append(" ON ");
+                    sb1.append(column.getEscapedColumnName(true));
+                    sb1.append(" = ");
+                    sb1.append(associatedSchema.getPrimaryKey().getEscapedColumnName(true));
+                    return sb1;
+                })
+                .collect(Collectors.joining(", ")));
+
+        return sb.toString();
     }
 
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
@@ -249,23 +269,29 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    public CodeBlock buildEscapedColumnNamesInitializer() {
+    public CodeBlock buildEscapedColumnNamesInitializer(SchemaDefinition schema, boolean fqn) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
-        builder.add("{\n").indent();
+        builder.indent();
 
         List<ColumnDefinition> columns = schema.getColumns();
 
-        for (int i = 0; i < columns.size(); i++) {
-            builder.add("$S", '"' + columns.get(i).columnName + '"');
-            if ((i + 1) != columns.size()) {
+        for (int i = 0, size = columns.size(); i < size; i++) {
+            ColumnDefinition column = columns.get(i);
+            builder.add("$S", column.getEscapedColumnName(fqn));
+            if (column.isDirectAssociation()) {
+                SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
+                builder.add(",\n")
+                        .add(buildEscapedColumnNamesInitializer(associatedSchema, fqn));
+            }
+            if ((i + 1) != size) {
                 builder.add(",\n");
             } else {
                 builder.add("\n");
             }
         }
 
-        builder.unindent().add("}");
+        builder.unindent();
 
         return builder.build();
     }
@@ -297,11 +323,11 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("getEscapedTableName")
+                MethodSpec.methodBuilder("getFromClause")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return '\"' + $L + '\"'", TABLE_NAME)
+                        .addStatement("return $S", buildFromClause())
                         .build()
         );
 
@@ -324,11 +350,11 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("getEscapedColumnNames")
+                MethodSpec.methodBuilder("getDefaultResultColumns")
                         .addAnnotations(overrideAndNonNull)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.StringArray)
-                        .addStatement("return $L", ESCAPED_COLUMN_NAMES)
+                        .addStatement("return $L", DEFAULT_RESULT_COLUMNS)
                         .build()
         );
 
@@ -427,6 +453,7 @@ public class SchemaWriter extends BaseWriter {
                                 ParameterSpec.builder(Types.Cursor, "cursor")
                                         .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
+                        .addParameter(int.class, "offset")
                         .addCode(buildNewModelFromCursor())
                         .build()
         );
@@ -497,7 +524,6 @@ public class SchemaWriter extends BaseWriter {
         for (int i = 0; i < columns.size(); i++) {
             int n = i + 1; // bind index starts 1
             ColumnDefinition c = columns.get(i);
-            TypeName serializedType = c.getSerializedType();
             AssociationDefinition r = c.getAssociation();
 
             if (c.isNullableInJava()) {
@@ -507,16 +533,21 @@ public class SchemaWriter extends BaseWriter {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
-            if (r != null) {
-                if (r.isSingleAssociation()) {
-                    builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
-                } else { // direct association
-                    SchemaDefinition schema = context.getSchemaDef(r.modelType);
-                    builder.addStatement("statement.bindLong($L, $L)", n,
-                            schema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model")));
-                }
+            if (r != null && r.isSingleAssociation()) {
+                builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
             } else {
-                CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+                CodeBlock rhsExpr;
+                TypeName serializedType;
+
+                if (r == null) {
+                    rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+                    serializedType = c.getSerializedType();
+                } else {
+                    // direct associations
+                    SchemaDefinition schema = context.getSchemaDef(r.modelType);
+                    rhsExpr = schema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model"));
+                    serializedType = schema.getPrimaryKey().getSerializedType();
+                }
 
                 if (serializedType.equals(TypeName.BOOLEAN)) {
                     builder.addStatement("statement.bindLong($L, $L ? 1 : 0)", n, rhsExpr);
@@ -551,38 +582,43 @@ public class SchemaWriter extends BaseWriter {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         List<ColumnDefinition> columns = schema.getColumns();
+        int offset = 0; // direct associations increase the offset
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getUnboxType();
+
+            CodeBlock index = CodeBlock.builder().add("offset + $L", i + offset).build();
 
             if (Types.isDirectAssociation(context, type)) {
                 AssociationDefinition r = c.getAssociation();
                 assert r != null;
 
                 SchemaDefinition schema = context.getSchemaDef(r.modelType);
-                // FIXME: offset
+                int numberOfColumns = schema.getColumns().size();
                 CodeBlock createAssociatedModelExpr = CodeBlock.builder()
-                        .add("$T.INSTANCE.newModelFromCursor(conn, cursor /* FIXME: offset */)", schema.getSchemaClassName())
+                        .add("$T.INSTANCE.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
+                                schema.getSchemaClassName(), index, numberOfColumns)
                         .build();
 
                 // Given a "Book has-a Publisher" association. The following expression should be created:
                 // book.publisher = Publisher_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset)
                 // NOTE: lhsBaseGen.apply(c) makes, e.g. "model.", ignoring the parameter "c".
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(createAssociatedModelExpr));
-
+                offset += numberOfColumns;
             } else if (Types.isSingleAssociation(type)) {
                 AssociationDefinition r = c.getAssociation();
                 assert r != null;
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder()
                         .add("new $T<>(conn, $L, cursor.getLong($L))",
-                                r.associationType, context.getSchemaInstanceExpr(r.modelType), i);
+                                r.associationType, context.getSchemaInstanceExpr(r.modelType), index);
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             } else {
                 CodeBlock.Builder rhsExprBuilder = CodeBlock.builder();
                 if (c.isNullableInSQL()) {
-                    rhsExprBuilder.add("cursor.isNull($L) ? null : $L", i, c.buildDeserializeExpr("conn", cursorGetter(c, i)));
+                    rhsExprBuilder.add("cursor.isNull($L) ? null : $L", index,
+                            c.buildDeserializeExpr("conn", cursorGetter(c, index)));
                 } else {
-                    rhsExprBuilder.add(c.buildDeserializeExpr("conn", cursorGetter(c, i)));
+                    rhsExprBuilder.add(c.buildDeserializeExpr("conn", cursorGetter(c, index)));
                 }
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(rhsExprBuilder.build()));
             }
@@ -597,7 +633,6 @@ public class SchemaWriter extends BaseWriter {
             builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.builder().add("model.").build()));
             builder.addStatement("return model");
         } else {
-
             if (schema.getColumns().size() != schema.constructorElement.getParameters().size()) {
                 context.addError("The @Setter constructor parameters must satisfy all the @Column fields",
                         schema.constructorElement);
@@ -625,21 +660,22 @@ public class SchemaWriter extends BaseWriter {
         return parameterElement.getSimpleName().toString();
     }
 
-    private String cursorGetter(ColumnDefinition column, int position) {
+    private CodeBlock cursorGetter(ColumnDefinition column, CodeBlock index) {
         TypeName type = column.getSerializedType();
         if (type.equals(TypeName.BOOLEAN)) {
-            return "cursor.getLong(" + position + ") != 0";
+            return CodeBlock.builder().add("cursor.getLong($L) != 0", index).build();
         } else if (type.equals(TypeName.BYTE)) {
-            return "(byte)cursor.getShort(" + position + ")";
+            return CodeBlock.builder().add("(byte)cursor.getLong($L)", index).build();
         } else if (type.isPrimitive()) {
             String s = type.toString();
-            return "cursor.get" + s.substring(0, 1).toUpperCase() + s.substring(1) + "(" + position + ")";
+            return CodeBlock.builder().add("cursor.get$L($L)", Strings.toUpperFirst(s), index).build();
         } else if (type.equals(Types.String)) {
-            return "cursor.getString(" + position + ")";
+            return CodeBlock.builder().add("cursor.getString($L)", index).build();
         } else if (type.equals(Types.ByteArray)) {
-            return "cursor.getBlob(" + position + ")";
+            return CodeBlock.builder().add("cursor.getBlob($L)", index).build();
         } else {
-            return "cursor.getString(" + position + ")"; // handled by type adapters
+            // FIXME: not reached?
+            return CodeBlock.builder().add("cursor.getString($L)", index).build();
         }
     }
 }

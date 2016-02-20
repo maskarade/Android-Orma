@@ -219,6 +219,20 @@ public class ColumnDefinition {
         return null;
     }
 
+    public String getEscapedColumnName(boolean fqn) {
+        StringBuilder sb = new StringBuilder();
+        if (fqn) {
+            sb.append('"');
+            sb.append(schema.getTableName());
+            sb.append('"');
+            sb.append('.');
+        }
+        sb.append('"');
+        sb.append(columnName);
+        sb.append('"');
+        return sb.toString();
+    }
+
     public TypeName getType() {
         return type;
     }
@@ -309,7 +323,7 @@ public class ColumnDefinition {
         // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
-                new Throwable().printStackTrace();
+                new Throwable().printStackTrace(); // FIXME: remove this
                 throw new ProcessingException("Missing @StaticTypeAdapter to serialize " + type, element);
             }
 
@@ -321,7 +335,7 @@ public class ColumnDefinition {
         }
     }
 
-    public CodeBlock buildDeserializeExpr(String connectionExpr, String valueExpr) {
+    public CodeBlock buildDeserializeExpr(String connectionExpr, CodeBlock valueExpr) {
         // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
@@ -333,7 +347,7 @@ public class ColumnDefinition {
                     .build();
         } else {
             return CodeBlock.builder()
-                .add("$L", valueExpr)
+                    .add("$L", valueExpr)
                     .build();
         }
     }
@@ -352,5 +366,9 @@ public class ColumnDefinition {
         } else {
             return Collections.singletonList(Specs.nonNullAnnotationSpec());
         }
+    }
+
+    public boolean isDirectAssociation() {
+        return Types.isDirectAssociation(context, type);
     }
 }

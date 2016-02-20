@@ -184,7 +184,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @Nullable
     public Model getOrNull(@IntRange(from = 0) long position) {
-        return conn.querySingle(schema, schema.getEscapedColumnNames(),
+        return conn.querySingle(schema, schema.getDefaultResultColumns(),
                 getWhereClause(), getBindArgs(), groupBy, having, orderBy, position);
     }
 
@@ -199,7 +199,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @NonNull
     public Cursor execute() {
-        return conn.query(schema, schema.getEscapedColumnNames(),
+        return conn.query(schema, schema.getDefaultResultColumns(),
                 getWhereClause(), getBindArgs(), groupBy, having, orderBy, getLimitClause());
     }
 
@@ -241,7 +241,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @NonNull
     public Model newModelFromCursor(@NonNull Cursor cursor) {
-        return schema.newModelFromCursor(conn, cursor);
+        return schema.newModelFromCursor(conn, cursor, 0);
     }
 
     @NonNull

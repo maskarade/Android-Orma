@@ -136,7 +136,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
         long id = sth.execute(model);
 
         ColumnDef<T, ?> primaryKey = schema.getPrimaryKey();
-        String whereClause = primaryKey.getEscapedName() + " = ?";
+        String whereClause = primaryKey.getFullyQualifiedName() + " = ?";
         String primaryKeyValue;
         if (primaryKey.isAutoValue()) {
             primaryKeyValue = Long.toString(id);
@@ -144,7 +144,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
             primaryKeyValue = String.valueOf(primaryKey.get(model));
         }
         String[] whereArgs = {primaryKeyValue};
-        T createdModel = querySingle(schema, schema.getEscapedColumnNames(), whereClause, whereArgs, null, null, null, 0);
+        T createdModel = querySingle(schema, schema.getDefaultResultColumns(), whereClause, whereArgs, null, null, null, 0);
         if (createdModel == null) {
             throw new NoValueException("Can't retrieve the created model for " + model + " (rowid=" + id + ")");
         }
@@ -153,7 +153,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
-        return db.update(schema.getEscapedTableName(), values, whereClause, whereArgs);
+        return db.update(schema.getFromClause(), values, whereClause, whereArgs);
     }
 
     @NonNull
@@ -172,13 +172,13 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] bindArgs,
             String groupBy, String having, String orderBy, String limit) {
         String sql = SQLiteQueryBuilder.buildQueryString(
-                false, schema.getEscapedTableName(), columns, whereClause, groupBy, having, orderBy, limit);
+                false, schema.getFromClause(), columns, whereClause, groupBy, having, orderBy, limit);
         return rawQuery(sql, bindArgs);
     }
 
     public int count(Schema<?> schema, String whereClause, String[] whereArgs) {
         String sql = SQLiteQueryBuilder.buildQueryString(
-                false, schema.getEscapedTableName(), countSelections, whereClause, null, null, null, null);
+                false, schema.getFromClause(), countSelections, whereClause, null, null, null, null);
         return (int) rawQueryForLong(sql, whereArgs);
     }
 
@@ -189,7 +189,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
         try {
             if (cursor.moveToFirst()) {
-                return schema.newModelFromCursor(this, cursor);
+                return schema.newModelFromCursor(this, cursor, 0);
             } else {
                 return null;
             }
@@ -201,7 +201,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
     public int delete(@NonNull Schema<?> schema, @Nullable String whereClause, @Nullable String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
 
-        String sql = "DELETE FROM " + schema.getEscapedTableName()
+        String sql = "DELETE FROM " + schema.getFromClause()
                 + (!TextUtils.isEmpty(whereClause) ? " WHERE " + whereClause : "");
         trace(sql, whereArgs);
         SQLiteStatement statement = db.compileStatement(sql);

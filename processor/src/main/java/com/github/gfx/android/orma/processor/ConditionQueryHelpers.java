@@ -55,11 +55,10 @@ public class ConditionQueryHelpers {
     }
 
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
-
-        boolean isAssociation = Types.isSingleAssociation(column.getType());
         AssociationDefinition r = column.getAssociation();
 
-        TypeName type = r != null ? r.modelType : column.getType();
+        boolean isAssociation = r != null;
+        TypeName type = isAssociation ? r.modelType : column.getType();
 
         TypeName collectionType = Types.getCollection(type.box());
 

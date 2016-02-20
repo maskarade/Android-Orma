@@ -318,7 +318,7 @@ public class DatabaseWriter extends BaseWriter {
                                     .addAnnotation(Specs.nonNullAnnotationSpec())
                                     .build()
                     )
-                    .addStatement("return $L.newModelFromCursor($L, cursor)", schemaInstance, connection)
+                    .addStatement("return $L.newModelFromCursor($L, cursor, 0)", schemaInstance, connection)
                     .build());
 
             methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)

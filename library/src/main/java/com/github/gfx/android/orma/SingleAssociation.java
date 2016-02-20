@@ -59,7 +59,7 @@ public class SingleAssociation<Model> implements Parcelable {
                 ColumnDef<Model, ?> primaryKey = schema.getPrimaryKey();
                 String whereClause = primaryKey.getEscapedName() + " = ?";
                 String[] whereArgs = {String.valueOf(id)};
-                Model model = conn.querySingle(schema, schema.getEscapedColumnNames(),
+                Model model = conn.querySingle(schema, schema.getDefaultResultColumns(),
                         whereClause, whereArgs, null, null, null, 0);
                 if (model != null) {
                     subscriber.onSuccess(model);
