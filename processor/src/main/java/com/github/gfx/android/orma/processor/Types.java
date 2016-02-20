@@ -109,10 +109,6 @@ public class Types {
 
     public static final ClassName TypeHolder = ClassName.get(ormaPackageName + ".internal", "TypeHolder");
 
-    public static final ClassName TypeAdapter = ClassName.get(ormaPackageName + ".adapter", "TypeAdapter");
-
-    public static final ParameterizedTypeName WildcardTypeAdapter = ParameterizedTypeName.get(TypeAdapter, WildcardType);
-
     public static final ClassName TransactionAbortException = ClassName
             .get(ormaPackageName + ".exception", "TransactionAbortException");
 

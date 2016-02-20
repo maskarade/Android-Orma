@@ -15,8 +15,6 @@
  */
 package com.github.gfx.android.orma;
 
-import com.github.gfx.android.orma.adapter.TypeAdapter;
-import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
@@ -40,7 +38,6 @@ import android.support.annotation.WorkerThread;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,10 +64,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final boolean trace;
 
-    @SuppressWarnings("deprecated")
-    @Deprecated
-    final TypeAdapterRegistry typeAdapterRegistry;
-
     final AccessThreadConstraint readOnMainThread;
 
     final AccessThreadConstraint writeOnMainThread;
@@ -81,7 +74,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
         this.migration = configuration.migrationEngine;
         this.foreignKeys = configuration.foreignKeys;
         this.wal = configuration.wal;
-        this.typeAdapterRegistry = configuration.typeAdapterRegistry;
 
         this.tryParsingSql = configuration.tryParsingSql;
         this.trace = configuration.trace;
@@ -135,24 +127,6 @@ public class OrmaConnection extends SQLiteOpenHelper {
             }
         }
         return super.getReadableDatabase();
-    }
-
-    @Deprecated
-    @SuppressWarnings("deprecated")
-    @NonNull
-    public <SourceType> TypeAdapter<SourceType> getTypeAdapter(Type sourceType) {
-        return typeAdapterRegistry.get(sourceType);
-    }
-
-    /**
-     * Use {@link com.github.gfx.android.orma.annotation.StaticTypeAdapter} instead.
-     *
-     * @return the instance of TypeAdapterRegistry
-     */
-    @Deprecated
-    @SuppressWarnings("deprecated")
-    public TypeAdapterRegistry getTypeAdapterRegistry() {
-        return typeAdapterRegistry;
     }
 
     @NonNull

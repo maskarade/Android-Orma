@@ -15,8 +15,6 @@
  */
 package com.github.gfx.android.orma;
 
-import com.github.gfx.android.orma.adapter.TypeAdapter;
-import com.github.gfx.android.orma.adapter.TypeAdapterRegistry;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.OrmaMigration;
@@ -42,9 +40,6 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     @Nullable
     String name;
-
-    @SuppressWarnings("deprecated")
-    TypeAdapterRegistry typeAdapterRegistry;
 
     MigrationEngine migrationEngine;
 
@@ -96,23 +91,6 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
      */
     public T name(@Nullable String name) {
         this.name = name;
-        return (T) this;
-    }
-
-    /**
-     * Adds type adapters. You can override the defaults.
-     *
-     * @param typeAdapters Custom type adapters to add
-     * @return the receiver itself
-     */
-    @Deprecated
-    @SuppressWarnings("deprecated")
-    public T typeAdapters(@NonNull TypeAdapter<?>... typeAdapters) {
-        if (typeAdapterRegistry == null) {
-            typeAdapterRegistry = new TypeAdapterRegistry();
-            typeAdapterRegistry.addAll(TypeAdapterRegistry.defaultTypeAdapters());
-        }
-        typeAdapterRegistry.addAll(typeAdapters);
         return (T) this;
     }
 
@@ -249,7 +227,6 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
     @NonNull
     protected abstract String getSchemaHash();
 
-    @SuppressWarnings("deprecated")
     protected T fillDefaults() {
         if (ormaMigrationBuilder != null) {
             if (migrationTraceListener == null) {
@@ -261,11 +238,6 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
                     .build();
         } else if (migrationEngine == null) {
             migrationEngine = new SchemaDiffMigration(context, getSchemaHash(), migrationTraceListener);
-        }
-
-        if (typeAdapterRegistry == null) {
-            typeAdapterRegistry = new TypeAdapterRegistry();
-            typeAdapterRegistry.addAll(TypeAdapterRegistry.defaultTypeAdapters());
         }
 
         return (T) this;

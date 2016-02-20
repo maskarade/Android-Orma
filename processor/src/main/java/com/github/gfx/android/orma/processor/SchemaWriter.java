@@ -459,14 +459,15 @@ public class SchemaWriter extends BaseWriter {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
-            CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
-
             if (r != null && r.associationType.equals(Types.SingleAssociation)) {
                 builder.addStatement("args[$L] = $L.getId()", i, c.buildGetColumnExpr("model"));
-            } else if (c.getSerializedType().equals(TypeName.BOOLEAN)) {
-                builder.addStatement("args[$L] = $L ? 1 : 0", i, rhsExpr);
             } else {
-                builder.addStatement("args[$L] = $L", i, rhsExpr);
+                CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+                if (c.getSerializedType().equals(TypeName.BOOLEAN)) {
+                    builder.addStatement("args[$L] = $L ? 1 : 0", i, rhsExpr);
+                } else {
+                    builder.addStatement("args[$L] = $L", i, rhsExpr);
+                }
             }
 
             if (c.autoId) {
@@ -501,25 +502,24 @@ public class SchemaWriter extends BaseWriter {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
-            CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
-
-            if (serializedType.equals(TypeName.BOOLEAN)) {
-                builder.addStatement("statement.bindLong($L + $L, $L ? 1 : 0)", offset, n, rhsExpr);
-            } else if (Types.looksLikeIntegerType(serializedType)) {
-                builder.addStatement("statement.bindLong($L + $L, $L)", offset, n, rhsExpr);
-            } else if (Types.looksLikeFloatType(serializedType)) {
-                builder.addStatement("statement.bindDouble($L + $L, $L)", offset, n, rhsExpr);
-            } else if (serializedType.equals(Types.ByteArray)) {
-                builder.addStatement("statement.bindBlob($L + $L, $L)", offset, n, rhsExpr);
-            } else if (serializedType.equals(Types.String)) {
-                builder.addStatement("statement.bindString($L + $L, $L)", offset, n, rhsExpr);
-            } else if (r != null && r.associationType.equals(Types.SingleAssociation)) {
+            if (r != null && r.associationType.equals(Types.SingleAssociation)) {
                 builder.addStatement("statement.bindLong($L + $L, $L.getId())", offset, n, c.buildGetColumnExpr("model"));
             } else {
-                builder.addStatement("statement.bindString($L + $L, $L)", offset, n, rhsExpr);
+                CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
 
-                // TODO: throw the following errors in v2.0
-                // throw new ProcessingException("No storage method found for " + serializedType, c.element);
+                if (serializedType.equals(TypeName.BOOLEAN)) {
+                    builder.addStatement("statement.bindLong($L + $L, $L ? 1 : 0)", offset, n, rhsExpr);
+                } else if (Types.looksLikeIntegerType(serializedType)) {
+                    builder.addStatement("statement.bindLong($L + $L, $L)", offset, n, rhsExpr);
+                } else if (Types.looksLikeFloatType(serializedType)) {
+                    builder.addStatement("statement.bindDouble($L + $L, $L)", offset, n, rhsExpr);
+                } else if (serializedType.equals(Types.ByteArray)) {
+                    builder.addStatement("statement.bindBlob($L + $L, $L)", offset, n, rhsExpr);
+                } else if (serializedType.equals(Types.String)) {
+                    builder.addStatement("statement.bindString($L + $L, $L)", offset, n, rhsExpr);
+                } else {
+                    throw new ProcessingException("No storage method found for " + serializedType, c.element);
+                }
             }
 
             if (c.autoId) {

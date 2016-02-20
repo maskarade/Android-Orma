@@ -287,61 +287,40 @@ public class ColumnDefinition {
         }
     }
 
-    public CodeBlock buildGetTypeAdapter(String connectionExpr) {
-        return CodeBlock.builder()
-                .add("$L.<$T>getTypeAdapter($T.$L.type)",
-                        connectionExpr,
-                        type,
-                        schema.getSchemaClassName(),
-                        name)
-                .build();
-    }
-
     public CodeBlock buildSerializeExpr(String connectionExpr, String valueExpr) {
         return buildSerializeExpr(connectionExpr, CodeBlock.builder().add("$L", valueExpr).build());
     }
 
     public CodeBlock buildSerializeExpr(String connectionExpr, CodeBlock valueExpr) {
-        if (typeAdapter != null) {
-            // static type adapters
+        // TODO: parameter injection for static type serializers
+        if (needsTypeAdapter()) {
+            if (typeAdapter == null) {
+                new Throwable().printStackTrace();
+                throw new ProcessingException("Missing @StaticTypeAdapter to serialize " + type, element);
+            }
+
             return CodeBlock.builder()
                     .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getSerializerName(), valueExpr)
                     .build();
         } else {
-            // TODO: remove this branch in v2.0
-            // dynamic type adapters (DEPRECATED)
-            CodeBlock.Builder expr = CodeBlock.builder();
-            if (needsTypeAdapter()) {
-                expr.add("$L.$L($L)",
-                        buildGetTypeAdapter(connectionExpr),
-                        nullable ? "serializeNullable" : "serialize",
-                        valueExpr);
-            } else {
-                expr.add(valueExpr);
-            }
-            return expr.build();
+            return valueExpr;
         }
     }
 
     public CodeBlock buildDeserializeExpr(String connectionExpr, String valueExpr) {
-        if (typeAdapter != null) {
-            // static type adapters
+        // TODO: parameter injection for static type serializers
+        if (needsTypeAdapter()) {
+            if (typeAdapter == null) {
+                throw new ProcessingException("Missing @StaticTypeAdapter to deserialize " + type, element);
+            }
+
             return CodeBlock.builder()
                     .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr)
                     .build();
         } else {
-            // dynamic type adapters
-            CodeBlock.Builder expr = CodeBlock.builder();
-            if (needsTypeAdapter()) {
-                expr.add("$L.$L($L)",
-                        buildGetTypeAdapter(connectionExpr),
-                        nullable ? "deserializeNullable" : "deserialize",
-                        valueExpr);
-            } else {
-                expr.add("$L", valueExpr);
-            }
-
-            return expr.build();
+            return CodeBlock.builder()
+                .add("$L", valueExpr)
+                    .build();
         }
     }
 
