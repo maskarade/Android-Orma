@@ -410,7 +410,6 @@ public class SchemaWriter extends BaseWriter {
                                         .addAnnotation(Specs.nonNullAnnotationSpec())
                                         .build())
                         .addParameter(boolean.class, withoutAutoId)
-                        .addParameter(int.class, offset)
                         .addCode(buildBindArgs())
                         .build()
         );
@@ -510,25 +509,25 @@ public class SchemaWriter extends BaseWriter {
 
             if (r != null) {
                 if (r.isSingleAssociation()) {
-                    builder.addStatement("statement.bindLong($L + $L, $L.getId())", offset, n, c.buildGetColumnExpr("model"));
+                    builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
                 } else { // direct association
                     SchemaDefinition schema = context.getSchemaDef(r.modelType);
-                    builder.addStatement("statement.bindLong($L + $L, $L)", offset, i,
+                    builder.addStatement("statement.bindLong($L, $L)", i,
                             schema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model")));
                 }
             } else {
                 CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
 
                 if (serializedType.equals(TypeName.BOOLEAN)) {
-                    builder.addStatement("statement.bindLong($L + $L, $L ? 1 : 0)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindLong($L, $L ? 1 : 0)", n, rhsExpr);
                 } else if (Types.looksLikeIntegerType(serializedType)) {
-                    builder.addStatement("statement.bindLong($L + $L, $L)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindLong($L, $L)", n, rhsExpr);
                 } else if (Types.looksLikeFloatType(serializedType)) {
-                    builder.addStatement("statement.bindDouble($L + $L, $L)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindDouble($L, $L)", n, rhsExpr);
                 } else if (serializedType.equals(Types.ByteArray)) {
-                    builder.addStatement("statement.bindBlob($L + $L, $L)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindBlob($L, $L)", n, rhsExpr);
                 } else if (serializedType.equals(Types.String)) {
-                    builder.addStatement("statement.bindString($L + $L, $L)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindString($L, $L)", n, rhsExpr);
                 } else {
                     throw new ProcessingException("No storage method found for " + serializedType, c.element);
                 }
@@ -540,7 +539,7 @@ public class SchemaWriter extends BaseWriter {
             if (c.isNullableInJava()) {
                 builder.endControlFlow();
                 builder.beginControlFlow("else");
-                builder.addStatement("statement.bindNull($L + $L)", n, offset);
+                builder.addStatement("statement.bindNull($L)", n);
                 builder.endControlFlow();
             }
         }

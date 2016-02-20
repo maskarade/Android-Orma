@@ -65,7 +65,7 @@ public class Inserter<Model> {
         if (conn.trace) {
             conn.trace(sql, schema.convertToArgs(conn, model, withoutAutoId));
         }
-        schema.bindArgs(conn, statement, model, withoutAutoId, 0);
+        schema.bindArgs(conn, statement, model, withoutAutoId);
         return statement.executeInsert();
     }
 
