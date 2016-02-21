@@ -322,6 +322,19 @@ public class OrmaConnection extends SQLiteOpenHelper {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    void setForeignKeyConstraintsEnabled(SQLiteDatabase db, boolean enabled) {
+        if (isRunningOnJellyBean()) {
+            db.setForeignKeyConstraintsEnabled(enabled);
+        } else {
+            if (enabled) {
+                db.execSQL("PRAGMA foreign_keys = ON");
+            } else {
+                db.execSQL("PRAGMA foreign_keys = OFF");
+            }
+        }
+    }
+
     // SQLiteOpenHelper
 
     @Override
@@ -331,11 +344,8 @@ public class OrmaConnection extends SQLiteOpenHelper {
         if (wal && getDatabaseName() != null && !isRunningOnJellyBean()) {
             db.enableWriteAheadLogging();
         }
-        if (foreignKeys) {
-            db.execSQL("PRAGMA foreign_keys = ON");
-        } else {
-            db.execSQL("PRAGMA foreign_keys = OFF");
-        }
+
+        setForeignKeyConstraintsEnabled(db, foreignKeys);
     }
 
     @Override
