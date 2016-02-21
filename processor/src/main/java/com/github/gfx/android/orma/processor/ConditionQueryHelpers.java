@@ -113,6 +113,25 @@ public class ConditionQueryHelpers {
         );
 
         if (isAssociation) {
+            // for foreign keys
+            SchemaDefinition associatedSchema = column.getAssociatedSchema();
+            ColumnDefinition foreignKey = associatedSchema.getPrimaryKey();
+            if (foreignKey != null) {
+                String paramName = column.name + Strings.toUpperFirst(foreignKey.name);
+                methodSpecs.add(
+                        MethodSpec.methodBuilder(column.name + "Eq")
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(
+                                        ParameterSpec.builder(foreignKey.getType(), paramName)
+                                                .addAnnotations(foreignKey.nullabilityAnnotations())
+                                                .build())
+                                .returns(targetClassName)
+                                .addStatement("return where($S, $L)", sql.quoteIdentifier(column.columnName) + " = ?",
+                                        paramName)
+                                .build()
+                );
+            }
+
             // generates only "*Eq" for associations
             return;
         }
@@ -219,7 +238,6 @@ public class ConditionQueryHelpers {
                                 column.name + "NotIn", Types.Arrays)
                         .build()
         );
-
 
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "Lt")

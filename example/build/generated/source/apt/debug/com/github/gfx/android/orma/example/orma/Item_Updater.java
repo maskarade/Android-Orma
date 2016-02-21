@@ -31,6 +31,10 @@ public class Item_Updater extends Updater<Item, Item_Updater> {
     return where("\"category\" = ?", category.id /* primary key */);
   }
 
+  public Item_Updater categoryEq(long categoryId) {
+    return where("\"category\" = ?", categoryId);
+  }
+
   public Item_Updater nameEq(@NonNull String name) {
     return where("\"name\" = ?", name);
   }

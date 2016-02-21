@@ -147,6 +147,45 @@ public class DirectAssociationsTest {
     }
 
     @Test
+    public void testFindByAssociatedModel() throws Exception {
+        Inserter<ModelWithDirectAssociation> inserter = orma.prepareInsertIntoModelWithDirectAssociation();
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.title = "foo";
+                model.author = author1;
+                model.note = "SQLite rocks";
+                return model;
+            }
+        });
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.title = "bar";
+                model.author = author2;
+                model.note = "SQLite supports most of SQL92";
+                return model;
+            }
+        });
+
+        ModelWithDirectAssociation_Selector selector = orma.selectFromModelWithDirectAssociation()
+                .authorEq(author1);
+
+        assertThat(selector.count(), is(1));
+
+        ModelWithDirectAssociation model = selector.value();
+        assertThat(model.title, is("foo"));
+        assertThat(model.note, is("SQLite rocks"));
+        assertThat(model.author, is(notNullValue()));
+        assertThat(model.author.name, is(author1.name));
+        assertThat(model.author.note, is(author1.note));
+    }
+
+    @Test
     public void testFindByPrimaryKey() throws Exception {
         Inserter<ModelWithDirectAssociation> inserter = orma.prepareInsertIntoModelWithDirectAssociation();
         inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
@@ -172,7 +211,8 @@ public class DirectAssociationsTest {
             }
         });
 
-        ModelWithDirectAssociation_Selector selector = orma.selectFromModelWithDirectAssociation().authorEq(author1);
+        ModelWithDirectAssociation_Selector selector = orma.selectFromModelWithDirectAssociation()
+                .authorEq(author1.name);
 
         assertThat(selector.count(), is(1));
 
@@ -183,6 +223,7 @@ public class DirectAssociationsTest {
         assertThat(model.author.name, is(author1.name));
         assertThat(model.author.note, is(author1.note));
     }
+
 
     @Test
     public void testCascadingDelete() throws Exception {
