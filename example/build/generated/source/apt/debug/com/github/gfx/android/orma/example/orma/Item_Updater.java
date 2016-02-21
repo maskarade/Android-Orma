@@ -1,0 +1,73 @@
+package com.github.gfx.android.orma.example.orma;
+
+import android.support.annotation.NonNull;
+import com.github.gfx.android.orma.OrmaConnection;
+import com.github.gfx.android.orma.Schema;
+import com.github.gfx.android.orma.Updater;
+import java.lang.String;
+import java.util.Arrays;
+import java.util.Collection;
+
+public class Item_Updater extends Updater<Item, Item_Updater> {
+  public Item_Updater(OrmaConnection conn, Schema<Item> schema) {
+    super(conn, schema);
+  }
+
+  public Item_Updater(Item_Relation relation) {
+    super(relation);
+  }
+
+  public Item_Updater category(@NonNull Category category) {
+    contents.put("\"category\"", category.id);
+    return this;
+  }
+
+  public Item_Updater name(@NonNull String name) {
+    contents.put("\"name\"", name);
+    return this;
+  }
+
+  public Item_Updater categoryEq(@NonNull Category category) {
+    return where("\"category\" = ?", category.id /* primary key */);
+  }
+
+  public Item_Updater nameEq(@NonNull String name) {
+    return where("\"name\" = ?", name);
+  }
+
+  public Item_Updater nameNotEq(@NonNull String name) {
+    return where("\"name\" <> ?", name);
+  }
+
+  public Item_Updater nameIn(@NonNull Collection<String> values) {
+    return in(false, "\"name\"", values);
+  }
+
+  public Item_Updater nameNotIn(@NonNull Collection<String> values) {
+    return in(true, "\"name\"", values);
+  }
+
+  public Item_Updater nameIn(@NonNull String... values) {
+    return nameIn(Arrays.asList(values));
+  }
+
+  public Item_Updater nameNotIn(@NonNull String... values) {
+    return nameNotIn(Arrays.asList(values));
+  }
+
+  public Item_Updater nameLt(@NonNull String name) {
+    return where("\"name\" < ?", name);
+  }
+
+  public Item_Updater nameLe(@NonNull String name) {
+    return where("\"name\" <= ?", name);
+  }
+
+  public Item_Updater nameGt(@NonNull String name) {
+    return where("\"name\" > ?", name);
+  }
+
+  public Item_Updater nameGe(@NonNull String name) {
+    return where("\"name\" >= ?", name);
+  }
+}
