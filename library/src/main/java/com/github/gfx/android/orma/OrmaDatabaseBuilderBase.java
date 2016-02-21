@@ -31,7 +31,7 @@ import android.support.annotation.Nullable;
  * This class represents Orma options, and it is the base class of {@code OrmaDatabase.Builder}.
  */
 @SuppressWarnings("unchecked")
-public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
+public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<?>> {
 
     @NonNull
     final Context context;
@@ -59,7 +59,7 @@ public abstract class OrmaConfiguration<T extends OrmaConfiguration<?>> {
 
     AccessThreadConstraint writeOnMainThread;
 
-    public OrmaConfiguration(@NonNull Context context) {
+    public OrmaDatabaseBuilderBase(@NonNull Context context) {
         this.context = context.getApplicationContext();
         this.debug = extractDebuggable(context);
         this.name = context.getPackageName() + ".orma.db";

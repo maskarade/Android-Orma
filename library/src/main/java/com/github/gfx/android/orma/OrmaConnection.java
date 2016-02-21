@@ -68,7 +68,7 @@ public class OrmaConnection extends SQLiteOpenHelper {
 
     final AccessThreadConstraint writeOnMainThread;
 
-    public OrmaConnection(@NonNull OrmaConfiguration<?> configuration, List<Schema<?>> schemas) {
+    public OrmaConnection(@NonNull OrmaDatabaseBuilderBase<?> configuration, List<Schema<?>> schemas) {
         super(configuration.context, configuration.name, null, SCHEMA_VERSION);
         this.schemas = schemas;
         this.migration = configuration.migrationEngine;

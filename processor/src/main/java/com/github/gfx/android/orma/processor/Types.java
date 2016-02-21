@@ -112,7 +112,7 @@ public class Types {
     public static final ClassName TransactionAbortException = ClassName
             .get(ormaPackageName + ".exception", "TransactionAbortException");
 
-    public static final ClassName OrmaConfiguration = ClassName.get(ormaPackageName, "OrmaConfiguration");
+    public static final ClassName OrmaDatabaseBuilderBase = ClassName.get(ormaPackageName, "OrmaDatabaseBuilderBase");
 
     public static final ClassName DatabaseHandle = ClassName.get(ormaPackageName, "DatabaseHandle");
 

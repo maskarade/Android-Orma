@@ -8,8 +8,8 @@ import android.support.annotation.WorkerThread;
 import com.github.gfx.android.orma.DatabaseHandle;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.OrmaConfiguration;
 import com.github.gfx.android.orma.OrmaConnection;
+import com.github.gfx.android.orma.OrmaDatabaseBuilderBase;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.annotation.OnConflict;
@@ -27,7 +27,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * The time at which the schema was built. Units are as per {@link System#currentTimeMillis()}.
    */
-  public static long SCHEMA_TIMESTAMP = 1456021958936L /* 2016-02-21T11:32:38.936+09:00[Asia/Tokyo] */;
+  public static long SCHEMA_TIMESTAMP = 1456051053608L /* 2016-02-21T19:37:33.608+09:00[Asia/Tokyo] */;
 
   /**
    * The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.
@@ -311,7 +311,7 @@ public class OrmaDatabase implements DatabaseHandle {
     return new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
-  public static class Builder extends OrmaConfiguration<Builder> {
+  public static class Builder extends OrmaDatabaseBuilderBase<Builder> {
     public Builder(@NonNull Context context) {
       super(context);
     }
