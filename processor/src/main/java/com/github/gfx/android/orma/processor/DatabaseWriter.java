@@ -89,7 +89,7 @@ public class DatabaseWriter extends BaseWriter {
 
         builder.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
-        builder.superclass(ParameterizedTypeName.get(Types.OrmaConfiguration, builderClass));
+        builder.superclass(ParameterizedTypeName.get(Types.OrmaDatabaseBuilderBase, builderClass));
 
         builder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
