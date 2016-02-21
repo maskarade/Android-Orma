@@ -38,7 +38,9 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Built-in serializes.
+ * Built-in serializes and deserializers.
+ *
+ * @see com.github.gfx.android.orma.annotation.StaticTypeAdapter
  */
 public class BuiltInSerializers {
 
@@ -177,6 +179,7 @@ public class BuiltInSerializers {
                 }
             }
             jsonReader.endArray();
+            jsonReader.close();
             return collection;
         } catch (IOException e) {
             return collection;
