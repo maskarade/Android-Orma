@@ -327,23 +327,21 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         return array.toString();
     }
 
-    public void executeStatements(SQLiteDatabase db, List<String> statements) {
+    public void executeStatements(final SQLiteDatabase db, final List<String> statements) {
         if (statements.isEmpty()) {
             return;
         }
 
-        db.beginTransaction();
-        try {
-            for (String statement : statements) {
-                trace("%s", statement);
-                db.execSQL(statement);
-                saveStep(db, statement);
+        transaction(db, new Runnable() {
+            @Override
+            public void run() {
+                for (String statement : statements) {
+                    trace("%s", statement);
+                    db.execSQL(statement);
+                    saveStep(db, statement);
+                }
             }
-
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
+        });
     }
 
     public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<? extends MigrationSchema> schemas) {

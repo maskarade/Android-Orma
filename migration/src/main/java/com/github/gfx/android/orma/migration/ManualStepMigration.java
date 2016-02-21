@@ -169,20 +169,19 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         runTasksInTransaction(db, tasks);
     }
 
-    private void runTasksInTransaction(SQLiteDatabase db, List<Runnable> tasks) {
+    private void runTasksInTransaction(SQLiteDatabase db, final List<Runnable> tasks) {
         if (tasks.isEmpty()) {
             return;
         }
 
-        db.beginTransaction();
-        try {
-            for (Runnable task : tasks) {
-                task.run();
+        transaction(db, new Runnable() {
+            @Override
+            public void run() {
+                for (Runnable task : tasks) {
+                    task.run();
+                }
             }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
+        });
     }
 
     public void saveStep(SQLiteDatabase db, int version, @Nullable String sql) {
