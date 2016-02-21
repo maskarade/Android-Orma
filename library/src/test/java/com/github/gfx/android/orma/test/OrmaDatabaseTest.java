@@ -26,6 +26,8 @@ import org.junit.runner.RunWith;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
@@ -117,4 +119,22 @@ public class OrmaDatabaseTest {
         assertThat(db.getConnection().getReadableDatabase().isWriteAheadLoggingEnabled(), is(false));
     }
 
+    @Test
+    public void testDefaultForeignKeySetting() throws Exception {
+        OrmaDatabase db = OrmaDatabase.builder(getContext()).build();
+        assertThat(isForeignKeyEnabled(db), is(true));
+    }
+
+    @Test
+    public void testDisableForeignKey() throws Exception {
+        OrmaDatabase db = OrmaDatabase.builder(getContext())
+                .foreignKeys(false)
+                .build();
+        assertThat(isForeignKeyEnabled(db), is(false));
+    }
+
+    boolean isForeignKeyEnabled(OrmaDatabase orma) {
+        SQLiteDatabase db = orma.getConnection().getReadableDatabase();
+        return DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null) != 0;
+    }
 }
