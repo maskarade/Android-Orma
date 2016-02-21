@@ -8,6 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.0.2 - 2016/02/21
+
+### Bug Fixes
+
+- Fix NPE when migration is invoked with default settings (#184)
+
 ## v2.0.1 - 2016/02/21
 
 ### Bug Fixes
