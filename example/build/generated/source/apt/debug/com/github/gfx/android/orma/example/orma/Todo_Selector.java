@@ -45,11 +45,11 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     return in(true, "\"title\"", values);
   }
 
-  public Todo_Selector titleIn(@NonNull String... values) {
+  public final Todo_Selector titleIn(@NonNull String... values) {
     return titleIn(Arrays.asList(values));
   }
 
-  public Todo_Selector titleNotIn(@NonNull String... values) {
+  public final Todo_Selector titleNotIn(@NonNull String... values) {
     return titleNotIn(Arrays.asList(values));
   }
 
@@ -85,11 +85,11 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     return in(true, "\"done\"", values);
   }
 
-  public Todo_Selector doneIn(@NonNull Boolean... values) {
+  public final Todo_Selector doneIn(@NonNull Boolean... values) {
     return doneIn(Arrays.asList(values));
   }
 
-  public Todo_Selector doneNotIn(@NonNull Boolean... values) {
+  public final Todo_Selector doneNotIn(@NonNull Boolean... values) {
     return doneNotIn(Arrays.asList(values));
   }
 
@@ -135,11 +135,11 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     });
   }
 
-  public Todo_Selector createdTimeIn(@NonNull Date... values) {
+  public final Todo_Selector createdTimeIn(@NonNull Date... values) {
     return createdTimeIn(Arrays.asList(values));
   }
 
-  public Todo_Selector createdTimeNotIn(@NonNull Date... values) {
+  public final Todo_Selector createdTimeNotIn(@NonNull Date... values) {
     return createdTimeNotIn(Arrays.asList(values));
   }
 
@@ -175,11 +175,11 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     return in(true, "\"id\"", values);
   }
 
-  public Todo_Selector idIn(@NonNull Long... values) {
+  public final Todo_Selector idIn(@NonNull Long... values) {
     return idIn(Arrays.asList(values));
   }
 
-  public Todo_Selector idNotIn(@NonNull Long... values) {
+  public final Todo_Selector idNotIn(@NonNull Long... values) {
     return idNotIn(Arrays.asList(values));
   }
 

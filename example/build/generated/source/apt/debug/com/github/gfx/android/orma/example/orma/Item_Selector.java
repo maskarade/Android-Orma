@@ -44,11 +44,11 @@ public class Item_Selector extends Selector<Item, Item_Selector> {
     return in(true, "\"name\"", values);
   }
 
-  public Item_Selector nameIn(@NonNull String... values) {
+  public final Item_Selector nameIn(@NonNull String... values) {
     return nameIn(Arrays.asList(values));
   }
 
-  public Item_Selector nameNotIn(@NonNull String... values) {
+  public final Item_Selector nameNotIn(@NonNull String... values) {
     return nameNotIn(Arrays.asList(values));
   }
 

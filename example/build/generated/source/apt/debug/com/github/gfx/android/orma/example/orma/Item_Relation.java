@@ -61,11 +61,11 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
     return in(true, "\"name\"", values);
   }
 
-  public Item_Relation nameIn(@NonNull String... values) {
+  public final Item_Relation nameIn(@NonNull String... values) {
     return nameIn(Arrays.asList(values));
   }
 
-  public Item_Relation nameNotIn(@NonNull String... values) {
+  public final Item_Relation nameNotIn(@NonNull String... values) {
     return nameNotIn(Arrays.asList(values));
   }
 

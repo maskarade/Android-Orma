@@ -33,11 +33,11 @@ public class Category_Deleter extends Deleter<Category, Category_Deleter> {
     return in(true, "\"id\"", values);
   }
 
-  public Category_Deleter idIn(@NonNull Long... values) {
+  public final Category_Deleter idIn(@NonNull Long... values) {
     return idIn(Arrays.asList(values));
   }
 
-  public Category_Deleter idNotIn(@NonNull Long... values) {
+  public final Category_Deleter idNotIn(@NonNull Long... values) {
     return idNotIn(Arrays.asList(values));
   }
 

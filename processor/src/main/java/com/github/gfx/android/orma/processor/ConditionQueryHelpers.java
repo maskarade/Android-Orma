@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -65,6 +66,8 @@ public class ConditionQueryHelpers {
         ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
                 .addAnnotations(column.nullabilityAnnotations())
                 .build();
+
+        List<AnnotationSpec> safeVarargsIfNeeded = Annotations.safeVarargsIfNeeded(column.getType());
 
         CodeBlock serializedFieldExpr;
         if (isAssociation) {
@@ -189,11 +192,13 @@ public class ConditionQueryHelpers {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "In")
+                        .addAnnotations(safeVarargsIfNeeded)
+                        .varargs(true)
+                        .addModifiers(Modifier.FINAL) // to use SafeVarargs
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
                                 .addAnnotation(Annotations.nonNull())
                                 .build())
-                        .varargs(true)
                         .returns(targetClassName)
                         .addStatement("return $L($T.asList(values))",
                                 column.name + "In", Types.Arrays)
@@ -202,11 +207,13 @@ public class ConditionQueryHelpers {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder(column.name + "NotIn")
+                        .addAnnotations(safeVarargsIfNeeded)
+                        .varargs(true)
+                        .addModifiers(Modifier.FINAL) // to use @SafeVarargs
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
                                 .addAnnotation(Annotations.nonNull())
                                 .build())
-                        .varargs(true)
                         .returns(targetClassName)
                         .addStatement("return $L($T.asList(values))",
                                 column.name + "NotIn", Types.Arrays)

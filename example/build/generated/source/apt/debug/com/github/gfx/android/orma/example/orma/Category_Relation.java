@@ -57,11 +57,11 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
     return in(true, "\"id\"", values);
   }
 
-  public Category_Relation idIn(@NonNull Long... values) {
+  public final Category_Relation idIn(@NonNull Long... values) {
     return idIn(Arrays.asList(values));
   }
 
-  public Category_Relation idNotIn(@NonNull Long... values) {
+  public final Category_Relation idNotIn(@NonNull Long... values) {
     return idNotIn(Arrays.asList(values));
   }
 

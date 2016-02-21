@@ -17,8 +17,11 @@ package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -67,6 +70,17 @@ public class Annotations {
                 .build();
     }
 
+    public static List<AnnotationSpec> safeVarargsIfNeeded(TypeName type) {
+        if(type instanceof ParameterizedTypeName) {
+            return Arrays.asList(
+                    AnnotationSpec.builder(SafeVarargs.class).build(),
+                    suppressWarnings("varargs")
+            );
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
     public static AnnotationSpec suppressWarnings(String... warnings) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(SuppressWarnings.class);
         CodeBlock.Builder names = CodeBlock.builder();
@@ -79,7 +93,11 @@ public class Annotations {
                 names.add(", $S", warning);
             }
         }
-        builder.addMember("value", "{$L}", names.build());
+        if (warnings.length == 1) {
+            builder.addMember("value", names.build());
+        } else {
+            builder.addMember("value", "{$L}", names.build());
+        }
         return builder.build();
     }
 }

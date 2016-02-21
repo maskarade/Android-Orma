@@ -37,11 +37,11 @@ public class Item_Deleter extends Deleter<Item, Item_Deleter> {
     return in(true, "\"name\"", values);
   }
 
-  public Item_Deleter nameIn(@NonNull String... values) {
+  public final Item_Deleter nameIn(@NonNull String... values) {
     return nameIn(Arrays.asList(values));
   }
 
-  public Item_Deleter nameNotIn(@NonNull String... values) {
+  public final Item_Deleter nameNotIn(@NonNull String... values) {
     return nameNotIn(Arrays.asList(values));
   }
 
