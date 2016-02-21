@@ -8,6 +8,14 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.0.4 - 2016/02/22
+
+### Bug Fixes
+
+* Fix syntax errors on multiple associations in a table
+* Disable SQLite `foreign_key` in migration to avoid crashes
+* Use [SQLiteDatabase#setForeignKeyConstraintsEnabled()](http://developer.android.com/intl/ja/reference/android/database/sqlite/SQLiteDatabase.html#setForeignKeyConstraintsEnabled(boolean)) if API version >= 16
+
 ## v2.0.3 - 2016/02/21
 
 ### Bug Fixes
