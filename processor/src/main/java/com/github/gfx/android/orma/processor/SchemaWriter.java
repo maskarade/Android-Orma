@@ -126,15 +126,18 @@ public class SchemaWriter extends BaseWriter {
         sb.append(schema.getColumns().stream()
                 .filter(ColumnDefinition::isDirectAssociation)
                 .map(column -> {
-                    StringBuilder sb1 = new StringBuilder();
+                    StringBuilder s = new StringBuilder();
                     SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
-                    sb1.append(" JOIN ");
-                    sql.appendIdentifier(sb1, associatedSchema.getTableName());
-                    sb1.append(" ON ");
-                    sb1.append(column.getEscapedColumnName(true));
-                    sb1.append(" = ");
-                    sb1.append(associatedSchema.getPrimaryKey().getEscapedColumnName(true));
-                    return sb1;
+                    ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
+                    if (primaryKey != null) {
+                        s.append(" JOIN ");
+                        sql.appendIdentifier(s, associatedSchema.getTableName());
+                        s.append(" ON ");
+                        s.append(column.getEscapedColumnName(true));
+                        s.append(" = ");
+                        s.append(primaryKey.getEscapedColumnName(true));
+                    }
+                    return s;
                 })
                 .collect(Collectors.joining(", ")));
 
@@ -480,8 +483,12 @@ public class SchemaWriter extends BaseWriter {
                 builder.addStatement("args[$L] = $L.getId()", i, c.buildGetColumnExpr("model"));
             } else if (c.isDirectAssociation()) { // direct association
                 SchemaDefinition associatedSchema = c.getAssociatedSchema();
-                builder.addStatement("args[$L] = $L",
-                        i, associatedSchema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model")));
+                ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
+                // make errors in ColumnDefinition.java on primaryKey == null
+                if (primaryKey != null) {
+                    builder.addStatement("args[$L] = $L",
+                            i, primaryKey.buildGetColumnExpr(c.buildGetColumnExpr("model")));
+                }
             } else {
                 CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
                 if (c.getSerializedType().equals(TypeName.BOOLEAN)) {
@@ -527,8 +534,15 @@ public class SchemaWriter extends BaseWriter {
 
                 if (c.isDirectAssociation()) {
                     SchemaDefinition associatedSchema = c.getAssociatedSchema();
-                    rhsExpr = associatedSchema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model"));
-                    serializedType = associatedSchema.getPrimaryKey().getSerializedType();
+                    ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
+                    // make errors in ColumnDefinition.java on primaryKey == null
+                    if (primaryKey != null) {
+                        rhsExpr = primaryKey.buildGetColumnExpr(c.buildGetColumnExpr("model"));
+                        serializedType = associatedSchema.getPrimaryKey().getSerializedType();
+                    } else {
+                        rhsExpr = CodeBlock.builder().add("null").build(); // dummy
+                        serializedType = Types.ByteArray; // dummy
+                    }
                 } else {
                     rhsExpr = c.buildSerializedColumnExpr("conn", "model");
                     serializedType = c.getSerializedType();

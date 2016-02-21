@@ -95,7 +95,7 @@ public class ColumnDefinition {
 
         type = ClassName.get(element.asType());
         typeAdapter = schema.context.typeAdapterMap.get(type);
-        storageType = storageType(context, column, type, typeAdapter);
+        storageType = storageType(context, element, column, type, typeAdapter);
 
         if (column != null) {
             indexed = column.indexed();
@@ -145,7 +145,7 @@ public class ColumnDefinition {
         defaultExpr = "";
         collate = Column.Collate.BINARY;
         typeAdapter = schema.context.typeAdapterMap.get(type);
-        storageType = storageType(context, null, type, typeAdapter);
+        storageType = storageType(context, null, null, type, typeAdapter);
     }
 
     public static ColumnDefinition createDefaultPrimaryKey(SchemaDefinition schema) {
@@ -178,7 +178,8 @@ public class ColumnDefinition {
         return element.getSimpleName().toString();
     }
 
-    static String storageType(ProcessingContext context, Column column, TypeName type, TypeAdapterDefinition typeAdapter) {
+    static String storageType(ProcessingContext context, Element element, Column column, TypeName type,
+            TypeAdapterDefinition typeAdapter) {
         if (column != null && !Strings.isEmpty(column.storageType())) {
             return column.storageType();
         } else {
@@ -187,7 +188,13 @@ public class ColumnDefinition {
             } else if (Types.isSingleAssociation(type)) {
                 return SqlTypes.getSqliteType(TypeName.LONG);
             } else if (Types.isDirectAssociation(context, type)) {
-                return SqlTypes.getSqliteType(context.getSchemaDef(type).getPrimaryKey().getType());
+                ColumnDefinition primaryKey = context.getSchemaDef(type).getPrimaryKey();
+                if (primaryKey != null) {
+                    return SqlTypes.getSqliteType(primaryKey.getType());
+                } else {
+                    context.addError("Missing @PrimaryKey", element);
+                    return "UNKNOWN";
+                }
             } else {
                 return SqlTypes.getSqliteType(type);
             }
