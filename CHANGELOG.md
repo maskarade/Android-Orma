@@ -8,6 +8,34 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.0.0
+
+This version includes incompatible changes.
+
+* https://github.com/gfx/Android-Orma/compare/v1.3.0...v2.0.0
+* [v2.0 milestone](https://github.com/gfx/Android-Orma/pulls?q=is%3Apr+is%3Aclosed+milestone%3Av2.0)
+
+### New Features
+
+* Migration API has been re-designed. See `README.md` for details
+* Hash base migration triggers (#165)
+  * Migration does no longer depend on `SQLiteOpenHelper`
+* `migration.TraceListener` (#170)
+* Add `OrmaDatabase#migrate()`  (#171)
+* Support direct associations. Now a model can have another model directly (#175)
+
+### changes
+
+* Remove dynamic type adapters ( #172)
+* Remove `Selector#empty()`; use `#isEmpty()` instead (#173)
+* Remove `SingleAssociation#single()`; use `#observable()` instead (#173)
+* Change `Observable<Integer> countAsObservable()` to `Single<Integer> countAsObservable()` for consistency (#173)
+* Re-design the API of `Schema` to support direct associations (#175)
+
+### Bug Fixes
+
+* Suppress warnings on varargs (#179)
+
 ## v1.3.0 - 2016/02/13
 
 There are lots of changes in this version:
