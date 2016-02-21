@@ -581,8 +581,8 @@ public class SchemaWriter extends BaseWriter {
                 SchemaDefinition schema = context.getSchemaDef(r.modelType);
                 int numberOfColumns = schema.getColumns().size();
                 CodeBlock createAssociatedModelExpr = CodeBlock.builder()
-                        .add("$T.INSTANCE.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
-                                schema.getSchemaClassName(), index, numberOfColumns)
+                        .add("$L.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
+                                schema.createSchemaInstanceExpr(), index, numberOfColumns)
                         .build();
 
                 // Given a "Book has-a Publisher" association. The following expression should be created:
@@ -595,7 +595,7 @@ public class SchemaWriter extends BaseWriter {
                 assert r != null;
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder()
                         .add("new $T<>(conn, $L, cursor.getLong($L))",
-                                r.associationType, context.getSchemaInstanceExpr(r.modelType), index);
+                                r.associationType, c.getAssociatedSchema().createSchemaInstanceExpr(), index);
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             } else {
                 CodeBlock.Builder rhsExprBuilder = CodeBlock.builder();

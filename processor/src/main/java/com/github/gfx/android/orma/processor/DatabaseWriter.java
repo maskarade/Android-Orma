@@ -138,22 +138,9 @@ public class DatabaseWriter extends BaseWriter {
                         .build()
         );
 
-        List<FieldSpec> schemaFields = new ArrayList<>();
-
-        context.schemaMap.values().forEach((schema) -> {
-            schemaFields.add(
-                    FieldSpec.builder(schema.getSchemaClassName(),
-                            "schema" + schema.getModelClassName().simpleName())
-                            .addModifiers(publicStaticFinal)
-                            .initializer("$T.INSTANCE", schema.getSchemaClassName())
-                            .build());
-        });
-
-        fieldSpecs.addAll(schemaFields);
-
         fieldSpecs.add(
                 FieldSpec.builder(Types.getList(Types.WildcardSchema), SCHEMAS, publicStaticFinal)
-                        .initializer(buildSchemasInitializer(schemaFields))
+                        .initializer(buildSchemasInitializer())
                         .build());
 
         fieldSpecs.add(
@@ -193,14 +180,16 @@ public class DatabaseWriter extends BaseWriter {
         return new String(hexChars);
     }
 
-    private CodeBlock buildSchemasInitializer(List<FieldSpec> schemaFields) {
+    private CodeBlock buildSchemasInitializer() {
         CodeBlock.Builder builder = CodeBlock.builder();
         builder.add("$T.<$T>asList(\n", Types.Arrays, Types.WildcardSchema).indent();
 
-        for (int i = 0; i < schemaFields.size(); i++) {
-            builder.add("$N", schemaFields.get(i));
+        List<SchemaDefinition> schemas = new ArrayList<>(context.schemaMap.values());
 
-            if ((i + 1) != schemaFields.size()) {
+        for (int i = 0; i < schemas.size(); i++) {
+            builder.add(schemas.get(i).createSchemaInstanceExpr());
+
+            if ((i + 1) != schemas.size()) {
                 builder.add(",\n");
             } else {
                 builder.add("\n");
@@ -304,7 +293,7 @@ public class DatabaseWriter extends BaseWriter {
 
         context.schemaMap.values().forEach(schema -> {
             String simpleModelName = schema.getModelClassName().simpleName();
-            String schemaInstance = "schema" + simpleModelName;
+            CodeBlock schemaInstance = schema.createSchemaInstanceExpr();
 
             methodSpecs.add(MethodSpec.methodBuilder("load" + simpleModelName + "fromCursor")
                     .addAnnotation(Annotations.nonNull())
