@@ -25,11 +25,6 @@ import java.util.List;
  */
 public class OrmaDatabase implements DatabaseHandle {
   /**
-   * The time at which the schema was built. Units are as per {@link System#currentTimeMillis()}.
-   */
-  public static long SCHEMA_TIMESTAMP = 1456051313930L /* 2016-02-21T19:41:53.930+09:00[Asia/Tokyo] */;
-
-  /**
    * The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.
    */
   public static String SCHEMA_HASH = "415EFE25C7A15AE414AB7BFE6513008E335AE0E83A402AA465794101091364F7";
