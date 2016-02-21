@@ -32,20 +32,23 @@ public interface Schema<Model> extends MigrationSchema {
     @NonNull
     String getTableName();
 
+    /**
+     * @return A general escaped table name, used in {@code UPDATE} and {@code DELETE}.
+     */
     @NonNull
     String getEscapedTableName();
 
     /**
-     * @return The escaped table name, which may includes {@code JOIN} clauses
+     * @return An escaped table name, which may includes {@code JOIN} clauses, used in {@code SELECT}.
      */
     @NonNull
-    String getFromClause();
+    String getSelectFromTableClause();
 
     @NonNull
     ColumnDef<Model, ?> getPrimaryKey();
 
     /**
-     * @return The escaped column names, which may includes joined table's columns.
+     * @return Escaped column names for {@code SELECT}, which may includes joined table's columns.
      */
     @NonNull
     String[] getDefaultResultColumns();

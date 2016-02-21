@@ -177,7 +177,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
             @Override
             public void call(SingleSubscriber<? super Integer> subscriber) {
                 String select = SQLiteQueryBuilder.buildQueryString(
-                        false, schema.getFromClause(), new String[]{schema.getPrimaryKey().toString()},
+                        false, schema.getSelectFromTableClause(), new String[]{schema.getPrimaryKey().toString()},
                         getWhereClause(), null, null, buildOrderingTerms(), size + "," + Integer.MAX_VALUE);
 
                 int deletedRows = conn.delete(schema, schema.getPrimaryKey() + " IN (" + select + ")", getBindArgs());

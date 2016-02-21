@@ -119,7 +119,7 @@ public class SchemaWriter extends BaseWriter {
         return fieldSpecs;
     }
 
-    private String buildFromClause() {
+    private String buildSelectFromTableClause() {
         StringBuilder sb = new StringBuilder();
         sql.appendIdentifier(sb, schema.getTableName());
 
@@ -315,11 +315,11 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("getFromClause")
+                MethodSpec.methodBuilder("getSelectFromTableClause")
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return $S", buildFromClause())
+                        .addStatement("return $S", buildSelectFromTableClause())
                         .build()
         );
 
