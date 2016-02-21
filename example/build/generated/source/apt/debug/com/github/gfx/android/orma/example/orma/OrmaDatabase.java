@@ -27,7 +27,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * The time at which the schema was built. Units are as per {@link System#currentTimeMillis()}.
    */
-  public static long SCHEMA_TIMESTAMP = 1456021958936L /* 2016-02-21T11:32:38.936+09:00[Asia/Tokyo] */;
+  public static long SCHEMA_TIMESTAMP = 1456027412143L /* 2016-02-21T13:03:32.143+09:00[Asia/Tokyo] */;
 
   /**
    * The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.

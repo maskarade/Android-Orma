@@ -60,11 +60,11 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
     return in(true, "\"title\"", values);
   }
 
-  public Todo_Updater titleIn(@NonNull String... values) {
+  public final Todo_Updater titleIn(@NonNull String... values) {
     return titleIn(Arrays.asList(values));
   }
 
-  public Todo_Updater titleNotIn(@NonNull String... values) {
+  public final Todo_Updater titleNotIn(@NonNull String... values) {
     return titleNotIn(Arrays.asList(values));
   }
 
@@ -100,11 +100,11 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
     return in(true, "\"done\"", values);
   }
 
-  public Todo_Updater doneIn(@NonNull Boolean... values) {
+  public final Todo_Updater doneIn(@NonNull Boolean... values) {
     return doneIn(Arrays.asList(values));
   }
 
-  public Todo_Updater doneNotIn(@NonNull Boolean... values) {
+  public final Todo_Updater doneNotIn(@NonNull Boolean... values) {
     return doneNotIn(Arrays.asList(values));
   }
 
@@ -150,11 +150,11 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
     });
   }
 
-  public Todo_Updater createdTimeIn(@NonNull Date... values) {
+  public final Todo_Updater createdTimeIn(@NonNull Date... values) {
     return createdTimeIn(Arrays.asList(values));
   }
 
-  public Todo_Updater createdTimeNotIn(@NonNull Date... values) {
+  public final Todo_Updater createdTimeNotIn(@NonNull Date... values) {
     return createdTimeNotIn(Arrays.asList(values));
   }
 
@@ -190,11 +190,11 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
     return in(true, "\"id\"", values);
   }
 
-  public Todo_Updater idIn(@NonNull Long... values) {
+  public final Todo_Updater idIn(@NonNull Long... values) {
     return idIn(Arrays.asList(values));
   }
 
-  public Todo_Updater idNotIn(@NonNull Long... values) {
+  public final Todo_Updater idNotIn(@NonNull Long... values) {
     return idNotIn(Arrays.asList(values));
   }
 

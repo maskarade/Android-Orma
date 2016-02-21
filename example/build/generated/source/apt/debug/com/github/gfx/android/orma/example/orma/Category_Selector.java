@@ -40,11 +40,11 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
     return in(true, "\"id\"", values);
   }
 
-  public Category_Selector idIn(@NonNull Long... values) {
+  public final Category_Selector idIn(@NonNull Long... values) {
     return idIn(Arrays.asList(values));
   }
 
-  public Category_Selector idNotIn(@NonNull Long... values) {
+  public final Category_Selector idNotIn(@NonNull Long... values) {
     return idNotIn(Arrays.asList(values));
   }
 
