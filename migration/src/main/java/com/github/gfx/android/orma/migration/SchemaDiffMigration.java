@@ -80,7 +80,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     private boolean tableCreated = false;
 
-    public SchemaDiffMigration(@NonNull Context context, @NonNull String schemaHash, TraceListener traceListener) {
+    public SchemaDiffMigration(@NonNull Context context, @NonNull String schemaHash, @NonNull TraceListener traceListener) {
         super(traceListener);
         this.versionName = extractVersionName(context);
         this.versionCode = extractVersionCode(context);
