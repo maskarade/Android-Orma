@@ -17,7 +17,6 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.Setter;
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -29,7 +28,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -42,17 +40,13 @@ import javax.lang.model.element.VariableElement;
  */
 public class SchemaWriter extends BaseWriter {
 
-    static final String TABLE_NAME = "$TABLE_NAME";
-
     static final String COLUMNS = "$COLUMNS";
 
-    static final String ESCAPED_COLUMN_NAMES = "$ESCAPED_COLUMN_NAMES";
+    static final String DEFAULT_RESULT_COLUMNS = "$DEFAULT_RESULT_COLUMNS";
 
     static final String onConflictAlgorithm = "onConflictAlgorithm";
 
     static final String withoutAutoId = "withoutAutoId";
-
-    static final String offset = "offset";
 
     static final Modifier[] publicStaticFinal = {
             Modifier.PUBLIC,
@@ -109,13 +103,6 @@ public class SchemaWriter extends BaseWriter {
         fieldSpecs.addAll(columns);
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.String, TABLE_NAME)
-                        .addModifiers(publicStaticFinal)
-                        .initializer("$S", schema.tableName)
-                        .build()
-        );
-
-        fieldSpecs.add(
                 FieldSpec.builder(Types.getColumnDefList(schema.getModelClassName()), COLUMNS)
                         .addModifiers(publicStaticFinal)
                         .initializer(buildColumnsInitializer(columns))
@@ -123,13 +110,35 @@ public class SchemaWriter extends BaseWriter {
         );
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.StringArray, ESCAPED_COLUMN_NAMES)
+                FieldSpec.builder(Types.StringArray, DEFAULT_RESULT_COLUMNS)
                         .addModifiers(publicStaticFinal)
-                        .initializer(buildEscapedColumnNamesInitializer())
+                        .initializer("{\n$L}", buildEscapedColumnNamesInitializer(schema, schema.hasDirectAssociations()))
                         .build()
         );
 
         return fieldSpecs;
+    }
+
+    private String buildSelectFromTableClause() {
+        StringBuilder sb = new StringBuilder();
+        sql.appendIdentifier(sb, schema.getTableName());
+
+        sb.append(schema.getColumns().stream()
+                .filter(ColumnDefinition::isDirectAssociation)
+                .map(column -> {
+                    StringBuilder sb1 = new StringBuilder();
+                    SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
+                    sb1.append(" JOIN ");
+                    sql.appendIdentifier(sb1, associatedSchema.getTableName());
+                    sb1.append(" ON ");
+                    sb1.append(column.getEscapedColumnName(true));
+                    sb1.append(" = ");
+                    sb1.append(associatedSchema.getPrimaryKey().getEscapedColumnName(true));
+                    return sb1;
+                })
+                .collect(Collectors.joining(", ")));
+
+        return sb.toString();
     }
 
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
@@ -150,12 +159,12 @@ public class SchemaWriter extends BaseWriter {
                 c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c));
         columnDefType.superclass(c.getColumnDefType());
         MethodSpec.Builder getBuilder = MethodSpec.methodBuilder("get")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addAnnotation(c.nullable ? Specs.nullableAnnotation() : Specs.nonNullAnnotationSpec())
+                .addAnnotation(Annotations.override())
+                .addAnnotation(c.nullable ? Annotations.nullable() : Annotations.nonNull())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(c.getBoxType())
                 .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .addAnnotation(Annotations.nonNull())
                         .build());
         if (c.element != null) {
             getBuilder.addStatement("return $L", c.buildGetColumnExpr("model"));
@@ -249,23 +258,28 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    public CodeBlock buildEscapedColumnNamesInitializer() {
+    public CodeBlock buildEscapedColumnNamesInitializer(SchemaDefinition schema, boolean fqn) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
-        builder.add("{\n").indent();
+        builder.indent();
 
         List<ColumnDefinition> columns = schema.getColumns();
 
-        for (int i = 0; i < columns.size(); i++) {
-            builder.add("$S", '"' + columns.get(i).columnName + '"');
-            if ((i + 1) != columns.size()) {
+        for (int i = 0, size = columns.size(); i < size; i++) {
+            ColumnDefinition column = columns.get(i);
+            builder.add("$S", column.getEscapedColumnName(fqn));
+            if (column.isDirectAssociation()) {
+                builder.add(",\n")
+                        .add(buildEscapedColumnNamesInitializer(column.getAssociatedSchema(), fqn));
+            }
+            if ((i + 1) != size) {
                 builder.add(",\n");
             } else {
                 builder.add("\n");
             }
         }
 
-        builder.unindent().add("}");
+        builder.unindent();
 
         return builder.build();
     }
@@ -273,14 +287,9 @@ public class SchemaWriter extends BaseWriter {
     public List<MethodSpec> buildMethodSpecs() {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
-        List<AnnotationSpec> overrideAndNonNull = Arrays.asList(
-                Specs.nonNullAnnotationSpec(),
-                Specs.overrideAnnotationSpec()
-        );
-
         methodSpecs.add(
                 MethodSpec.methodBuilder("getModelClass")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(ParameterizedTypeName.get(ClassName.get(Class.class), schema.getModelClassName()))
                         .addStatement("return $T.class", schema.getModelClassName())
@@ -289,25 +298,34 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getTableName")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return $L", TABLE_NAME)
+                        .addStatement("return $S", schema.getTableName())
                         .build()
         );
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getEscapedTableName")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return '\"' + $L + '\"'", TABLE_NAME)
+                        .addStatement("return $S", sql.quoteIdentifier(schema.getTableName()))
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getSelectFromTableClause")
+                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return $S", buildSelectFromTableClause())
                         .build()
         );
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getPrimaryKey")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getColumnDef(schema.getModelClassName(), Types.WildcardType))
                         .addStatement("return $N", primaryKey)
@@ -316,7 +334,7 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getColumns")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getColumnDefList(schema.getModelClassName()))
                         .addStatement("return $L", COLUMNS)
@@ -324,17 +342,17 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("getEscapedColumnNames")
-                        .addAnnotations(overrideAndNonNull)
+                MethodSpec.methodBuilder("getDefaultResultColumns")
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.StringArray)
-                        .addStatement("return $L", ESCAPED_COLUMN_NAMES)
+                        .addStatement("return $L", DEFAULT_RESULT_COLUMNS)
                         .build()
         );
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getCreateTableStatement")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
                         .addStatement("return $S", schema.getCreateTableStatement())
@@ -343,7 +361,7 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getCreateIndexStatements")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getList(Types.String))
                         .addCode(sql.buildCreateIndexStatementsExpr(schema))
@@ -352,7 +370,7 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getDropTableStatement")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
                         .addStatement("return $S", sql.buildDropTableStatement(schema))
@@ -361,7 +379,7 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getInsertStatement")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(int.class, onConflictAlgorithm)
                                 .addAnnotation(OnConflict.class)
@@ -376,16 +394,16 @@ public class SchemaWriter extends BaseWriter {
         methodSpecs.add(
                 MethodSpec.methodBuilder("convertToArgs")
                         .addJavadoc("Provided for debugging\n")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(ArrayTypeName.of(TypeName.OBJECT))
                         .addParameter(
                                 ParameterSpec.builder(Types.OrmaConnection, "conn")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addParameter(
                                 ParameterSpec.builder(schema.getModelClassName(), "model")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addParameter(boolean.class, withoutAutoId)
                         .addCode(buildConvertToArgs())
@@ -394,40 +412,40 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("bindArgs")
-                        .addAnnotation(Override.class)
+                        .addAnnotation(Annotations.override())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(TypeName.VOID)
                         .addParameter(
                                 ParameterSpec.builder(Types.OrmaConnection, "conn")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addParameter(
                                 ParameterSpec.builder(Types.SQLiteStatement, "statement")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addParameter(
                                 ParameterSpec.builder(schema.getModelClassName(), "model")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addParameter(boolean.class, withoutAutoId)
-                        .addParameter(int.class, offset)
                         .addCode(buildBindArgs())
                         .build()
         );
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("newModelFromCursor")
-                        .addAnnotations(overrideAndNonNull)
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(schema.getModelClassName())
                         .addParameter(
                                 ParameterSpec.builder(Types.OrmaConnection, "conn")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addParameter(
                                 ParameterSpec.builder(Types.Cursor, "cursor")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
+                        .addParameter(int.class, "offset")
                         .addCode(buildNewModelFromCursor())
                         .build()
         );
@@ -450,7 +468,6 @@ public class SchemaWriter extends BaseWriter {
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
-            AssociationDefinition r = c.getAssociation();
 
             if (c.isNullableInJava()) {
                 builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
@@ -459,8 +476,12 @@ public class SchemaWriter extends BaseWriter {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
-            if (r != null && r.associationType.equals(Types.SingleAssociation)) {
+            if (c.isSingleAssociation()) {
                 builder.addStatement("args[$L] = $L.getId()", i, c.buildGetColumnExpr("model"));
+            } else if (c.isDirectAssociation()) { // direct association
+                SchemaDefinition associatedSchema = c.getAssociatedSchema();
+                builder.addStatement("args[$L] = $L",
+                        i, associatedSchema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model")));
             } else {
                 CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
                 if (c.getSerializedType().equals(TypeName.BOOLEAN)) {
@@ -474,8 +495,6 @@ public class SchemaWriter extends BaseWriter {
                 builder.endControlFlow();
             }
             if (c.isNullableInJava()) {
-                builder.endControlFlow();
-                builder.beginControlFlow("else");
                 builder.endControlFlow();
             }
         }
@@ -492,8 +511,6 @@ public class SchemaWriter extends BaseWriter {
         for (int i = 0; i < columns.size(); i++) {
             int n = i + 1; // bind index starts 1
             ColumnDefinition c = columns.get(i);
-            TypeName serializedType = c.getSerializedType();
-            AssociationDefinition r = c.getAssociation();
 
             if (c.isNullableInJava()) {
                 builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
@@ -502,21 +519,31 @@ public class SchemaWriter extends BaseWriter {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
-            if (r != null && r.associationType.equals(Types.SingleAssociation)) {
-                builder.addStatement("statement.bindLong($L + $L, $L.getId())", offset, n, c.buildGetColumnExpr("model"));
+            if (c.isSingleAssociation()) {
+                builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
             } else {
-                CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+                CodeBlock rhsExpr;
+                TypeName serializedType;
+
+                if (c.isDirectAssociation()) {
+                    SchemaDefinition associatedSchema = c.getAssociatedSchema();
+                    rhsExpr = associatedSchema.getPrimaryKey().buildGetColumnExpr(c.buildGetColumnExpr("model"));
+                    serializedType = associatedSchema.getPrimaryKey().getSerializedType();
+                } else {
+                    rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+                    serializedType = c.getSerializedType();
+                }
 
                 if (serializedType.equals(TypeName.BOOLEAN)) {
-                    builder.addStatement("statement.bindLong($L + $L, $L ? 1 : 0)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindLong($L, $L ? 1 : 0)", n, rhsExpr);
                 } else if (Types.looksLikeIntegerType(serializedType)) {
-                    builder.addStatement("statement.bindLong($L + $L, $L)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindLong($L, $L)", n, rhsExpr);
                 } else if (Types.looksLikeFloatType(serializedType)) {
-                    builder.addStatement("statement.bindDouble($L + $L, $L)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindDouble($L, $L)", n, rhsExpr);
                 } else if (serializedType.equals(Types.ByteArray)) {
-                    builder.addStatement("statement.bindBlob($L + $L, $L)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindBlob($L, $L)", n, rhsExpr);
                 } else if (serializedType.equals(Types.String)) {
-                    builder.addStatement("statement.bindString($L + $L, $L)", offset, n, rhsExpr);
+                    builder.addStatement("statement.bindString($L, $L)", n, rhsExpr);
                 } else {
                     throw new ProcessingException("No storage method found for " + serializedType, c.element);
                 }
@@ -528,7 +555,7 @@ public class SchemaWriter extends BaseWriter {
             if (c.isNullableInJava()) {
                 builder.endControlFlow();
                 builder.beginControlFlow("else");
-                builder.addStatement("statement.bindNull($L + $L)", n, offset);
+                builder.addStatement("statement.bindNull($L)", n);
                 builder.endControlFlow();
             }
         }
@@ -540,26 +567,43 @@ public class SchemaWriter extends BaseWriter {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         List<ColumnDefinition> columns = schema.getColumns();
+        int offset = 0; // direct associations increase the offset
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getUnboxType();
 
+            CodeBlock index = CodeBlock.builder().add("offset + $L", i + offset).build();
+
             if (Types.isDirectAssociation(context, type)) {
-                ClassName className = (ClassName) type;
-                String singleAssocType = "SingleAssociation<" + className.simpleName() + ">";
-                context.addError("Direct association is not yet supported. Use " + singleAssocType + " instead.", c.element);
+                AssociationDefinition r = c.getAssociation();
+                assert r != null;
+
+                SchemaDefinition schema = context.getSchemaDef(r.modelType);
+                int numberOfColumns = schema.getColumns().size();
+                CodeBlock createAssociatedModelExpr = CodeBlock.builder()
+                        .add("$T.INSTANCE.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
+                                schema.getSchemaClassName(), index, numberOfColumns)
+                        .build();
+
+                // Given a "Book has-a Publisher" association. The following expression should be created:
+                // book.publisher = Publisher_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset)
+                // NOTE: lhsBaseGen.apply(c) makes, e.g. "model.", ignoring the parameter "c".
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(createAssociatedModelExpr));
+                offset += numberOfColumns;
             } else if (Types.isSingleAssociation(type)) {
                 AssociationDefinition r = c.getAssociation();
+                assert r != null;
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder()
                         .add("new $T<>(conn, $L, cursor.getLong($L))",
-                                r.associationType, context.getSchemaInstanceExpr(r.modelType), i);
+                                r.associationType, context.getSchemaInstanceExpr(r.modelType), index);
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             } else {
                 CodeBlock.Builder rhsExprBuilder = CodeBlock.builder();
                 if (c.isNullableInSQL()) {
-                    rhsExprBuilder.add("cursor.isNull($L) ? null : $L", i, c.buildDeserializeExpr("conn", cursorGetter(c, i)));
+                    rhsExprBuilder.add("cursor.isNull($L) ? null : $L", index,
+                            c.buildDeserializeExpr("conn", cursorGetter(c, index)));
                 } else {
-                    rhsExprBuilder.add(c.buildDeserializeExpr("conn", cursorGetter(c, i)));
+                    rhsExprBuilder.add(c.buildDeserializeExpr("conn", cursorGetter(c, index)));
                 }
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(rhsExprBuilder.build()));
             }
@@ -574,7 +618,6 @@ public class SchemaWriter extends BaseWriter {
             builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.builder().add("model.").build()));
             builder.addStatement("return model");
         } else {
-
             if (schema.getColumns().size() != schema.constructorElement.getParameters().size()) {
                 context.addError("The @Setter constructor parameters must satisfy all the @Column fields",
                         schema.constructorElement);
@@ -602,21 +645,22 @@ public class SchemaWriter extends BaseWriter {
         return parameterElement.getSimpleName().toString();
     }
 
-    private String cursorGetter(ColumnDefinition column, int position) {
+    private CodeBlock cursorGetter(ColumnDefinition column, CodeBlock index) {
         TypeName type = column.getSerializedType();
         if (type.equals(TypeName.BOOLEAN)) {
-            return "cursor.getLong(" + position + ") != 0";
+            return CodeBlock.builder().add("cursor.getLong($L) != 0", index).build();
         } else if (type.equals(TypeName.BYTE)) {
-            return "(byte)cursor.getShort(" + position + ")";
+            return CodeBlock.builder().add("(byte)cursor.getLong($L)", index).build();
         } else if (type.isPrimitive()) {
             String s = type.toString();
-            return "cursor.get" + s.substring(0, 1).toUpperCase() + s.substring(1) + "(" + position + ")";
+            return CodeBlock.builder().add("cursor.get$L($L)", Strings.toUpperFirst(s), index).build();
         } else if (type.equals(Types.String)) {
-            return "cursor.getString(" + position + ")";
+            return CodeBlock.builder().add("cursor.getString($L)", index).build();
         } else if (type.equals(Types.ByteArray)) {
-            return "cursor.getBlob(" + position + ")";
+            return CodeBlock.builder().add("cursor.getBlob($L)", index).build();
         } else {
-            return "cursor.getString(" + position + ")"; // handled by type adapters
+            // FIXME: not reached?
+            return CodeBlock.builder().add("cursor.getString($L)", index).build();
         }
     }
 }

@@ -78,7 +78,7 @@ public class UpdaterWriter extends BaseWriter {
                                 .returns(schema.getUpdaterClassName())
                                 .addParameter(
                                         ParameterSpec.builder(column.getType(), paramName)
-                                                .addAnnotations(conditionQueryHelpers.nullabilityAnnotations(column))
+                                                .addAnnotations(column.nullabilityAnnotations())
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
@@ -87,21 +87,23 @@ public class UpdaterWriter extends BaseWriter {
                                 .build()
                 );
 
-            } else { // SingleAssociation<T>
-                methodSpecs.add(
-                        MethodSpec.methodBuilder(column.name)
-                                .addModifiers(Modifier.PUBLIC)
-                                .returns(schema.getUpdaterClassName())
-                                .addParameter(
-                                        ParameterSpec.builder(column.getType(), column.name + "Reference")
-                                                .addAnnotation(Specs.nonNullAnnotationSpec())
-                                                .build()
-                                )
-                                .addStatement("contents.put($S, $L.getId())",
-                                        sql.quoteIdentifier(column.columnName), column.name + "Reference")
-                                .addStatement("return this")
-                                .build()
-                );
+            } else {
+                if (r.isSingleAssociation()) {
+                    methodSpecs.add(
+                            MethodSpec.methodBuilder(column.name)
+                                    .addModifiers(Modifier.PUBLIC)
+                                    .returns(schema.getUpdaterClassName())
+                                    .addParameter(
+                                            ParameterSpec.builder(column.getType(), column.name + "Reference")
+                                                    .addAnnotation(Annotations.nonNull())
+                                                    .build()
+                                    )
+                                    .addStatement("contents.put($S, $L.getId())",
+                                            sql.quoteIdentifier(column.columnName), column.name + "Reference")
+                                    .addStatement("return this")
+                                    .build()
+                    );
+                }
 
                 SchemaDefinition modelSchema = context.getSchemaDef(r.modelType);
                 if (modelSchema == null) {
@@ -123,6 +125,7 @@ public class UpdaterWriter extends BaseWriter {
                                 .returns(schema.getUpdaterClassName())
                                 .addParameter(
                                         ParameterSpec.builder(r.modelType, column.name)
+                                                .addAnnotations(column.nullabilityAnnotations())
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L)",

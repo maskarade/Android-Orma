@@ -32,14 +32,26 @@ public interface Schema<Model> extends MigrationSchema {
     @NonNull
     String getTableName();
 
+    /**
+     * @return A general escaped table name, used in {@code UPDATE} and {@code DELETE}.
+     */
     @NonNull
     String getEscapedTableName();
+
+    /**
+     * @return An escaped table name, which may includes {@code JOIN} clauses, used in {@code SELECT}.
+     */
+    @NonNull
+    String getSelectFromTableClause();
 
     @NonNull
     ColumnDef<Model, ?> getPrimaryKey();
 
+    /**
+     * @return Escaped column names for {@code SELECT}, which may includes joined table's columns.
+     */
     @NonNull
-    String[] getEscapedColumnNames();
+    String[] getDefaultResultColumns();
 
     @NonNull
     List<ColumnDef<Model, ?>> getColumns();
@@ -59,8 +71,8 @@ public interface Schema<Model> extends MigrationSchema {
     Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Model mode, boolean withoutAutoId);
 
     void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model,
-            boolean withoutAutoId, int offset);
+            boolean withoutAutoId);
 
     @NonNull
-    Model newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor);
+    Model newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int offset);
 }

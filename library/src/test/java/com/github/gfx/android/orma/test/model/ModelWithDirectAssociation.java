@@ -25,6 +25,13 @@ public class ModelWithDirectAssociation {
     @Column
     public String title;
 
-    //@Column // TODO direct association
-    public Book book;
+    @Column(indexed = true)
+    public Author author;
+
+    // FIXME: multiple direct associations
+//    @Column(indexed = true)
+//    public Author author2;
+
+    @Column
+    public String note; // the same name as Author#note
 }

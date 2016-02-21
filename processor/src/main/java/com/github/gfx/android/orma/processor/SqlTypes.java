@@ -49,8 +49,6 @@ public class SqlTypes {
         javaToSqlite.put(TypeName.BOOLEAN, "BOOLEAN");
         javaToSqlite.put(TypeName.BOOLEAN.box(), "BOOLEAN");
 
-        javaToSqlite.put(Types.SingleAssociation, "INTEGER"); // foreign key
-
         // TODO: date and time types?
     }
 

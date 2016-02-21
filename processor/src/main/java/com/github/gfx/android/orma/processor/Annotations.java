@@ -18,32 +18,56 @@ package com.github.gfx.android.orma.processor;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 
-public class Specs {
+import java.util.Arrays;
+import java.util.List;
 
-    private static final AnnotationSpec overrideAnnotationSpec = AnnotationSpec.builder(Override.class).build();
+/**
+ * Pre-defined JavaPoet specs.
+ */
+public class Annotations {
 
-    private static final AnnotationSpec nonNullAnnotationSpec = AnnotationSpec.builder(Types.NonNull).build();
+    private static final AnnotationSpec override = AnnotationSpec.builder(Override.class).build();
 
-    private static final AnnotationSpec nullableAnnotationSpec = AnnotationSpec.builder(Types.Nullable).build();
+    private static final AnnotationSpec nonNull = AnnotationSpec.builder(Types.NonNull).build();
 
-    public static AnnotationSpec overrideAnnotationSpec() {
-        return overrideAnnotationSpec;
+    private static final AnnotationSpec nullable = AnnotationSpec.builder(Types.Nullable).build();
+
+    private static List<AnnotationSpec> overrideAndNonNull = Arrays.asList(
+            Annotations.nonNull(),
+            Annotations.override()
+    );
+
+    private static List<AnnotationSpec> overrideAndNullable = Arrays.asList(
+            Annotations.nonNull(),
+            Annotations.override()
+    );
+
+    public static AnnotationSpec override() {
+        return override;
     }
 
-    public static AnnotationSpec nonNullAnnotationSpec() {
-        return nonNullAnnotationSpec;
+    public static AnnotationSpec nonNull() {
+        return nonNull;
     }
 
-    public static AnnotationSpec nullableAnnotation() {
-        return nullableAnnotationSpec;
+    public static AnnotationSpec nullable() {
+        return nullable;
     }
 
-    public static AnnotationSpec workerThreadAnnotation() {
+    public static List<AnnotationSpec> overrideAndNonNull() {
+        return overrideAndNonNull;
+    }
+
+    public static List<AnnotationSpec> overrideAndNullable() {
+        return overrideAndNullable;
+    }
+
+    public static AnnotationSpec workerThread() {
         return AnnotationSpec.builder(Types.WorkerThread)
                 .build();
     }
 
-    public static AnnotationSpec suppressWarningsAnnotation(String... warnings) {
+    public static AnnotationSpec suppressWarnings(String... warnings) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(SuppressWarnings.class);
         CodeBlock.Builder names = CodeBlock.builder();
         boolean first = true;

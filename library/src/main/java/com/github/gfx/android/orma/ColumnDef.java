@@ -55,6 +55,12 @@ public abstract class ColumnDef<Model, T> {
         return new StringBuilder().append('"').append(name).append('"');
     }
 
+    public StringBuilder getFullyQualifiedName() {
+        return new StringBuilder()
+                .append('"').append(schema.getTableName()).append('"')
+                .append('.')
+                .append('"').append(name).append('"');
+    }
     private boolean checkFlags(int flags) {
         return (this.flags & flags) == flags;
     }

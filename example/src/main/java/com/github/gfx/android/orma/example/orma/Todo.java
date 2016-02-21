@@ -39,6 +39,6 @@ public class Todo {
     @Column(indexed = true)
     public boolean done;
 
-    @Column(indexed = true)
+    @Column(indexed = true, defaultExpr = "0")
     public Date createdTime;
 }

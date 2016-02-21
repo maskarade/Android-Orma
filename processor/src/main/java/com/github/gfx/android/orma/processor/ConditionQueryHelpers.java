@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.processor;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -25,7 +24,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -57,15 +55,15 @@ public class ConditionQueryHelpers {
     }
 
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
+        AssociationDefinition r = column.getAssociation();
 
-        boolean isAssociation = Types.isSingleAssociation(column.getType());
-
-        TypeName type = isAssociation ? column.getAssociation().modelType : column.getType();
+        boolean isAssociation = r != null;
+        TypeName type = isAssociation ? r.modelType : column.getType();
 
         TypeName collectionType = Types.getCollection(type.box());
 
         ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
-                .addAnnotations(nullabilityAnnotations(column))
+                .addAnnotations(column.nullabilityAnnotations())
                 .build();
 
         CodeBlock serializedFieldExpr;
@@ -131,7 +129,7 @@ public class ConditionQueryHelpers {
                     .superclass(Types.getFunc1(type.box(), column.getSerializedBoxType()))
                     .addMethod(
                             MethodSpec.methodBuilder("call")
-                                    .addAnnotation(Specs.overrideAnnotationSpec())
+                                    .addAnnotation(Annotations.override())
                                     .addModifiers(Modifier.PUBLIC)
                                     .returns(column.getSerializedBoxType())
                                     .addParameter(ParameterSpec.builder(type.box(), "value").build())
@@ -143,7 +141,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(false, $S, values, $L)",
@@ -155,7 +153,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(true, $S, values, $L)",
@@ -168,7 +166,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(false, $S, values)",
@@ -180,7 +178,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(true, $S, values)",
@@ -193,7 +191,7 @@ public class ConditionQueryHelpers {
                 MethodSpec.methodBuilder(column.name + "In")
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
-                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .addAnnotation(Annotations.nonNull())
                                 .build())
                         .varargs(true)
                         .returns(targetClassName)
@@ -206,7 +204,7 @@ public class ConditionQueryHelpers {
                 MethodSpec.methodBuilder(column.name + "NotIn")
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
-                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .addAnnotation(Annotations.nonNull())
                                 .build())
                         .varargs(true)
                         .returns(targetClassName)
@@ -257,17 +255,4 @@ public class ConditionQueryHelpers {
                         .build()
         );
     }
-
-    public List<AnnotationSpec> nullabilityAnnotations(ColumnDefinition column) {
-        if (column.getType().isPrimitive()) {
-            return Collections.emptyList();
-        }
-
-        if (column.nullable) {
-            return Collections.singletonList(Specs.nullableAnnotation());
-        } else {
-            return Collections.singletonList(Specs.nonNullAnnotationSpec());
-        }
-    }
-
 }

@@ -94,7 +94,7 @@ public class DatabaseWriter extends BaseWriter {
         builder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(Types.Context, "context")
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .addAnnotation(Annotations.nonNull())
                         .build())
                 .addStatement("super(context)")
                 .build());
@@ -102,8 +102,7 @@ public class DatabaseWriter extends BaseWriter {
         builder.addMethod(
                 MethodSpec.methodBuilder("getSchemaHash")
                         .addModifiers(Modifier.PROTECTED)
-                        .addAnnotation(Specs.overrideAnnotationSpec())
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .returns(Types.String)
                         .addStatement("return SCHEMA_HASH")
                         .build()
@@ -222,15 +221,14 @@ public class DatabaseWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(builderClass)
                         .addParameter(ParameterSpec.builder(Types.Context, "context")
-                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .addAnnotation(Annotations.nonNull())
                                 .build())
                         .addStatement("return new $T(context)", builderClass)
                         .build());
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getSchemas")
-                        .addAnnotation(Specs.overrideAnnotationSpec())
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getList(Types.WildcardSchema))
                         .addStatement("return $L", SCHEMAS)
@@ -250,8 +248,7 @@ public class DatabaseWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getConnection")
-                        .addAnnotation(Specs.overrideAnnotationSpec())
-                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                        .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.OrmaConnection)
                         .addStatement("return $L", connection)
@@ -262,10 +259,10 @@ public class DatabaseWriter extends BaseWriter {
                 MethodSpec.methodBuilder("transactionSync")
                         .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Specs.workerThreadAnnotation())
+                        .addAnnotation(Annotations.workerThread())
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionSync(task)", connection)
                         .build()
@@ -276,7 +273,7 @@ public class DatabaseWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionAsync(task)", connection)
                         .build()
@@ -288,7 +285,7 @@ public class DatabaseWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionNonExclusiveSync(task)", connection)
                         .build()
@@ -299,7 +296,7 @@ public class DatabaseWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Specs.nonNullAnnotationSpec())
+                                        .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionNonExclusiveAsync(task)", connection)
                         .build()
@@ -310,15 +307,15 @@ public class DatabaseWriter extends BaseWriter {
             String schemaInstance = "schema" + simpleModelName;
 
             methodSpecs.add(MethodSpec.methodBuilder("load" + simpleModelName + "fromCursor")
-                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                    .addAnnotation(Annotations.nonNull())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
                     .addParameter(
                             ParameterSpec.builder(Types.Cursor, "cursor")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build()
                     )
-                    .addStatement("return $L.newModelFromCursor($L, cursor)", schemaInstance, connection)
+                    .addStatement("return $L.newModelFromCursor($L, cursor, 0)", schemaInstance, connection)
                     .build());
 
             methodSpecs.add(MethodSpec.methodBuilder("create" + simpleModelName)
@@ -326,12 +323,12 @@ public class DatabaseWriter extends BaseWriter {
                             "Inserts a model created by {@code ModelFactory<T>},"
                                     + " and retrieves it which is just inserted.\n"
                                     + " The return value has the row ID.\n")
-                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                    .addAnnotation(Annotations.nonNull())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
                     .addParameter(
                             ParameterSpec.builder(Types.getModelFactory(schema.getModelClassName()), "factory")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build()
                     )
                     .addStatement("return $L.createModel($L, factory)", connection, schemaInstance)
@@ -341,7 +338,7 @@ public class DatabaseWriter extends BaseWriter {
                     MethodSpec.methodBuilder("relationOf" + simpleModelName)
                             .addJavadoc("Creates a relation of {@code $T}, which is an entry point of all the operations.\n",
                                     schema.getModelClassName())
-                            .addAnnotation(Specs.nonNullAnnotationSpec())
+                            .addAnnotation(Annotations.nonNull())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getRelationClassName())
                             .addStatement("return new $T($L, $L)",
@@ -353,7 +350,7 @@ public class DatabaseWriter extends BaseWriter {
             methodSpecs.add(
                     MethodSpec.methodBuilder("selectFrom" + simpleModelName)
                             .addJavadoc("Starts building a query: {@code SELECT * FROM $T ...}.\n", schema.getModelClassName())
-                            .addAnnotation(Specs.nonNullAnnotationSpec())
+                            .addAnnotation(Annotations.nonNull())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getSelectorClassName())
                             .addStatement("return new $T($L, $L)",
@@ -365,7 +362,7 @@ public class DatabaseWriter extends BaseWriter {
             methodSpecs.add(
                     MethodSpec.methodBuilder("update" + simpleModelName)
                             .addJavadoc("Starts building a query: {@code UPDATE $T ...}.\n", schema.getModelClassName())
-                            .addAnnotation(Specs.nonNullAnnotationSpec())
+                            .addAnnotation(Annotations.nonNull())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getUpdaterClassName())
                             .addStatement("return new $T($L, $L)",
@@ -377,7 +374,7 @@ public class DatabaseWriter extends BaseWriter {
             methodSpecs.add(
                     MethodSpec.methodBuilder("deleteFrom" + simpleModelName)
                             .addJavadoc("Starts building a query: {@code DELETE FROM $T ...}.\n", schema.getModelClassName())
-                            .addAnnotation(Specs.nonNullAnnotationSpec())
+                            .addAnnotation(Annotations.nonNull())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getDeleterClassName())
                             .addStatement("return new $T($L, $L)",
@@ -393,7 +390,7 @@ public class DatabaseWriter extends BaseWriter {
                             .returns(long.class)
                             .addParameter(
                                     ParameterSpec.builder(schema.getModelClassName(), "model")
-                                            .addAnnotation(Specs.nonNullAnnotationSpec())
+                                            .addAnnotation(Annotations.nonNull())
                                             .build()
                             )
                             .addStatement("return prepareInsertInto$L().execute(model)",
@@ -457,7 +454,7 @@ public class DatabaseWriter extends BaseWriter {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(
                         ParameterSpec.builder(Types.OrmaConnection, connection)
-                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .addAnnotation(Annotations.nonNull())
                                 .build())
                 .addStatement("this.$L = $L", connection, connection)
                 .build());
