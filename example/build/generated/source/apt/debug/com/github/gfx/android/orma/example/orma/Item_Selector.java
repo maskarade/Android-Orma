@@ -28,6 +28,10 @@ public class Item_Selector extends Selector<Item, Item_Selector> {
     return where("\"category\" = ?", category.id /* primary key */);
   }
 
+  public Item_Selector categoryEq(long categoryId) {
+    return where("\"category\" = ?", categoryId);
+  }
+
   public Item_Selector nameEq(@NonNull String name) {
     return where("\"name\" = ?", name);
   }

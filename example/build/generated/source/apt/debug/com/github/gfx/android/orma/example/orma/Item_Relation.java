@@ -45,6 +45,10 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
     return where("\"category\" = ?", category.id /* primary key */);
   }
 
+  public Item_Relation categoryEq(long categoryId) {
+    return where("\"category\" = ?", categoryId);
+  }
+
   public Item_Relation nameEq(@NonNull String name) {
     return where("\"name\" = ?", name);
   }

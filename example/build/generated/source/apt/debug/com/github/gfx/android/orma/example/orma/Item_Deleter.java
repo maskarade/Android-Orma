@@ -21,6 +21,10 @@ public class Item_Deleter extends Deleter<Item, Item_Deleter> {
     return where("\"category\" = ?", category.id /* primary key */);
   }
 
+  public Item_Deleter categoryEq(long categoryId) {
+    return where("\"category\" = ?", categoryId);
+  }
+
   public Item_Deleter nameEq(@NonNull String name) {
     return where("\"name\" = ?", name);
   }
