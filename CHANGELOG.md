@@ -8,6 +8,13 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.0.5 - 2016/02/22
+
+### Bug Fixes
+
+* Fix name conflicts on query helpers (#190)
+  * This is a temporary fix, though. See #189.
+
 ## v2.0.4 - 2016/02/22
 
 ### Bug Fixes
