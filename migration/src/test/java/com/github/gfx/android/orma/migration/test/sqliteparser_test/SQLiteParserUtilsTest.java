@@ -145,6 +145,19 @@ public class SQLiteParserUtilsTest {
     }
 
     @Test
+    public void testTableWithForeignKey() throws Exception {
+        CreateTableStatement createTableStatement = SQLiteParserUtils.parseIntoCreateTableStatement(
+                "CREATE TABLE foo (id INTEGER PRIMARY KEY, bar INTEGER NOT NULL REFERENCES baz (id))"
+        );
+
+        List<CreateTableStatement.ColumnDef> columns =  createTableStatement.getColumns();
+        assertThat(columns, hasSize(2));
+        assertThat(columns.get(0).getName(), is(new SQLiteComponent.Name("id")));
+        assertThat(columns.get(1).getName(), is(new SQLiteComponent.Name("bar")));
+    }
+
+
+    @Test
     public void testComplexTable() throws Exception {
         assumeFalse(TestUtils.runOnAndroid()); // FIXME
 

@@ -112,7 +112,7 @@ public class SchemaDiffMigrationTest {
     }
 
     @Test
-    public void diffAll_createTable() throws Exception {
+    public void createTable() throws Exception {
         SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x10\" TEXT, \"x20\" TEXT)");
         schemas.add(newSchema);
 
@@ -147,13 +147,12 @@ public class SchemaDiffMigrationTest {
     }
 
     @Test
-    public void recreateTableWithIndes() throws Exception {
+    public void recreateTableWithIndexes() throws Exception {
         schemas.set(0, new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT, \"field03\" TEXT)",
                 "CREATE INDEX \"index_field01_on_foo\" ON \"foo\" (\"field01\")",
                 "CREATE INDEX \"index_field02_on_foo\" ON \"foo\" (\"field02\")"
         ));
         statements = migration.diffAll(metadata, schemas);
-
         migration.executeStatements(db, statements);
 
         assertThat(migration.diffAll(migration.loadMetadata(db, schemas), schemas), is(empty()));

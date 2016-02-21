@@ -274,4 +274,18 @@ public class TableDiffTest {
                 "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""
         ));
     }
+
+    @Test
+    public void addForeignKeyConstraints() throws Exception {
+        String a = "CREATE TABLE foo (id INTEGER PRIMARY KEY, bar INTEGER NOT NULL)";
+        String b = "CREATE TABLE foo (id INTEGER PRIMARY KEY, bar INTEGER NOT NULL REFERENCES baz (id))";
+
+        List<String> statements = migration.tableDiff(a, b);
+        assertThat(statements, contains(
+                "CREATE TABLE \"__temp_foo\" (\"id\" INTEGER PRIMARY KEY, \"bar\" INTEGER NOT NULL REFERENCES \"baz\" ( \"id\" ))",
+                "INSERT INTO \"__temp_foo\" (\"id\", \"bar\") SELECT \"id\", \"bar\" FROM \"foo\"",
+                "DROP TABLE \"foo\"",
+                "ALTER TABLE \"__temp_foo\" RENAME TO \"foo\""
+        ));
+    }
 }
