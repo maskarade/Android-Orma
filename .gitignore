@@ -9,7 +9,11 @@ gradle.properties
 !.idea/codeStyleSettings.xml
 *.iml
 .DS_Store
-build/
+/build/*
+processor/build/*
+library/build/*
+annotations/build/*
+example/build/*
 captures/
 .gradletasknamecache
 
@@ -18,3 +22,26 @@ _site/
 
 # gradlew's bug?
 true
+
+# What orma generates for example
+!example/build/generated
+example/build/generated/*
+!example/build/generated/source
+example/build/generated/source/*
+!example/build/generated/source/apt
+example/build/generated/source/apt/*
+!example/build/generated/source/apt/debug
+example/build/generated/source/apt/debug/*
+!example/build/generated/source/apt/debug/com
+example/build/generated/source/apt/debug/com/*
+!example/build/generated/source/apt/debug/com/github
+example/build/generated/source/apt/debug/com/github/*
+!example/build/generated/source/apt/debug/com/github/gfx
+example/build/generated/source/apt/debug/com/github/gfx/*
+!example/build/generated/source/apt/debug/com/github/gfx/android
+example/build/generated/source/apt/debug/com/github/gfx/android/*
+!example/build/generated/source/apt/debug/com/github/gfx/android/orma
+example/build/generated/source/apt/debug/com/github/gfx/android/orma/*
+!example/build/generated/source/apt/debug/com/github/gfx/android/orma/example
+example/build/generated/source/apt/debug/com/github/gfx/android/orma/example/*
+!example/build/generated/source/apt/debug/com/github/gfx/android/orma/example/orma
