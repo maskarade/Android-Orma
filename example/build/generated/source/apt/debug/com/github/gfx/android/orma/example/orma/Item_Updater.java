@@ -47,11 +47,11 @@ public class Item_Updater extends Updater<Item, Item_Updater> {
     return in(true, "\"name\"", values);
   }
 
-  public Item_Updater nameIn(@NonNull String... values) {
+  public final Item_Updater nameIn(@NonNull String... values) {
     return nameIn(Arrays.asList(values));
   }
 
-  public Item_Updater nameNotIn(@NonNull String... values) {
+  public final Item_Updater nameNotIn(@NonNull String... values) {
     return nameNotIn(Arrays.asList(values));
   }
 

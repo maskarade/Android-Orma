@@ -62,11 +62,11 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     return in(true, "\"title\"", values);
   }
 
-  public Todo_Relation titleIn(@NonNull String... values) {
+  public final Todo_Relation titleIn(@NonNull String... values) {
     return titleIn(Arrays.asList(values));
   }
 
-  public Todo_Relation titleNotIn(@NonNull String... values) {
+  public final Todo_Relation titleNotIn(@NonNull String... values) {
     return titleNotIn(Arrays.asList(values));
   }
 
@@ -102,11 +102,11 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     return in(true, "\"done\"", values);
   }
 
-  public Todo_Relation doneIn(@NonNull Boolean... values) {
+  public final Todo_Relation doneIn(@NonNull Boolean... values) {
     return doneIn(Arrays.asList(values));
   }
 
-  public Todo_Relation doneNotIn(@NonNull Boolean... values) {
+  public final Todo_Relation doneNotIn(@NonNull Boolean... values) {
     return doneNotIn(Arrays.asList(values));
   }
 
@@ -152,11 +152,11 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     });
   }
 
-  public Todo_Relation createdTimeIn(@NonNull Date... values) {
+  public final Todo_Relation createdTimeIn(@NonNull Date... values) {
     return createdTimeIn(Arrays.asList(values));
   }
 
-  public Todo_Relation createdTimeNotIn(@NonNull Date... values) {
+  public final Todo_Relation createdTimeNotIn(@NonNull Date... values) {
     return createdTimeNotIn(Arrays.asList(values));
   }
 
@@ -192,11 +192,11 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     return in(true, "\"id\"", values);
   }
 
-  public Todo_Relation idIn(@NonNull Long... values) {
+  public final Todo_Relation idIn(@NonNull Long... values) {
     return idIn(Arrays.asList(values));
   }
 
-  public Todo_Relation idNotIn(@NonNull Long... values) {
+  public final Todo_Relation idNotIn(@NonNull Long... values) {
     return idNotIn(Arrays.asList(values));
   }
 

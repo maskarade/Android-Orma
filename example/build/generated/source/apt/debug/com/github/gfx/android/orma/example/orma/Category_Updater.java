@@ -39,11 +39,11 @@ public class Category_Updater extends Updater<Category, Category_Updater> {
     return in(true, "\"id\"", values);
   }
 
-  public Category_Updater idIn(@NonNull Long... values) {
+  public final Category_Updater idIn(@NonNull Long... values) {
     return idIn(Arrays.asList(values));
   }
 
-  public Category_Updater idNotIn(@NonNull Long... values) {
+  public final Category_Updater idNotIn(@NonNull Long... values) {
     return idNotIn(Arrays.asList(values));
   }
 
