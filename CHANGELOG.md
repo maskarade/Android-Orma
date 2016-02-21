@@ -8,7 +8,14 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
-## v2.0.0
+## v2.0.1 - 2016/02/21
+
+### Bug Fixes
+
+* Missing find-by-foreign-key for associated models (#183)
+* Fix NPE when direct associations has no primary keys (#182)
+
+## v2.0.0 - 2016/02/21
 
 This version includes incompatible changes.
 
