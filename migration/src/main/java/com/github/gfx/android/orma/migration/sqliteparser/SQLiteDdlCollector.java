@@ -116,7 +116,7 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     @Override
     public void exitColumn_name(SQLiteParser.Column_nameContext ctx) {
-        if (columnDef != null) {
+        if (columnDef != null && columnDef.name == null) {
             columnDef.name = new SQLiteComponent.Name(ctx.getText());
         }
     }
