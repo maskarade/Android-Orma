@@ -251,6 +251,43 @@ public class DirectAssociationsTest {
         assertThat(model.author.note, is(author1.note));
     }
 
+    @Test
+    public void testFindByFieldWithConflict() throws Exception {
+        Inserter<ModelWithDirectAssociation> inserter = orma.prepareInsertIntoModelWithDirectAssociation();
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.title = "foo";
+                model.author = author1;
+                model.publisher = publisher;
+                model.note = "SQLite rocks";
+                return model;
+            }
+        });
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.title = "bar";
+                model.author = author2;
+                model.publisher = publisher;
+                model.note = "SQLite supports most of SQL92";
+                return model;
+            }
+        });
+
+        // Both ModelWithDirectAssociation and Author has "note" column
+        ModelWithDirectAssociation_Selector selector = orma.selectFromModelWithDirectAssociation()
+                .noteEq("SQLite supports most of SQL92");
+
+        assertThat(selector.count(), is(1));
+
+        ModelWithDirectAssociation model = selector.value();
+        assertThat(model.title, is("bar"));
+    }
 
     @Test
     public void testCascadingDelete() throws Exception {

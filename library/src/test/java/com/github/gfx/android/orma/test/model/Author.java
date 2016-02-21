@@ -28,7 +28,7 @@ public class Author {
     @PrimaryKey(auto = false)
     public String name;
 
-    @Column
+    @Column(indexed = true)
     @Nullable
     public String note;
 

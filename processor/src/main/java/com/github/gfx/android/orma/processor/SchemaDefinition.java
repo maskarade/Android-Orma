@@ -68,6 +68,8 @@ public class SchemaDefinition {
 
     final ExecutableElement constructorElement; // null if it has a default constructor
 
+    final boolean hasDirectAssociations;
+
     String createTableStatement = null;
 
     List<String> createIndexStatements = null;
@@ -89,6 +91,7 @@ public class SchemaDefinition {
         this.columns = collectColumns(typeElement);
         this.primaryKey = findPrimaryKey(columns);
         this.constructorElement = findConstructor(context, typeElement);
+        this.hasDirectAssociations = hasDirectAssociations(columns);
     }
 
     /**
@@ -159,6 +162,11 @@ public class SchemaDefinition {
         }
         return null;
     }
+
+    static boolean hasDirectAssociations(List<ColumnDefinition> columns) {
+        return columns.stream().anyMatch(ColumnDefinition::isDirectAssociation);
+    }
+
 
     List<ColumnDefinition> collectColumns(TypeElement typeElement) {
         Map<String, ExecutableElement> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -333,7 +341,7 @@ public class SchemaDefinition {
     }
 
     public boolean hasDirectAssociations() {
-        return columns.stream().anyMatch(ColumnDefinition::isDirectAssociation);
+        return hasDirectAssociations;
     }
 
     @Override

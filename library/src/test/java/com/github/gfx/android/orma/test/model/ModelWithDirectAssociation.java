@@ -35,6 +35,6 @@ public class ModelWithDirectAssociation {
 //    @Column(indexed = true)
 //    public Author author2;
 
-    @Column
+    @Column(indexed = true)
     public String note; // the same name as Author#note
 }
