@@ -16,7 +16,6 @@
 package com.github.gfx.android.orma.processor;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
 import java.lang.reflect.Type;
@@ -81,12 +80,6 @@ public class ProcessingContext {
             return schema.getPackageName();
         }
         throw new RuntimeException("No schema defined");
-    }
-
-    public CodeBlock getSchemaInstanceExpr(ClassName modelClassName) {
-        return CodeBlock.builder()
-                .add("$T.schema$L", OrmaDatabase, modelClassName.simpleName())
-                .build();
     }
 
     public TypeMirror getTypeMirrorOf(Type type) {

@@ -18,9 +18,9 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithStorageTypes_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters_Schema;
-import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.PublisherSchema;
 
 import org.junit.Test;
@@ -36,7 +36,7 @@ public class SchemaTest {
 
     @Test
     public void testPublisherSchema() throws Exception {
-        PublisherSchema schema = OrmaDatabase.schemaPublisher;
+        PublisherSchema schema = PublisherSchema.INSTANCE;
 
         assertThat(schema.getTableName(), is("publishers"));
         assertThat(schema.getPrimaryKey(), is((ColumnDef) PublisherSchema.id));
@@ -53,7 +53,7 @@ public class SchemaTest {
 
     @Test
     public void testBookSchema() throws Exception {
-        Book_Schema schema = OrmaDatabase.schemaBook;
+        Book_Schema schema = Book_Schema.INSTANCE;
 
         assertThat(schema.getTableName(), is("Book"));
         assertThat(schema.getPrimaryKey(), is((ColumnDef) Book_Schema.bookId));
@@ -70,7 +70,7 @@ public class SchemaTest {
 
     @Test
     public void testAuthorSchema() throws Exception {
-        Author_Schema schema = OrmaDatabase.schemaAuthor;
+        Author_Schema schema = Author_Schema.INSTANCE;
 
         assertThat(schema.getTableName(), is("Author"));
         assertThat(schema.getPrimaryKey(), is((ColumnDef) Author_Schema.name));
@@ -109,4 +109,8 @@ public class SchemaTest {
         assertThat(ModelWithTypeAdapters_Schema.intTuple2.storageType, is("INTEGER"));
     }
 
+    @Test
+    public void testStorageTypeForDirectAssociation() throws Exception {
+        assertThat(ModelWithDirectAssociation_Schema.author.storageType, is(Author_Schema.INSTANCE.getPrimaryKey().storageType));
+    }
 }

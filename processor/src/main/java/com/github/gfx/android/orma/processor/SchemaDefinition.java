@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -322,6 +323,12 @@ public class SchemaDefinition {
             buildStatements();
         }
         return createIndexStatements;
+    }
+
+    public CodeBlock createSchemaInstanceExpr() {
+        return CodeBlock.builder()
+                .add("$T.INSTANCE", schemaClassName)
+                .build();
     }
 
     public boolean hasDirectAssociations() {
