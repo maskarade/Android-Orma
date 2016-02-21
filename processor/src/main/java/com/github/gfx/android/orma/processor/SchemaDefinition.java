@@ -295,6 +295,7 @@ public class SchemaDefinition {
         return columns.stream().filter(column -> column.columnName.contentEquals(name)).findFirst();
     }
 
+    @Nullable
     public ColumnDefinition getPrimaryKey() {
         return primaryKey;
     }
