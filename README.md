@@ -403,14 +403,18 @@ public class KeyValuePair {
 
 ## Associations
 
-Two orma models can be associated with Association mechanism. There are two type of association: has-one and has-many.
+Two Orma models can be associated with **association** mechanism.
 
-### Has-One Associations
+There are two type of associations: **has-one** and **has-many**.
 
-There is `SingleAssociation` to support has-one associations.
+In addition, there are another two kind of association supports: indirect associations with `SingleAssociation<T>` and direct associations
+
+### Has-One Associations with `SingleAssociation<T>`
+
+There is `SingleAssociation<T>` to support has-one associations, which is
+retrieved on demand, or loaded lazily.
 
 For example, a book has a publisher:
-
 
 ```java
 @Table
@@ -430,7 +434,7 @@ class Book {
 
 The entity of `Book#publisher` is `Publisher#id`.
 
-### Has-Many Associations
+### Has-Many Associations with `SingleAssociation<T>`
 
 Has-many associations are not directly supported but you can define a method to get associated objects:
 
@@ -453,6 +457,62 @@ class Book {
 
 }
 ```
+
+### Direct Associations
+
+As of v2.0, direct associations, which use the very Orma model classes, are supported. Given a `has-one` association, `Book has-one Publisher`:
+
+```java
+@Table
+class Publisher {
+  @PrimaryKey
+  public long id;
+
+  @Column
+  public String name;
+}
+
+@Table
+class Book {
+
+    @PrimaryKey
+    public long id;
+
+    @column
+    public String title;
+
+    @Column
+    public Publisher publisher;
+}
+```
+
+The corresponding table definition is something like this:
+
+```sql
+CREATE TABLE `Publisher` (
+  `id` INTEGER PRIMARY KEY,
+  `name` TEXT NOT NULL
+)
+CREATE TABLE `Book` (
+  `id` INTEGER PRIMARY KEY,
+  `title` TEXT NOT NULL,
+  `publisher` INTEGER NOT NULL
+    REFERENCES `Publisher`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+)
+```
+
+In SQL, `Book#publisher` refers `Publisher#id`, indicating the two tables
+should be joined in `SELECT` statements.
+
+In Java, `Book#publisher` is a `Publisher` instance, which is retrieved in each
+`SELECT` operations. There is no lazy loading in direct associations.
+
+### Known Issues in Associations
+
+* There are no methods to query associated models
+* In direct associations, a model can have only one model for each type
+
+These issues will be fixed in a future.
 
 ## Type Adapters
 
@@ -536,14 +596,19 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
 
 There are built-in type adapters:
 
-
 * `java.math.BigDecimal`
 * `java.math.BigInteger`
 * `java.nio.ByteBuffer`
 * `java.util.Currency`
-* `java.util.List<String>`
-* `java.util.Set<String>`
+* `java.util.Date`
+* `java.sql.Date`
+* `java.sql.Time`
+* `java.sql.Timestamp`
 * `java.util.UUID`
+* `java.util.List<String>`
+* `java.util.ArrayList<String>`
+* `java.util.Set<String>`
+* `java.util.HashSet<String>`
 * `android.net.Uri`
 
 More classes? Patches welcome!
@@ -564,6 +629,9 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
   .migrationEngine(new CustomMigrationEngine())
   .build();
 ```
+
+You can also define migration steps with `OrmaDatabase.Builder#migrationStep(int, Step)`,
+ which calls `OrmaMigration.Builder#step()`.
 
 See [migration/README.md](migration/README.md) for details.
 
@@ -591,6 +659,8 @@ Here is a result performed on Android 5.0.2 / Xperia Z4
 as of Orma v0.9.0 and Realm 0.86.0:
 
 <img src="benchmark_v0.9.0_2015-12-10.png" alt="" width="443"/>
+
+I welcome benchmark in another condition and/or another code.
 
 ## FAQ
 
