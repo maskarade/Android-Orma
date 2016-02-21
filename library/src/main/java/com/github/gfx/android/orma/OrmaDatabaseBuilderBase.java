@@ -228,10 +228,10 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
     protected abstract String getSchemaHash();
 
     protected T fillDefaults() {
+        if (migrationTraceListener == null) {
+            migrationTraceListener = trace ? TraceListener.LOGCAT : TraceListener.EMPTY;
+        }
         if (ormaMigrationBuilder != null) {
-            if (migrationTraceListener == null) {
-                migrationTraceListener = trace ? TraceListener.LOGCAT : TraceListener.EMPTY;
-            }
             migrationEngine = ormaMigrationBuilder
                     .trace(migrationTraceListener)
                     .schemaHashForSchemaDiffMigration(getSchemaHash())

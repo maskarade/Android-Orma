@@ -109,7 +109,7 @@ public class DatabaseWriter extends BaseWriter {
         builder.addMethod(MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(getPackageName(), kClassName))
-                .addStatement("return new $L(new $T(this.fillDefaults(), $L))", kClassName, Types.OrmaConnection, SCHEMAS)
+                .addStatement("return new $L(new $T(fillDefaults(), $L))", kClassName, Types.OrmaConnection, SCHEMAS)
                 .build());
 
         return builder.build();

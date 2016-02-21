@@ -318,7 +318,7 @@ public class OrmaDatabase implements DatabaseHandle {
     }
 
     public OrmaDatabase build() {
-      return new OrmaDatabase(new OrmaConnection(this.fillDefaults(), SCHEMAS));
+      return new OrmaDatabase(new OrmaConnection(fillDefaults(), SCHEMAS));
     }
   }
 }
