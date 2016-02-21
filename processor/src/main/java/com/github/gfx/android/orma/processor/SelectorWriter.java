@@ -92,16 +92,17 @@ public class SelectorWriter extends BaseWriter {
     }
 
     Stream<MethodSpec> buildOrderByHelpers(ColumnDefinition column) {
+        String columnName = column.getEscapedColumnName();
         return Stream.of(
                 MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Asc")
                         .addModifiers(Modifier.PUBLIC)
                         .returns(getTargetClassName())
-                        .addStatement("return orderBy($S)", sql.quoteIdentifier(column.columnName) + " ASC")
+                        .addStatement("return orderBy($S)", columnName + " ASC")
                         .build(),
                 MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Desc")
                         .addModifiers(Modifier.PUBLIC)
                         .returns(getTargetClassName())
-                        .addStatement("return orderBy($S)", sql.quoteIdentifier(column.columnName) + " DESC")
+                        .addStatement("return orderBy($S)", columnName + " DESC")
                         .build()
         );
     }

@@ -42,27 +42,27 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   }
 
   public Item_Relation categoryEq(@NonNull Category category) {
-    return where("\"category\" = ?", category.id /* primary key */);
+    return where("\"Item\".\"category\" = ?", category.id /* primary key */);
   }
 
   public Item_Relation categoryEq(long categoryId) {
-    return where("\"category\" = ?", categoryId);
+    return where("\"Item\".\"category\" = ?", categoryId);
   }
 
   public Item_Relation nameEq(@NonNull String name) {
-    return where("\"name\" = ?", name);
+    return where("\"Item\".\"name\" = ?", name);
   }
 
   public Item_Relation nameNotEq(@NonNull String name) {
-    return where("\"name\" <> ?", name);
+    return where("\"Item\".\"name\" <> ?", name);
   }
 
   public Item_Relation nameIn(@NonNull Collection<String> values) {
-    return in(false, "\"name\"", values);
+    return in(false, "\"Item\".\"name\"", values);
   }
 
   public Item_Relation nameNotIn(@NonNull Collection<String> values) {
-    return in(true, "\"name\"", values);
+    return in(true, "\"Item\".\"name\"", values);
   }
 
   public final Item_Relation nameIn(@NonNull String... values) {
@@ -74,19 +74,19 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   }
 
   public Item_Relation nameLt(@NonNull String name) {
-    return where("\"name\" < ?", name);
+    return where("\"Item\".\"name\" < ?", name);
   }
 
   public Item_Relation nameLe(@NonNull String name) {
-    return where("\"name\" <= ?", name);
+    return where("\"Item\".\"name\" <= ?", name);
   }
 
   public Item_Relation nameGt(@NonNull String name) {
-    return where("\"name\" > ?", name);
+    return where("\"Item\".\"name\" > ?", name);
   }
 
   public Item_Relation nameGe(@NonNull String name) {
-    return where("\"name\" >= ?", name);
+    return where("\"Item\".\"name\" >= ?", name);
   }
 
   public Item_Relation orderByCategoryAsc() {

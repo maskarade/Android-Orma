@@ -220,6 +220,10 @@ public class ColumnDefinition {
         }
     }
 
+    public String getEscapedColumnName() {
+        return getEscapedColumnName(schema.hasDirectAssociations());
+    }
+
     public String getEscapedColumnName(boolean fqn) {
         StringBuilder sb = new StringBuilder();
         if (fqn) {
