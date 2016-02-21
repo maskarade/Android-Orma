@@ -19,7 +19,6 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.Author;
-import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -35,6 +34,9 @@ import android.support.test.runner.AndroidJUnit4;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * @see ForeignKeysTest
+ */
 @RunWith(AndroidJUnit4.class)
 public class DirectAssociationsTest {
 
@@ -180,5 +182,27 @@ public class DirectAssociationsTest {
         assertThat(model.author, is(notNullValue()));
         assertThat(model.author.name, is(author1.name));
         assertThat(model.author.note, is(author1.note));
+    }
+
+    @Test
+    public void testCascadingDelete() throws Exception {
+        orma.createModelWithDirectAssociation(
+                new ModelFactory<ModelWithDirectAssociation>() {
+                    @NonNull
+                    @Override
+                    public ModelWithDirectAssociation call() {
+                        ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                        model.title = "foo";
+                        model.author = author1;
+                        model.note = "SQLite rocks";
+                        return model;
+                    }
+                });
+
+        orma.deleteFromAuthor()
+                .nameEq(author1.name)
+                .execute();
+
+        assertThat(orma.selectFromModelWithDirectAssociation().isEmpty(), is(true));
     }
 }

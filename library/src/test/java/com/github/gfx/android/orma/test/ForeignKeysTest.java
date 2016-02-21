@@ -34,6 +34,9 @@ import android.support.test.runner.AndroidJUnit4;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * @see DirectAssociationsTest
+ */
 @RunWith(AndroidJUnit4.class)
 public class ForeignKeysTest {
 

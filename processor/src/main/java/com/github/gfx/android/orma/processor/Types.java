@@ -258,12 +258,4 @@ public class Types {
 
         return type;
     }
-
-    public static TypeName asRawType(TypeName type) {
-        if (type instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) type).rawType;
-        } else {
-            return type;
-        }
-    }
 }

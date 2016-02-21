@@ -102,7 +102,7 @@ public class SqlGenerator {
             constraints.add("COLLATE " + column.collate.name());
         }
 
-        if (Types.isSingleAssociation(column.type)) {
+        if (column.isSingleAssociation() || column.isDirectAssociation()) {
             constraints.add(foreignKeyConstraints(column));
         }
 

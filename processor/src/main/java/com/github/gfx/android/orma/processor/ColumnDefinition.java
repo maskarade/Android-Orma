@@ -95,7 +95,7 @@ public class ColumnDefinition {
 
         type = ClassName.get(element.asType());
         typeAdapter = schema.context.typeAdapterMap.get(type);
-        storageType = storageType(column, type, typeAdapter);
+        storageType = storageType(context, column, type, typeAdapter);
 
         if (column != null) {
             indexed = column.indexed();
@@ -145,7 +145,7 @@ public class ColumnDefinition {
         defaultExpr = "";
         collate = Column.Collate.BINARY;
         typeAdapter = schema.context.typeAdapterMap.get(type);
-        storageType = storageType(null, type, typeAdapter);
+        storageType = storageType(context, null, type, typeAdapter);
     }
 
     public static ColumnDefinition createDefaultPrimaryKey(SchemaDefinition schema) {
@@ -178,14 +178,18 @@ public class ColumnDefinition {
         return element.getSimpleName().toString();
     }
 
-    static String storageType(Column column, TypeName type, TypeAdapterDefinition typeAdapter) {
+    static String storageType(ProcessingContext context, Column column, TypeName type, TypeAdapterDefinition typeAdapter) {
         if (column != null && !Strings.isEmpty(column.storageType())) {
             return column.storageType();
         } else {
             if (typeAdapter != null) {
                 return SqlTypes.getSqliteType(typeAdapter.serializedType);
+            } else if (Types.isSingleAssociation(type)) {
+                return SqlTypes.getSqliteType(TypeName.LONG);
+            } else if (Types.isDirectAssociation(context, type)) {
+                return SqlTypes.getSqliteType(context.getSchemaDef(type).getPrimaryKey().getType());
             } else {
-                return SqlTypes.getSqliteType(Types.asRawType(type));
+                return SqlTypes.getSqliteType(type);
             }
         }
     }
