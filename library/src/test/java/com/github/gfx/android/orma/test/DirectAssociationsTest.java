@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
@@ -45,6 +46,8 @@ public class DirectAssociationsTest {
     Author author1;
 
     Author author2;
+
+    Publisher publisher;
 
     @Before
     public void setUp() throws Exception {
@@ -71,6 +74,18 @@ public class DirectAssociationsTest {
                 return author;
             }
         });
+
+        publisher = orma.createPublisher(new ModelFactory<Publisher>() {
+            @NonNull
+            @Override
+            public Publisher call() {
+                Publisher publisher = new Publisher();
+                publisher.name = "foo bar";
+                publisher.startedYear = 2015;
+                publisher.startedMonth = 12;
+                return publisher;
+            }
+        });
     }
 
     @Test
@@ -83,6 +98,7 @@ public class DirectAssociationsTest {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                         model.title = "foo";
                         model.author = author1;
+                        model.publisher = publisher;
                         model.note = "SQLite rocks";
                         return model;
                     }
@@ -93,6 +109,11 @@ public class DirectAssociationsTest {
         assertThat(model.author, is(notNullValue()));
         assertThat(model.author.name, is(author1.name));
         assertThat(model.author.note, is(author1.note));
+        assertThat(model.publisher, is(notNullValue()));
+        assertThat(model.publisher.id, is(publisher.id));
+        assertThat(model.publisher.name, is(publisher.name));
+        assertThat(model.publisher.startedYear, is(publisher.startedYear));
+        assertThat(model.publisher.startedMonth, is(publisher.startedMonth));
     }
 
     @Test
@@ -105,6 +126,7 @@ public class DirectAssociationsTest {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                         model.title = "foo";
                         model.author = author1;
+                        model.publisher = publisher;
                         model.note = "SQLite rocks";
                         return model;
                     }
@@ -134,6 +156,7 @@ public class DirectAssociationsTest {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                         model.title = "foo";
                         model.author = author1;
+                        model.publisher = publisher;
                         model.note = "SQLite rocks";
                         return model;
                     }
@@ -156,6 +179,7 @@ public class DirectAssociationsTest {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                 model.title = "foo";
                 model.author = author1;
+                model.publisher = publisher;
                 model.note = "SQLite rocks";
                 return model;
             }
@@ -167,6 +191,7 @@ public class DirectAssociationsTest {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                 model.title = "bar";
                 model.author = author2;
+                model.publisher = publisher;
                 model.note = "SQLite supports most of SQL92";
                 return model;
             }
@@ -195,6 +220,7 @@ public class DirectAssociationsTest {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                 model.title = "foo";
                 model.author = author1;
+                model.publisher = publisher;
                 model.note = "SQLite rocks";
                 return model;
             }
@@ -206,6 +232,7 @@ public class DirectAssociationsTest {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                 model.title = "bar";
                 model.author = author2;
+                model.publisher = publisher;
                 model.note = "SQLite supports most of SQL92";
                 return model;
             }
@@ -235,6 +262,7 @@ public class DirectAssociationsTest {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
                         model.title = "foo";
                         model.author = author1;
+                        model.publisher = publisher;
                         model.note = "SQLite rocks";
                         return model;
                     }
