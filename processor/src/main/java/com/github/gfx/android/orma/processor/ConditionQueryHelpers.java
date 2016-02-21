@@ -129,7 +129,7 @@ public class ConditionQueryHelpers {
                     .superclass(Types.getFunc1(type.box(), column.getSerializedBoxType()))
                     .addMethod(
                             MethodSpec.methodBuilder("call")
-                                    .addAnnotation(Specs.overrideAnnotationSpec())
+                                    .addAnnotation(Annotations.override())
                                     .addModifiers(Modifier.PUBLIC)
                                     .returns(column.getSerializedBoxType())
                                     .addParameter(ParameterSpec.builder(type.box(), "value").build())
@@ -141,7 +141,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(false, $S, values, $L)",
@@ -153,7 +153,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(true, $S, values, $L)",
@@ -166,7 +166,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "In")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(false, $S, values)",
@@ -178,7 +178,7 @@ public class ConditionQueryHelpers {
                     MethodSpec.methodBuilder(column.name + "NotIn")
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                    .addAnnotation(Annotations.nonNull())
                                     .build())
                             .returns(targetClassName)
                             .addStatement("return in(true, $S, values)",
@@ -191,7 +191,7 @@ public class ConditionQueryHelpers {
                 MethodSpec.methodBuilder(column.name + "In")
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
-                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .addAnnotation(Annotations.nonNull())
                                 .build())
                         .varargs(true)
                         .returns(targetClassName)
@@ -204,7 +204,7 @@ public class ConditionQueryHelpers {
                 MethodSpec.methodBuilder(column.name + "NotIn")
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
-                                .addAnnotation(Specs.nonNullAnnotationSpec())
+                                .addAnnotation(Annotations.nonNull())
                                 .build())
                         .varargs(true)
                         .returns(targetClassName)

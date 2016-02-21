@@ -95,7 +95,7 @@ public class UpdaterWriter extends BaseWriter {
                                     .returns(schema.getUpdaterClassName())
                                     .addParameter(
                                             ParameterSpec.builder(column.getType(), column.name + "Reference")
-                                                    .addAnnotation(Specs.nonNullAnnotationSpec())
+                                                    .addAnnotation(Annotations.nonNull())
                                                     .build()
                                     )
                                     .addStatement("contents.put($S, $L.getId())",

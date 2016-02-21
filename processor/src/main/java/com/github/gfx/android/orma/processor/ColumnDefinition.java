@@ -209,16 +209,6 @@ public class ColumnDefinition {
         }
     }
 
-    @Nullable
-    public AssociationDefinition getAssociation() {
-        if (Types.isSingleAssociation(type)) {
-            return AssociationDefinition.createSingleAssociation(type);
-        } else if (Types.isDirectAssociation(context, type)) {
-            return AssociationDefinition.createDirectAssociation(type);
-        }
-        return null;
-    }
-
     public String getEscapedColumnName(boolean fqn) {
         StringBuilder sb = new StringBuilder();
         if (fqn) {
@@ -362,13 +352,33 @@ public class ColumnDefinition {
         }
 
         if (nullable) {
-            return Collections.singletonList(Specs.nullableAnnotation());
+            return Collections.singletonList(Annotations.nullable());
         } else {
-            return Collections.singletonList(Specs.nonNullAnnotationSpec());
+            return Collections.singletonList(Annotations.nonNull());
         }
+    }
+
+    @Nullable
+    public AssociationDefinition getAssociation() {
+        if (Types.isSingleAssociation(type)) {
+            return AssociationDefinition.createSingleAssociation(type);
+        } else if (Types.isDirectAssociation(context, type)) {
+            return AssociationDefinition.createDirectAssociation(type);
+        }
+        return null;
     }
 
     public boolean isDirectAssociation() {
         return Types.isDirectAssociation(context, type);
+    }
+
+    public boolean isSingleAssociation() {
+        return Types.isSingleAssociation(type);
+    }
+
+    public SchemaDefinition getAssociatedSchema() {
+        AssociationDefinition r = getAssociation();
+        assert r != null;
+        return context.getSchemaDef(r.modelType);
     }
 }

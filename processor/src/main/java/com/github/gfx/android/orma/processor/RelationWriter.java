@@ -70,30 +70,27 @@ public class RelationWriter extends BaseWriter {
 
         methodSpecs.add(MethodSpec.methodBuilder("clone")
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Override.class)
+                .addAnnotation(Annotations.override())
                 .returns(getTargetClassName())
                 .addStatement("return new $T(this)", getTargetClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("selector")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addAnnotation(Specs.nonNullAnnotationSpec())
+                .addAnnotations(Annotations.overrideAndNonNull())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSelectorClassName())
                 .addStatement("return new $T(this)", schema.getSelectorClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("updater")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addAnnotation(Specs.nonNullAnnotationSpec())
+                .addAnnotations(Annotations.overrideAndNonNull())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getUpdaterClassName())
                 .addStatement("return new $T(this)", schema.getUpdaterClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("deleter")
-                .addAnnotation(Specs.overrideAnnotationSpec())
-                .addAnnotation(Specs.nonNullAnnotationSpec())
+                .addAnnotations(Annotations.overrideAndNonNull())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getDeleterClassName())
                 .addStatement("return new $T(this)", schema.getDeleterClassName())
