@@ -28,6 +28,9 @@ public class ModelWithDirectAssociation {
     @Column(indexed = true)
     public Author author;
 
+    @Column(indexed = true)
+    public Publisher publisher;
+
     // FIXME: multiple direct associations
 //    @Column(indexed = true)
 //    public Author author2;

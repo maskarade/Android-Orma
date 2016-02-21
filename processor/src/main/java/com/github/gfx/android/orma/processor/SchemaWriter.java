@@ -139,7 +139,7 @@ public class SchemaWriter extends BaseWriter {
                     }
                     return s;
                 })
-                .collect(Collectors.joining(", ")));
+                .collect(Collectors.joining(" ")));
 
         return sb.toString();
     }

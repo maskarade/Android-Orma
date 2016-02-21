@@ -72,7 +72,6 @@ public class QueryTest {
                 publisher.name = "foo bar";
                 publisher.startedYear = 2015;
                 publisher.startedMonth = 12;
-
                 return publisher;
             }
         });
