@@ -27,8 +27,6 @@ import com.squareup.javapoet.TypeSpec;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Clock;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,15 +118,16 @@ public class DatabaseWriter extends BaseWriter {
     public List<FieldSpec> buildFieldSpecs() {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
 
-        Clock now = Clock.systemDefaultZone();
-        fieldSpecs.add(
-                FieldSpec.builder(long.class, "SCHEMA_TIMESTAMP", Modifier.PUBLIC, Modifier.STATIC)
-                        .addJavadoc(
-                                "The time at which the schema was built. Units are as per {@link System#currentTimeMillis()}.\n")
-                        .initializer("$LL /* $L */",
-                                now.millis(), ZonedDateTime.now(now).toString())
-                        .build()
-        );
+// This must be optional because it causes git conflict easily.
+//        Clock now = Clock.systemDefaultZone();
+//        fieldSpecs.add(
+//                FieldSpec.builder(long.class, "SCHEMA_TIMESTAMP", Modifier.PUBLIC, Modifier.STATIC)
+//                        .addJavadoc(
+//                                "The time at which the schema was built. Units are as per {@link System#currentTimeMillis()}.\n")
+//                        .initializer("$LL /* $L */",
+//                                now.millis(), ZonedDateTime.now(now).toString())
+//                        .build()
+//        );
 
         fieldSpecs.add(
                 FieldSpec.builder(String.class, "SCHEMA_HASH", Modifier.PUBLIC, Modifier.STATIC)
