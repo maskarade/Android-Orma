@@ -267,6 +267,10 @@ public class SchemaDefinition {
         return tableName;
     }
 
+    public String getEscapedTableName() {
+        return context.sqlg.escapeIdentifier(tableName);
+    }
+
     public ClassName getModelClassName() {
         return modelClassName;
     }
@@ -313,9 +317,8 @@ public class SchemaDefinition {
     }
 
     private void buildStatements() {
-        SqlGenerator sql = new SqlGenerator(context);
-        createTableStatement = sql.buildCreateTableStatement(this);
-        createIndexStatements = sql.buildCreateIndexStatements(this);
+        createTableStatement = context.sqlg.buildCreateTableStatement(context, this);
+        createIndexStatements = context.sqlg.buildCreateIndexStatements(this);
     }
 
     @NonNull

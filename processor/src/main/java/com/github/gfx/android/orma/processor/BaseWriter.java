@@ -21,11 +21,8 @@ public abstract class BaseWriter {
 
     protected final ProcessingContext context;
 
-    protected final SqlGenerator sql;
-
     public BaseWriter(ProcessingContext context) {
         this.context = context;
-        this.sql = new SqlGenerator(context);
     }
 
     public abstract TypeSpec buildTypeSpec();

@@ -227,14 +227,10 @@ public class ColumnDefinition {
     public String getEscapedColumnName(boolean fqn) {
         StringBuilder sb = new StringBuilder();
         if (fqn) {
-            sb.append('"');
-            sb.append(schema.getTableName());
-            sb.append('"');
+            context.sqlg.appendIdentifier(sb, schema.getTableName());
             sb.append('.');
         }
-        sb.append('"');
-        sb.append(columnName);
-        sb.append('"');
+        context.sqlg.appendIdentifier(sb, columnName);
         return sb.toString();
     }
 

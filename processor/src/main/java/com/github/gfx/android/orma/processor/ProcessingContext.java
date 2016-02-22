@@ -41,12 +41,15 @@ public class ProcessingContext {
 
     public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap;
 
+    public final SqlGenerator sqlg;
+
     public ClassName OrmaDatabase;
 
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
         this.schemaMap = new LinkedHashMap<>(); // the order matters
         this.typeAdapterMap = new HashMap<>();
+        this.sqlg = new SqlGenerator();
         for (TypeAdapterDefinition typeAdapterDefinition : TypeAdapterDefinition.BUILTINS) {
             addTypeAdapterDefinition(typeAdapterDefinition);
         }

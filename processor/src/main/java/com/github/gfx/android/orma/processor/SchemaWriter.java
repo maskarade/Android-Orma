@@ -121,7 +121,7 @@ public class SchemaWriter extends BaseWriter {
 
     private String buildSelectFromTableClause() {
         StringBuilder sb = new StringBuilder();
-        sql.appendIdentifier(sb, schema.getTableName());
+        context.sqlg.appendIdentifier(sb, schema.getTableName());
 
         sb.append(schema.getColumns().stream()
                 .filter(ColumnDefinition::isDirectAssociation)
@@ -131,7 +131,7 @@ public class SchemaWriter extends BaseWriter {
                     ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
                     if (primaryKey != null) {
                         s.append(" JOIN ");
-                        sql.appendIdentifier(s, associatedSchema.getTableName());
+                        context.sqlg.appendIdentifier(s, associatedSchema.getTableName());
                         s.append(" ON ");
                         s.append(column.getEscapedColumnName(true));
                         s.append(" = ");
@@ -313,7 +313,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return $S", sql.quoteIdentifier(schema.getTableName()))
+                        .addStatement("return $S", schema.getEscapedTableName())
                         .build()
         );
 
@@ -367,7 +367,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getList(Types.String))
-                        .addCode(sql.buildCreateIndexStatementsExpr(schema))
+                        .addCode(context.sqlg.buildCreateIndexStatementsExpr(schema))
                         .build()
         );
 
@@ -376,7 +376,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return $S", sql.buildDropTableStatement(schema))
+                        .addStatement("return $S", context.sqlg.buildDropTableStatement(schema))
                         .build()
         );
 
@@ -390,7 +390,7 @@ public class SchemaWriter extends BaseWriter {
                         .addParameter(ParameterSpec.builder(boolean.class, withoutAutoId)
                                 .build())
                         .returns(Types.String)
-                        .addCode(sql.buildInsertStatementCode(schema, onConflictAlgorithm, withoutAutoId))
+                        .addCode(context.sqlg.buildInsertStatementCode(schema, onConflictAlgorithm, withoutAutoId))
                         .build()
         );
 

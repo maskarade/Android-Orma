@@ -27,13 +27,7 @@ import java.util.stream.Collectors;
 
 public class SqlGenerator {
 
-    final ProcessingContext context;
-
-    public SqlGenerator(ProcessingContext context) {
-        this.context = context;
-    }
-
-    public String buildCreateTableStatement(SchemaDefinition schema) {
+    public String buildCreateTableStatement(ProcessingContext context, SchemaDefinition schema) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("CREATE TABLE ");
@@ -43,7 +37,7 @@ public class SqlGenerator {
         int nColumns = schema.getColumns().size();
         for (int i = 0; i < nColumns; i++) {
             ColumnDefinition column = schema.getColumns().get(i);
-            appendColumnDef(sb, column);
+            appendColumnDef(sb, context, column);
 
             if ((i + 1) != nColumns) {
                 sb.append(", ");
@@ -63,7 +57,7 @@ public class SqlGenerator {
         return sb.toString();
     }
 
-    public void appendColumnDef(StringBuilder sb, ColumnDefinition column) {
+    public void appendColumnDef(StringBuilder sb, ProcessingContext context, ColumnDefinition column) {
         appendIdentifier(sb, column.columnName);
         sb.append(' ');
 
@@ -103,7 +97,7 @@ public class SqlGenerator {
         }
 
         if (column.isSingleAssociation() || column.isDirectAssociation()) {
-            constraints.add(foreignKeyConstraints(column));
+            constraints.add(foreignKeyConstraints(context, column));
         }
 
         sb.append(constraints.stream().collect(Collectors.joining(" ")));
@@ -126,8 +120,9 @@ public class SqlGenerator {
         }
     }
 
-    String foreignKeyConstraints(ColumnDefinition column) {
+    String foreignKeyConstraints(ProcessingContext context, ColumnDefinition column) {
         AssociationDefinition a = column.getAssociation();
+        assert a != null;
         SchemaDefinition foreignTableSchema = context.getSchemaDef(a.modelType);
         StringBuilder sb = new StringBuilder();
         sb.append("REFERENCES ");
@@ -268,7 +263,7 @@ public class SqlGenerator {
     }
 
 
-    public String quoteIdentifier(String identifier) {
+    public String escapeIdentifier(String identifier) {
         StringBuilder sb = new StringBuilder();
         appendIdentifier(sb, identifier);
         return sb.toString();

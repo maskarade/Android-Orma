@@ -81,7 +81,7 @@ public class UpdaterWriter extends BaseWriter {
                                                 .addAnnotations(column.nullabilityAnnotations())
                                                 .build()
                                 )
-                                .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
+                                .addStatement("contents.put($S, $L)", column.getEscapedColumnName(false),
                                         column.buildSerializeExpr("conn", paramName))
                                 .addStatement("return this")
                                 .build()
@@ -99,7 +99,7 @@ public class UpdaterWriter extends BaseWriter {
                                                     .build()
                                     )
                                     .addStatement("contents.put($S, $L.getId())",
-                                            sql.quoteIdentifier(column.columnName), column.name + "Reference")
+                                            column.getEscapedColumnName(false), column.name + "Reference")
                                     .addStatement("return this")
                                     .build()
                     );
@@ -129,7 +129,7 @@ public class UpdaterWriter extends BaseWriter {
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L)",
-                                        sql.quoteIdentifier(column.columnName),
+                                        column.getEscapedColumnName(false),
                                         modelSchema.getPrimaryKey().buildGetColumnExpr(column.name))
                                 .addStatement("return this")
                                 .build()
