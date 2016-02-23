@@ -13,8 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.generator;
 
+import com.github.gfx.android.orma.processor.util.Annotations;
+import com.github.gfx.android.orma.processor.model.AssociationDefinition;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -81,7 +88,7 @@ public class UpdaterWriter extends BaseWriter {
                                                 .addAnnotations(column.nullabilityAnnotations())
                                                 .build()
                                 )
-                                .addStatement("contents.put($S, $L)", sql.quoteIdentifier(column.columnName),
+                                .addStatement("contents.put($S, $L)", column.getEscapedColumnName(false),
                                         column.buildSerializeExpr("conn", paramName))
                                 .addStatement("return this")
                                 .build()
@@ -99,13 +106,13 @@ public class UpdaterWriter extends BaseWriter {
                                                     .build()
                                     )
                                     .addStatement("contents.put($S, $L.getId())",
-                                            sql.quoteIdentifier(column.columnName), column.name + "Reference")
+                                            column.getEscapedColumnName(false), column.name + "Reference")
                                     .addStatement("return this")
                                     .build()
                     );
                 }
 
-                SchemaDefinition modelSchema = context.getSchemaDef(r.modelType);
+                SchemaDefinition modelSchema = context.getSchemaDef(r.getModelType());
                 if (modelSchema == null) {
                     // FIXME: just stack errors and return in order to continue processing
                     throw new ProcessingException(Types.SingleAssociation.simpleName() + "<T> can handle only Orma models",
@@ -124,12 +131,12 @@ public class UpdaterWriter extends BaseWriter {
                                 .addModifiers(Modifier.PUBLIC)
                                 .returns(schema.getUpdaterClassName())
                                 .addParameter(
-                                        ParameterSpec.builder(r.modelType, column.name)
+                                        ParameterSpec.builder(r.getModelType(), column.name)
                                                 .addAnnotations(column.nullabilityAnnotations())
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L)",
-                                        sql.quoteIdentifier(column.columnName),
+                                        column.getEscapedColumnName(false),
                                         modelSchema.getPrimaryKey().buildGetColumnExpr(column.name))
                                 .addStatement("return this")
                                 .build()

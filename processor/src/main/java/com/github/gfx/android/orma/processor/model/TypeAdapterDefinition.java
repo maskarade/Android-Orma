@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.model;
 
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
+import com.github.gfx.android.orma.processor.util.Mirrors;
+import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 

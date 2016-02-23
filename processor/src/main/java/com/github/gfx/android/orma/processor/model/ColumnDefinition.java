@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.model;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.processor.util.Annotations;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.util.SqlTypes;
+import com.github.gfx.android.orma.processor.util.Strings;
+import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -227,14 +233,10 @@ public class ColumnDefinition {
     public String getEscapedColumnName(boolean fqn) {
         StringBuilder sb = new StringBuilder();
         if (fqn) {
-            sb.append('"');
-            sb.append(schema.getTableName());
-            sb.append('"');
+            context.sqlg.appendIdentifier(sb, schema.getTableName());
             sb.append('.');
         }
-        sb.append('"');
-        sb.append(columnName);
-        sb.append('"');
+        context.sqlg.appendIdentifier(sb, columnName);
         return sb.toString();
     }
 

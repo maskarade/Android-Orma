@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.generator;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.AssociationDefinition;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.util.Strings;
+import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.CodeBlock;
 
 import android.support.annotation.NonNull;
@@ -27,13 +34,7 @@ import java.util.stream.Collectors;
 
 public class SqlGenerator {
 
-    final ProcessingContext context;
-
-    public SqlGenerator(ProcessingContext context) {
-        this.context = context;
-    }
-
-    public String buildCreateTableStatement(SchemaDefinition schema) {
+    public String buildCreateTableStatement(ProcessingContext context, SchemaDefinition schema) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("CREATE TABLE ");
@@ -43,14 +44,14 @@ public class SqlGenerator {
         int nColumns = schema.getColumns().size();
         for (int i = 0; i < nColumns; i++) {
             ColumnDefinition column = schema.getColumns().get(i);
-            appendColumnDef(sb, column);
+            appendColumnDef(sb, context, column);
 
             if ((i + 1) != nColumns) {
                 sb.append(", ");
             }
         }
 
-        for (String constraint : schema.constraints) {
+        for (String constraint : schema.getConstraints()) {
             if (Strings.isEmpty(constraint)) {
                 throw new ProcessingException("Empty constraint found", schema.getElement());
             }
@@ -63,7 +64,7 @@ public class SqlGenerator {
         return sb.toString();
     }
 
-    public void appendColumnDef(StringBuilder sb, ColumnDefinition column) {
+    public void appendColumnDef(StringBuilder sb, ProcessingContext context, ColumnDefinition column) {
         appendIdentifier(sb, column.columnName);
         sb.append(' ');
 
@@ -103,7 +104,7 @@ public class SqlGenerator {
         }
 
         if (column.isSingleAssociation() || column.isDirectAssociation()) {
-            constraints.add(foreignKeyConstraints(column));
+            constraints.add(foreignKeyConstraints(context, column));
         }
 
         sb.append(constraints.stream().collect(Collectors.joining(" ")));
@@ -126,9 +127,10 @@ public class SqlGenerator {
         }
     }
 
-    String foreignKeyConstraints(ColumnDefinition column) {
+    String foreignKeyConstraints(ProcessingContext context, ColumnDefinition column) {
         AssociationDefinition a = column.getAssociation();
-        SchemaDefinition foreignTableSchema = context.getSchemaDef(a.modelType);
+        assert a != null;
+        SchemaDefinition foreignTableSchema = context.getSchemaDef(a.getModelType());
         StringBuilder sb = new StringBuilder();
         sb.append("REFERENCES ");
         appendIdentifier(sb, foreignTableSchema.getTableName());
@@ -268,7 +270,7 @@ public class SqlGenerator {
     }
 
 
-    public String quoteIdentifier(String identifier) {
+    public String escapeIdentifier(String identifier) {
         StringBuilder sb = new StringBuilder();
         appendIdentifier(sb, identifier);
         return sb.toString();

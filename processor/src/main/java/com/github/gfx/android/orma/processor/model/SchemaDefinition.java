@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.model;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.Getter;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.util.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 
@@ -66,6 +68,7 @@ public class SchemaDefinition {
 
     final ColumnDefinition primaryKey;
 
+    @Nullable
     final ExecutableElement constructorElement; // null if it has a default constructor
 
     final boolean hasDirectAssociations;
@@ -251,6 +254,19 @@ public class SchemaDefinition {
                 || context.isSameType(type, context.getTypeMirrorOf(Boolean.class));
     }
 
+    @Nullable
+    public ExecutableElement getConstructorElement() {
+        return constructorElement;
+    }
+
+    public TypeElement getTypeElement() {
+        return typeElement;
+    }
+
+    public String[] getConstraints() {
+        return constraints;
+    }
+
     public boolean hasDefaultConstructor() {
         return constructorElement == null;
     }
@@ -265,6 +281,10 @@ public class SchemaDefinition {
 
     public String getTableName() {
         return tableName;
+    }
+
+    public String getEscapedTableName() {
+        return context.sqlg.escapeIdentifier(tableName);
     }
 
     public ClassName getModelClassName() {
@@ -313,9 +333,8 @@ public class SchemaDefinition {
     }
 
     private void buildStatements() {
-        SqlGenerator sql = new SqlGenerator(context);
-        createTableStatement = sql.buildCreateTableStatement(this);
-        createIndexStatements = sql.buildCreateIndexStatements(this);
+        createTableStatement = context.sqlg.buildCreateTableStatement(context, this);
+        createIndexStatements = context.sqlg.buildCreateIndexStatements(this);
     }
 
     @NonNull

@@ -18,6 +18,16 @@ package com.github.gfx.android.orma.processor;
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
+import com.github.gfx.android.orma.processor.generator.BaseWriter;
+import com.github.gfx.android.orma.processor.generator.DatabaseWriter;
+import com.github.gfx.android.orma.processor.generator.DeleterWriter;
+import com.github.gfx.android.orma.processor.generator.RelationWriter;
+import com.github.gfx.android.orma.processor.generator.SchemaWriter;
+import com.github.gfx.android.orma.processor.generator.SelectorWriter;
+import com.github.gfx.android.orma.processor.generator.UpdaterWriter;
 import com.squareup.javapoet.JavaFile;
 
 import java.io.IOException;
