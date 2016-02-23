@@ -405,7 +405,7 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("convertToArgs")
-                        .addJavadoc("Provided for debugging\n")
+                        .addJavadoc("Convert models to {@code Object[]}. Provided for debugging\n")
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(ArrayTypeName.of(TypeName.OBJECT))
@@ -481,9 +481,10 @@ public class SchemaWriter extends BaseWriter {
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
 
-            if (c.isNullableInJava()) {
+            if (!c.getType().isPrimitive()) {
                 builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
             }
+
             if (c.autoId) {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
@@ -510,8 +511,18 @@ public class SchemaWriter extends BaseWriter {
             if (c.autoId) {
                 builder.endControlFlow();
             }
-            if (c.isNullableInJava()) {
+
+            if (!c.getType().isPrimitive()) {
                 builder.endControlFlow();
+
+                if (!c.isNullableInJava()) {
+                    // check nullability even if it is not declared as @Nullable
+                    builder.beginControlFlow("else");
+                    builder.addStatement("throw new $T($S + $S)", Types.NullPointerException,
+                            schema.getModelClassName().simpleName() + '.' + c.name,
+                            " must not be null, or use @Nullable to declare it as NULL");
+                    builder.endControlFlow();
+                }
             }
         }
 

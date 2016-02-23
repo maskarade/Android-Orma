@@ -13,6 +13,7 @@ import com.github.gfx.android.orma.internal.Schemas;
 import java.lang.Boolean;
 import java.lang.Class;
 import java.lang.Long;
+import java.lang.NullPointerException;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -167,18 +168,28 @@ public class Todo_Schema implements Schema<Todo> {
   }
 
   /**
-   * Provided for debugging
+   * Convert models to {@code Object[]}. Provided for debugging
    */
   @NonNull
   @Override
   public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Todo model, boolean withoutAutoId) {
     Object[] args = new Object[withoutAutoId ? 4 : 5];
-    args[0] = model.title;
+    if (model.title != null) {
+      args[0] = model.title;
+    }
+    else {
+      throw new NullPointerException("Todo.title" + " must not be null, or use @Nullable to declare it as NULL");
+    }
     if (model.content != null) {
       args[1] = model.content;
     }
     args[2] = model.done ? 1 : 0;
-    args[3] = BuiltInSerializers.serializeDate(model.createdTime);
+    if (model.createdTime != null) {
+      args[3] = BuiltInSerializers.serializeDate(model.createdTime);
+    }
+    else {
+      throw new NullPointerException("Todo.createdTime" + " must not be null, or use @Nullable to declare it as NULL");
+    }
     if (!withoutAutoId) {
       args[4] = model.id;
     }

@@ -101,7 +101,7 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
 
     @SuppressWarnings("unchecked")
     public C where(@NonNull ColumnDef<Model, ?> column, @NonNull String operator, @NonNull Object value) {
-        return where(column.getEscapedName().append(' ').append(operator).append(" ?"), value);
+        return where(column.getEscapedName() + ' ' + operator + " ?", value);
     }
 
     @SuppressWarnings("unchecked")

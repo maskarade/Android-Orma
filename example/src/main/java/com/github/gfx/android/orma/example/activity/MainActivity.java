@@ -64,10 +64,10 @@ public class MainActivity extends AppCompatActivity
 
     OrmaDatabase orma;
 
-    public void largeLog(String tag, final String content) {
+    public static void largeLogE(String tag, String content) {
         if (content.length() > 2000) {
             Log.e(tag, content.substring(0, 2000));
-            largeLog(tag, content.substring(2000));
+            largeLogE(tag, content.substring(2000));
         } else {
             Log.e(tag, content);
         }
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     });
 
-                    largeLog(TAG, Log.getStackTraceString(e));
+                    largeLogE(TAG, Log.getStackTraceString(e));
                 }
             }
         });

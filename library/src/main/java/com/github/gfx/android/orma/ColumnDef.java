@@ -51,16 +51,16 @@ public abstract class ColumnDef<Model, T> {
         this.flags = flags;
     }
 
-    public StringBuilder getEscapedName() {
-        return new StringBuilder().append('"').append(name).append('"');
+    public String getEscapedName() {
+        return "\"" + name + '"';
     }
 
-    public StringBuilder getFullyQualifiedName() {
-        return new StringBuilder()
-                .append('"').append(schema.getTableName()).append('"')
-                .append('.')
-                .append('"').append(name).append('"');
+    public String getFullyQualifiedName() {
+        return "\"" + schema.getTableName() + '"' +
+                '.' +
+                '"' + name + '"';
     }
+
     private boolean checkFlags(int flags) {
         return (this.flags & flags) == flags;
     }
@@ -102,6 +102,6 @@ public abstract class ColumnDef<Model, T> {
     @NonNull
     @Override
     public String toString() {
-        return getEscapedName().toString();
+        return schema.getModelClass().getSimpleName() + '#' + name;
     }
 }
