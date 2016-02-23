@@ -85,7 +85,7 @@ public abstract class AbstractMigrationEngine implements MigrationEngine {
     public void transaction(@NonNull SQLiteDatabase db, @NonNull Runnable task) {
         boolean foreignKey = DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null) != 0;
         if (foreignKey) {
-            db.execSQL("PRAGMA foreign_keys OFF");
+            db.execSQL("PRAGMA foreign_keys = OFF");
         }
 
         db.beginTransaction();
@@ -95,7 +95,7 @@ public abstract class AbstractMigrationEngine implements MigrationEngine {
         } finally {
             db.endTransaction();
             if (foreignKey) {
-                db.execSQL("PRAGMA foreign_keys ON");
+                db.execSQL("PRAGMA foreign_keys = ON");
             }
         }
     }
