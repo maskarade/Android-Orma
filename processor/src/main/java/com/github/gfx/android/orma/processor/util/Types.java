@@ -127,6 +127,8 @@ public class Types {
 
     public static final ClassName Schemas = ClassName.get(ormaPackageName + ".internal", "Schemas");
 
+    public static final ClassName NullPointerException = ClassName.get(NullPointerException.class);
+
     // helper methods
 
     public static ParameterizedTypeName getCollection(TypeName type) {

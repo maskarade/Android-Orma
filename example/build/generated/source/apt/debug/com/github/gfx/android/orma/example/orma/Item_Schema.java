@@ -9,6 +9,7 @@ import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.lang.Class;
+import java.lang.NullPointerException;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -128,14 +129,24 @@ public class Item_Schema implements Schema<Item> {
   }
 
   /**
-   * Provided for debugging
+   * Convert models to {@code Object[]}. Provided for debugging
    */
   @NonNull
   @Override
   public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Item model, boolean withoutAutoId) {
     Object[] args = new Object[2];
-    args[0] = model.category.id;
-    args[1] = model.name;
+    if (model.category != null) {
+      args[0] = model.category.id;
+    }
+    else {
+      throw new NullPointerException("Item.category" + " must not be null, or use @Nullable to declare it as NULL");
+    }
+    if (model.name != null) {
+      args[1] = model.name;
+    }
+    else {
+      throw new NullPointerException("Item.name" + " must not be null, or use @Nullable to declare it as NULL");
+    }
     return args;
   }
 

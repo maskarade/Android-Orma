@@ -10,6 +10,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.lang.Class;
 import java.lang.Long;
+import java.lang.NullPointerException;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -130,13 +131,18 @@ public class Category_Schema implements Schema<Category> {
   }
 
   /**
-   * Provided for debugging
+   * Convert models to {@code Object[]}. Provided for debugging
    */
   @NonNull
   @Override
   public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Category model, boolean withoutAutoId) {
     Object[] args = new Object[withoutAutoId ? 1 : 2];
-    args[0] = model.name;
+    if (model.name != null) {
+      args[0] = model.name;
+    }
+    else {
+      throw new NullPointerException("Category.name" + " must not be null, or use @Nullable to declare it as NULL");
+    }
     if (!withoutAutoId) {
       args[1] = model.id;
     }

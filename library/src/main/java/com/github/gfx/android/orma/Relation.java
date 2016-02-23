@@ -176,11 +176,12 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return Single.create(new Single.OnSubscribe<Integer>() {
             @Override
             public void call(SingleSubscriber<? super Integer> subscriber) {
+                String pk = schema.getPrimaryKey().getEscapedName();
                 String select = SQLiteQueryBuilder.buildQueryString(
-                        false, schema.getSelectFromTableClause(), new String[]{schema.getPrimaryKey().toString()},
+                        false, schema.getSelectFromTableClause(), new String[]{pk},
                         getWhereClause(), null, null, buildOrderingTerms(), size + "," + Integer.MAX_VALUE);
 
-                int deletedRows = conn.delete(schema, schema.getPrimaryKey() + " IN (" + select + ")", getBindArgs());
+                int deletedRows = conn.delete(schema, pk + " IN (" + select + ")", getBindArgs());
                 subscriber.onSuccess(deletedRows);
             }
         });
