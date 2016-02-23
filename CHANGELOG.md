@@ -8,6 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.0.6 - 2016/02/23
+
+### Bug Fixes
+
+* Fix SQL syntax errors in `AbstractMigrationEngine#transaction()` (#193)
+
 ## v2.0.5 - 2016/02/22
 
 ### Bug Fixes
