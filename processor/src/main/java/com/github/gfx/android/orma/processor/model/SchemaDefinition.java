@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.model;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.Getter;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.util.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 
@@ -66,6 +68,7 @@ public class SchemaDefinition {
 
     final ColumnDefinition primaryKey;
 
+    @Nullable
     final ExecutableElement constructorElement; // null if it has a default constructor
 
     final boolean hasDirectAssociations;
@@ -249,6 +252,19 @@ public class SchemaDefinition {
     private boolean isBooleanType(TypeMirror type) {
         return type.getKind() == TypeKind.BOOLEAN
                 || context.isSameType(type, context.getTypeMirrorOf(Boolean.class));
+    }
+
+    @Nullable
+    public ExecutableElement getConstructorElement() {
+        return constructorElement;
+    }
+
+    public TypeElement getTypeElement() {
+        return typeElement;
+    }
+
+    public String[] getConstraints() {
+        return constraints;
     }
 
     public boolean hasDefaultConstructor() {

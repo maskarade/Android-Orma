@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.generator;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.AssociationDefinition;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.util.Strings;
+import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.CodeBlock;
 
 import android.support.annotation.NonNull;
@@ -44,7 +51,7 @@ public class SqlGenerator {
             }
         }
 
-        for (String constraint : schema.constraints) {
+        for (String constraint : schema.getConstraints()) {
             if (Strings.isEmpty(constraint)) {
                 throw new ProcessingException("Empty constraint found", schema.getElement());
             }
@@ -123,7 +130,7 @@ public class SqlGenerator {
     String foreignKeyConstraints(ProcessingContext context, ColumnDefinition column) {
         AssociationDefinition a = column.getAssociation();
         assert a != null;
-        SchemaDefinition foreignTableSchema = context.getSchemaDef(a.modelType);
+        SchemaDefinition foreignTableSchema = context.getSchemaDef(a.getModelType());
         StringBuilder sb = new StringBuilder();
         sb.append("REFERENCES ");
         appendIdentifier(sb, foreignTableSchema.getTableName());

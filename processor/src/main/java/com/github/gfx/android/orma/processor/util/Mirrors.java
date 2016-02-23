@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.util;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,7 +31,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
- * Utilities for AnnotationMirror
+ * Utilities for {@link AnnotationMirror}
  */
 public class Mirrors {
 

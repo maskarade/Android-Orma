@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.generator;
 
+import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.squareup.javapoet.TypeSpec;
 
 public abstract class BaseWriter {

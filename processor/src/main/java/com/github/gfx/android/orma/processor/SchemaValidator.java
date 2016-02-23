@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 
 import java.util.ArrayList;
 import java.util.List;

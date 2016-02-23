@@ -15,6 +15,11 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.generator.SqlGenerator;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
+import com.github.gfx.android.orma.processor.generator.DatabaseWriter;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 

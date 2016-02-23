@@ -13,10 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.generator;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.Setter;
+import com.github.gfx.android.orma.processor.util.Annotations;
+import com.github.gfx.android.orma.processor.model.AssociationDefinition;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.util.Strings;
+import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -32,6 +40,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 
@@ -592,7 +601,7 @@ public class SchemaWriter extends BaseWriter {
                 AssociationDefinition r = c.getAssociation();
                 assert r != null;
 
-                SchemaDefinition schema = context.getSchemaDef(r.modelType);
+                SchemaDefinition schema = context.getSchemaDef(r.getModelType());
                 int numberOfColumns = schema.getColumns().size();
                 CodeBlock createAssociatedModelExpr = CodeBlock.builder()
                         .add("$L.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
@@ -609,7 +618,7 @@ public class SchemaWriter extends BaseWriter {
                 assert r != null;
                 CodeBlock.Builder getRhsExpr = CodeBlock.builder()
                         .add("new $T<>(conn, $L, cursor.getLong($L))",
-                                r.associationType, c.getAssociatedSchema().createSchemaInstanceExpr(), index);
+                                r.getAssociationType(), c.getAssociatedSchema().createSchemaInstanceExpr(), index);
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
             } else {
                 CodeBlock.Builder rhsExprBuilder = CodeBlock.builder();
@@ -632,16 +641,18 @@ public class SchemaWriter extends BaseWriter {
             builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.builder().add("model.").build()));
             builder.addStatement("return model");
         } else {
-            if (schema.getColumns().size() != schema.constructorElement.getParameters().size()) {
+            ExecutableElement constructorElement = schema.getConstructorElement();
+            assert constructorElement != null;
+            if (schema.getColumns().size() != constructorElement.getParameters().size()) {
                 context.addError("The @Setter constructor parameters must satisfy all the @Column fields",
-                        schema.constructorElement);
+                        constructorElement);
             }
 
             builder.add(buildPopulateValuesIntoCursor(
                     column -> CodeBlock.builder().add("$T ", column.getType()).build()));
 
             builder.addStatement("return new $T($L)", schema.getModelClassName(),
-                    schema.constructorElement.getParameters()
+                    constructorElement.getParameters()
                             .stream()
                             .map(this::extractColumnNameFromParameterElement)
                             .collect(Collectors.joining(", ")));

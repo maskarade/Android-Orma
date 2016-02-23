@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.model;
 
+import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -42,6 +43,16 @@ public class AssociationDefinition {
 
     public static AssociationDefinition createDirectAssociation(TypeName type) {
         return new AssociationDefinition(null, type);
+    }
+
+    @NonNull
+    public ClassName getModelType() {
+        return modelType;
+    }
+
+    @Nullable
+    public ClassName getAssociationType() {
+        return associationType;
     }
 
     public boolean isSingleAssociation() {

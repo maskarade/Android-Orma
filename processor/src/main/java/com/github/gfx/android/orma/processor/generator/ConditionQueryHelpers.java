@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor;
+package com.github.gfx.android.orma.processor.generator;
 
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.AssociationDefinition;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.util.Annotations;
+import com.github.gfx.android.orma.processor.util.Strings;
+import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -56,7 +64,7 @@ public class ConditionQueryHelpers {
         AssociationDefinition r = column.getAssociation();
 
         boolean isAssociation = r != null;
-        TypeName type = isAssociation ? r.modelType : column.getType();
+        TypeName type = isAssociation ? r.getModelType() : column.getType();
 
         TypeName collectionType = Types.getCollection(type.box());
 
