@@ -21,21 +21,14 @@ import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
 @Table
-public class ModelWithDirectAssociation {
+public class ModelWithNestedDirectAssociations {
 
     @PrimaryKey
-    public String title;
+    public long id;
 
-    @Column(indexed = true)
-    public Author author;
+    @Column
+    public ModelWithDirectAssociation md;
 
-    @Column(indexed = true)
-    public Publisher publisher;
-
-    // FIXME: multiple direct associations
-//    @Column(indexed = true)
-//    public Author author2;
-
-    @Column(indexed = true)
-    public String note; // the same name as Author#note
+    @Column
+    public String note;
 }
