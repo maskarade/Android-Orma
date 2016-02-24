@@ -47,7 +47,7 @@ public class SchemaTest {
 
         assertThat("PRIMARY KEY is placed in the last",
                 schema.getCreateTableStatement(), is(
-                        "CREATE TABLE \"publishers\" (\"name\" TEXT UNIQUE NOT NULL, \"started_year\" INTEGER NOT NULL, \"started_month\" INTEGER NOT NULL, \"id\" INTEGER PRIMARY KEY AUTOINCREMENT)"
+                        "CREATE TABLE `publishers` (`name` TEXT UNIQUE NOT NULL, `started_year` INTEGER NOT NULL, `started_month` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT)"
                 ));
     }
 
@@ -96,7 +96,7 @@ public class SchemaTest {
         assertThat(ModelWithStorageTypes_Schema.date.storageType, is("INTEGER"));
         assertThat(ModelWithStorageTypes_Schema.timestamp.storageType, is("DATETIME"));
         assertThat(ModelWithStorageTypes_Schema.INSTANCE.getCreateTableStatement(), is(
-                "CREATE TABLE \"ModelWithStorageTypes\" (\"date\" INTEGER NOT NULL, \"timestamp\" DATETIME NOT NULL)"
+                "CREATE TABLE `ModelWithStorageTypes` (`date` INTEGER NOT NULL, `timestamp` DATETIME NOT NULL)"
         ));
     }
 

@@ -19,24 +19,24 @@ public class Category_Updater extends Updater<Category, Category_Updater> {
   }
 
   public Category_Updater name(@NonNull String name) {
-    contents.put("\"name\"", name);
+    contents.put("`name`", name);
     return this;
   }
 
   public Category_Updater idEq(long id) {
-    return where("\"id\" = ?", id);
+    return where("`id` = ?", id);
   }
 
   public Category_Updater idNotEq(long id) {
-    return where("\"id\" <> ?", id);
+    return where("`id` <> ?", id);
   }
 
   public Category_Updater idIn(@NonNull Collection<Long> values) {
-    return in(false, "\"id\"", values);
+    return in(false, "`id`", values);
   }
 
   public Category_Updater idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "\"id\"", values);
+    return in(true, "`id`", values);
   }
 
   public final Category_Updater idIn(@NonNull Long... values) {
@@ -48,18 +48,18 @@ public class Category_Updater extends Updater<Category, Category_Updater> {
   }
 
   public Category_Updater idLt(long id) {
-    return where("\"id\" < ?", id);
+    return where("`id` < ?", id);
   }
 
   public Category_Updater idLe(long id) {
-    return where("\"id\" <= ?", id);
+    return where("`id` <= ?", id);
   }
 
   public Category_Updater idGt(long id) {
-    return where("\"id\" > ?", id);
+    return where("`id` > ?", id);
   }
 
   public Category_Updater idGe(long id) {
-    return where("\"id\" >= ?", id);
+    return where("`id` >= ?", id);
   }
 }

@@ -44,8 +44,8 @@ public class Category_Schema implements Schema<Category> {
   );
 
   public static final String[] $DEFAULT_RESULT_COLUMNS = {
-    "\"name\"",
-    "\"id\""
+    "`name`",
+    "`id`"
   };
 
   @NonNull
@@ -63,13 +63,13 @@ public class Category_Schema implements Schema<Category> {
   @NonNull
   @Override
   public String getEscapedTableName() {
-    return "\"Category\"";
+    return "`Category`";
   }
 
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "\"Category\"";
+    return "`Category`";
   }
 
   @NonNull
@@ -93,7 +93,7 @@ public class Category_Schema implements Schema<Category> {
   @NonNull
   @Override
   public String getCreateTableStatement() {
-    return "CREATE TABLE \"Category\" (\"name\" TEXT UNIQUE ON CONFLICT IGNORE NOT NULL, \"id\" INTEGER PRIMARY KEY)";
+    return "CREATE TABLE `Category` (`name` TEXT UNIQUE ON CONFLICT IGNORE NOT NULL, `id` INTEGER PRIMARY KEY)";
   }
 
   @NonNull
@@ -105,7 +105,7 @@ public class Category_Schema implements Schema<Category> {
   @NonNull
   @Override
   public String getDropTableStatement() {
-    return "DROP TABLE IF EXISTS \"Category\"";
+    return "DROP TABLE IF EXISTS `Category`";
   }
 
   @NonNull
@@ -122,10 +122,10 @@ public class Category_Schema implements Schema<Category> {
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
     }
     if (withoutAutoId) {
-      s.append(" INTO \"Category\" (\"name\") VALUES (?)");
+      s.append(" INTO `Category` (`name`) VALUES (?)");
     }
     else {
-      s.append(" INTO \"Category\" (\"name\",\"id\") VALUES (?,?)");
+      s.append(" INTO `Category` (`name`,`id`) VALUES (?,?)");
     }
     return s.toString();
   }

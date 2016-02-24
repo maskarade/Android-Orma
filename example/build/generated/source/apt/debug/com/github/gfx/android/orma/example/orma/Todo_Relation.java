@@ -47,19 +47,19 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation titleEq(@NonNull String title) {
-    return where("\"title\" = ?", title);
+    return where("`title` = ?", title);
   }
 
   public Todo_Relation titleNotEq(@NonNull String title) {
-    return where("\"title\" <> ?", title);
+    return where("`title` <> ?", title);
   }
 
   public Todo_Relation titleIn(@NonNull Collection<String> values) {
-    return in(false, "\"title\"", values);
+    return in(false, "`title`", values);
   }
 
   public Todo_Relation titleNotIn(@NonNull Collection<String> values) {
-    return in(true, "\"title\"", values);
+    return in(true, "`title`", values);
   }
 
   public final Todo_Relation titleIn(@NonNull String... values) {
@@ -71,35 +71,35 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation titleLt(@NonNull String title) {
-    return where("\"title\" < ?", title);
+    return where("`title` < ?", title);
   }
 
   public Todo_Relation titleLe(@NonNull String title) {
-    return where("\"title\" <= ?", title);
+    return where("`title` <= ?", title);
   }
 
   public Todo_Relation titleGt(@NonNull String title) {
-    return where("\"title\" > ?", title);
+    return where("`title` > ?", title);
   }
 
   public Todo_Relation titleGe(@NonNull String title) {
-    return where("\"title\" >= ?", title);
+    return where("`title` >= ?", title);
   }
 
   public Todo_Relation doneEq(boolean done) {
-    return where("\"done\" = ?", done);
+    return where("`done` = ?", done);
   }
 
   public Todo_Relation doneNotEq(boolean done) {
-    return where("\"done\" <> ?", done);
+    return where("`done` <> ?", done);
   }
 
   public Todo_Relation doneIn(@NonNull Collection<Boolean> values) {
-    return in(false, "\"done\"", values);
+    return in(false, "`done`", values);
   }
 
   public Todo_Relation doneNotIn(@NonNull Collection<Boolean> values) {
-    return in(true, "\"done\"", values);
+    return in(true, "`done`", values);
   }
 
   public final Todo_Relation doneIn(@NonNull Boolean... values) {
@@ -111,31 +111,31 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation doneLt(boolean done) {
-    return where("\"done\" < ?", done);
+    return where("`done` < ?", done);
   }
 
   public Todo_Relation doneLe(boolean done) {
-    return where("\"done\" <= ?", done);
+    return where("`done` <= ?", done);
   }
 
   public Todo_Relation doneGt(boolean done) {
-    return where("\"done\" > ?", done);
+    return where("`done` > ?", done);
   }
 
   public Todo_Relation doneGe(boolean done) {
-    return where("\"done\" >= ?", done);
+    return where("`done` >= ?", done);
   }
 
   public Todo_Relation createdTimeEq(@NonNull Date createdTime) {
-    return where("\"createdTime\" = ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` = ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Relation createdTimeNotEq(@NonNull Date createdTime) {
-    return where("\"createdTime\" <> ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` <> ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Relation createdTimeIn(@NonNull Collection<Date> values) {
-    return in(false, "\"createdTime\"", values, new Func1<Date, Long>() {
+    return in(false, "`createdTime`", values, new Func1<Date, Long>() {
       @Override
       public Long call(Date value) {
         return BuiltInSerializers.serializeDate(value);
@@ -144,7 +144,7 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation createdTimeNotIn(@NonNull Collection<Date> values) {
-    return in(true, "\"createdTime\"", values, new Func1<Date, Long>() {
+    return in(true, "`createdTime`", values, new Func1<Date, Long>() {
       @Override
       public Long call(Date value) {
         return BuiltInSerializers.serializeDate(value);
@@ -161,35 +161,35 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation createdTimeLt(@NonNull Date createdTime) {
-    return where("\"createdTime\" < ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` < ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Relation createdTimeLe(@NonNull Date createdTime) {
-    return where("\"createdTime\" <= ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` <= ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Relation createdTimeGt(@NonNull Date createdTime) {
-    return where("\"createdTime\" > ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` > ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Relation createdTimeGe(@NonNull Date createdTime) {
-    return where("\"createdTime\" >= ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` >= ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Relation idEq(long id) {
-    return where("\"id\" = ?", id);
+    return where("`id` = ?", id);
   }
 
   public Todo_Relation idNotEq(long id) {
-    return where("\"id\" <> ?", id);
+    return where("`id` <> ?", id);
   }
 
   public Todo_Relation idIn(@NonNull Collection<Long> values) {
-    return in(false, "\"id\"", values);
+    return in(false, "`id`", values);
   }
 
   public Todo_Relation idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "\"id\"", values);
+    return in(true, "`id`", values);
   }
 
   public final Todo_Relation idIn(@NonNull Long... values) {
@@ -201,19 +201,19 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation idLt(long id) {
-    return where("\"id\" < ?", id);
+    return where("`id` < ?", id);
   }
 
   public Todo_Relation idLe(long id) {
-    return where("\"id\" <= ?", id);
+    return where("`id` <= ?", id);
   }
 
   public Todo_Relation idGt(long id) {
-    return where("\"id\" > ?", id);
+    return where("`id` > ?", id);
   }
 
   public Todo_Relation idGe(long id) {
-    return where("\"id\" >= ?", id);
+    return where("`id` >= ?", id);
   }
 
   public Todo_Relation orderByTitleAsc() {

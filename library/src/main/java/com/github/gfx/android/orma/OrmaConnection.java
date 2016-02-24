@@ -48,8 +48,6 @@ public class OrmaConnection {
 
     static final String TAG = "Orma";
 
-    static final int SCHEMA_VERSION = 1;
-
     static final String[] countSelections = {"COUNT(*)"};
 
     final String name;

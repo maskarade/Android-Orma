@@ -18,19 +18,19 @@ public class Category_Deleter extends Deleter<Category, Category_Deleter> {
   }
 
   public Category_Deleter idEq(long id) {
-    return where("\"id\" = ?", id);
+    return where("`id` = ?", id);
   }
 
   public Category_Deleter idNotEq(long id) {
-    return where("\"id\" <> ?", id);
+    return where("`id` <> ?", id);
   }
 
   public Category_Deleter idIn(@NonNull Collection<Long> values) {
-    return in(false, "\"id\"", values);
+    return in(false, "`id`", values);
   }
 
   public Category_Deleter idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "\"id\"", values);
+    return in(true, "`id`", values);
   }
 
   public final Category_Deleter idIn(@NonNull Long... values) {
@@ -42,18 +42,18 @@ public class Category_Deleter extends Deleter<Category, Category_Deleter> {
   }
 
   public Category_Deleter idLt(long id) {
-    return where("\"id\" < ?", id);
+    return where("`id` < ?", id);
   }
 
   public Category_Deleter idLe(long id) {
-    return where("\"id\" <= ?", id);
+    return where("`id` <= ?", id);
   }
 
   public Category_Deleter idGt(long id) {
-    return where("\"id\" > ?", id);
+    return where("`id` > ?", id);
   }
 
   public Category_Deleter idGe(long id) {
-    return where("\"id\" >= ?", id);
+    return where("`id` >= ?", id);
   }
 }
