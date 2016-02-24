@@ -94,10 +94,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`) SELECT `title` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
     @Test
@@ -107,10 +107,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT, \"createdDate\" TIMESTAMP)",
-                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` TEXT, `createdDate` TIMESTAMP)",
+                "INSERT INTO `__temp_todo` (`title`) SELECT `title` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
     @Test
@@ -120,10 +120,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`) SELECT `title` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
     @Test
@@ -133,10 +133,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`) SELECT `title` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
 
@@ -147,10 +147,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT NOT NULL)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` TEXT NOT NULL)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
     @Test
@@ -160,10 +160,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
     @Test
@@ -173,10 +173,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT PRIMARY KEY, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT PRIMARY KEY, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
     @Test
@@ -186,23 +186,23 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT UNIQUE, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT UNIQUE, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
     @Test
     public void withQuotedNames() throws Exception {
-        String from = "CREATE TABLE \"todo\" (\"title\" TEXT)";
-        String to = "CREATE TABLE \"todo\" (\"title\" TEXT, \"content\" TEXT)";
+        String from = "CREATE TABLE `todo` (`title` TEXT)";
+        String to = "CREATE TABLE `todo` (`title` TEXT, `content` TEXT)";
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\") SELECT \"title\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""));
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`) SELECT `title` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"));
     }
 
     @Test
@@ -212,10 +212,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"
         ));
     }
 
@@ -226,10 +226,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" BLOB)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` BLOB)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"
         ));
     }
 
@@ -240,10 +240,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"
         ));
     }
 
@@ -254,10 +254,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT UNIQUE ON CONFLICT IGNORE, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""
+                "CREATE TABLE `__temp_todo` (`title` TEXT UNIQUE ON CONFLICT IGNORE, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"
         ));
     }
 
@@ -268,10 +268,10 @@ public class TableDiffTest {
         List<String> statements = migration.tableDiff(from, to);
 
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_todo\" (\"title\" TEXT, \"content\" TEXT)",
-                "INSERT INTO \"__temp_todo\" (\"title\", \"content\") SELECT \"title\", \"content\" FROM \"todo\"",
-                "DROP TABLE \"todo\"",
-                "ALTER TABLE \"__temp_todo\" RENAME TO \"todo\""
+                "CREATE TABLE `__temp_todo` (`title` TEXT, `content` TEXT)",
+                "INSERT INTO `__temp_todo` (`title`, `content`) SELECT `title`, `content` FROM `todo`",
+                "DROP TABLE `todo`",
+                "ALTER TABLE `__temp_todo` RENAME TO `todo`"
         ));
     }
 
@@ -282,10 +282,10 @@ public class TableDiffTest {
 
         List<String> statements = migration.tableDiff(a, b);
         assertThat(statements, contains(
-                "CREATE TABLE \"__temp_foo\" (\"id\" INTEGER PRIMARY KEY, \"bar\" INTEGER NOT NULL REFERENCES \"baz\" ( \"id\" ))",
-                "INSERT INTO \"__temp_foo\" (\"id\", \"bar\") SELECT \"id\", \"bar\" FROM \"foo\"",
-                "DROP TABLE \"foo\"",
-                "ALTER TABLE \"__temp_foo\" RENAME TO \"foo\""
+                "CREATE TABLE `__temp_foo` (`id` INTEGER PRIMARY KEY, `bar` INTEGER NOT NULL REFERENCES `baz` ( `id` ))",
+                "INSERT INTO `__temp_foo` (`id`, `bar`) SELECT `id`, `bar` FROM `foo`",
+                "DROP TABLE `foo`",
+                "ALTER TABLE `__temp_foo` RENAME TO `foo`"
         ));
     }
 }

@@ -24,19 +24,19 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter titleEq(@NonNull String title) {
-    return where("\"title\" = ?", title);
+    return where("`title` = ?", title);
   }
 
   public Todo_Deleter titleNotEq(@NonNull String title) {
-    return where("\"title\" <> ?", title);
+    return where("`title` <> ?", title);
   }
 
   public Todo_Deleter titleIn(@NonNull Collection<String> values) {
-    return in(false, "\"title\"", values);
+    return in(false, "`title`", values);
   }
 
   public Todo_Deleter titleNotIn(@NonNull Collection<String> values) {
-    return in(true, "\"title\"", values);
+    return in(true, "`title`", values);
   }
 
   public final Todo_Deleter titleIn(@NonNull String... values) {
@@ -48,35 +48,35 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter titleLt(@NonNull String title) {
-    return where("\"title\" < ?", title);
+    return where("`title` < ?", title);
   }
 
   public Todo_Deleter titleLe(@NonNull String title) {
-    return where("\"title\" <= ?", title);
+    return where("`title` <= ?", title);
   }
 
   public Todo_Deleter titleGt(@NonNull String title) {
-    return where("\"title\" > ?", title);
+    return where("`title` > ?", title);
   }
 
   public Todo_Deleter titleGe(@NonNull String title) {
-    return where("\"title\" >= ?", title);
+    return where("`title` >= ?", title);
   }
 
   public Todo_Deleter doneEq(boolean done) {
-    return where("\"done\" = ?", done);
+    return where("`done` = ?", done);
   }
 
   public Todo_Deleter doneNotEq(boolean done) {
-    return where("\"done\" <> ?", done);
+    return where("`done` <> ?", done);
   }
 
   public Todo_Deleter doneIn(@NonNull Collection<Boolean> values) {
-    return in(false, "\"done\"", values);
+    return in(false, "`done`", values);
   }
 
   public Todo_Deleter doneNotIn(@NonNull Collection<Boolean> values) {
-    return in(true, "\"done\"", values);
+    return in(true, "`done`", values);
   }
 
   public final Todo_Deleter doneIn(@NonNull Boolean... values) {
@@ -88,31 +88,31 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter doneLt(boolean done) {
-    return where("\"done\" < ?", done);
+    return where("`done` < ?", done);
   }
 
   public Todo_Deleter doneLe(boolean done) {
-    return where("\"done\" <= ?", done);
+    return where("`done` <= ?", done);
   }
 
   public Todo_Deleter doneGt(boolean done) {
-    return where("\"done\" > ?", done);
+    return where("`done` > ?", done);
   }
 
   public Todo_Deleter doneGe(boolean done) {
-    return where("\"done\" >= ?", done);
+    return where("`done` >= ?", done);
   }
 
   public Todo_Deleter createdTimeEq(@NonNull Date createdTime) {
-    return where("\"createdTime\" = ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` = ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Deleter createdTimeNotEq(@NonNull Date createdTime) {
-    return where("\"createdTime\" <> ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` <> ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Deleter createdTimeIn(@NonNull Collection<Date> values) {
-    return in(false, "\"createdTime\"", values, new Func1<Date, Long>() {
+    return in(false, "`createdTime`", values, new Func1<Date, Long>() {
       @Override
       public Long call(Date value) {
         return BuiltInSerializers.serializeDate(value);
@@ -121,7 +121,7 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter createdTimeNotIn(@NonNull Collection<Date> values) {
-    return in(true, "\"createdTime\"", values, new Func1<Date, Long>() {
+    return in(true, "`createdTime`", values, new Func1<Date, Long>() {
       @Override
       public Long call(Date value) {
         return BuiltInSerializers.serializeDate(value);
@@ -138,35 +138,35 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter createdTimeLt(@NonNull Date createdTime) {
-    return where("\"createdTime\" < ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` < ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Deleter createdTimeLe(@NonNull Date createdTime) {
-    return where("\"createdTime\" <= ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` <= ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Deleter createdTimeGt(@NonNull Date createdTime) {
-    return where("\"createdTime\" > ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` > ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Deleter createdTimeGe(@NonNull Date createdTime) {
-    return where("\"createdTime\" >= ?", BuiltInSerializers.serializeDate(createdTime));
+    return where("`createdTime` >= ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Deleter idEq(long id) {
-    return where("\"id\" = ?", id);
+    return where("`id` = ?", id);
   }
 
   public Todo_Deleter idNotEq(long id) {
-    return where("\"id\" <> ?", id);
+    return where("`id` <> ?", id);
   }
 
   public Todo_Deleter idIn(@NonNull Collection<Long> values) {
-    return in(false, "\"id\"", values);
+    return in(false, "`id`", values);
   }
 
   public Todo_Deleter idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "\"id\"", values);
+    return in(true, "`id`", values);
   }
 
   public final Todo_Deleter idIn(@NonNull Long... values) {
@@ -178,18 +178,18 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter idLt(long id) {
-    return where("\"id\" < ?", id);
+    return where("`id` < ?", id);
   }
 
   public Todo_Deleter idLe(long id) {
-    return where("\"id\" <= ?", id);
+    return where("`id` <= ?", id);
   }
 
   public Todo_Deleter idGt(long id) {
-    return where("\"id\" > ?", id);
+    return where("`id` > ?", id);
   }
 
   public Todo_Deleter idGe(long id) {
-    return where("\"id\" >= ?", id);
+    return where("`id` >= ?", id);
   }
 }

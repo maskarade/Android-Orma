@@ -26,21 +26,18 @@ import java.util.List;
 public class SqliteDdlBuilder {
 
     @NonNull
-    public static String ensureQuoted(@NonNull String name) {
-        if (name.startsWith("\"") || name.startsWith("`")) {
-            return name;
-        }
-        return '"' + name + '"';
+    public static String ensureEscaped(@NonNull String name) {
+        return '`' + ensureNotEscaped(name) + '`';
     }
 
     @NonNull
-    public static String ensureNotQuoted(@NonNull String maybeQuoted) {
-        if (maybeQuoted.startsWith("\"") || maybeQuoted.endsWith("\n")) {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-        } else if (maybeQuoted.startsWith("`") || maybeQuoted.endsWith("`")) {
-            return maybeQuoted.substring(1, maybeQuoted.length() - 1);
+    public static String ensureNotEscaped(@NonNull String maybeEscaped) {
+        if (maybeEscaped.startsWith("\"") || maybeEscaped.endsWith("\n")) {
+            return maybeEscaped.substring(1, maybeEscaped.length() - 1);
+        } else if (maybeEscaped.startsWith("`") || maybeEscaped.endsWith("`")) {
+            return maybeEscaped.substring(1, maybeEscaped.length() - 1);
         } else {
-            return maybeQuoted;
+            return maybeEscaped;
         }
     }
 
@@ -106,22 +103,6 @@ public class SqliteDdlBuilder {
             }
             i++;
         }
-    }
-
-    @NonNull
-    public <T> String joinBy(@NonNull String separator, @NonNull Collection<T> collection,
-            @NonNull Func<T, String> func) {
-        StringBuilder sb = new StringBuilder();
-        int i = 0;
-        int size = collection.size();
-        for (T item : collection) {
-            sb.append(func.call(item));
-            if ((i + 1) != size) {
-                sb.append(separator);
-            }
-            i++;
-        }
-        return sb.toString();
     }
 
     public interface Func<A, R> {

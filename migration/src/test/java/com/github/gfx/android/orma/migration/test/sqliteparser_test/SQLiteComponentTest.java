@@ -73,6 +73,6 @@ public class SQLiteComponentTest {
         assertThat(a, is(b));
         assertThat(a.hashCode(), is(b.hashCode()));
 
-        assertThat(a.toString(), is("\"foo\""));
+        assertThat(a.toString(), is("`foo`"));
     }
 }

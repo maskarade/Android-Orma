@@ -264,9 +264,9 @@ public class SqlGenerator {
 
 
     public void appendIdentifier(StringBuilder sb, String identifier) {
-        sb.append('"');
+        sb.append('`');
         sb.append(identifier);
-        sb.append('"');
+        sb.append('`');
     }
 
 

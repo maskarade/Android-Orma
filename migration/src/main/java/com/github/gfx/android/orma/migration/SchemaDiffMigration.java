@@ -296,8 +296,8 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
         Matcher matcher = indexNamePattern.matcher(createIndexStatement);
         if (matcher.matches()) {
-            String indexName = SqliteDdlBuilder.ensureNotQuoted(matcher.group(1));
-            return "DROP INDEX IF EXISTS \"" + indexName + "\"";
+            String indexName = SqliteDdlBuilder.ensureNotEscaped(matcher.group(1));
+            return "DROP INDEX IF EXISTS " + SqliteDdlBuilder.ensureEscaped(indexName);
         } else {
             return "";
         }

@@ -65,11 +65,11 @@ public class SchemaDiffMigrationTest {
     @Before
     public void setUp() throws Exception {
         schemas = new ArrayList<>(Arrays.asList(
-                new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT)",
-                        "CREATE INDEX \"index_field01_on_foo\" ON \"foo\" (\"field01\")",
-                        "CREATE INDEX \"index_field02_on_foo\" ON \"foo\" (\"field02\")"
+                new SchemaData("foo", "CREATE TABLE `foo` (`field01` TEXT, `field02` TEXT)",
+                        "CREATE INDEX `index_field01_on_foo` ON `foo` (`field01`)",
+                        "CREATE INDEX `index_field02_on_foo` ON `foo` (`field02`)"
                 ),
-                new SchemaData("bar", "CREATE TABLE \"bar\" (\"field10\" TEXT, \"field20\" TEXT)")
+                new SchemaData("bar", "CREATE TABLE `bar` (`field10` TEXT, `field20` TEXT)")
         ));
 
         initialData = Arrays.asList(
@@ -99,11 +99,11 @@ public class SchemaDiffMigrationTest {
     @Test
     public void differentCases() throws Exception {
         List<SchemaData> newSchemas = Arrays.asList(
-                new SchemaData("FOO", "CREATE TABLE \"FOO\" (\"FIELD01\" TEXT, \"FIELD02\" TEXT)",
-                        "CREATE INDEX \"INDEX_FIELD01_ON_FOO\" ON \"FOO\" (\"FIELD01\")",
-                        "CREATE INDEX \"INDEX_FIELD02_ON_FOO\" ON \"FOO\" (\"FIELD02\")"
+                new SchemaData("FOO", "CREATE TABLE `FOO` (`FIELD01` TEXT, `FIELD02` TEXT)",
+                        "CREATE INDEX `INDEX_FIELD01_ON_FOO` ON `FOO` (`FIELD01`)",
+                        "CREATE INDEX `INDEX_FIELD02_ON_FOO` ON `FOO` (`FIELD02`)"
                 ),
-                new SchemaData("BAR", "CREATE TABLE \"BAR\" (\"FIELD10\" TEXT, \"FIELD20\" TEXT)")
+                new SchemaData("BAR", "CREATE TABLE `BAR` (`FIELD10` TEXT, `FIELD20` TEXT)")
         );
 
         statements = migration.diffAll(metadata, newSchemas);
@@ -113,7 +113,7 @@ public class SchemaDiffMigrationTest {
 
     @Test
     public void createTable() throws Exception {
-        SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x10\" TEXT, \"x20\" TEXT)");
+        SchemaData newSchema = new SchemaData("baz", "CREATE TABLE `baz` (`x10` TEXT, `x20` TEXT)");
         schemas.add(newSchema);
 
         statements = migration.diffAll(metadata, schemas);
@@ -123,9 +123,9 @@ public class SchemaDiffMigrationTest {
 
     @Test
     public void createTableAndCreateIndexes() throws Exception {
-        SchemaData newSchema = new SchemaData("baz", "CREATE TABLE \"baz\" (\"x01\" TEXT, \"x02\" TEXT)",
-                "CREATE INDEX \"index_x01_on_baz\" ON \"baz\" (\"x01\")",
-                "CREATE INDEX \"index_x02_on_baz\" ON \"baz\" (\"x02\")"
+        SchemaData newSchema = new SchemaData("baz", "CREATE TABLE `baz` (`x01` TEXT, `x02` TEXT)",
+                "CREATE INDEX `index_x01_on_baz` ON `baz` (`x01`)",
+                "CREATE INDEX `index_x02_on_baz` ON `baz` (`x02`)"
         );
         schemas.add(newSchema);
 
@@ -137,8 +137,8 @@ public class SchemaDiffMigrationTest {
     @Test
     public void createIndexes() throws Exception {
         schemas.get(1).addCreateIndexStatements(
-                "CREATE INDEX \"index_field10_on_bar\" ON \"bar\" (\"field10\")",
-                "CREATE INDEX \"index_field20_on_bar\" ON \"bar\" (\"field20\")"
+                "CREATE INDEX `index_field10_on_bar` ON `bar` (`field10`)",
+                "CREATE INDEX `index_field20_on_bar` ON `bar` (`field20`)"
         );
 
         statements = migration.diffAll(metadata, schemas);
@@ -148,9 +148,9 @@ public class SchemaDiffMigrationTest {
 
     @Test
     public void recreateTableWithIndexes() throws Exception {
-        schemas.set(0, new SchemaData("foo", "CREATE TABLE \"foo\" (\"field01\" TEXT, \"field02\" TEXT, \"field03\" TEXT)",
-                "CREATE INDEX \"index_field01_on_foo\" ON \"foo\" (\"field01\")",
-                "CREATE INDEX \"index_field02_on_foo\" ON \"foo\" (\"field02\")"
+        schemas.set(0, new SchemaData("foo", "CREATE TABLE `foo` (`field01` TEXT, `field02` TEXT, `field03` TEXT)",
+                "CREATE INDEX `index_field01_on_foo` ON `foo` (`field01`)",
+                "CREATE INDEX `index_field02_on_foo` ON `foo` (`field02`)"
         ));
         statements = migration.diffAll(metadata, schemas);
         migration.executeStatements(db, statements);

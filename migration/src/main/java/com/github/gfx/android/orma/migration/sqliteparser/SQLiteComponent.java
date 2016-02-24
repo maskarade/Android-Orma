@@ -16,6 +16,8 @@
 
 package com.github.gfx.android.orma.migration.sqliteparser;
 
+import com.github.gfx.android.orma.migration.SqliteDdlBuilder;
+
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -126,24 +128,12 @@ public class SQLiteComponent {
     public static class Name extends CaseInsensitiveToken {
 
         public Name(@NonNull String token) {
-            super(ensureDoubleQuoted(token));
-        }
-
-        static String ensureDoubleQuoted(String name) {
-            return '"' + dequote(name) + '"';
-        }
-
-        static String dequote(String maybeQuoted) {
-            if (maybeQuoted.charAt(0) == '"' || maybeQuoted.charAt(0) == '`') {
-                return maybeQuoted.substring(1, maybeQuoted.length() - 1);
-            } else {
-                return maybeQuoted;
-            }
+            super(SqliteDdlBuilder.ensureEscaped(token));
         }
 
         @NonNull
         public String getUnquotedToken() {
-            return dequote(token);
+            return SqliteDdlBuilder.ensureNotEscaped(token);
         }
 
         @NonNull

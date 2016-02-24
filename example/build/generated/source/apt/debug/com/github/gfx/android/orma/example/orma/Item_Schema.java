@@ -42,11 +42,11 @@ public class Item_Schema implements Schema<Item> {
   );
 
   public static final String[] $DEFAULT_RESULT_COLUMNS = {
-    "\"Item\".\"category\"",
-      "\"Category\".\"name\"",
-      "\"Category\".\"id\""
+    "`Item`.`category`",
+      "`Category`.`name`",
+      "`Category`.`id`"
     ,
-    "\"Item\".\"name\""
+    "`Item`.`name`"
   };
 
   @NonNull
@@ -64,13 +64,13 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public String getEscapedTableName() {
-    return "\"Item\"";
+    return "`Item`";
   }
 
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "\"Item\" JOIN \"Category\" ON \"Item\".\"category\" = \"Category\".\"id\"";
+    return "`Item` JOIN `Category` ON `Item`.`category` = `Category`.`id`";
   }
 
   @NonNull
@@ -94,21 +94,21 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public String getCreateTableStatement() {
-    return "CREATE TABLE \"Item\" (\"category\" INTEGER NOT NULL REFERENCES \"Category\"(\"id\") ON UPDATE CASCADE ON DELETE CASCADE, \"name\" TEXT PRIMARY KEY)";
+    return "CREATE TABLE `Item` (`category` INTEGER NOT NULL REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `name` TEXT PRIMARY KEY)";
   }
 
   @NonNull
   @Override
   public List<String> getCreateIndexStatements() {
     return Arrays.asList(
-      "CREATE INDEX \"index_category_on_Item\" ON \"Item\" (\"category\")"
+      "CREATE INDEX `index_category_on_Item` ON `Item` (`category`)"
     );
   }
 
   @NonNull
   @Override
   public String getDropTableStatement() {
-    return "DROP TABLE IF EXISTS \"Item\"";
+    return "DROP TABLE IF EXISTS `Item`";
   }
 
   @NonNull
@@ -124,7 +124,7 @@ public class Item_Schema implements Schema<Item> {
       case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
     }
-    s.append(" INTO \"Item\" (\"category\",\"name\") VALUES (?,?)");
+    s.append(" INTO `Item` (`category`,`name`) VALUES (?,?)");
     return s.toString();
   }
 

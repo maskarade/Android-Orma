@@ -74,11 +74,11 @@ public class Todo_Schema implements Schema<Todo> {
   );
 
   public static final String[] $DEFAULT_RESULT_COLUMNS = {
-    "\"title\"",
-    "\"content\"",
-    "\"done\"",
-    "\"createdTime\"",
-    "\"id\""
+    "`title`",
+    "`content`",
+    "`done`",
+    "`createdTime`",
+    "`id`"
   };
 
   @NonNull
@@ -96,13 +96,13 @@ public class Todo_Schema implements Schema<Todo> {
   @NonNull
   @Override
   public String getEscapedTableName() {
-    return "\"Todo\"";
+    return "`Todo`";
   }
 
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "\"Todo\"";
+    return "`Todo`";
   }
 
   @NonNull
@@ -126,23 +126,23 @@ public class Todo_Schema implements Schema<Todo> {
   @NonNull
   @Override
   public String getCreateTableStatement() {
-    return "CREATE TABLE \"Todo\" (\"title\" TEXT NOT NULL, \"content\" TEXT , \"done\" BOOLEAN NOT NULL, \"createdTime\" INTEGER NOT NULL DEFAULT 0, \"id\" INTEGER PRIMARY KEY)";
+    return "CREATE TABLE `Todo` (`title` TEXT NOT NULL, `content` TEXT , `done` BOOLEAN NOT NULL, `createdTime` INTEGER NOT NULL DEFAULT 0, `id` INTEGER PRIMARY KEY)";
   }
 
   @NonNull
   @Override
   public List<String> getCreateIndexStatements() {
     return Arrays.asList(
-      "CREATE INDEX \"index_title_on_Todo\" ON \"Todo\" (\"title\")",
-      "CREATE INDEX \"index_done_on_Todo\" ON \"Todo\" (\"done\")",
-      "CREATE INDEX \"index_createdTime_on_Todo\" ON \"Todo\" (\"createdTime\")"
+      "CREATE INDEX `index_title_on_Todo` ON `Todo` (`title`)",
+      "CREATE INDEX `index_done_on_Todo` ON `Todo` (`done`)",
+      "CREATE INDEX `index_createdTime_on_Todo` ON `Todo` (`createdTime`)"
     );
   }
 
   @NonNull
   @Override
   public String getDropTableStatement() {
-    return "DROP TABLE IF EXISTS \"Todo\"";
+    return "DROP TABLE IF EXISTS `Todo`";
   }
 
   @NonNull
@@ -159,10 +159,10 @@ public class Todo_Schema implements Schema<Todo> {
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
     }
     if (withoutAutoId) {
-      s.append(" INTO \"Todo\" (\"title\",\"content\",\"done\",\"createdTime\") VALUES (?,?,?,?)");
+      s.append(" INTO `Todo` (`title`,`content`,`done`,`createdTime`) VALUES (?,?,?,?)");
     }
     else {
-      s.append(" INTO \"Todo\" (\"title\",\"content\",\"done\",\"createdTime\",\"id\") VALUES (?,?,?,?,?)");
+      s.append(" INTO `Todo` (`title`,`content`,`done`,`createdTime`,`id`) VALUES (?,?,?,?,?)");
     }
     return s.toString();
   }

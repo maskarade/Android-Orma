@@ -25,19 +25,19 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
   }
 
   public Category_Selector idEq(long id) {
-    return where("\"id\" = ?", id);
+    return where("`id` = ?", id);
   }
 
   public Category_Selector idNotEq(long id) {
-    return where("\"id\" <> ?", id);
+    return where("`id` <> ?", id);
   }
 
   public Category_Selector idIn(@NonNull Collection<Long> values) {
-    return in(false, "\"id\"", values);
+    return in(false, "`id`", values);
   }
 
   public Category_Selector idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "\"id\"", values);
+    return in(true, "`id`", values);
   }
 
   public final Category_Selector idIn(@NonNull Long... values) {
@@ -49,18 +49,18 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
   }
 
   public Category_Selector idLt(long id) {
-    return where("\"id\" < ?", id);
+    return where("`id` < ?", id);
   }
 
   public Category_Selector idLe(long id) {
-    return where("\"id\" <= ?", id);
+    return where("`id` <= ?", id);
   }
 
   public Category_Selector idGt(long id) {
-    return where("\"id\" > ?", id);
+    return where("`id` > ?", id);
   }
 
   public Category_Selector idGe(long id) {
-    return where("\"id\" >= ?", id);
+    return where("`id` >= ?", id);
   }
 }

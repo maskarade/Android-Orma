@@ -48,13 +48,13 @@ public class IndexDiffTest {
     @Test
     public void buildDropIndexStatement() throws Exception {
         assertThat(migration.buildDropIndexStatement("CREATE INDEX IF NOT EXISTS index_foo ON foo (bar)"),
-                is("DROP INDEX IF EXISTS \"index_foo\""));
+                is("DROP INDEX IF EXISTS `index_foo`"));
     }
 
     @Test
     public void buildDropIndexStatement_caseInsensitive() throws Exception {
         assertThat(migration.buildDropIndexStatement("create index if not exists index_foo on foo (bar)"),
-                is("DROP INDEX IF EXISTS \"index_foo\""));
+                is("DROP INDEX IF EXISTS `index_foo`"));
     }
 
     @Test
@@ -68,25 +68,25 @@ public class IndexDiffTest {
                         + "on \n"
                         + "foo \n"
                         + "(bar)\n"),
-                is("DROP INDEX IF EXISTS \"index_foo\""));
+                is("DROP INDEX IF EXISTS `index_foo`"));
     }
 
     @Test
     public void buildDropIndexStatement_omitIfNotExists() throws Exception {
         assertThat(migration.buildDropIndexStatement("CREATE INDEX index_foo ON foo (bar)"),
-                is("DROP INDEX IF EXISTS \"index_foo\""));
+                is("DROP INDEX IF EXISTS `index_foo`"));
     }
 
     @Test
     public void buildDropIndexStatement_doubleQuotedNames() throws Exception {
-        assertThat(migration.buildDropIndexStatement("CREATE INDEX IF NOT EXISTS \"index_foo\" ON \"foo\" (\"bar\")"),
-                is("DROP INDEX IF EXISTS \"index_foo\""));
+        assertThat(migration.buildDropIndexStatement("CREATE INDEX IF NOT EXISTS `index_foo` ON `foo` (`bar`)"),
+                is("DROP INDEX IF EXISTS `index_foo`"));
     }
 
     @Test
     public void buildDropIndexStatement_backQuotedNames() throws Exception {
         assertThat(migration.buildDropIndexStatement("CREATE INDEX IF NOT EXISTS `index_foo` ON `foo` (`bar`)"),
-                is("DROP INDEX IF EXISTS \"index_foo\""));
+                is("DROP INDEX IF EXISTS `index_foo`"));
     }
 
 }
