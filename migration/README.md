@@ -8,11 +8,16 @@ any Android `SQLiteDatabase` tools.
 
 ## MigrationEngine
 
-`MigrationEngine` is an interface to provide migration.
+`MigrationEngine` is an interface to provide migration. There are two migration engines provided:
+
+* `SchemaDiffMigration`
+* `ManualStepMigration`
+
+Typically you set up them with `OrmaDatabase.Builder`.
 
 ## SchemaDiffMigration
 
-`SchemaDiffMigration` can make SQL statements from two different schemas.
+`SchemaDiffMigration` can make SQL statements from two different schemas. In other words, you don't need to write the migration code.
 
 For example, given there is a table:
 
