@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Selector;
+import com.github.gfx.android.orma.test.model.ModelWithNestedDirectAssociations;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
@@ -80,7 +81,7 @@ public class DirectAssociationsTest {
             @Override
             public Publisher call() {
                 Publisher publisher = new Publisher();
-                publisher.name = "foo bar";
+                publisher.name = "publisher's note";
                 publisher.startedYear = 2015;
                 publisher.startedMonth = 12;
                 return publisher;
@@ -114,6 +115,44 @@ public class DirectAssociationsTest {
         assertThat(model.publisher.name, is(publisher.name));
         assertThat(model.publisher.startedYear, is(publisher.startedYear));
         assertThat(model.publisher.startedMonth, is(publisher.startedMonth));
+    }
+
+    @Test
+    public void testCreateNested() throws Exception {
+        ModelWithNestedDirectAssociations model = orma.createModelWithNestedDirectAssociations(
+                new ModelFactory<ModelWithNestedDirectAssociations>() {
+                    @NonNull
+                    @Override
+                    public ModelWithNestedDirectAssociations call() {
+                        ModelWithNestedDirectAssociations model = new ModelWithNestedDirectAssociations();
+                        model.note = "This is a nested model";
+                        model.md = orma.createModelWithDirectAssociation(new ModelFactory<ModelWithDirectAssociation>() {
+                            @NonNull
+                            @Override
+                            public ModelWithDirectAssociation call() {
+                                ModelWithDirectAssociation md = new ModelWithDirectAssociation();
+                                md.title = "foo";
+                                md.author = author1;
+                                md.publisher = publisher;
+                                md.note = "SQLite rocks";
+                                return md;
+                            }
+                        });
+                        return model;
+                    }
+                });
+
+        assertThat(model.note, is("This is a nested model"));
+        assertThat(model.md.title, is("foo"));
+        assertThat(model.md.note, is("SQLite rocks"));
+        assertThat(model.md.author, is(notNullValue()));
+        assertThat(model.md.author.name, is(author1.name));
+        assertThat(model.md.author.note, is(author1.note));
+        assertThat(model.md.publisher, is(notNullValue()));
+        assertThat(model.md.publisher.id, is(publisher.id));
+        assertThat(model.md.publisher.name, is(publisher.name));
+        assertThat(model.md.publisher.startedYear, is(publisher.startedYear));
+        assertThat(model.md.publisher.startedMonth, is(publisher.startedMonth));
     }
 
     @Test

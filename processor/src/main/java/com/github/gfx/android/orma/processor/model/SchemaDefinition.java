@@ -363,6 +363,13 @@ public class SchemaDefinition {
         return hasDirectAssociations;
     }
 
+    public int calculateConsumingColumnSize() {
+        return columns.size() + columns.stream()
+                .filter(ColumnDefinition::isDirectAssociation)
+                .map(column -> column.getAssociatedSchema().calculateConsumingColumnSize())
+                .reduce(0, (a, b) -> a + b);
+    }
+
     @Override
     public String toString() {
         return getModelClassName().simpleName();

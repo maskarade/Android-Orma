@@ -134,23 +134,36 @@ public class SchemaWriter extends BaseWriter {
 
         sb.append(schema.getColumns().stream()
                 .filter(ColumnDefinition::isDirectAssociation)
-                .map(column -> {
-                    StringBuilder s = new StringBuilder();
-                    SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
-                    ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
-                    if (primaryKey != null) {
-                        s.append(" JOIN ");
-                        context.sqlg.appendIdentifier(s, associatedSchema.getTableName());
-                        s.append(" ON ");
-                        s.append(column.getEscapedColumnName(true));
-                        s.append(" = ");
-                        s.append(primaryKey.getEscapedColumnName(true));
-                    }
-                    return s;
-                })
+                .map(this::buildJoins)
                 .collect(Collectors.joining(" ")));
 
         return sb.toString();
+    }
+
+    public String buildJoins(ColumnDefinition column) {
+        StringBuilder s = new StringBuilder();
+        SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
+        ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
+        if (primaryKey != null) {
+            s.append(" JOIN ");
+            context.sqlg.appendIdentifier(s, associatedSchema.getTableName());
+            s.append(" ON ");
+            s.append(column.getEscapedColumnName(true));
+            s.append(" = ");
+            s.append(primaryKey.getEscapedColumnName(true));
+
+            String nested = associatedSchema.getColumns()
+                    .stream()
+                    .filter(ColumnDefinition::isDirectAssociation)
+                    .map(this::buildJoins)
+                    .collect(Collectors.joining(" "));
+
+            if (!Strings.isEmpty(nested)) {
+                s.append(' ');
+                s.append(nested);
+            }
+        }
+        return s.toString();
     }
 
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
@@ -609,21 +622,18 @@ public class SchemaWriter extends BaseWriter {
             CodeBlock index = CodeBlock.builder().add("offset + $L", i + offset).build();
 
             if (Types.isDirectAssociation(context, type)) {
-                AssociationDefinition r = c.getAssociation();
-                assert r != null;
-
-                SchemaDefinition schema = context.getSchemaDef(r.getModelType());
-                int numberOfColumns = schema.getColumns().size();
+                SchemaDefinition associatedSchema = c.getAssociatedSchema();
+                int consumingItemSize = associatedSchema.calculateConsumingColumnSize();
                 CodeBlock createAssociatedModelExpr = CodeBlock.builder()
                         .add("$L.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
-                                schema.createSchemaInstanceExpr(), index, numberOfColumns)
+                                associatedSchema.createSchemaInstanceExpr(), index, consumingItemSize)
                         .build();
 
                 // Given a "Book has-a Publisher" association. The following expression should be created:
                 // book.publisher = Publisher_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset)
                 // NOTE: lhsBaseGen.apply(c) makes, e.g. "model.", ignoring the parameter "c".
                 builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(createAssociatedModelExpr));
-                offset += numberOfColumns;
+                offset += consumingItemSize;
             } else if (Types.isSingleAssociation(type)) {
                 AssociationDefinition r = c.getAssociation();
                 assert r != null;
