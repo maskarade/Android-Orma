@@ -74,7 +74,6 @@ public class OrmaDatabaseTest {
         });
 
         assertThat(db.selectFromAuthor().count(), is(1));
-        db.getConnection().close();
         db.getConnection().resetDatabase();
         assertThat(db.selectFromAuthor().count(), is(0));
     }
