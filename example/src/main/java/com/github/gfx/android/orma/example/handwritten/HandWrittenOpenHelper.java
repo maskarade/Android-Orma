@@ -21,10 +21,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class HandWrittenOpenHelper extends SQLiteOpenHelper {
 
-    int VERSION = 4;
+    static final int VERSION = 4;
 
     public HandWrittenOpenHelper(Context context, String name) {
-        super(context, name, null, 4);
+        super(context, name, null, VERSION);
     }
 
     @Override
@@ -43,5 +43,10 @@ public class HandWrittenOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE todo");
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // nop
     }
 }

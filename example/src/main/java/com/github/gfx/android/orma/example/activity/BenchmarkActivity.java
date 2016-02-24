@@ -114,6 +114,7 @@ public class BenchmarkActivity extends AppCompatActivity {
         Schedulers.io().createWorker().schedule(new Action0() {
             @Override
             public void call() {
+                deleteDatabase("orma-benchmark.db");
                 orma = OrmaDatabase.builder(BenchmarkActivity.this)
                         .name("orma-benchmark.db")
                         .readOnMainThread(AccessThreadConstraint.NONE)
@@ -121,7 +122,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                         .writeAheadLogging(false)
                         .trace(false)
                         .build();
-                orma.getConnection().resetDatabase();
+                orma.migrate();
             }
         });
 
