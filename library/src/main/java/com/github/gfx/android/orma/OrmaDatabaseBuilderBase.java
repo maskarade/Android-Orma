@@ -62,7 +62,7 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
     public OrmaDatabaseBuilderBase(@NonNull Context context) {
         this.context = context.getApplicationContext();
         this.debug = extractDebuggable(context);
-        this.name = context.getPackageName() + ".orma.db";
+        this.name = getDefaultDatabaseName(context);
 
         // debug flags
 
@@ -76,6 +76,11 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
             readOnMainThread = AccessThreadConstraint.NONE;
             writeOnMainThread = AccessThreadConstraint.NONE;
         }
+    }
+
+    @NonNull
+    public static String getDefaultDatabaseName(@NonNull Context context) {
+        return context.getPackageName() + ".orma.db";
     }
 
     static boolean extractDebuggable(Context context) {

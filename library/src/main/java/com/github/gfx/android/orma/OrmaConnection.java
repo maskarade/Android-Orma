@@ -108,7 +108,7 @@ public class OrmaConnection {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private int openFlags() {
         if (wal && isRunningOnJellyBean()) {
-            return SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
+            return Context.MODE_ENABLE_WRITE_AHEAD_LOGGING;
         } else {
             return 0;
         }
@@ -297,34 +297,10 @@ public class OrmaConnection {
         });
     }
 
-    /**
-     * Drops and creates all the tables. This is provided for testing.
-     */
-    @Deprecated
-    public synchronized void resetDatabase() {
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
-        try {
-            dropAllTables(db);
-            migrationCompleted = false;
-
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-    }
-
     public void execSQL(@NonNull String sql, @NonNull Object... bindArgs) {
         trace(sql, bindArgs);
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(sql, bindArgs);
-    }
-
-    void dropAllTables(SQLiteDatabase db)
-    {
-        for (Schema<?> schema : schemas) {
-            execSQL(db, schema.getDropTableStatement());
-        }
     }
 
     protected void checkSchemas(List<Schema<?>> schemas) {
@@ -335,7 +311,7 @@ public class OrmaConnection {
         }
     }
 
-    protected void execSQL(SQLiteDatabase db, String sql) {
+    protected void execSQL(@NonNull  SQLiteDatabase db, @NonNull String sql) {
         trace(sql, null);
         db.execSQL(sql);
     }
@@ -357,9 +333,9 @@ public class OrmaConnection {
             db.setForeignKeyConstraintsEnabled(enabled);
         } else {
             if (enabled) {
-                db.execSQL("PRAGMA foreign_keys = ON");
+                execSQL(db, "PRAGMA foreign_keys = ON");
             } else {
-                db.execSQL("PRAGMA foreign_keys = OFF");
+                execSQL(db, "PRAGMA foreign_keys = OFF");
             }
         }
     }

@@ -51,6 +51,11 @@ public class OrmaDatabaseTest {
     }
 
     @Test
+    public void testDefaultDatabaseName() throws Exception {
+        assertThat(OrmaDatabase.Builder.getDefaultDatabaseName(getContext()), is(not(isEmptyOrNullString())));
+    }
+
+    @Test
     public void testSchemaHash() throws Exception {
         assertThat(OrmaDatabase.SCHEMA_HASH, is(not(isEmptyOrNullString())));
     }
@@ -74,7 +79,14 @@ public class OrmaDatabaseTest {
         });
 
         assertThat(db.selectFromAuthor().count(), is(1));
-        db.getConnection().resetDatabase();
+
+        getContext().deleteDatabase(NAME);
+        db = OrmaDatabase.builder(getContext())
+                .name(NAME)
+                .trace(true)
+                .tryParsingSql(false)
+                .build();
+
         assertThat(db.selectFromAuthor().count(), is(0));
     }
 
