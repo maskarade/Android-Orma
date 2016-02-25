@@ -172,7 +172,7 @@ public class OrmaConnection {
         if (primaryKey.isAutoValue()) {
             primaryKeyValue = Long.toString(id);
         } else {
-            primaryKeyValue = String.valueOf(primaryKey.get(model));
+            primaryKeyValue = String.valueOf(primaryKey.getSerialized(model));
         }
         String[] whereArgs = {primaryKeyValue};
         T createdModel = querySingle(schema, schema.getDefaultResultColumns(), whereClause, whereArgs, null, null, null, 0);

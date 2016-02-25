@@ -31,12 +31,24 @@ public class Todo_Schema implements Schema<Todo> {
     public String get(@NonNull Todo model) {
       return model.title;
     }
+
+    @Override
+    @NonNull
+    public String getSerialized(@NonNull Todo model) {
+      return model.title;
+    }
   };
 
   public static final ColumnDef<Todo, String> content = new ColumnDef<Todo, String>(INSTANCE, "content", String.class, "TEXT", ColumnDef.NULLABLE) {
     @Override
     @Nullable
     public String get(@NonNull Todo model) {
+      return model.content;
+    }
+
+    @Override
+    @Nullable
+    public String getSerialized(@NonNull Todo model) {
       return model.content;
     }
   };
@@ -47,6 +59,12 @@ public class Todo_Schema implements Schema<Todo> {
     public Boolean get(@NonNull Todo model) {
       return model.done;
     }
+
+    @Override
+    @NonNull
+    public Boolean getSerialized(@NonNull Todo model) {
+      return model.done;
+    }
   };
 
   public static final ColumnDef<Todo, Date> createdTime = new ColumnDef<Todo, Date>(INSTANCE, "createdTime", Date.class, "INTEGER", ColumnDef.INDEXED) {
@@ -55,12 +73,24 @@ public class Todo_Schema implements Schema<Todo> {
     public Date get(@NonNull Todo model) {
       return model.createdTime;
     }
+
+    @Override
+    @NonNull
+    public Long getSerialized(@NonNull Todo model) {
+      return BuiltInSerializers.serializeDate(model.createdTime);
+    }
   };
 
   public static final ColumnDef<Todo, Long> id = new ColumnDef<Todo, Long>(INSTANCE, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
     @Override
     @NonNull
     public Long get(@NonNull Todo model) {
+      return model.id;
+    }
+
+    @Override
+    @NonNull
+    public Long getSerialized(@NonNull Todo model) {
       return model.id;
     }
   };

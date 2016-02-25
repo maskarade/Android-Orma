@@ -28,12 +28,24 @@ public class Category_Schema implements Schema<Category> {
     public String get(@NonNull Category model) {
       return model.name;
     }
+
+    @Override
+    @NonNull
+    public String getSerialized(@NonNull Category model) {
+      return model.name;
+    }
   };
 
   public static final ColumnDef<Category, Long> id = new ColumnDef<Category, Long>(INSTANCE, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
     @Override
     @NonNull
     public Long get(@NonNull Category model) {
+      return model.id;
+    }
+
+    @Override
+    @NonNull
+    public Long getSerialized(@NonNull Category model) {
       return model.id;
     }
   };

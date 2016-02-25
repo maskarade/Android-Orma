@@ -17,12 +17,12 @@ package com.github.gfx.android.orma.processor.generator;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.Setter;
-import com.github.gfx.android.orma.processor.util.Annotations;
-import com.github.gfx.android.orma.processor.model.AssociationDefinition;
-import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.AssociationDefinition;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Strings;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ArrayTypeName;
@@ -183,6 +183,8 @@ public class SchemaWriter extends BaseWriter {
         TypeSpec.Builder columnDefType = TypeSpec.anonymousClassBuilder("INSTANCE, $S, $L, $S, $L",
                 c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c));
         columnDefType.superclass(c.getColumnDefType());
+
+        // ColumnDef#get()
         MethodSpec.Builder getBuilder = MethodSpec.methodBuilder("get")
                 .addAnnotation(Annotations.override())
                 .addAnnotation(c.nullable ? Annotations.nullable() : Annotations.nonNull())
@@ -197,6 +199,22 @@ public class SchemaWriter extends BaseWriter {
             getBuilder.addStatement("throw new $T($S)", Types.NoValueException, "Missing @PrimaryKey definition");
         }
         columnDefType.addMethod(getBuilder.build());
+
+        // ColumnDef#getSerialized()
+        MethodSpec.Builder getSerializedBuilder = MethodSpec.methodBuilder("getSerialized")
+                .addAnnotation(Annotations.override())
+                .addAnnotation(c.nullable ? Annotations.nullable() : Annotations.nonNull())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(c.getSerializedBoxType())
+                .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
+                        .addAnnotation(Annotations.nonNull())
+                        .build());
+        if (c.element != null) {
+            getSerializedBuilder.addStatement("return $L", c.buildSerializedColumnExpr("conn", "model"));
+        } else {
+            getSerializedBuilder.addStatement("throw new $T($S)", Types.NoValueException, "Missing @PrimaryKey definition");
+        }
+        columnDefType.addMethod(getSerializedBuilder.build());
 
         return FieldSpec.builder(c.getColumnDefType(), c.name)
                 .addModifiers(publicStaticFinal)
@@ -502,23 +520,11 @@ public class SchemaWriter extends BaseWriter {
                 builder.beginControlFlow("if (!$L)", withoutAutoId);
             }
 
-            if (c.isSingleAssociation()) {
-                builder.addStatement("args[$L] = $L.getId()", i, c.buildGetColumnExpr("model"));
-            } else if (c.isDirectAssociation()) { // direct association
-                SchemaDefinition associatedSchema = c.getAssociatedSchema();
-                ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
-                // make errors in ColumnDefinition.java on primaryKey == null
-                if (primaryKey != null) {
-                    builder.addStatement("args[$L] = $L",
-                            i, primaryKey.buildGetColumnExpr(c.buildGetColumnExpr("model")));
-                }
+            CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+            if (c.getSerializedType().equals(TypeName.BOOLEAN)) {
+                builder.addStatement("args[$L] = $L ? 1 : 0", i, rhsExpr);
             } else {
-                CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
-                if (c.getSerializedType().equals(TypeName.BOOLEAN)) {
-                    builder.addStatement("args[$L] = $L ? 1 : 0", i, rhsExpr);
-                } else {
-                    builder.addStatement("args[$L] = $L", i, rhsExpr);
-                }
+                builder.addStatement("args[$L] = $L", i, rhsExpr);
             }
 
             if (c.autoId) {
@@ -562,24 +568,8 @@ public class SchemaWriter extends BaseWriter {
             if (c.isSingleAssociation()) {
                 builder.addStatement("statement.bindLong($L, $L.getId())", n, c.buildGetColumnExpr("model"));
             } else {
-                CodeBlock rhsExpr;
-                TypeName serializedType;
-
-                if (c.isDirectAssociation()) {
-                    SchemaDefinition associatedSchema = c.getAssociatedSchema();
-                    ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
-                    // make errors in ColumnDefinition.java on primaryKey == null
-                    if (primaryKey != null) {
-                        rhsExpr = primaryKey.buildGetColumnExpr(c.buildGetColumnExpr("model"));
-                        serializedType = associatedSchema.getPrimaryKey().getSerializedType();
-                    } else {
-                        rhsExpr = CodeBlock.builder().add("null").build(); // dummy
-                        serializedType = Types.ByteArray; // dummy
-                    }
-                } else {
-                    rhsExpr = c.buildSerializedColumnExpr("conn", "model");
-                    serializedType = c.getSerializedType();
-                }
+                CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+                TypeName serializedType = c.getSerializedType();
 
                 if (serializedType.equals(TypeName.BOOLEAN)) {
                     builder.addStatement("statement.bindLong($L, $L ? 1 : 0)", n, rhsExpr);
