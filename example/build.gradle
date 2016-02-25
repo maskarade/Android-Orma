@@ -71,6 +71,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.3'
-    compile 'com.cookpad.android.rxt4a:rxt4a:1.0.0'
+    compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.facebook.stetho:stetho:1.3.0'
 }

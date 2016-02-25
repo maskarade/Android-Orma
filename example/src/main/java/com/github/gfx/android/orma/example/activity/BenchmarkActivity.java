@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.example.activity;
 
-import com.cookpad.android.rxt4a.schedulers.AndroidSchedulers;
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.TransactionTask;
@@ -54,6 +53,7 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import rx.Single;
 import rx.SingleSubscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
