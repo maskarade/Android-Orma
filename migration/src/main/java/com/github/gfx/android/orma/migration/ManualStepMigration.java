@@ -102,8 +102,14 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         int dbVersion = fetchDbVersion(db);
 
-        if (dbVersion == 0 || dbVersion == version) {
-            trace("skip migration: dbVersion=%d, version=%d", dbVersion, version);
+        if (dbVersion == version) {
+            trace("skip migration: version=%d", version);
+            return;
+        }
+
+        if (dbVersion == 0) {
+            trace("no version history");
+            saveStep(db, version, null);
             return;
         }
 
@@ -171,6 +177,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     private void runTasksInTransaction(SQLiteDatabase db, final List<Runnable> tasks) {
         if (tasks.isEmpty()) {
+            saveStep(db, version, null);
             return;
         }
 

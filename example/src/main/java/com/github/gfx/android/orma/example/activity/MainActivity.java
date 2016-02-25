@@ -115,12 +115,13 @@ public class MainActivity extends AppCompatActivity
         activityMain.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
 
         orma = OrmaDatabase.builder(this)
+                .versionForManualStepMigration(10)
                 .migrationStep(10, new ManualStepMigration.ChangeStep() {
                     @Override
                     public void change(@NonNull ManualStepMigration.Helper helper) {
-                        helper.execSQL("DROP TABLE Todo");
-                        helper.execSQL("DROP TABLE Item");
-                        helper.execSQL("DROP TABLE Category");
+                        helper.execSQL("DROP TABLE IF EXISTS Todo");
+                        helper.execSQL("DROP TABLE IF EXISTS Item");
+                        helper.execSQL("DROP TABLE IF EXISTS Category");
                     }
                 })
                 .migrationTraceListener(new TraceListener() {
