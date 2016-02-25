@@ -629,6 +629,24 @@ That is, you don't need migration steps for the following cases:
 
 Of course, you can define migration steps for each schema version (or `BuildConfig.VERSION`).
 
+Here is an example to define migration steps:
+
+```java
+int VERSION_2; // a past version of VERSION_CODE
+
+OrmaDatabase orma = OrmaDatabase.builder(this)
+        .migrationStep(VERSION_2, new ManualStepMigration.ChangeStep() {
+            @Override
+            public void change(@NonNull ManualStepMigration.Helper helper) {
+              Log.(TAG, helper.upgrade ? "upgrade" : "downgrade");
+              helper.execSQL("DROP TABLE foo");
+              helper.execSQL("DROP TABLE bar");
+            }
+        })
+        // ... other configurations
+        .build();
+```
+
 See [migration/README.md](migration/README.md) for details.
 
 ## Cooperation with Serialization Libraries

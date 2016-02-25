@@ -23,6 +23,7 @@ import com.github.gfx.android.orma.example.orma.Category;
 import com.github.gfx.android.orma.example.orma.Item;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
+import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.TraceListener;
 
@@ -114,6 +115,14 @@ public class MainActivity extends AppCompatActivity
         activityMain.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
 
         orma = OrmaDatabase.builder(this)
+                .migrationStep(10, new ManualStepMigration.ChangeStep() {
+                    @Override
+                    public void change(@NonNull ManualStepMigration.Helper helper) {
+                        helper.execSQL("DROP TABLE Todo");
+                        helper.execSQL("DROP TABLE Item");
+                        helper.execSQL("DROP TABLE Category");
+                    }
+                })
                 .migrationTraceListener(new TraceListener() {
                     @Override
                     public void onTrace(@NonNull MigrationEngine engine, @NonNull final String format,
