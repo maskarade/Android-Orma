@@ -76,7 +76,7 @@ public class OrmaAdapter<Model> {
 
     @NonNull
     public Model getItem(int position) {
-        return getItemAsObservable(position).toBlocking().value();
+        return relation.get(position);
     }
 
     @NonNull
