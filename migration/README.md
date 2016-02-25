@@ -49,6 +49,8 @@ is limited, `SchemaDiffMigration` always re-creates tables if two tables differs
 
 The typical key is `OrmaDatabase.SCHEMA_HASH`.
 
+Internally, `SchemaDiffMigration` saves all the migration steps to a table [orma_schema_diff_migration_steps](https://github.com/gfx/Android-Orma/blob/master/migration/src/main/java/com/github/gfx/android/orma/migration/SchemaDiffMigration.java#L49). The `schema_hash` of the latest row of the table is the schema hash for `SchemaDiffMigration`.
+
 ## ManualStepMigration
 
 `SchemaDiffMigration` can't handle **renaming**. If you want rename tables
@@ -62,7 +64,11 @@ is an example.
 
 ### Schema Version Control
 
-`ManualStepMigration` uses host application's `VERSION_CODE` by default.
+`ManualStepMigration` uses host application's `VERSION_CODE` as schema versions.
+
+This "schema version" likes [SQLiteOpenHelper's schema version](http://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper.html#SQLiteOpenHelper(android.content.Context, java.lang.String, android.database.sqlite.SQLiteDatabase.CursorFactory, int)), although `ManualStepMigration` does not depend on `SQLiteOpenHelper`.
+
+Internally, `ManualStepMigration` use a table to manage schema versions: [orma_migration_steps](https://github.com/gfx/Android-Orma/blob/master/migration/src/main/java/com/github/gfx/android/orma/migration/ManualStepMigration.java#L35). The `version` of the latest row of the table is the schema version for `ManualStepMigration`.
 
 ## OrmaMigration
 
@@ -111,6 +117,28 @@ OrmaMigration migration = OrmaMigration.builder(context)
 ```
 
 You can see migration logs in debug build, which are disabled in release build.
+
+You can also have a look at databases in devices with [Stetho](https://github.com/facebook/stetho), which is really useful for debugging.
+
+## FAQ
+
+### Does Orma migration engine use `SQLiteOpenHelper` migration mechanism?
+
+No. As of Orma v2.1.0, `SQLiteOpenHelper` is no longer used, whereas old versions of Orma use `SQLiteOpenHelper` to trigger migrations.
+
+In other words, Orma no longer use [PRAGMA user_version](https://www.sqlite.org/pragma.html#pragma_schema_version).
+
+### Why does `SchemaDiffMigration` crash when I add a column?
+
+If the column is not annotated by `@Nullable`, it is declared as `NOT NULL`.
+
+You have to add `@Nullable` to it or set `DEFAULT` to it with `@Column(defaultExpr = "...")`.
+
+### When should I set `OrmaDatabase.Builder#versionForManualStepMigration()`?
+
+The option is provided to test `ManualStepMigration`.
+
+The default value, application's `BuildConfig.VERSION_CODE` is good for almost all the cases.
 
 ## See Also
 
