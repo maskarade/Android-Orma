@@ -52,13 +52,11 @@ public abstract class ColumnDef<Model, T> {
     }
 
     public String getEscapedName() {
-        return "\"" + name + '"';
+        return '`' + name + '`';
     }
 
     public String getFullyQualifiedName() {
-        return "\"" + schema.getTableName() + '"' +
-                '.' +
-                '"' + name + '"';
+        return schema.getEscapedTableName() + '.' + getEscapedName();
     }
 
     private boolean checkFlags(int flags) {
