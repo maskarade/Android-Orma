@@ -132,7 +132,9 @@ public class OrmaDatabaseTest {
 
     @Test
     public void testDefaultForeignKeySetting() throws Exception {
-        OrmaDatabase db = OrmaDatabase.builder(getContext()).build();
+        OrmaDatabase db = OrmaDatabase.builder(getContext())
+                .tryParsingSql(false)
+                .build();
         assertThat(isForeignKeyEnabled(db), is(true));
     }
 
@@ -140,6 +142,7 @@ public class OrmaDatabaseTest {
     public void testDisableForeignKey() throws Exception {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
                 .foreignKeys(false)
+                .tryParsingSql(false)
                 .build();
         assertThat(isForeignKeyEnabled(db), is(false));
     }
