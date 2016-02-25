@@ -1,6 +1,6 @@
 # Orma Migration Module
 
-`orma-migration` is a library which provides migration
+`orma-migration` is a library which provides migration mechanism
 for `SQLiteDatabase`.
 
 This is independent from `orma` module and available for
@@ -14,9 +14,7 @@ any Android `SQLiteDatabase` tools.
 * `ManualStepMigration`
 * `OrmaMigration`
 
-The last one, `OrmaMigration` is just a composite of the other two.
-
-Typically you set up them with `OrmaDatabase.Builder`.
+The last one, `OrmaMigration`, is just a composite of the other two.
 
 ## SchemaDiffMigration
 
@@ -81,20 +79,27 @@ It invokes `ManualStepMigration` at first, and then invokes `SchemaDiffMigration
 
 ### How To Define Migration Steps
 
-* Use `OrmaMigration` which has both `ManualStepMigration` and `SchemaDiffMigration` functionalities.
-* `ManualStepMigration` writes steps in `ManualStepMigration.MIGRATION_STEPS_TABLE`
-* `SchemaDiffMigration` writes steps in `SchemaDiffMigration.MIGRATION_STEPS_TABLE`
+`OrmaMigration.Builder` is an interface to setup `ManualStemMigration` and `SchemaDiffMigration`.
 
-Here is an example to use `OrmaMigration`:
+Here is an example to setup `OrmaMigration`:
 
 ```java
-int VERSION_2;
-int VERSION_3;
+int VERSION_2; // a past version of VERSION_CODE
+int VERSION_3; // another past version of VERSION_CODE
 
 OrmaMigration migration = OrmaMigration.builder(context)
     .schemaHashForSchemaDiffMigration(OrmaDatabase.SCHEMA_HASH)
-    // register up() / down() steps
-    .step(VERSION_2, new ManualStepMigration.Step() {
+    // define change(), which is used both in upgrade and downgrade
+    .step(VERSION_2, new ManualStepMigration.ChangeStep() {
+        @Override
+        public void change(@NonNull ManualStepMigration.Helper helper) {
+            Log.(TAG, helper.upgrade ? "upgrade" : "downgrade");
+            helper.execSQL("DROP TABLE foo");
+            helper.execSQL("DROP TABLE bar");
+        }
+    })
+    // define up() / down() steps
+    .step(VERSION_3, new ManualStepMigration.Step() {
         @Override
         public void up(@NonNull ManualStepMigration.Helper helper) {
             helper.execSQL("... upgrading ...");
@@ -103,15 +108,6 @@ OrmaMigration migration = OrmaMigration.builder(context)
         @Override
         public void down(@NonNull ManualStepMigration.Helper helper) {
             helper.execSQL("... downgrading ...");
-        }
-    })
-    // register change(), which is used both in upgrade and downgrade
-    .step(VERSION_3, new ManualStepMigration.ChangeStep() {
-        @Override
-        public void change(@NonNull ManualStepMigration.Helper helper) {
-            Log.(TAG, helper.upgrade ? "upgrade" : "downgrade");
-            helper.execSQL("DROP TABLE foo");
-            helper.execSQL("DROP TABLE bar");
         }
     })
     .build();
