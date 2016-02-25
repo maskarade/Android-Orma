@@ -19,8 +19,8 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.test.model.Author;
-import com.github.gfx.android.orma.test.model.Author_Relation;
+import com.github.gfx.android.orma.test.model.ModelWithDate;
+import com.github.gfx.android.orma.test.model.ModelWithDate_Relation;
 import com.github.gfx.android.orma.test.model.ModelWithMultipleSortableColumns;
 import com.github.gfx.android.orma.test.model.ModelWithMultipleSortableColumns_Relation;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -32,6 +32,8 @@ import org.junit.runner.RunWith;
 
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
+
+import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -45,58 +47,64 @@ public class RelationTest {
     public void setUp() throws Exception {
         orma = OrmaFactory.create();
 
-        Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
-        inserter.execute(new ModelFactory<Author>() {
+        final long t = System.currentTimeMillis();
+
+        Inserter<ModelWithDate> inserter = orma.prepareInsertIntoModelWithDate();
+        inserter.execute(new ModelFactory<ModelWithDate>() {
             @NonNull
             @Override
-            public Author call() {
-                Author author = new Author();
-                author.name = "A";
-                author.note = "foo";
-                return author;
+            public ModelWithDate call() {
+                ModelWithDate model = new ModelWithDate();
+                model.name = "A";
+                model.note = "foo";
+                model.time = new Date(t);
+                return model;
             }
         });
 
-        inserter.execute(new ModelFactory<Author>() {
+        inserter.execute(new ModelFactory<ModelWithDate>() {
             @NonNull
             @Override
-            public Author call() {
-                Author author = new Author();
-                author.name = "B";
-                author.note = "bar";
-                return author;
+            public ModelWithDate call() {
+                ModelWithDate model = new ModelWithDate();
+                model.name = "B";
+                model.note = "bar";
+                model.time = new Date(t + 1);
+                return model;
             }
         });
 
-        inserter.execute(new ModelFactory<Author>() {
+        inserter.execute(new ModelFactory<ModelWithDate>() {
             @NonNull
             @Override
-            public Author call() {
-                Author author = new Author();
-                author.name = "C";
-                author.note = "baz";
-                return author;
+            public ModelWithDate call() {
+                ModelWithDate model = new ModelWithDate();
+                model.name = "C";
+                model.note = "baz";
+                model.time = new Date(t + 2);
+                return model;
             }
         });
 
-        inserter.execute(new ModelFactory<Author>() {
+        inserter.execute(new ModelFactory<ModelWithDate>() {
             @NonNull
             @Override
-            public Author call() {
-                Author author = new Author();
-                author.name = "D";
-                author.note = "nobody";
-                return author;
+            public ModelWithDate call() {
+                ModelWithDate model = new ModelWithDate();
+                model.name = "D";
+                model.note = "nobody";
+                model.time = new Date(t + 3);
+                return model;
             }
         });
     }
 
-    Author_Relation rel() {
-        return orma.relationOfAuthor().nameNotEq("D");
+    ModelWithDate_Relation rel() {
+        return orma.relationOfModelWithDate().nameNotEq("D");
     }
 
-    Author find(String name) {
-        return orma.selectFromAuthor().nameEq(name).value();
+    ModelWithDate find(String name) {
+        return orma.selectFromModelWithDate().nameEq(name).value();
     }
 
     @Test
@@ -111,7 +119,7 @@ public class RelationTest {
 
     @Test
     public void indexOfInAsc() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameAsc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
         assertThat(rel.indexOf(find("A")), is(0));
         assertThat(rel.indexOf(find("B")), is(1));
         assertThat(rel.indexOf(find("C")), is(2));
@@ -119,7 +127,23 @@ public class RelationTest {
 
     @Test
     public void indexOfInDesc() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameDesc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameDesc();
+        assertThat(rel.indexOf(find("A")), is(2));
+        assertThat(rel.indexOf(find("B")), is(1));
+        assertThat(rel.indexOf(find("C")), is(0));
+    }
+
+    @Test
+    public void indexOfInAscForDate() throws Exception {
+        Relation<ModelWithDate, ?> rel = rel().orderByTimeAsc();
+        assertThat(rel.indexOf(find("A")), is(0));
+        assertThat(rel.indexOf(find("B")), is(1));
+        assertThat(rel.indexOf(find("C")), is(2));
+    }
+
+    @Test
+    public void indexOfInDescForDate() throws Exception {
+        Relation<ModelWithDate, ?> rel = rel().orderByTimeDesc();
         assertThat(rel.indexOf(find("A")), is(2));
         assertThat(rel.indexOf(find("B")), is(1));
         assertThat(rel.indexOf(find("C")), is(0));
@@ -127,7 +151,7 @@ public class RelationTest {
 
     @Test
     public void getInAsc() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameAsc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
         assertThat(rel.get(0).name, is("A"));
         assertThat(rel.get(1).name, is("B"));
         assertThat(rel.get(2).name, is("C"));
@@ -135,7 +159,7 @@ public class RelationTest {
 
     @Test
     public void getInDesc() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameDesc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameDesc();
         assertThat(rel.get(2).name, is("A"));
         assertThat(rel.get(1).name, is("B"));
         assertThat(rel.get(0).name, is("C"));
@@ -143,7 +167,7 @@ public class RelationTest {
 
     @Test
     public void truncateAsc() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameAsc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
         int deletedRows = rel.truncateAsObservable(2)
                 .toBlocking()
                 .value();
@@ -156,7 +180,7 @@ public class RelationTest {
 
     @Test
     public void truncateAscOverflow() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameAsc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
         int deletedRows = rel.truncateAsObservable(10)
                 .toBlocking()
                 .value();
@@ -170,7 +194,7 @@ public class RelationTest {
 
     @Test
     public void truncateDesc() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameDesc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameDesc();
         int deletedRows = rel.truncateAsObservable(10)
                 .toBlocking()
                 .value();
@@ -184,7 +208,7 @@ public class RelationTest {
 
     @Test
     public void deleteAsObservableAsc() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameAsc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
 
         int position = rel.deleteAsObservable(rel.get(2)).toBlocking().first();
         assertThat(position, is(2));
@@ -196,7 +220,7 @@ public class RelationTest {
 
     @Test
     public void deleteAsObservableDesc() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameDesc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameDesc();
 
         int position = rel.deleteAsObservable(rel.get(2)).toBlocking().first();
         assertThat(position, is(2));
@@ -264,28 +288,28 @@ public class RelationTest {
 
     @Test
     public void upserter() throws Exception {
-        Author author = rel().selector().nameEq("A").value();
-        author.note = "modified";
+        ModelWithDate model = rel().selector().nameEq("A").value();
+        model.note = "modified";
 
-        rel().upserter().execute(author);
+        rel().upserter().execute(model);
 
-        assertThat(rel().nameEq(author.name).selector().value().note, is("modified"));
+        assertThat(rel().nameEq(model.name).selector().value().note, is("modified"));
     }
 
     @Test
     public void iterable() throws Exception {
-        Relation<Author, ?> rel = rel().orderByNameAsc();
+        Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
 
         int count = 0;
-        for (Author author : rel) {
-            assertThat(author, is(notNullValue()));
+        for (ModelWithDate ModelWithDate : rel) {
+            assertThat(ModelWithDate, is(notNullValue()));
             count++;
         }
         assertThat(count, is(3));
 
         count = 0;
-        for (Author author : rel) {
-            assertThat(author, is(notNullValue()));
+        for (ModelWithDate ModelWithDate : rel) {
+            assertThat(ModelWithDate, is(notNullValue()));
             count++;
         }
         assertThat(count, is(3));

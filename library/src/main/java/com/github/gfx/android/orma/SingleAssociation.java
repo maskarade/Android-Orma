@@ -73,7 +73,7 @@ public class SingleAssociation<Model> implements Parcelable {
 
     @SuppressWarnings("unchecked")
     public static <T> SingleAssociation<T> just(@NonNull T model) {
-        Schema<T> schema = Schemas.get((Class<T>)model.getClass());
+        Schema<T> schema = Schemas.get((Class<T>) model.getClass());
         return just(schema, model);
     }
 
@@ -82,7 +82,7 @@ public class SingleAssociation<Model> implements Parcelable {
     }
 
     public static <T> SingleAssociation<T> just(@NonNull Schema<T> schema, @NonNull T model) {
-        return new SingleAssociation<>((long) (Object) schema.getPrimaryKey().get(model), model);
+        return new SingleAssociation<>((long) schema.getPrimaryKey().getSerialized(model), model);
     }
 
     public static <T> SingleAssociation<T> id(final long id) {
@@ -121,7 +121,8 @@ public class SingleAssociation<Model> implements Parcelable {
 
     // Parcelable
 
-    public static Parcelable.ClassLoaderCreator<SingleAssociation<?>> CREATOR = new ClassLoaderCreator<SingleAssociation<?>>() {
+    public static Parcelable.ClassLoaderCreator<SingleAssociation<?>> CREATOR
+            = new ClassLoaderCreator<SingleAssociation<?>>() {
         @Override
         public SingleAssociation<?> createFromParcel(Parcel source) {
             return createFromParcel(source, null);

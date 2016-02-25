@@ -120,9 +120,9 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         for (OrderSpec<Model> orderSpec : orderSpecs) {
             ColumnDef<Model, ?> column = orderSpec.column;
             if (orderSpec.ordering.equals(OrderSpec.ASC)) {
-                selector.where(column, "<", column.get(item));
+                selector.where(column, "<", column.getSerialized(item));
             } else {
-                selector.where(column, ">", column.get(item));
+                selector.where(column, ">", column.getSerialized(item));
             }
         }
         return selector.count();
@@ -144,10 +144,9 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                     @Override
                     public void execute() throws Exception {
                         int position = indexOf(item);
-
-                        ColumnDef<Model, ?> column = schema.getPrimaryKey();
+                        ColumnDef<Model, ?> pk = schema.getPrimaryKey();
                         int deletedRows = deleter()
-                                .where(column, "=", column.get(item))
+                                .where(pk, "=", pk.getSerialized(item))
                                 .execute();
 
                         if (deletedRows > 0) {

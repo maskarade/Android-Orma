@@ -91,6 +91,8 @@ public abstract class ColumnDef<Model, T> {
 
     public abstract T get(@NonNull Model model);
 
+    public abstract Object getSerialized(@NonNull Model model);
+
     public OrderSpec<Model> orderInAscending() {
         return new OrderSpec<>(this, OrderSpec.ASC);
     }

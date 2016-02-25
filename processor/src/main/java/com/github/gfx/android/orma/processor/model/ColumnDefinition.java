@@ -18,9 +18,9 @@ package com.github.gfx.android.orma.processor.model;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.SqlTypes;
 import com.github.gfx.android.orma.processor.util.Strings;
 import com.github.gfx.android.orma.processor.util.Types;
@@ -253,7 +253,15 @@ public class ColumnDefinition {
     }
 
     public TypeName getSerializedType() {
-        if (typeAdapter != null) {
+        if (isDirectAssociation() || isSingleAssociation()) {
+            SchemaDefinition associatedSchema = getAssociatedSchema();
+            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
+            if (primaryKey != null) {
+                return associatedSchema.getPrimaryKey().getSerializedType();
+            } else {
+                return Types.ByteArray; // dummy
+            }
+        } else if (typeAdapter != null) {
             return Types.asUnboxType(typeAdapter.serializedType);
         } else {
             return getUnboxType();
@@ -261,11 +269,7 @@ public class ColumnDefinition {
     }
 
     public TypeName getSerializedBoxType() {
-        if (typeAdapter != null) {
-            return typeAdapter.serializedType.box();
-        } else {
-            return type.box();
-        }
+        return getSerializedType().box();
     }
 
     public String getStorageType() {
@@ -310,10 +314,19 @@ public class ColumnDefinition {
     }
 
     public CodeBlock buildSerializedColumnExpr(String connectionExpr, String modelExpr) {
-        CodeBlock getColumnExpr = CodeBlock.builder()
-                .add("$L.$L", modelExpr, getter != null ? getter.getSimpleName() + "()" : name)
-                .build();
-        if (needsTypeAdapter()) {
+        CodeBlock getColumnExpr = buildGetColumnExpr(modelExpr);
+
+        if (isSingleAssociation()) {
+            return CodeBlock.builder().add("$L.getId()", getColumnExpr).build();
+        } else if (isDirectAssociation()) {
+            SchemaDefinition associatedSchema = getAssociatedSchema();
+            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
+            if (primaryKey != null) {
+                return primaryKey.buildGetColumnExpr(getColumnExpr);
+            } else {
+                return CodeBlock.builder().add("null /* missing @PrimaryKey */").build();
+            }
+        } else if (needsTypeAdapter()) {
             return CodeBlock.builder()
                     .add(buildSerializeExpr(connectionExpr, getColumnExpr))
                     .build();
