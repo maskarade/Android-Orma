@@ -619,19 +619,15 @@ Orma has pluggable migration mechanism via the `MigrationEngine` interface.
 
 The default migration engine is `SchemaDiffMigration`, which handles
 schema changes by making diff with old and new table definitions.
+That is, you don't need migration steps for the following cases:
 
-You can set a custom migration engine to `OrmaDatabase` builders:
+* Adding tables
+* Adding columns
+* Changing column types
+  * You have to add `@Column(defaultExpr = "...")` for non-null columns, though
+* Changing column constraints (`NOT NULL`, `UNIQUE`, and etc.)
 
-```java
-class CustomMigrationEngine implements MigrationEngine { ... }
-
-OrmaDatabase orma = OrmaDatabase.builder(context)
-  .migrationEngine(new CustomMigrationEngine())
-  .build();
-```
-
-You can also define migration steps with `OrmaDatabase.Builder#migrationStep(int, Step)`,
- which calls `OrmaMigration.Builder#step()`.
+Of course, you can define migration steps for each schema version (or `BuildConfig.VERSION`).
 
 See [migration/README.md](migration/README.md) for details.
 
