@@ -9,6 +9,7 @@ import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.lang.Class;
+import java.lang.Long;
 import java.lang.NullPointerException;
 import java.lang.Object;
 import java.lang.Override;
@@ -26,12 +27,24 @@ public class Item_Schema implements Schema<Item> {
     public Category get(@NonNull Item model) {
       return model.category;
     }
+
+    @Override
+    @NonNull
+    public Long getSerialized(@NonNull Item model) {
+      return model.category.id;
+    }
   };
 
   public static final ColumnDef<Item, String> name = new ColumnDef<Item, String>(INSTANCE, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
     @Override
     @NonNull
     public String get(@NonNull Item model) {
+      return model.name;
+    }
+
+    @Override
+    @NonNull
+    public String getSerialized(@NonNull Item model) {
       return model.name;
     }
   };
