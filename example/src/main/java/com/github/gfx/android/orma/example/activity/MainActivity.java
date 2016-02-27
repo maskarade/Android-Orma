@@ -29,7 +29,9 @@ import com.github.gfx.android.orma.migration.TraceListener;
 
 import org.threeten.bp.ZonedDateTime;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -61,7 +63,11 @@ public class MainActivity extends AppCompatActivity
 
     static final String ORMA_SITE = "https://github.com/gfx/Android-Orma/";
 
-    ActivityMainBinding activityMain;
+    static final String DB_NAME = "main.db";
+
+    static final int DB_VERSION_2 = 5;
+
+    ActivityMainBinding binding;
 
     OrmaDatabase orma;
 
@@ -74,54 +80,32 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public static void setupV1Database(Context context) {
+        context.deleteDatabase(DB_NAME);
+        SQLiteDatabase db = context.openOrCreateDatabase(DB_NAME, 0, null);
+        db.setVersion(1);
+        db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, title TEXT NOT NULL)");
+        db.execSQL("INSERT INTO todos (title) values ('todo v1 #1'), ('todo v1 #2')");
+        db.close();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activityMain = DataBindingUtil.setContentView(this, R.layout.activity_main);
-
-        Toolbar toolbar = activityMain.appBarMain.toolbar;
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = activityMain.appBarMain.fab;
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, ORMA_SITE, Snackbar.LENGTH_LONG)
-                        .setAction("Open", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(ORMA_SITE));
-                                startActivity(intent);
-                            }
-                        })
-                        .show();
-            }
-        });
-
-        DrawerLayout drawer = activityMain.drawerLayout;
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = activityMain.navView;
-        navigationView.setNavigationItemSelectedListener(this);
-
-        activityMain.appBarMain.contentMain.textInfo.setText(
-                "This is an example app for Orma v" + BuildConfig.VERSION_NAME + ".");
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        setupViews();
 
         final ArrayAdapter<String> logsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        activityMain.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
+        binding.appBarMain.contentMain.listLogs.setAdapter(logsAdapter);
+
+        setupV1Database(this);
 
         orma = OrmaDatabase.builder(this)
-                .versionForManualStepMigration(10)
-                .migrationStep(10, new ManualStepMigration.ChangeStep() {
+                .name(DB_NAME)
+                .migrationStep(DB_VERSION_2, new ManualStepMigration.ChangeStep() {
                     @Override
                     public void change(@NonNull ManualStepMigration.Helper helper) {
-                        helper.execSQL("DROP TABLE IF EXISTS Todo");
-                        helper.execSQL("DROP TABLE IF EXISTS Item");
-                        helper.execSQL("DROP TABLE IF EXISTS Category");
+                        helper.renameTable("todos", "Todo");
                     }
                 })
                 .migrationTraceListener(new TraceListener() {
@@ -209,9 +193,43 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, TextUtils.join(", ", category.getItems(orma)));
     }
 
+    void setupViews() {
+        Toolbar toolbar = binding.appBarMain.toolbar;
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = binding.appBarMain.fab;
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, ORMA_SITE, Snackbar.LENGTH_LONG)
+                        .setAction("Open", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(ORMA_SITE));
+                                startActivity(intent);
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        DrawerLayout drawer = binding.drawerLayout;
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = binding.navView;
+        navigationView.setNavigationItemSelectedListener(this);
+
+        binding.appBarMain.contentMain.textInfo.setText(
+                "This is Android Orma v" + BuildConfig.VERSION_NAME + ".");
+    }
+
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = activityMain.drawerLayout;
+        DrawerLayout drawer = binding.drawerLayout;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -253,13 +271,9 @@ public class MainActivity extends AppCompatActivity
             startActivity(ListViewActivity.createIntent(this));
         } else if (id == R.id.nav_benchmark) {
             startActivity(BenchmarkActivity.createIntent(this));
-        } else if (id == R.id.nav_share) {
-            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
-        } else if (id == R.id.nav_send) {
-            Toast.makeText(this, "Not yet implemented", Toast.LENGTH_LONG).show();
         }
 
-        activityMain.drawerLayout.closeDrawer(GravityCompat.START);
+        binding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 }

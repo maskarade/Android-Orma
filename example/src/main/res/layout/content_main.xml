@@ -30,7 +30,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="The following list shows how SchemaDiffMigration works.\nChange Todo.java to invoke migration."
+                android:text="The following list shows how migration works:"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 />
 
