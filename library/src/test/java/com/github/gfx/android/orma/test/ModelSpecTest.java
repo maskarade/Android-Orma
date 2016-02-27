@@ -26,6 +26,7 @@ import com.github.gfx.android.orma.test.model.ModelWithDefaults;
 import com.github.gfx.android.orma.test.model.ModelWithPrimitives;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
@@ -57,6 +58,8 @@ import static org.hamcrest.Matchers.*;
 public class ModelSpecTest {
 
     OrmaDatabase db;
+
+    OrmaDatabaseToAvoidTryParsing db2;
 
     @Before
     public void setUp() throws Exception {
@@ -247,6 +250,8 @@ public class ModelSpecTest {
 
     @Test
     public void testTableConstraintsSuccess() throws Exception {
+        OrmaDatabaseToAvoidTryParsing db = OrmaFactory.create2();
+
         ModelWithConstraints model = db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override
@@ -263,6 +268,8 @@ public class ModelSpecTest {
 
     @Test(expected = SQLiteException.class)
     public void testTableConstraintsViolateUniqueConstraint() throws Exception {
+        OrmaDatabaseToAvoidTryParsing db = OrmaFactory.create2();
+
         db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override
@@ -288,6 +295,8 @@ public class ModelSpecTest {
 
     @Test(expected = SQLiteException.class)
     public void testTableConstraintsViolateCheckConstraint1() throws Exception {
+        OrmaDatabaseToAvoidTryParsing db = OrmaFactory.create2();
+
         db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override
@@ -306,6 +315,8 @@ public class ModelSpecTest {
 
     @Test(expected = SQLiteException.class)
     public void testTableConstraintsViolateCheckConstraint2() throws Exception {
+        OrmaDatabaseToAvoidTryParsing db = OrmaFactory.create2();
+
         db.createModelWithConstraints(new ModelFactory<ModelWithConstraints>() {
             @NonNull
             @Override

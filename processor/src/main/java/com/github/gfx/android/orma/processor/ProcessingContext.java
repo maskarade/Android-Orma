@@ -15,12 +15,13 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.github.gfx.android.orma.annotation.Database;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
 import com.github.gfx.android.orma.processor.generator.SqlGenerator;
+import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
-import com.github.gfx.android.orma.processor.generator.DatabaseWriter;
-import com.squareup.javapoet.ClassName;
+import com.github.gfx.android.orma.processor.util.Strings;
 import com.squareup.javapoet.TypeName;
 
 import java.lang.reflect.Type;
@@ -34,6 +35,7 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 
 public class ProcessingContext {
@@ -42,13 +44,13 @@ public class ProcessingContext {
 
     public final List<ProcessingException> errors = new ArrayList<>();
 
+    public final List<DatabaseDefinition> databases = new ArrayList<>();
+
     public final Map<TypeName, SchemaDefinition> schemaMap;
 
     public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap;
 
     public final SqlGenerator sqlg;
-
-    public ClassName OrmaDatabase;
 
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -75,19 +77,20 @@ public class ProcessingContext {
                 Diagnostic.Kind.ERROR, error.getMessage(), error.element));
     }
 
+    public Elements getElements() {
+        return processingEnv.getElementUtils();
+    }
+
+    public void addDatabaseDefinition(DatabaseDefinition databaseDefinition) {
+        databases.add(databaseDefinition);
+    }
+
     public void addTypeAdapterDefinition(TypeAdapterDefinition typeAdapterDefinition) {
         typeAdapterMap.put(typeAdapterDefinition.targetType, typeAdapterDefinition);
     }
 
     public SchemaDefinition getSchemaDef(TypeName modelClassName) {
         return schemaMap.get(modelClassName);
-    }
-
-    public String getPackageName() {
-        for (SchemaDefinition schema : schemaMap.values()) {
-            return schema.getPackageName();
-        }
-        throw new RuntimeException("No schema defined");
     }
 
     public TypeMirror getTypeMirrorOf(Type type) {
@@ -98,9 +101,19 @@ public class ProcessingContext {
         return processingEnv.getTypeUtils().isSameType(t1, t2);
     }
 
-    public void initializeOrmaDatabase() {
-        if (!schemaMap.isEmpty()) {
-            OrmaDatabase = ClassName.get(getPackageName(), DatabaseWriter.kClassName);
+    public void setupDefaultDatabaseIfNeeded() {
+        if (databases.isEmpty()) {
+            SchemaDefinition schema = getFirstSchema();
+            databases.add(new DatabaseDefinition(this, schema.getPackageName(), Database.DEFAULT_DATABASE_CLASS_NAME));
         }
+    }
+
+    SchemaDefinition getFirstSchema() {
+        return schemaMap.values().iterator().next();
+    }
+
+    public boolean isDebugging() {
+        String debug = System.getProperty("orma.debug", "true");
+        return !Strings.isEmpty(debug) && !debug.equals("0") && !debug.equalsIgnoreCase("false");
     }
 }

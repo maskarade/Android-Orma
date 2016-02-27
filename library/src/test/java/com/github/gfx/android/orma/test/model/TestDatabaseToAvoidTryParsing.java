@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.processor.util;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+package com.github.gfx.android.orma.test.model;
 
-public class Strings {
+import com.github.gfx.android.orma.annotation.Database;
 
-    public static boolean isEmpty(@Nullable String s) {
-        return s == null || s.trim().isEmpty();
-    }
+/**
+ * @see OrmaDatabaseToAvoidTryParsing
+ */
+@Database(
+        databaseClassName = "OrmaDatabaseToAvoidTryParsing",
+        includes = ModelWithConstraints.class
+)
+public class TestDatabaseToAvoidTryParsing {
 
-    public static String toUpperFirst(@NonNull String s) {
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
 }
