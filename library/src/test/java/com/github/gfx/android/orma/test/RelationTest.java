@@ -19,6 +19,7 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.test.model.ModelWithDate;
 import com.github.gfx.android.orma.test.model.ModelWithDate_Relation;
 import com.github.gfx.android.orma.test.model.ModelWithMultipleSortableColumns;
@@ -49,52 +50,57 @@ public class RelationTest {
 
         final long t = System.currentTimeMillis();
 
-        Inserter<ModelWithDate> inserter = orma.prepareInsertIntoModelWithDate();
-        inserter.execute(new ModelFactory<ModelWithDate>() {
-            @NonNull
+        orma.transactionSync(new TransactionTask() {
             @Override
-            public ModelWithDate call() {
-                ModelWithDate model = new ModelWithDate();
-                model.name = "A";
-                model.note = "foo";
-                model.time = new Date(t);
-                return model;
-            }
-        });
+            public void execute() throws Exception {
+                Inserter<ModelWithDate> inserter = orma.prepareInsertIntoModelWithDate();
+                inserter.execute(new ModelFactory<ModelWithDate>() {
+                    @NonNull
+                    @Override
+                    public ModelWithDate call() {
+                        ModelWithDate model = new ModelWithDate();
+                        model.name = "A";
+                        model.note = "foo";
+                        model.time = new Date(t);
+                        return model;
+                    }
+                });
 
-        inserter.execute(new ModelFactory<ModelWithDate>() {
-            @NonNull
-            @Override
-            public ModelWithDate call() {
-                ModelWithDate model = new ModelWithDate();
-                model.name = "B";
-                model.note = "bar";
-                model.time = new Date(t + 1);
-                return model;
-            }
-        });
+                inserter.execute(new ModelFactory<ModelWithDate>() {
+                    @NonNull
+                    @Override
+                    public ModelWithDate call() {
+                        ModelWithDate model = new ModelWithDate();
+                        model.name = "B";
+                        model.note = "bar";
+                        model.time = new Date(t + 1);
+                        return model;
+                    }
+                });
 
-        inserter.execute(new ModelFactory<ModelWithDate>() {
-            @NonNull
-            @Override
-            public ModelWithDate call() {
-                ModelWithDate model = new ModelWithDate();
-                model.name = "C";
-                model.note = "baz";
-                model.time = new Date(t + 2);
-                return model;
-            }
-        });
+                inserter.execute(new ModelFactory<ModelWithDate>() {
+                    @NonNull
+                    @Override
+                    public ModelWithDate call() {
+                        ModelWithDate model = new ModelWithDate();
+                        model.name = "C";
+                        model.note = "baz";
+                        model.time = new Date(t + 2);
+                        return model;
+                    }
+                });
 
-        inserter.execute(new ModelFactory<ModelWithDate>() {
-            @NonNull
-            @Override
-            public ModelWithDate call() {
-                ModelWithDate model = new ModelWithDate();
-                model.name = "D";
-                model.note = "nobody";
-                model.time = new Date(t + 3);
-                return model;
+                inserter.execute(new ModelFactory<ModelWithDate>() {
+                    @NonNull
+                    @Override
+                    public ModelWithDate call() {
+                        ModelWithDate model = new ModelWithDate();
+                        model.name = "D";
+                        model.note = "nobody";
+                        model.time = new Date(t + 3);
+                        return model;
+                    }
+                });
             }
         });
     }

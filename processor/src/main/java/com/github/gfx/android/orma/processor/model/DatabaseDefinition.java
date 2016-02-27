@@ -22,6 +22,8 @@ import com.github.gfx.android.orma.processor.util.Mirrors;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
+import android.support.annotation.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +37,8 @@ public class DatabaseDefinition {
 
     final ProcessingContext context;
 
+    final TypeElement element;
+
     final String packageName;
 
     final ClassName className;
@@ -45,6 +49,7 @@ public class DatabaseDefinition {
 
     public DatabaseDefinition(ProcessingContext context, TypeElement element) {
         this.context = context;
+        this.element = element;
         AnnotationMirror annotation = Mirrors.findAnnotationMirror(element, Database.class);
         assert annotation != null;
 
@@ -63,10 +68,16 @@ public class DatabaseDefinition {
 
     public DatabaseDefinition(ProcessingContext context, String packageName, String className) {
         this.context = context;
+        this.element = null;
         this.packageName = packageName;
         this.className = ClassName.get(packageName, className);
         this.includes = Collections.emptySet();
         this.excludes = Collections.emptySet();
+    }
+
+    @Nullable
+    public TypeElement getElement() {
+        return element;
     }
 
     public List<SchemaDefinition> getSchemas() {

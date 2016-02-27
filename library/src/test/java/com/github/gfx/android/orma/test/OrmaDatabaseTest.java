@@ -17,8 +17,10 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.ModelFactory;
+import com.github.gfx.android.orma.test.database_package_test.OrmaDatabaseInAnotherPackage;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 
 import org.junit.After;
 import org.junit.Test;
@@ -58,6 +60,15 @@ public class OrmaDatabaseTest {
     @Test
     public void testSchemaHash() throws Exception {
         assertThat(OrmaDatabase.SCHEMA_HASH, is(not(isEmptyOrNullString())));
+        assertThat(OrmaDatabaseToAvoidTryParsing.SCHEMA_HASH, is(not(isEmptyOrNullString())));
+        assertThat(OrmaDatabaseInAnotherPackage.SCHEMA_HASH, is(not(isEmptyOrNullString())));
+        assertThat(OrmaDatabaseToAvoidTryParsing.SCHEMA_HASH, is(not(OrmaDatabase.SCHEMA_HASH)));
+        assertThat(OrmaDatabaseInAnotherPackage.SCHEMA_HASH, is(not(OrmaDatabase.SCHEMA_HASH)));
+    }
+
+    @Test
+    public void testNumberOfSchemas() throws Exception {
+        assertThat(OrmaDatabaseInAnotherPackage.SCHEMAS, hasSize(2));
     }
 
     @Test

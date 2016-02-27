@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.test.model;
+package com.github.gfx.android.orma.test.database_package_test;
 
 import com.github.gfx.android.orma.annotation.Database;
+import com.github.gfx.android.orma.test.model.Book;
+import com.github.gfx.android.orma.test.model.Publisher;
 
 /**
- * @see OrmaDatabaseToAvoidTryParsing
+ * @see OrmaDatabaseInAnotherPackage
  */
 @Database(
-    databaseClassName = "OrmaDatabaseToAvoidTryParsing",
-    includes = ModelWithConstraints.class
+    databaseClassName = "OrmaDatabaseInAnotherPackage",
+    includes = {Book.class, Publisher.class}
 )
-public class TestDatabaseToAvoidTryParsing {
+public class TestDatabasePackage {
 
 }
