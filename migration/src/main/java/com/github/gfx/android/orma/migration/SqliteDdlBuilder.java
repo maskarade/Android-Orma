@@ -15,9 +15,12 @@
  */
 package com.github.gfx.android.orma.migration;
 
+import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
+import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,21 +56,57 @@ public class SqliteDdlBuilder {
     }
 
     @NonNull
-    public String buildInsertFromSelect(@NonNull SQLiteComponent.Name toTable, @NonNull SQLiteComponent.Name fromTable,
-            @NonNull Collection<SQLiteComponent.Name> columns) {
+    public String buildInsertFromSelect(@NonNull SQLiteComponent.Name fromTable, @NonNull SQLiteComponent.Name toTable,
+            @NonNull List<SQLiteComponent.Name> fromColumnNames, @NonNull List<SQLiteComponent.Name> toColumnNames) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ");
         sb.append(toTable);
         sb.append(" (");
-        appendWithSeparator(sb, ", ", columns);
+        appendWithSeparator(sb, ", ", toColumnNames);
         sb.append(") SELECT ");
-        appendWithSeparator(sb, ", ", columns);
+        appendWithSeparator(sb, ", ", fromColumnNames);
         sb.append(" FROM ");
         sb.append(fromTable);
 
         return sb.toString();
     }
+
+    @NonNull
+    public List<String> buildRecreateTable(CreateTableStatement fromTable, CreateTableStatement toTable,
+            List<SQLiteComponent.Name> fromColumnNames, List<SQLiteComponent.Name> toColumnNames) {
+        SQLiteComponent.Name fromTableName = fromTable.getTableName();
+        SQLiteComponent.Name toTableName = toTable.getTableName();
+
+        List<String> statements = new ArrayList<>();
+
+        SQLiteComponent.Name tempTableName = new SQLiteComponent.Name("__temp_" + toTableName.getUnquotedToken());
+
+        statements.add(buildCreateTable(tempTableName,
+                map(toTable.getColumns(), new SqliteDdlBuilder.Func<CreateTableStatement.ColumnDef, String>() {
+                    @Override
+                    public String call(CreateTableStatement.ColumnDef arg) {
+                        StringBuilder columnSpecBuilder = new StringBuilder(arg.getName());
+
+                        if (arg.getType() != null) {
+                            columnSpecBuilder.append(' ');
+                            columnSpecBuilder.append(arg.getType());
+                        }
+
+                        if (!arg.getConstraints().isEmpty()) {
+                            columnSpecBuilder.append(' ');
+                            columnSpecBuilder.append(TextUtils.join(" ", arg.getConstraints()));
+                        }
+                        return columnSpecBuilder.toString();
+                    }
+                })));
+
+        statements.add(buildInsertFromSelect(fromTableName, tempTableName, fromColumnNames, toColumnNames));
+        statements.add(buildDropTable(fromTableName));
+        statements.add(buildRenameTable(tempTableName, toTableName));
+        return statements;
+    }
+
 
     @NonNull
     public String buildDropTable(@NonNull SQLiteComponent.Name table) {
@@ -82,6 +121,40 @@ public class SqliteDdlBuilder {
     @NonNull
     public String buildRenameTable(@NonNull SQLiteComponent.Name fromTable, @NonNull SQLiteComponent.Name toTable) {
         return "ALTER TABLE " + fromTable + " RENAME TO " + toTable;
+    }
+
+    @NonNull
+    public List<String> buildRenameColumn(@NonNull String table,
+            @NonNull String fromColumnName, @NonNull String toColumnName) {
+        CreateTableStatement fromTable = SQLiteParserUtils.parseIntoCreateTableStatement(table);
+        CreateTableStatement toTable = SQLiteParserUtils.parseIntoCreateTableStatement(table);
+
+        SQLiteComponent.Name fromColumn = new SQLiteComponent.Name(fromColumnName);
+        SQLiteComponent.Name toColumn = new SQLiteComponent.Name(toColumnName);
+
+        boolean renamed = false;
+        for (CreateTableStatement.ColumnDef column : toTable.getColumns()) {
+            if (column.getName().equals(fromColumn)) {
+                column.setName(toColumn);
+                renamed = true;
+            }
+        }
+
+        if (!renamed) {
+            throw new RuntimeException("No column found in " + fromTable.getTableName() + ": " + fromColumnName);
+        }
+
+        return buildRecreateTable(fromTable, toTable,
+                extractColumnNames(fromTable.getColumns()), extractColumnNames(toTable.getColumns()));
+    }
+
+    private List<SQLiteComponent.Name> extractColumnNames(List<CreateTableStatement.ColumnDef> columns) {
+        return map(columns, new Func<CreateTableStatement.ColumnDef, SQLiteComponent.Name>() {
+            @Override
+            public SQLiteComponent.Name call(CreateTableStatement.ColumnDef arg) {
+                return arg.getName();
+            }
+        });
     }
 
     @NonNull

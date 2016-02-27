@@ -29,7 +29,6 @@ import com.github.gfx.android.orma.migration.TraceListener;
 
 import org.threeten.bp.ZonedDateTime;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
@@ -80,12 +79,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static void setupV1Database(Context context) {
-        context.deleteDatabase(DB_NAME);
-        SQLiteDatabase db = context.openOrCreateDatabase(DB_NAME, 0, null);
+    public void setupV1Database() {
+        deleteDatabase(DB_NAME);
+        SQLiteDatabase db = openOrCreateDatabase(DB_NAME, 0, null);
         db.setVersion(1);
-        db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, title TEXT NOT NULL)");
-        db.execSQL("INSERT INTO todos (title) values ('todo v1 #1'), ('todo v1 #2')");
+        db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
+        db.execSQL("CREATE INDEX index_note_on_todos ON todos (note)");
+        db.execSQL("INSERT INTO todos (note) values ('todo v1 #1'), ('todo v1 #2')");
         db.close();
     }
 
@@ -95,10 +95,9 @@ public class MainActivity extends AppCompatActivity
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setupViews();
 
-        setupV1Database(this);
-
         // OrmaDatabase with migration steps
         // The current database schema version is 10 (= BuildConfig.VERSION_CODE)
+        setupV1Database();
         orma = OrmaDatabase.builder(this)
                 .name(DB_NAME)
                 .migrationStep(5, new ManualStepMigration.ChangeStep() {
@@ -111,7 +110,14 @@ public class MainActivity extends AppCompatActivity
                 .migrationStep(6, new ManualStepMigration.ChangeStep() {
                     @Override
                     public void change(@NonNull ManualStepMigration.Helper helper) {
-                        // In schema version 6, "content", "done" were added
+                        // In schema version 7, "note" was renamed to "title":
+                        helper.renameColumn("Todo", "note", "title");
+                    }
+                })
+                .migrationStep(7, new ManualStepMigration.ChangeStep() {
+                    @Override
+                    public void change(@NonNull ManualStepMigration.Helper helper) {
+                        // In schema version 7, "content", "done" were added:
                         helper.execSQL("ALTER TABLE Todo ADD COLUMN content TEXT NULL");
                         helper.execSQL("ALTER TABLE Todo ADD COLUMN done INTEGER NOT NULL DEFAULT 0");
                     }
@@ -249,23 +255,16 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

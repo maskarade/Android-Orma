@@ -30,7 +30,6 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -245,45 +244,10 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
                 !fromTable.getConstraints().equals(toTable.getConstraints())) {
             trace("from: %s", from);
             trace("to:   %s", to);
-            return buildRecreateTable(fromTable, toTable, intersectionColumnNames);
+            return util.buildRecreateTable(fromTable, toTable, intersectionColumnNames, intersectionColumnNames);
         } else {
             return Collections.emptyList();
         }
-    }
-
-    private List<String> buildRecreateTable(CreateTableStatement fromTable, CreateTableStatement toTable,
-            Collection<SQLiteComponent.Name> columns) {
-        SQLiteComponent.Name fromTableName = fromTable.getTableName();
-        SQLiteComponent.Name toTableName = toTable.getTableName();
-
-        List<String> statements = new ArrayList<>();
-
-        SQLiteComponent.Name tempTableName = new SQLiteComponent.Name("__temp_" + toTableName.getUnquotedToken());
-
-        statements.add(util.buildCreateTable(tempTableName,
-                util.map(toTable.getColumns(), new SqliteDdlBuilder.Func<CreateTableStatement.ColumnDef, String>() {
-                    @Override
-                    public String call(CreateTableStatement.ColumnDef arg) {
-                        StringBuilder columnSpecBuilder = new StringBuilder(arg.getName());
-
-                        if (arg.getType() != null) {
-                            columnSpecBuilder.append(' ');
-                            columnSpecBuilder.append(arg.getType());
-                        }
-
-                        if (!arg.getConstraints().isEmpty()) {
-                            columnSpecBuilder.append(' ');
-                            columnSpecBuilder.append(TextUtils.join(" ", arg.getConstraints()));
-                        }
-                        return columnSpecBuilder.toString();
-                    }
-                })));
-
-        statements.add(util.buildInsertFromSelect(tempTableName, fromTableName, columns)); // TODO: progressive migration
-        statements.add(util.buildDropTable(fromTableName));
-        statements.add(util.buildRenameTable(tempTableName, toTableName));
-
-        return statements;
     }
 
     public String buildDropIndexStatement(String createIndexStatement) {

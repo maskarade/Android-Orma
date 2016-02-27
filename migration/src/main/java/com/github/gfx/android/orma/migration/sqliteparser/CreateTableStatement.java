@@ -16,6 +16,8 @@
 
 package com.github.gfx.android.orma.migration.sqliteparser;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +61,10 @@ public class CreateTableStatement extends SQLiteComponent {
 
         public Name getName() {
             return name;
+        }
+
+        public void setName(@NonNull Name name) {
+            this.name = name;
         }
 
         public String getType() {
