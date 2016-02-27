@@ -34,8 +34,10 @@ import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscriber;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.FuncN;
+import rx.subscriptions.Subscriptions;
 
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
@@ -233,10 +235,13 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
      */
     public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = execute();
-        for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-            action.call(newModelFromCursor(cursor));
+        try {
+            for (int pos = 0; cursor.moveToPosition(pos); pos++) {
+                action.call(newModelFromCursor(cursor));
+            }
+        } finally {
+            cursor.close();
         }
-        cursor.close();
     }
 
     @NonNull
@@ -249,12 +254,29 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
             public void call(final Subscriber<? super Model> subscriber) {
-                forEach(new Action1<Model>() {
+                final Cursor cursor = execute();
+                subscriber.add(Subscriptions.create(new Action0() {
                     @Override
-                    public void call(Model item) {
-                        subscriber.onNext(item);
+                    public void call() {
+                        cursor.close();
                     }
-                });
+                }));
+
+                try {
+                    for (int pos = 0; cursor.moveToPosition(pos); pos++) {
+                        if (cursor.isClosed()) {
+                            return;
+                        }
+                        subscriber.onNext(newModelFromCursor(cursor));
+                    }
+                } finally {
+                    if (!cursor.isClosed()) {
+                        cursor.close();
+                    }
+                }
+                if (cursor.isClosed()) {
+                    return;
+                }
                 subscriber.onCompleted();
             }
         });

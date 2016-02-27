@@ -29,7 +29,11 @@ import org.junit.runner.RunWith;
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import rx.Subscriber;
+import rx.functions.Func1;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -83,12 +87,25 @@ public class RxObservableTest {
                 return book;
             }
         });
+
+        db.createBook(new ModelFactory<Book>() {
+            @NonNull
+            @Override
+            public Book call() {
+                Book book = new Book();
+                book.title = "tomorrow";
+                book.content = "orange";
+                book.inPrint = false;
+                book.publisher = SingleAssociation.id(publisher.id);
+                return book;
+            }
+        });
     }
 
     @Test
-    public void relationObservable() throws Exception {
+    public void selectorObservable() throws Exception {
         List<Book> list = db.selectFromBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .executeAsObservable()
                 .toList()
                 .toBlocking()
@@ -122,7 +139,7 @@ public class RxObservableTest {
     @Test
     public void updaterObservable() throws Exception {
         int count = db.updateBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .content("modified")
                 .executeAsObservable()
                 .toBlocking()
@@ -135,7 +152,7 @@ public class RxObservableTest {
     @Test
     public void deleterObservable() throws Exception {
         int count = db.deleteFromBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .executeAsObservable()
                 .toBlocking()
                 .value();
@@ -143,4 +160,43 @@ public class RxObservableTest {
         assertThat(count, is(1));
         assertThat(db.selectFromBook().where("title = ?", "today").valueOrNull(), is(nullValue()));
     }
+
+    @Test
+    public void exceptionInObservable() throws Exception {
+        final List<String> mapped = new ArrayList<>();
+        final List<String> result = new ArrayList<>();
+
+        db.selectFromBook()
+                .executeAsObservable()
+                .map(new Func1<Book, String>() {
+                    @Override
+                    public String call(Book book) {
+                        mapped.add(book.title);
+                        if (book.title.equals("friday")) {
+                            throw new RuntimeException("died!");
+                        }
+                        return book.title;
+                    }
+                })
+                .subscribe(new Subscriber<String>() {
+                    @Override
+                    public void onCompleted() {
+                        result.add("ON_COMPLETED");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        result.add(e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                        result.add(s);
+                    }
+                });
+
+        assertThat(mapped, contains("today", "friday"));
+        assertThat(result, contains("today", "died!"));
+    }
+
 }
