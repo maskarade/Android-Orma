@@ -17,14 +17,16 @@ package com.github.gfx.android.orma.migration;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
-public class SQLiteMaster {
+public class SQLiteMaster implements MigrationSchema {
 
     public static String TAG = "SQLiteMaster";
 
@@ -48,9 +50,31 @@ public class SQLiteMaster {
         this.sql = sql;
     }
 
-    public static Map<String, SQLiteMaster> loadTables(SQLiteDatabase db) {
-        Cursor cursor = db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master", null);
+    @NonNull
+    public static SQLiteMaster findByTableName(@NonNull SQLiteDatabase db, @NonNull String tableName) {
+        Cursor cursor = db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master where tbl_name = ?",
+                new String[]{tableName});
+        try {
+            Map<String, SQLiteMaster> tables = loadTables(cursor);
+            if (tables.isEmpty()) {
+                throw new NoSuchElementException("No such table: " + tableName);
+            }
+            return tables.get(tableName);
+        } finally {
+            cursor.close();
+        }
+    }
 
+    public static Map<String, SQLiteMaster> loadTables(@NonNull SQLiteDatabase db) {
+        Cursor cursor = db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master", null);
+        try {
+            return loadTables(cursor);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    public static Map<String, SQLiteMaster> loadTables(Cursor cursor) {
         Map<String, SQLiteMaster> tables = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (cursor.moveToFirst()) {
             do {
@@ -83,8 +107,6 @@ public class SQLiteMaster {
                 }
             } while (cursor.moveToNext());
         }
-        cursor.close();
-
         return tables;
     }
 
@@ -100,5 +122,24 @@ public class SQLiteMaster {
         }
         s.setLength(s.length() - "; ".length());
         return s.toString();
+    }
+
+    @Override
+    public String getTableName() {
+        return tableName;
+    }
+
+    @Override
+    public String getCreateTableStatement() {
+        return sql;
+    }
+
+    @Override
+    public List<String> getCreateIndexStatements() {
+        List<String> createIndexStatements = new ArrayList<>();
+        for (SQLiteMaster index : indexes) {
+            createIndexStatements.add(index.sql);
+        }
+        return createIndexStatements;
     }
 }

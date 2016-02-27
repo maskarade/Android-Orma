@@ -240,9 +240,9 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
         public final boolean upgrade;
 
-        final SQLiteDatabase db;
+        private final SQLiteDatabase db;
 
-        final SqliteDdlBuilder sqliteDdlBuilder = new SqliteDdlBuilder();
+        private final SqliteDdlBuilder util = new SqliteDdlBuilder();
 
         public Helper(SQLiteDatabase db, int version, boolean upgrade) {
             this.db = db;
@@ -251,13 +251,29 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         }
 
         public void renameTable(@NonNull String fromTableName, @NonNull String toTableName) {
-            String sql;
+            String statement;
             if (upgrade) {
-                sql = sqliteDdlBuilder.buildRenameTable(fromTableName, toTableName);
+                statement = util.buildRenameTable(fromTableName, toTableName);
             } else {
-                sql = sqliteDdlBuilder.buildRenameTable(toTableName, fromTableName);
+                statement = util.buildRenameTable(toTableName, fromTableName);
             }
-            execSQL(sql);
+            execSQL(statement);
+        }
+
+        public void renameColumn(@NonNull String tableName, @NonNull String fromColumnName, @NonNull String toColumnName) {
+            MigrationSchema schema = SQLiteMaster.findByTableName(db, tableName);
+
+            List<String> statements;
+            if (upgrade) {
+                statements = util.buildRenameColumn(schema.getCreateTableStatement(), fromColumnName, toColumnName);
+            } else {
+                statements = util.buildRenameColumn(schema.getCreateTableStatement(), toColumnName, fromColumnName);
+            }
+            // Don't re-create index. SchemaDiffMigration will create them, anyway.
+
+            for (String sql : statements) {
+                execSQL(sql);
+            }
         }
 
         public void execSQL(@NonNull String sql) {
