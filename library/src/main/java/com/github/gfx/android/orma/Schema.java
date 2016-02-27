@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.migration.MigrationSchema;
 
 import android.database.Cursor;
@@ -70,6 +71,13 @@ public interface Schema<Model> extends MigrationSchema {
 
     Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Model mode, boolean withoutAutoId);
 
+    /**
+     * @param conn          Used to retrieve instances that depends on a connection
+     * @param statement     What to bind columns
+     * @param model         The target model
+     * @param withoutAutoId If {@code true}, the primary key with {@link PrimaryKey#auto()} is omitted in the {@code INSERT}
+     *                      statement.
+     */
     void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model,
             boolean withoutAutoId);
 

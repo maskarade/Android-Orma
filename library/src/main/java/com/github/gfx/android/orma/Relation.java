@@ -229,7 +229,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     /**
      * @param onConflictAlgorithm {@link OnConflict} algorithm
-     * @param withoutAutoId       if true, {@link PrimaryKey#auto()} is omitted in the {@code INSERT} statement.
+     * @param withoutAutoId       If {@code true}, the primary key with {@link PrimaryKey#auto()} is omitted in the {@code
+     *                            INSERT} statement.
      * @return An {@link Inserter} instance, or a prepared statement to {@code INSERT}.
      */
     @NonNull
