@@ -18,7 +18,6 @@ package com.github.gfx.android.orma.migration;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -84,32 +83,19 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     }
 
     public int fetchDbVersion(SQLiteDatabase db) {
-        ensureHistoryTableExists(db);
-        Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kVersion},
-                null, null, null, null, kId + " DESC", "1");
-        try {
-            if (cursor.moveToFirst()) {
-                return cursor.getInt(0);
-            } else {
-                return 0;
-            }
-        } finally {
-            cursor.close();
-        }
+        return db.getVersion();
     }
 
     @Override
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         int dbVersion = fetchDbVersion(db);
 
-        if (dbVersion == version) {
-            trace("skip migration: version=%d", version);
+        if (dbVersion == 0) {
+            db.setVersion(version);
             return;
         }
 
-        if (dbVersion == 0) {
-            trace("no version history");
-            saveStep(db, version, null);
+        if (dbVersion == version) {
             return;
         }
 
@@ -198,6 +184,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         values.put(kVersion, version);
         values.put(kSql, sql);
         db.insertOrThrow(MIGRATION_STEPS_TABLE, null, values);
+        db.setVersion(version);
     }
 
     public void execStep(SQLiteDatabase db, int version, @Nullable String sql) {
