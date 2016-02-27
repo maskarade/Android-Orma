@@ -26,6 +26,16 @@ import android.util.SparseArray;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <p>
+ * Version based, step-by-step migration engine with {@link SQLiteDatabase#getVersion()},
+ * which refers {@code PRAGMA user_version} in SQLite.
+ * </p>
+ * <p>
+ * This migration engine is compatible with {@link android.database.sqlite.SQLiteOpenHelper}.
+ * That is, you can migrate from {@code SQLiteOpenHelper}, or migrate to {@code SQLiteOpenHelper}.
+ * </p>
+ */
 @SuppressLint("Assert")
 public class ManualStepMigration extends AbstractMigrationEngine {
 
