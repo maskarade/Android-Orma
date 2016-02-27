@@ -15,12 +15,11 @@
  */
 package com.github.gfx.android.orma.processor;
 
+import com.github.gfx.android.orma.annotation.Database;
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
-import com.github.gfx.android.orma.processor.model.SchemaDefinition;
-import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
 import com.github.gfx.android.orma.processor.generator.BaseWriter;
 import com.github.gfx.android.orma.processor.generator.DatabaseWriter;
 import com.github.gfx.android.orma.processor.generator.DeleterWriter;
@@ -28,6 +27,9 @@ import com.github.gfx.android.orma.processor.generator.RelationWriter;
 import com.github.gfx.android.orma.processor.generator.SchemaWriter;
 import com.github.gfx.android.orma.processor.generator.SelectorWriter;
 import com.github.gfx.android.orma.processor.generator.UpdaterWriter;
+import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
 import com.squareup.javapoet.JavaFile;
 
 import java.io.IOException;
@@ -41,6 +43,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
@@ -56,9 +59,14 @@ public class OrmaProcessor extends AbstractProcessor {
             return true;
         }
 
+        long t0 = System.currentTimeMillis();
+
         ProcessingContext context = new ProcessingContext(processingEnv);
 
         try {
+            buildDatabase(context, roundEnv)
+                    .forEach(context::addDatabaseDefinition);
+
             buildTypeAdapters(context, roundEnv)
                     .forEach(context::addTypeAdapterDefinition);
 
@@ -70,8 +78,6 @@ public class OrmaProcessor extends AbstractProcessor {
                         throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
                     });
 
-            context.initializeOrmaDatabase();
-
             context.schemaMap.values().forEach((schema) -> {
                 writeCodeForEachModel(schema, new SchemaWriter(context, schema));
                 writeCodeForEachModel(schema, new RelationWriter(context, schema));
@@ -81,12 +87,15 @@ public class OrmaProcessor extends AbstractProcessor {
 
             });
 
-            DatabaseWriter databaseWriter = new DatabaseWriter(context);
-            if (databaseWriter.isRequired()) {
-                writeToFiler(null,
-                        JavaFile.builder(databaseWriter.getPackageName(),
-                                databaseWriter.buildTypeSpec())
-                                .build());
+            if (!context.schemaMap.isEmpty()) {
+                context.setupDefaultDatabaseIfNeeded();
+                for (DatabaseDefinition database : context.databases) {
+                    DatabaseWriter databaseWriter = new DatabaseWriter(context, database);
+                    writeToFiler(null,
+                            JavaFile.builder(databaseWriter.getPackageName(),
+                                    databaseWriter.buildTypeSpec())
+                                    .build());
+                }
             }
 
         } catch (ProcessingException e) {
@@ -95,7 +104,19 @@ public class OrmaProcessor extends AbstractProcessor {
 
         context.printErrors();
 
+        if (context.isDebugging()) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
+                    "[OrmaProcessor] process classes in " + (System.currentTimeMillis() - t0) + "ms");
+        }
+
         return false;
+    }
+
+    private Stream<DatabaseDefinition> buildDatabase(ProcessingContext context, RoundEnvironment roundEnv) {
+        return roundEnv
+                .getElementsAnnotatedWith(Database.class)
+                .stream()
+                .map(element -> new DatabaseDefinition(context, (TypeElement)element));
     }
 
     public Stream<TypeAdapterDefinition> buildTypeAdapters(ProcessingContext context, RoundEnvironment roundEnv) {

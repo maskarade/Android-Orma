@@ -17,6 +17,7 @@
 package com.github.gfx.android.orma.test.toolbox;
 
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
+import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 
 import android.support.test.InstrumentationRegistry;
 
@@ -25,11 +26,18 @@ public class OrmaFactory {
     public static OrmaDatabase.Builder builder() {
         return OrmaDatabase.builder(InstrumentationRegistry.getTargetContext())
                 .name(null)
-                .tryParsingSql(false)
                 .trace(true);
     }
 
     public static OrmaDatabase create() {
         return builder().build();
+    }
+
+    public static OrmaDatabaseToAvoidTryParsing create2() {
+        return OrmaDatabaseToAvoidTryParsing.builder(InstrumentationRegistry.getTargetContext())
+                .tryParsingSql(false)
+                .name(null)
+                .trace(true)
+                .build();
     }
 }
