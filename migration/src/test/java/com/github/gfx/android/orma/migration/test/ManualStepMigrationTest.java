@@ -53,9 +53,9 @@ public class ManualStepMigrationTest {
     @Before
     public void setUp() throws Exception {
         db = SQLiteDatabase.create(null);
+        db.setVersion(1);
 
         migration = new ManualStepMigration(getContext(), VERSION, true);
-        migration.saveStep(db, 1, null);
 
         seq = new ArrayList<>();
         setupSteps();
