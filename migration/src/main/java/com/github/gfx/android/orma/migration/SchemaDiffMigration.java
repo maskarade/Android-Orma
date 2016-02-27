@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
 import org.json.JSONArray;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -30,7 +31,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -41,6 +44,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressLint("Assert")
 public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     static final String TAG = "SchemaDiffMigration";
@@ -99,10 +103,8 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     @Override
     public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
         if (isSchemaChanged(db)) {
-
-            Map<String, SQLiteMaster> metadata = loadMetadata(db, schemas);
-            List<String> statements = diffAll(metadata, schemas);
-
+            Map<String, ? extends MigrationSchema> masterSchemas = loadMetadata(db, schemas);
+            List<String> statements = diffAll(masterSchemas, schemas);
             executeStatements(db, statements);
         }
     }
@@ -136,31 +138,23 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     @NonNull
-    public List<String> diffAll(@NonNull Map<String, SQLiteMaster> masterData,
+    public List<String> diffAll(@NonNull Map<String, ? extends MigrationSchema> masterData,
             @NonNull List<? extends MigrationSchema> schemas) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database
         for (MigrationSchema schema : schemas) {
-            SQLiteMaster table = masterData.get(schema.getTableName());
+            MigrationSchema table = masterData.get(schema.getTableName());
             if (table == null) {
                 statements.add(schema.getCreateTableStatement());
                 statements.addAll(schema.getCreateIndexStatements());
             } else {
-                List<String> tableDiffStatements = tableDiff(table.sql, schema.getCreateTableStatement());
+                List<String> tableDiffStatements = tableDiff(table.getCreateTableStatement(), schema.getCreateTableStatement());
 
                 if (tableDiffStatements.isEmpty()) {
-                    Set<String> schemaIndexes = new LinkedHashSet<>();
-                    Set<String> dbIndexes = new LinkedHashSet<>();
-
-                    schemaIndexes.addAll(schema.getCreateIndexStatements());
-
-                    for (SQLiteMaster index : table.indexes) {
-                        dbIndexes.add(index.sql);
-                    }
-                    statements.addAll(indexDiff(dbIndexes, schemaIndexes));
+                    statements.addAll(indexDiff(table.getCreateIndexStatements(), schema.getCreateIndexStatements()));
                 } else {
-                    // The table needs re-create, where all the indexes are also dropped.
+                    // This table needs re-create, where all the indexes are also dropped.
                     statements.addAll(tableDiffStatements);
                     statements.addAll(schema.getCreateIndexStatements());
                 }
@@ -175,26 +169,19 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
      * @return List of "CREATED INDEX" statements to apply to DB
      */
     @NonNull
-    public List<String> indexDiff(@NonNull Set<String> sourceIndex, @NonNull Set<String> destIndex) {
+    public List<String> indexDiff(@NonNull Collection<String> sourceIndex, @NonNull Collection<String> destIndex) {
+        LinkedHashMap<SQLiteComponent, String> unionIndexes = new LinkedHashMap<>();
+
+        Map<SQLiteComponent, String> sourceIndexesPairs = parseIndexes(sourceIndex);
+        unionIndexes.putAll(sourceIndexesPairs);
+
+        Map<SQLiteComponent, String> destIndexesPairs = parseIndexes(destIndex);
+        unionIndexes.putAll(destIndexesPairs);
+
         List<String> createIndexStatements = new ArrayList<>();
-
-        Map<SQLiteComponent, String> unionIndexes = new LinkedHashMap<>();
-
-        Map<SQLiteComponent, String> fromIndexPairs = new LinkedHashMap<>();
-        for (String createIndexStatement : sourceIndex) {
-            fromIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
-        }
-        unionIndexes.putAll(fromIndexPairs);
-
-        Map<SQLiteComponent, String> toIndexPairs = new LinkedHashMap<>();
-        for (String createIndexStatement : destIndex) {
-            toIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
-        }
-        unionIndexes.putAll(toIndexPairs);
-
         for (Map.Entry<SQLiteComponent, String> createIndexStatement : unionIndexes.entrySet()) {
-            boolean existsInDst = toIndexPairs.containsKey(createIndexStatement.getKey());
-            boolean existsInSrc = fromIndexPairs.containsKey(createIndexStatement.getKey());
+            boolean existsInDst = destIndexesPairs.containsKey(createIndexStatement.getKey());
+            boolean existsInSrc = sourceIndexesPairs.containsKey(createIndexStatement.getKey());
 
             if (existsInDst && existsInSrc) {
                 // okay, nothing to do
@@ -208,6 +195,14 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
             }
         }
         return createIndexStatements;
+    }
+
+    static private Map<SQLiteComponent, String> parseIndexes(Collection<String> indexes) {
+        Map<SQLiteComponent, String> parsedIndexPairs = new HashMap<>();
+        for (String createIndexStatement : indexes) {
+            parsedIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
+        }
+        return parsedIndexPairs;
     }
 
     public List<String> tableDiff(String from, String to) {
@@ -251,9 +246,8 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     public String buildDropIndexStatement(String createIndexStatement) {
-        if (TextUtils.isEmpty(createIndexStatement)) {
-            throw new AssertionError("No create index statement given");
-        }
+        assert !TextUtils.isEmpty(createIndexStatement);
+        // TODO: use SQLiteParser if it get rid of ANTLR4 (ANTLR4-based parser is too slow).
         Pattern indexNamePattern = Pattern.compile(
                 "CREATE \\s+ INDEX (?:\\s+ IF \\s+ NOT \\s+ EXISTS)? \\s+ (\\S+) \\s+ ON .+",
                 Pattern.CASE_INSENSITIVE | Pattern.COMMENTS | Pattern.DOTALL);
