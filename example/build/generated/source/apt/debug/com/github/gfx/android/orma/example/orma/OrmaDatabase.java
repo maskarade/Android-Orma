@@ -29,7 +29,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.
    */
-  public static String SCHEMA_HASH = "BBBAF227DCC44E5A07B5E620D0E366D398F8C6D32F259D064F03CE74BF0667F1";
+  public static String SCHEMA_HASH = "ECD5565F5A7D76F02456D2DE0E6FD24E4DDCE9F8D85217315F35388312007ED8";
 
   public static final List<Schema<?>> SCHEMAS = Arrays.<Schema<?>>asList(
     Category_Schema.INSTANCE,

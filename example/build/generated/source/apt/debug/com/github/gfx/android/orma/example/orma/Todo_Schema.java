@@ -156,7 +156,7 @@ public class Todo_Schema implements Schema<Todo> {
   @NonNull
   @Override
   public String getCreateTableStatement() {
-    return "CREATE TABLE `Todo` (`title` TEXT NOT NULL, `content` TEXT , `done` BOOLEAN NOT NULL, `createdTime` INTEGER NOT NULL DEFAULT 0, `id` INTEGER PRIMARY KEY)";
+    return "CREATE TABLE `Todo` (`title` TEXT NOT NULL, `content` TEXT , `done` BOOLEAN NOT NULL DEFAULT 0, `createdTime` INTEGER NOT NULL DEFAULT 0, `id` INTEGER PRIMARY KEY)";
   }
 
   @NonNull
