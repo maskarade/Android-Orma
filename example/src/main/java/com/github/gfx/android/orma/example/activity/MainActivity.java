@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity
         todo = orma.selectFromTodo()
                 .titleEq("buy")
                 .value();
+        Log.d(TAG, "selectFromTodo: " + todo.id);
 
         // update
         orma.updateTodo()
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = binding.navView;
@@ -263,6 +264,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            Toast.makeText(this, "¯_(ツ)_/¯", Toast.LENGTH_SHORT).show();
             return true;
         }
         return super.onOptionsItemSelected(item);
