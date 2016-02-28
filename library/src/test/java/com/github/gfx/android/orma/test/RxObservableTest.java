@@ -30,10 +30,11 @@ import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import rx.Subscriber;
 import rx.functions.Func1;
+import rx.observers.TestSubscriber;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -104,13 +105,16 @@ public class RxObservableTest {
 
     @Test
     public void selectorObservable() throws Exception {
-        List<Book> list = db.selectFromBook()
+        TestSubscriber<Book> testSubscriber = TestSubscriber.create();
+
+        db.selectFromBook()
                 .titleEq("today")
                 .executeAsObservable()
-                .toList()
-                .toBlocking()
-                .single();
+                .subscribe(testSubscriber);
 
+        testSubscriber.assertCompleted();
+
+        List<Book> list = testSubscriber.getOnNextEvents();
         assertThat(list.size(), is(1));
         assertThat(list.get(0).title, is("today"));
     }
@@ -133,7 +137,7 @@ public class RxObservableTest {
                 .toBlocking()
                 .value();
         assertThat(rowid, is(not(0L)));
-        assertThat(db.selectFromBook().count(), is(3));
+        assertThat(db.selectFromBook().count(), is(4));
     }
 
     @Test
@@ -163,8 +167,10 @@ public class RxObservableTest {
 
     @Test
     public void exceptionInObservable() throws Exception {
+        class AbortInMapException extends RuntimeException{}
+
+        TestSubscriber<String> testSubscriber = TestSubscriber.create();
         final List<String> mapped = new ArrayList<>();
-        final List<String> result = new ArrayList<>();
 
         db.selectFromBook()
                 .executeAsObservable()
@@ -173,30 +179,17 @@ public class RxObservableTest {
                     public String call(Book book) {
                         mapped.add(book.title);
                         if (book.title.equals("friday")) {
-                            throw new RuntimeException("died!");
+                            throw new AbortInMapException();
                         }
                         return book.title;
                     }
                 })
-                .subscribe(new Subscriber<String>() {
-                    @Override
-                    public void onCompleted() {
-                        result.add("ON_COMPLETED");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        result.add(e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(String s) {
-                        result.add(s);
-                    }
-                });
+                .subscribe(testSubscriber);
 
         assertThat(mapped, contains("today", "friday"));
-        assertThat(result, contains("today", "died!"));
-    }
 
+        testSubscriber.assertNotCompleted();
+        testSubscriber.assertReceivedOnNext(Collections.singletonList("today"));
+        testSubscriber.assertError(AbortInMapException.class);
+    }
 }

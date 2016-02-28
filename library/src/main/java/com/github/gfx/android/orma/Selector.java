@@ -34,10 +34,8 @@ import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscriber;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.FuncN;
-import rx.subscriptions.Subscriptions;
 
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
@@ -255,29 +253,17 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
             @Override
             public void call(final Subscriber<? super Model> subscriber) {
                 final Cursor cursor = execute();
-                subscriber.add(Subscriptions.create(new Action0() {
-                    @Override
-                    public void call() {
-                        cursor.close();
-                    }
-                }));
-
                 try {
-                    for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-                        if (cursor.isClosed()) {
-                            return;
-                        }
+                    // NOTE: cursor.moveToPosition() throws IllegalStateException if cursor is closed.
+                    for (int pos = 0; !subscriber.isUnsubscribed() && cursor.moveToPosition(pos); pos++) {
                         subscriber.onNext(newModelFromCursor(cursor));
                     }
-                } finally {
-                    if (!cursor.isClosed()) {
-                        cursor.close();
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onCompleted();
                     }
+                } finally {
+                    cursor.close();
                 }
-                if (cursor.isClosed()) {
-                    return;
-                }
-                subscriber.onCompleted();
             }
         });
     }
