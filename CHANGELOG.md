@@ -8,6 +8,30 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.1.0 - 2016/02/28
+
+* https://github.com/gfx/Android-Orma/compare/v2.0.6...v2.1.0
+* Milestone: [v2.1.0](https://github.com/gfx/Android-Orma/issues?q=milestone%3Av2.1.0)
+
+### New Features
+
+* `@Database` annotation to configure `OrmaDatabase` package, class name,
+  and handling model classes (#207, fix #115)
+* `ManualStepMigration.Helper#renameColumn()` to rename columns easily
+
+### Bug Fixes
+
+* Nested direct associations work properly
+* `Relation#indexOf()` works for columns with type serializers
+* `Selector#executeAsObservable()` checks `isUnsubscribed()` (#209, fix #202)
+
+### Internal Changes
+
+* Backquotes are used to escape identifiers to get readability, instead of double quotes defined in SQL92 standard
+* `OrmaConnection` no longer depends on `SQLiteOpenHelper` to control migration more precisely
+  * Now `OrmaConnection` always invokes `MigrationEngine#start()` even for initialization
+  * Now there is no difference between debug build and release build
+
 ## v2.0.6 - 2016/02/23
 
 ### Bug Fixes

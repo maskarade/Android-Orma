@@ -44,8 +44,8 @@ repositories {
 // To use orma in your Android applications or libraries
 
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:2.0.6'
-    compile 'com.github.gfx.android.orma:orma:2.0.6'
+    apt 'com.github.gfx.android.orma:orma-processor:2.1.0'
+    compile 'com.github.gfx.android.orma:orma:2.1.0'
 }
 ```
 
