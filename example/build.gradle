@@ -4,12 +4,14 @@ buildscript {
     }
     dependencies {
         classpath "io.realm:realm-gradle-plugin:0.87.5"
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.4.2'
     }
 }
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
+apply plugin: 'com.getkeepsafe.dexcount'
 
 android {
     compileSdkVersion 23
