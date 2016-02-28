@@ -233,10 +233,13 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
      */
     public void forEach(@NonNull Action1<Model> action) {
         Cursor cursor = execute();
-        for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-            action.call(newModelFromCursor(cursor));
+        try {
+            for (int pos = 0; cursor.moveToPosition(pos); pos++) {
+                action.call(newModelFromCursor(cursor));
+            }
+        } finally {
+            cursor.close();
         }
-        cursor.close();
     }
 
     @NonNull
@@ -249,13 +252,17 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return Observable.create(new Observable.OnSubscribe<Model>() {
             @Override
             public void call(final Subscriber<? super Model> subscriber) {
-                forEach(new Action1<Model>() {
-                    @Override
-                    public void call(Model item) {
-                        subscriber.onNext(item);
+                final Cursor cursor = execute();
+                try {
+                    for (int pos = 0; !subscriber.isUnsubscribed() && cursor.moveToPosition(pos); pos++) {
+                        subscriber.onNext(newModelFromCursor(cursor));
                     }
-                });
-                subscriber.onCompleted();
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onCompleted();
+                    }
+                } finally {
+                    cursor.close();
+                }
             }
         });
     }

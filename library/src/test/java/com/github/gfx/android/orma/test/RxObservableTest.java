@@ -29,7 +29,12 @@ import org.junit.runner.RunWith;
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import rx.functions.Func1;
+import rx.observers.TestSubscriber;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -83,17 +88,33 @@ public class RxObservableTest {
                 return book;
             }
         });
+
+        db.createBook(new ModelFactory<Book>() {
+            @NonNull
+            @Override
+            public Book call() {
+                Book book = new Book();
+                book.title = "tomorrow";
+                book.content = "orange";
+                book.inPrint = false;
+                book.publisher = SingleAssociation.id(publisher.id);
+                return book;
+            }
+        });
     }
 
     @Test
-    public void relationObservable() throws Exception {
-        List<Book> list = db.selectFromBook()
-                .where("title = ?", "today")
-                .executeAsObservable()
-                .toList()
-                .toBlocking()
-                .single();
+    public void selectorObservable() throws Exception {
+        TestSubscriber<Book> testSubscriber = TestSubscriber.create();
 
+        db.selectFromBook()
+                .titleEq("today")
+                .executeAsObservable()
+                .subscribe(testSubscriber);
+
+        testSubscriber.assertCompleted();
+
+        List<Book> list = testSubscriber.getOnNextEvents();
         assertThat(list.size(), is(1));
         assertThat(list.get(0).title, is("today"));
     }
@@ -116,13 +137,13 @@ public class RxObservableTest {
                 .toBlocking()
                 .value();
         assertThat(rowid, is(not(0L)));
-        assertThat(db.selectFromBook().count(), is(3));
+        assertThat(db.selectFromBook().count(), is(4));
     }
 
     @Test
     public void updaterObservable() throws Exception {
         int count = db.updateBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .content("modified")
                 .executeAsObservable()
                 .toBlocking()
@@ -135,12 +156,40 @@ public class RxObservableTest {
     @Test
     public void deleterObservable() throws Exception {
         int count = db.deleteFromBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .executeAsObservable()
                 .toBlocking()
                 .value();
 
         assertThat(count, is(1));
         assertThat(db.selectFromBook().where("title = ?", "today").valueOrNull(), is(nullValue()));
+    }
+
+    @Test
+    public void exceptionInObservable() throws Exception {
+        class AbortInMapException extends RuntimeException{}
+
+        TestSubscriber<String> testSubscriber = TestSubscriber.create();
+        final List<String> mapped = new ArrayList<>();
+
+        db.selectFromBook()
+                .executeAsObservable()
+                .map(new Func1<Book, String>() {
+                    @Override
+                    public String call(Book book) {
+                        mapped.add(book.title);
+                        if ("friday".equals(book.title)) {
+                            throw new AbortInMapException();
+                        }
+                        return book.title;
+                    }
+                })
+                .subscribe(testSubscriber);
+
+        assertThat(mapped, contains("today", "friday"));
+
+        testSubscriber.assertNotCompleted();
+        testSubscriber.assertReceivedOnNext(Collections.singletonList("today"));
+        testSubscriber.assertError(AbortInMapException.class);
     }
 }
