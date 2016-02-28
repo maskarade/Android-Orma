@@ -178,7 +178,7 @@ public class RxObservableTest {
                     @Override
                     public String call(Book book) {
                         mapped.add(book.title);
-                        if (book.title.equals("friday")) {
+                        if ("friday".equals(book.title)) {
                             throw new AbortInMapException();
                         }
                         return book.title;

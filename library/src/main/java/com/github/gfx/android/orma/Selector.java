@@ -254,7 +254,6 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
             public void call(final Subscriber<? super Model> subscriber) {
                 final Cursor cursor = execute();
                 try {
-                    // NOTE: cursor.moveToPosition() throws IllegalStateException if cursor is closed.
                     for (int pos = 0; !subscriber.isUnsubscribed() && cursor.moveToPosition(pos); pos++) {
                         subscriber.onNext(newModelFromCursor(cursor));
                     }
