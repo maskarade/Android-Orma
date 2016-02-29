@@ -729,6 +729,10 @@ boolean trace = true;
 SchemaDiffMigration migration = new SchemaDiffMigration(context, trace);
 ```
 
+### Does Orma support Kotlin?
+
+Yes. Here is an example to use Orma with Kotlin: https://github.com/gfx/Orma-Kotlin-Example
+
 ## Support
 
 * Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
