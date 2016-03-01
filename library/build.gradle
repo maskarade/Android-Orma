@@ -16,12 +16,11 @@ android {
         consumerProguardFiles 'proguard-rules.pro'
     }
     buildTypes {
-        release {
-        }
-
         debug {
             debuggable true
             testCoverageEnabled true
+        }
+        release {
         }
     }
     compileOptions {
