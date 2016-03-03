@@ -80,7 +80,7 @@ public class SchemaDiffMigrationTest {
         openHelper = new OpenHelper(getContext());
         db = openHelper.getWritableDatabase();
         migration = new SchemaDiffMigration(getContext(), SCHEMA_HASH);
-        metadata = migration.loadMetadata(db, schemas);
+        metadata = SchemaDiffMigration.loadMetadata(db, schemas);
     }
 
     @After
@@ -155,7 +155,7 @@ public class SchemaDiffMigrationTest {
         statements = migration.diffAll(metadata, schemas);
         migration.executeStatements(db, statements);
 
-        assertThat(migration.diffAll(migration.loadMetadata(db, schemas), schemas), is(empty()));
+        assertThat(migration.diffAll(SchemaDiffMigration.loadMetadata(db, schemas), schemas), is(empty()));
     }
 
     class OpenHelper extends SQLiteOpenHelper {

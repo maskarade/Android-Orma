@@ -17,6 +17,7 @@
 package com.github.gfx.android.orma.migration.test.sqliteparser_test;
 
 
+import com.github.gfx.android.orma.migration.sqliteparser.CreateIndexStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
@@ -64,8 +65,8 @@ public class SQLiteParserUtilsTest {
                 + "title TEXT\n"
                 + ")";
 
-        SQLiteComponent a = SQLiteParserUtils.parseIntoCreateTableStatement(sql);
-        SQLiteComponent b = SQLiteParserUtils.parseIntoCreateTableStatement(sql);
+        SQLiteComponent a = SQLiteParserUtils.parseIntoSQLiteComponent(sql);
+        SQLiteComponent b = SQLiteParserUtils.parseIntoSQLiteComponent(sql);
 
         assertThat(a, is(b));
         assertThat(a.hashCode(), is(b.hashCode()));
@@ -166,6 +167,17 @@ public class SQLiteParserUtilsTest {
         );
 
         assertThat(createTableStatement.getTableName(), is(new SQLiteComponent.Name("foo")));
+    }
+
+    @Test
+    public void testParseIntoCreateIndexStatement() throws Exception {
+        CreateIndexStatement statement = SQLiteParserUtils.parseIntoCreateIndexStatement(
+                "CREATE INDEX index_title_on_book ON \"book\" (`title`)"
+        );
+
+        assertThat(statement.getIndexName(), is(new SQLiteComponent.Name("index_title_on_book")));
+        assertThat(statement.getTableName(), is(new SQLiteComponent.Name("book")));
+        assertThat(statement.getColumns(), contains(new SQLiteComponent.Name("title")));
     }
 
     @Test

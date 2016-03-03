@@ -24,8 +24,12 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
  * An entrypoint of {@link SQLiteParser}
@@ -52,7 +56,7 @@ public class SQLiteParserUtils {
 
     public static CreateTableStatement parseIntoCreateTableStatement(String sql) throws ParseCancellationException {
         SQLiteParser parser = createParser(sql);
-        SQLiteDdlCollector collector = new SQLiteDdlCollector();
+        SQLiteCreateTableStatementCollector collector = new SQLiteCreateTableStatementCollector();
         parser.addParseListener(collector);
         try {
             parser.parse();
@@ -60,6 +64,20 @@ public class SQLiteParserUtils {
             throw new ParseCancellationException("SQL is too complex to parse: " + sql, e);
         }
         return collector.createTableStatement;
+    }
+
+    public static CreateIndexStatement parseIntoCreateIndexStatement(String sql) {
+        SQLiteParser parser = createParser(sql);
+        SQLiteCreateIndexStatementCollector collector = new SQLiteCreateIndexStatementCollector();
+        parser.addParseListener(collector);
+        SQLiteParser.ParseContext parseContext;
+        try {
+            parseContext = parser.parse();
+        } catch (StackOverflowError e) {
+            throw new ParseCancellationException("SQL is too complex to parse: " + sql, e);
+        }
+        appendTokenList(collector.createIndexStatement, parseContext);
+        return collector.createIndexStatement;
     }
 
     public static SQLiteComponent parseIntoSQLiteComponent(String sql) throws ParseCancellationException {
@@ -72,7 +90,33 @@ public class SQLiteParserUtils {
             throw new ParseCancellationException("SQL is too complex to parse: " + sql);
         }
         SQLiteComponent component = new SQLiteComponent();
-        SQLiteDdlCollector.appendTokenList(component, parseContext);
+        appendTokenList(component, parseContext);
         return component;
+    }
+
+    public static void appendTokenList(final SQLiteComponent component, ParseTree node) {
+        node.accept(new AbstractParseTreeVisitor<Void>() {
+            @Override
+            public Void visitTerminal(TerminalNode node) {
+                int type = node.getSymbol().getType();
+                if (type == Token.EOF) {
+                    return null;
+                }
+
+                if (node.getParent() instanceof SQLiteParser.Any_nameContext) {
+                    component.tokens.add(new SQLiteComponent.Name(node.getText()));
+                } else if (isKeyword(type)) {
+                    component.tokens.add(new SQLiteComponent.Keyword(node.getText()));
+                } else {
+                    component.tokens.add(node.getText());
+                }
+                return null;
+            }
+        });
+    }
+
+    private static boolean isKeyword(int type) {
+        String name = SQLiteLexer.VOCABULARY.getSymbolicName(type);
+        return name.startsWith("K_");
     }
 }
