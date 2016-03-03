@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import com.github.gfx.android.orma.internal.OrmaIterator;
 
 import android.database.Cursor;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -199,14 +200,30 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @NonNull
     public Cursor execute() {
-        return conn.query(schema, schema.getDefaultResultColumns(),
-                getWhereClause(), getBindArgs(), groupBy, having, orderBy, getLimitClause());
+        return conn.rawQuery(buildQuery(), getBindArgs());
     }
 
     @NonNull
     public Cursor executeWithColumns(@NonNull String... columns) {
-        return conn.query(schema, columns,
-                getWhereClause(), getBindArgs(), groupBy, having, orderBy, getLimitClause());
+        return conn.rawQuery(buildQueryWithColumns(columns), getBindArgs());
+    }
+
+    /**
+     * @return A {@code SELECT} statement the selector represents
+     */
+    @NonNull
+    public String buildQuery() {
+        return buildQueryWithColumns(schema.getDefaultResultColumns());
+    }
+
+    /**
+     * @return A {@code SELECT} statement the selector represents
+     */
+    @NonNull
+    public String buildQueryWithColumns(@NonNull String... columns) {
+        return SQLiteQueryBuilder.buildQueryString(
+                false, schema.getSelectFromTableClause(), columns,
+                getWhereClause(), groupBy, having, orderBy, getLimitClause());
     }
 
     /**

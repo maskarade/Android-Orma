@@ -188,7 +188,7 @@ public class OrmaConnection {
     }
 
     @NonNull
-    public Cursor rawQuery(@NonNull String sql, @NonNull String... bindArgs) {
+    public Cursor rawQuery(@NonNull String sql, String... bindArgs) {
         trace(sql, bindArgs);
         SQLiteDatabase db = getReadableDatabase();
         return db.rawQuery(sql, bindArgs);

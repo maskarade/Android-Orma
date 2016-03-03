@@ -19,7 +19,6 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -176,11 +175,10 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
             @Override
             public void call(SingleSubscriber<? super Integer> subscriber) {
                 String pk = schema.getPrimaryKey().getEscapedName();
-                String select = SQLiteQueryBuilder.buildQueryString(
-                        false, schema.getSelectFromTableClause(), new String[]{pk},
-                        getWhereClause(), null, null, buildOrderingTerms(), size + "," + Integer.MAX_VALUE);
-
-                int deletedRows = conn.delete(schema, pk + " IN (" + select + ")", getBindArgs());
+                Selector<Model, ?> subquery = selector();
+                subquery.limit(Integer.MAX_VALUE);
+                subquery.offset(size);
+                int deletedRows = conn.delete(schema, pk + " IN (" + subquery.buildQueryWithColumns(pk) + ")", getBindArgs());
                 subscriber.onSuccess(deletedRows);
             }
         });
