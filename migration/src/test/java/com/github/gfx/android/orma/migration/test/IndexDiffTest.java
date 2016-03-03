@@ -25,6 +25,9 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -89,4 +92,14 @@ public class IndexDiffTest {
                 is("DROP INDEX IF EXISTS `index_foo`"));
     }
 
+    @Test
+    public void testIndexDiff() throws Exception {
+        assertThat(migration.indexDiff(Collections.<String>emptyList(), Arrays.asList(
+                "CREATE INDEX IF NOT EXISTS `index_foo` ON `t` (`foo`)",
+                "CREATE INDEX IF NOT EXISTS `index_bar` ON `t` (`bar`)"
+        )), contains(
+                "CREATE INDEX IF NOT EXISTS `index_foo` ON `t` (`foo`)",
+                "CREATE INDEX IF NOT EXISTS `index_bar` ON `t` (`bar`)"
+        ));
+    }
 }

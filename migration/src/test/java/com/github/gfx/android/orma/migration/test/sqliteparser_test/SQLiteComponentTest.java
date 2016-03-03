@@ -26,6 +26,9 @@ import android.support.test.runner.AndroidJUnit4;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * @see SQLiteComponent
+ */
 @RunWith(AndroidJUnit4.class)
 public class SQLiteComponentTest {
 

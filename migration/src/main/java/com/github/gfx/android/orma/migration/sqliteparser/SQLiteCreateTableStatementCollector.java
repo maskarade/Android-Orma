@@ -17,10 +17,8 @@
 package com.github.gfx.android.orma.migration.sqliteparser;
 
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteBaseListener;
-import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteLexer;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -30,37 +28,11 @@ import java.util.List;
 /**
  * The SQLite DDL collector for {@link SQLiteParser}, used in {@link SQLiteParserUtils}
  */
-public class SQLiteDdlCollector extends SQLiteBaseListener {
+public class SQLiteCreateTableStatementCollector extends SQLiteBaseListener {
 
     CreateTableStatement.ColumnDef columnDef;
 
     CreateTableStatement createTableStatement;
-
-    static void appendTokenList(final SQLiteComponent component, ParseTree node) {
-        node.accept(new AbstractParseTreeVisitor<Void>() {
-            @Override
-            public Void visitTerminal(TerminalNode node) {
-                int type = node.getSymbol().getType();
-                if (type == Token.EOF) {
-                    return null;
-                }
-
-                if (node.getParent() instanceof SQLiteParser.Any_nameContext) {
-                    component.tokens.add(new SQLiteComponent.Name(node.getText()));
-                } else if (isKeyword(type)) {
-                    component.tokens.add(new SQLiteComponent.Keyword(node.getText()));
-                } else {
-                    component.tokens.add(node.getText());
-                }
-                return null;
-            }
-        });
-    }
-
-    static boolean isKeyword(int type) {
-        String name = SQLiteLexer.VOCABULARY.getSymbolicName(type);
-        return name.startsWith("K_");
-    }
 
     static String combineParseTree(ParseTree node) {
         return node.accept(new AbstractParseTreeVisitor<StringBuilder>() {
@@ -91,10 +63,10 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
     public void exitCreate_table_stmt(SQLiteParser.Create_table_stmtContext ctx) {
         if (ctx.K_AS() != null) {
             createTableStatement.selectStatement = new SelectStatement();
-            appendTokenList(createTableStatement.selectStatement, ctx);
+            SQLiteParserUtils.appendTokenList(createTableStatement.selectStatement, ctx);
         }
 
-        appendTokenList(createTableStatement, ctx);
+        SQLiteParserUtils.appendTokenList(createTableStatement, ctx);
     }
 
     @Override
@@ -110,7 +82,7 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
 
     @Override
     public void exitColumn_def(SQLiteParser.Column_defContext ctx) {
-        appendTokenList(columnDef, ctx);
+        SQLiteParserUtils.appendTokenList(columnDef, ctx);
         columnDef = null;
     }
 
@@ -120,8 +92,6 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
             columnDef.name = new SQLiteComponent.Name(ctx.getText());
         }
     }
-
-    // utils
 
     @Override
     public void exitType_name(SQLiteParser.Type_nameContext ctx) {
@@ -156,7 +126,7 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
             }
         }
 
-        appendTokenList(constraint, ctx);
+        SQLiteParserUtils.appendTokenList(constraint, ctx);
 
         columnDef.constraints.add(constraint);
     }
@@ -168,7 +138,7 @@ public class SQLiteDdlCollector extends SQLiteBaseListener {
         if (ctx.K_CONSTRAINT() != null) {
             constraint.name = new SQLiteComponent.Name(ctx.name().getText());
         }
-        appendTokenList(constraint, ctx);
+        SQLiteParserUtils.appendTokenList(constraint, ctx);
 
         createTableStatement.constraints.add(constraint);
     }

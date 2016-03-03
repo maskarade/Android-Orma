@@ -31,10 +31,6 @@ public class CreateTableStatement extends SQLiteComponent {
 
     SelectStatement selectStatement;
 
-    public CreateTableStatement() {
-
-    }
-
     public Name getTableName() {
         return tableName;
     }

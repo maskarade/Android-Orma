@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.migration;
 
+import com.github.gfx.android.orma.migration.sqliteparser.CreateIndexStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
@@ -28,7 +29,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,8 +41,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @SuppressLint("Assert")
 public class SchemaDiffMigration extends AbstractMigrationEngine {
@@ -94,10 +92,10 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         this(context, schemaHash, extractDebuggable(context) ? TraceListener.LOGCAT : TraceListener.EMPTY);
     }
 
-    static private Map<SQLiteComponent, String> parseIndexes(Collection<String> indexes) {
-        Map<SQLiteComponent, String> parsedIndexPairs = new HashMap<>();
+    static private Map<CreateIndexStatement, String> parseIndexes(Collection<String> indexes) {
+        Map<CreateIndexStatement, String> parsedIndexPairs = new HashMap<>();
         for (String createIndexStatement : indexes) {
-            parsedIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
+            parsedIndexPairs.put(SQLiteParserUtils.parseIntoCreateIndexStatement(createIndexStatement), createIndexStatement);
         }
         return parsedIndexPairs;
     }
@@ -207,16 +205,16 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
      */
     @NonNull
     public List<String> indexDiff(@NonNull Collection<String> srcIndexes, @NonNull Collection<String> dstIndexes) {
-        LinkedHashMap<SQLiteComponent, String> unionIndexes = new LinkedHashMap<>();
+        LinkedHashMap<CreateIndexStatement, String> unionIndexes = new LinkedHashMap<>();
 
-        Map<SQLiteComponent, String> srcIndexesPairs = parseIndexes(srcIndexes);
+        Map<CreateIndexStatement, String> srcIndexesPairs = parseIndexes(srcIndexes);
         unionIndexes.putAll(srcIndexesPairs);
 
-        Map<SQLiteComponent, String> dstIndexesPairs = parseIndexes(dstIndexes);
+        Map<CreateIndexStatement, String> dstIndexesPairs = parseIndexes(dstIndexes);
         unionIndexes.putAll(dstIndexesPairs);
 
         List<String> createIndexStatements = new ArrayList<>();
-        for (Map.Entry<SQLiteComponent, String> createIndexStatement : unionIndexes.entrySet()) {
+        for (Map.Entry<CreateIndexStatement, String> createIndexStatement : unionIndexes.entrySet()) {
             boolean existsInDst = dstIndexesPairs.containsKey(createIndexStatement.getKey());
             boolean existsInSrc = srcIndexesPairs.containsKey(createIndexStatement.getKey());
 
@@ -224,11 +222,8 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
                 // okay, nothing to do
             } else if (existsInDst) {
                 createIndexStatements.add(createIndexStatement.getValue());
-            } else {
-                String statement = buildDropIndexStatement(createIndexStatement.getValue());
-                if (!TextUtils.isEmpty(statement)) {
-                    createIndexStatements.add(buildDropIndexStatement(createIndexStatement.getValue()));
-                }
+            } else { // existsInSrc
+                createIndexStatements.add(buildDropIndexStatement(createIndexStatement.getKey()));
             }
         }
         return createIndexStatements;
@@ -274,20 +269,14 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         }
     }
 
+    @NonNull
     public String buildDropIndexStatement(String createIndexStatement) {
-        assert !TextUtils.isEmpty(createIndexStatement);
-        // TODO: use SQLiteParser if it get rid of ANTLR4 (ANTLR4-based parser is too slow).
-        Pattern indexNamePattern = Pattern.compile(
-                "CREATE \\s+ INDEX (?:\\s+ IF \\s+ NOT \\s+ EXISTS)? \\s+ (\\S+) \\s+ ON .+",
-                Pattern.CASE_INSENSITIVE | Pattern.COMMENTS | Pattern.DOTALL);
+        return buildDropIndexStatement(SQLiteParserUtils.parseIntoCreateIndexStatement(createIndexStatement));
+    }
 
-        Matcher matcher = indexNamePattern.matcher(createIndexStatement);
-        if (matcher.matches()) {
-            String indexName = SqliteDdlBuilder.ensureNotEscaped(matcher.group(1));
-            return "DROP INDEX IF EXISTS " + SqliteDdlBuilder.ensureEscaped(indexName);
-        } else {
-            return "";
-        }
+    @NonNull
+    public String buildDropIndexStatement(CreateIndexStatement createIndexStatement) {
+        return "DROP INDEX IF EXISTS " + createIndexStatement.getIndexName();
     }
 
     public void saveStep(SQLiteDatabase db, @Nullable String sql, @NonNull Object... args) {
