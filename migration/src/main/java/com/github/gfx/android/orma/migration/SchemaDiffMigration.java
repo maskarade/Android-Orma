@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
 @SuppressLint("Assert")
 public class SchemaDiffMigration extends AbstractMigrationEngine {
 
-    static final String TAG = "SchemaDiffMigration";
+    public static final String TAG = "SchemaDiffMigration";
 
     public static final String MIGRATION_STEPS_TABLE = "orma_schema_diff_migration_steps";
 
@@ -94,6 +94,42 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         this(context, schemaHash, extractDebuggable(context) ? TraceListener.LOGCAT : TraceListener.EMPTY);
     }
 
+    static private Map<SQLiteComponent, String> parseIndexes(Collection<String> indexes) {
+        Map<SQLiteComponent, String> parsedIndexPairs = new HashMap<>();
+        for (String createIndexStatement : indexes) {
+            parsedIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
+        }
+        return parsedIndexPairs;
+    }
+
+    private static String serializeArgs(@NonNull Object[] args) {
+        if (args.length == 0) {
+            return "[]";
+        }
+
+        JSONArray array = new JSONArray();
+        for (Object arg : args) {
+            array.put(arg);
+        }
+        return array.toString();
+    }
+
+    public static Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<? extends MigrationSchema> schemas) {
+        Map<String, SQLiteMaster> metadata = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        Set<String> tableNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (MigrationSchema schema : schemas) {
+            tableNames.add(schema.getTableName());
+        }
+
+        for (Map.Entry<String, SQLiteMaster> entry : SQLiteMaster.loadTables(db).entrySet()) {
+            if (tableNames.contains(entry.getKey())) {
+                metadata.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return metadata;
+    }
+
     @NonNull
     @Override
     public String getTag() {
@@ -138,25 +174,26 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     @NonNull
-    public List<String> diffAll(@NonNull Map<String, ? extends MigrationSchema> masterData,
-            @NonNull List<? extends MigrationSchema> schemas) {
+    public List<String> diffAll(@NonNull Map<String, ? extends MigrationSchema> srsSchemas,
+            @NonNull List<? extends MigrationSchema> dstSchemas) {
         List<String> statements = new ArrayList<>();
 
         // NOTE: ignore tables which exist only in database
-        for (MigrationSchema schema : schemas) {
-            MigrationSchema table = masterData.get(schema.getTableName());
-            if (table == null) {
-                statements.add(schema.getCreateTableStatement());
-                statements.addAll(schema.getCreateIndexStatements());
+        for (MigrationSchema dstSchema : dstSchemas) {
+            MigrationSchema srcSchema = srsSchemas.get(dstSchema.getTableName());
+            if (srcSchema == null) {
+                statements.add(dstSchema.getCreateTableStatement());
+                statements.addAll(dstSchema.getCreateIndexStatements());
             } else {
-                List<String> tableDiffStatements = tableDiff(table.getCreateTableStatement(), schema.getCreateTableStatement());
+                List<String> tableDiffStatements = tableDiff(srcSchema.getCreateTableStatement(),
+                        dstSchema.getCreateTableStatement());
 
                 if (tableDiffStatements.isEmpty()) {
-                    statements.addAll(indexDiff(table.getCreateIndexStatements(), schema.getCreateIndexStatements()));
+                    statements.addAll(indexDiff(srcSchema.getCreateIndexStatements(), dstSchema.getCreateIndexStatements()));
                 } else {
                     // This table needs re-create, where all the indexes are also dropped.
                     statements.addAll(tableDiffStatements);
-                    statements.addAll(schema.getCreateIndexStatements());
+                    statements.addAll(dstSchema.getCreateIndexStatements());
                 }
             }
         }
@@ -164,24 +201,24 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     /**
-     * @param sourceIndex Set of "CREATED INDEX" statements which the DB has
-     * @param destIndex   Set of "CREATE INDEX" statements which the code has
+     * @param srcIndexes Set of "CREATED INDEX" statements which the DB has
+     * @param dstIndexes Set of "CREATE INDEX" statements which the code has
      * @return List of "CREATED INDEX" statements to apply to DB
      */
     @NonNull
-    public List<String> indexDiff(@NonNull Collection<String> sourceIndex, @NonNull Collection<String> destIndex) {
+    public List<String> indexDiff(@NonNull Collection<String> srcIndexes, @NonNull Collection<String> dstIndexes) {
         LinkedHashMap<SQLiteComponent, String> unionIndexes = new LinkedHashMap<>();
 
-        Map<SQLiteComponent, String> sourceIndexesPairs = parseIndexes(sourceIndex);
-        unionIndexes.putAll(sourceIndexesPairs);
+        Map<SQLiteComponent, String> srcIndexesPairs = parseIndexes(srcIndexes);
+        unionIndexes.putAll(srcIndexesPairs);
 
-        Map<SQLiteComponent, String> destIndexesPairs = parseIndexes(destIndex);
-        unionIndexes.putAll(destIndexesPairs);
+        Map<SQLiteComponent, String> dstIndexesPairs = parseIndexes(dstIndexes);
+        unionIndexes.putAll(dstIndexesPairs);
 
         List<String> createIndexStatements = new ArrayList<>();
         for (Map.Entry<SQLiteComponent, String> createIndexStatement : unionIndexes.entrySet()) {
-            boolean existsInDst = destIndexesPairs.containsKey(createIndexStatement.getKey());
-            boolean existsInSrc = sourceIndexesPairs.containsKey(createIndexStatement.getKey());
+            boolean existsInDst = dstIndexesPairs.containsKey(createIndexStatement.getKey());
+            boolean existsInSrc = srcIndexesPairs.containsKey(createIndexStatement.getKey());
 
             if (existsInDst && existsInSrc) {
                 // okay, nothing to do
@@ -195,14 +232,6 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
             }
         }
         return createIndexStatements;
-    }
-
-    static private Map<SQLiteComponent, String> parseIndexes(Collection<String> indexes) {
-        Map<SQLiteComponent, String> parsedIndexPairs = new HashMap<>();
-        for (String createIndexStatement : indexes) {
-            parsedIndexPairs.put(SQLiteParserUtils.parseIntoSQLiteComponent(createIndexStatement), createIndexStatement);
-        }
-        return parsedIndexPairs;
     }
 
     public List<String> tableDiff(String from, String to) {
@@ -273,18 +302,6 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         db.insertOrThrow(MIGRATION_STEPS_TABLE, null, values);
     }
 
-    private String serializeArgs(@NonNull Object[] args) {
-        if (args.length == 0) {
-            return "[]";
-        }
-
-        JSONArray array = new JSONArray();
-        for (Object arg : args) {
-            array.put(arg);
-        }
-        return array.toString();
-    }
-
     public void executeStatements(final SQLiteDatabase db, final List<String> statements) {
         if (statements.isEmpty()) {
             return;
@@ -300,21 +317,5 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
                 }
             }
         });
-    }
-
-    public Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<? extends MigrationSchema> schemas) {
-        Map<String, SQLiteMaster> metadata = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-
-        Set<String> tableNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        for (MigrationSchema schema : schemas) {
-            tableNames.add(schema.getTableName());
-        }
-
-        for (Map.Entry<String, SQLiteMaster> entry : SQLiteMaster.loadTables(db).entrySet()) {
-            if (tableNames.contains(entry.getKey())) {
-                metadata.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return metadata;
     }
 }
