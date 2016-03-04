@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.migration;
 
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -26,6 +27,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
+/**
+ * Interface to the SQLite metadata table, {@code sqlite_master}.
+ */
 public class SQLiteMaster implements MigrationSchema {
 
     public static String TAG = "SQLiteMaster";
@@ -51,6 +55,11 @@ public class SQLiteMaster implements MigrationSchema {
     }
 
     @NonNull
+    public static boolean checkIfTableNameExists(@NonNull SQLiteDatabase db, @NonNull String tableName) {
+        return DatabaseUtils.queryNumEntries(db, "sqlite_master", "tbl_name = ?", new String[]{tableName}) != 0;
+    }
+
+    @NonNull
     public static SQLiteMaster findByTableName(@NonNull SQLiteDatabase db, @NonNull String tableName) {
         Cursor cursor = db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master where tbl_name = ?",
                 new String[]{tableName});
@@ -65,6 +74,7 @@ public class SQLiteMaster implements MigrationSchema {
         }
     }
 
+    @NonNull
     public static Map<String, SQLiteMaster> loadTables(@NonNull SQLiteDatabase db) {
         Cursor cursor = db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master", null);
         try {
@@ -74,6 +84,7 @@ public class SQLiteMaster implements MigrationSchema {
         }
     }
 
+    @NonNull
     public static Map<String, SQLiteMaster> loadTables(Cursor cursor) {
         Map<String, SQLiteMaster> tables = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (cursor.moveToFirst()) {

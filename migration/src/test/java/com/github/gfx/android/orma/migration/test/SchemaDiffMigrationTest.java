@@ -97,6 +97,19 @@ public class SchemaDiffMigrationTest {
     }
 
     @Test
+    public void isSchemaChanged() throws Exception {
+        db.execSQL("DROP TABLE foo");
+        db.execSQL("DROP TABLE bar");
+        migration.start(db, schemas);
+
+        assertThat(migration.isSchemaChanged(db), is(false));
+
+        db.execSQL("CREATE TABLE baz (id INTEGER PRIMARY KEY)");
+
+        assertThat(migration.isSchemaChanged(db), is(true));
+    }
+
+    @Test
     public void differentCases() throws Exception {
         List<SchemaData> newSchemas = Arrays.asList(
                 new SchemaData("FOO", "CREATE TABLE `FOO` (`FIELD01` TEXT, `FIELD02` TEXT)",
@@ -157,6 +170,35 @@ public class SchemaDiffMigrationTest {
 
         assertThat(migration.diffAll(SchemaDiffMigration.loadMetadata(db, schemas), schemas), is(empty()));
     }
+
+    @Test
+    public void migrationStepTableMigration1To2() throws Exception {
+        // setup v1 table
+        db.execSQL("CREATE TABLE IF NOT EXISTS "
+                        + SchemaDiffMigration.MIGRATION_STEPS_TABLE_1 + " ("
+                        + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        // no `db_version`
+                        + "version_name TEXT NOT NULL, "
+                        + "version_code INTEGER NOT NULL, "
+                        + "schema_hash TEXT NOT NULL, "
+                        + "sql TEXT NULL, "
+                        + "args TEXT NULL, "
+                        + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+        );
+        db.execSQL("INSERT INTO " + SchemaDiffMigration.MIGRATION_STEPS_TABLE_1
+                        + " (version_name, version_code, schema_hash, sql, args)"
+                        + " VALUES"
+                        + " ('1.2.3', 123, 'deadbeef', '--', '[]')"
+        );
+
+        migration.start(db, schemas);
+
+        assertThat(SQLiteMaster.checkIfTableNameExists(db, SchemaDiffMigration.MIGRATION_STEPS_TABLE_1), is(false));
+        assertThat(SQLiteMaster.checkIfTableNameExists(db, SchemaDiffMigration.MIGRATION_STEPS_TABLE), is(true));
+
+        assertThat(migration.isSchemaChanged(db), is(false));
+    }
+
 
     class OpenHelper extends SQLiteOpenHelper {
 

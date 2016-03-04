@@ -26,14 +26,16 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
+import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,9 +49,13 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     public static final String TAG = "SchemaDiffMigration";
 
-    public static final String MIGRATION_STEPS_TABLE = "orma_schema_diff_migration_steps";
+    public static final String MIGRATION_STEPS_TABLE_1 = "orma_schema_diff_migration_steps";
+
+    public static final String MIGRATION_STEPS_TABLE = "orma_schema_diff_migration_2";
 
     static final String kId = "id";
+
+    static final String kDbVersion = "db_version"; // PRAGMA schema_version
 
     static final String kVersionName = "version_name";
 
@@ -61,15 +67,18 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     static final String kArgs = "args";
 
+    static final String kCreatedTimestamp = "created_timestamp";
+
     public static final String SCHEMA_DIFF_DDL = "CREATE TABLE IF NOT EXISTS "
             + MIGRATION_STEPS_TABLE + " ("
             + kId + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + kDbVersion + " INTEGER NOT NULL, "
             + kVersionName + " TEXT NOT NULL, "
             + kVersionCode + " INTEGER NOT NULL, "
             + kSchemaHash + " TEXT NOT NULL, "
             + kSql + " TEXT NULL, "
             + kArgs + " TEXT NULL, "
-            + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
+            + kCreatedTimestamp + " DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
 
     final String versionName;
 
@@ -93,7 +102,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     static private Map<CreateIndexStatement, String> parseIndexes(Collection<String> indexes) {
-        Map<CreateIndexStatement, String> parsedIndexPairs = new HashMap<>();
+        Map<CreateIndexStatement, String> parsedIndexPairs = new LinkedHashMap<>();
         for (String createIndexStatement : indexes) {
             parsedIndexPairs.put(SQLiteParserUtils.parseIntoCreateIndexStatement(createIndexStatement), createIndexStatement);
         }
@@ -143,21 +152,22 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         }
     }
 
-    private boolean isSchemaChanged(SQLiteDatabase db) {
-        String oldSchemaHash = fetchDbSchemaHash(db);
-        return !schemaHash.equals(oldSchemaHash);
+    public boolean isSchemaChanged(SQLiteDatabase db) {
+        Pair<Integer, String> versions = fetchSchemaVersions(db);
+        int dbVersion = fetchDbVersion(db);
+        return !(dbVersion == versions.first && schemaHash.equals(versions.second));
     }
 
-    @Nullable
-    private String fetchDbSchemaHash(SQLiteDatabase db) {
+    @NonNull
+    private Pair<Integer, String> fetchSchemaVersions(SQLiteDatabase db) {
         ensureHistoryTableExists(db);
-        Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kSchemaHash},
+        Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kDbVersion, kSchemaHash},
                 null, null, null, null, kId + " DESC", "1");
         try {
             if (cursor.moveToFirst()) {
-                return cursor.getString(0);
+                return new Pair<>(cursor.getInt(0), cursor.getString(1));
             } else {
-                return null;
+                return new Pair<>(0, "");
             }
         } finally {
             cursor.close();
@@ -166,8 +176,32 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     void ensureHistoryTableExists(SQLiteDatabase db) {
         if (!tableCreated) {
-            db.execSQL(SCHEMA_DIFF_DDL);
+            migrate(db);
             tableCreated = true;
+        }
+    }
+
+    public void migrate(SQLiteDatabase db) {
+        if (SQLiteMaster.checkIfTableNameExists(db, MIGRATION_STEPS_TABLE_1)) {
+            try {
+                db.beginTransaction();
+
+                db.execSQL(SCHEMA_DIFF_DDL);
+                String[] src = {kId, "0", kVersionName, kVersionCode, kSchemaHash, kSql, kArgs, kCreatedTimestamp};
+                String[] dst = {kId, kDbVersion, kVersionName, kVersionCode, kSchemaHash, kSql, kArgs, kCreatedTimestamp};
+                db.execSQL("INSERT INTO " + MIGRATION_STEPS_TABLE + " ("
+                        + TextUtils.join(", ", dst)
+                        + ") SELECT "
+                        + TextUtils.join(", ", src) + " FROM " + MIGRATION_STEPS_TABLE_1);
+                db.execSQL("DROP TABLE " + MIGRATION_STEPS_TABLE_1);
+                db.execSQL(SCHEMA_DIFF_DDL);
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } else {
+            db.execSQL(SCHEMA_DIFF_DDL);
         }
     }
 
@@ -279,10 +313,11 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         return "DROP INDEX IF EXISTS " + createIndexStatement.getIndexName();
     }
 
-    public void saveStep(SQLiteDatabase db, @Nullable String sql, @NonNull Object... args) {
+    public void saveStep(@NonNull SQLiteDatabase db, int dbVersion, @Nullable String sql, @NonNull Object... args) {
         ensureHistoryTableExists(db);
 
         ContentValues values = new ContentValues();
+        values.put(kDbVersion, dbVersion);
         values.put(kVersionName, versionName);
         values.put(kVersionCode, versionCode);
         values.put(kSchemaHash, schemaHash);
@@ -293,6 +328,8 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     public void executeStatements(final SQLiteDatabase db, final List<String> statements) {
         if (statements.isEmpty()) {
+            int dbVersion = fetchDbVersion(db);
+            saveStep(db, dbVersion, null); // just to save the db version
             return;
         }
 
@@ -302,9 +339,17 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
                 for (String statement : statements) {
                     trace("%s", statement);
                     db.execSQL(statement);
-                    saveStep(db, statement);
+                }
+
+                int dbVersion = fetchDbVersion(db);
+                for (String statement : statements) {
+                    saveStep(db, dbVersion, statement);
                 }
             }
         });
+    }
+
+    private static int fetchDbVersion(SQLiteDatabase db) {
+        return (int) DatabaseUtils.longForQuery(db, "PRAGMA schema_version", null);
     }
 }
