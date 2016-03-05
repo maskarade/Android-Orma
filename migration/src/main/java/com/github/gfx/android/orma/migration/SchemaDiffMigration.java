@@ -148,7 +148,12 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         if (isSchemaChanged(db)) {
             Map<String, ? extends MigrationSchema> masterSchemas = loadMetadata(db, schemas);
             List<String> statements = diffAll(masterSchemas, schemas);
-            executeStatements(db, statements);
+            if (statements.isEmpty()) {
+                int dbVersion = fetchDbVersion(db);
+                saveStep(db, dbVersion, null); // just to save the db version
+            } else {
+                executeStatements(db, statements);
+            }
         }
     }
 
@@ -328,8 +333,6 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     public void executeStatements(final SQLiteDatabase db, final List<String> statements) {
         if (statements.isEmpty()) {
-            int dbVersion = fetchDbVersion(db);
-            saveStep(db, dbVersion, null); // just to save the db version
             return;
         }
 
