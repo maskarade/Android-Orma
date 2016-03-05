@@ -14,6 +14,7 @@ import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
+import java.lang.Deprecated;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Arrays;
@@ -87,7 +88,15 @@ public class OrmaDatabase implements DatabaseHandle {
     connection.transactionNonExclusiveAsync(task);
   }
 
+  /**
+   * Retrieves a model from a cursor. */
   @NonNull
+  public Category newCategoryFromCursor(@NonNull Cursor cursor) {
+    return Category_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
+  }
+
+  @NonNull
+  @Deprecated
   public Category loadCategoryfromCursor(@NonNull Cursor cursor) {
     return Category_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
   }
@@ -161,7 +170,15 @@ public class OrmaDatabase implements DatabaseHandle {
     return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
+  /**
+   * Retrieves a model from a cursor. */
   @NonNull
+  public Item newItemFromCursor(@NonNull Cursor cursor) {
+    return Item_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
+  }
+
+  @NonNull
+  @Deprecated
   public Item loadItemfromCursor(@NonNull Cursor cursor) {
     return Item_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
   }
@@ -235,7 +252,15 @@ public class OrmaDatabase implements DatabaseHandle {
     return new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
+  /**
+   * Retrieves a model from a cursor. */
   @NonNull
+  public Todo newTodoFromCursor(@NonNull Cursor cursor) {
+    return Todo_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
+  }
+
+  @NonNull
+  @Deprecated
   public Todo loadTodofromCursor(@NonNull Cursor cursor) {
     return Todo_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
   }
