@@ -167,7 +167,10 @@ public class RxObservableTest {
 
     @Test
     public void exceptionInObservable() throws Exception {
-        class AbortInMapException extends RuntimeException{}
+        @SuppressWarnings("serial")
+        class AbortInMapException extends RuntimeException {
+
+        }
 
         TestSubscriber<String> testSubscriber = TestSubscriber.create();
         final List<String> mapped = new ArrayList<>();
