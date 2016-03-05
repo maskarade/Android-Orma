@@ -25,12 +25,13 @@ public interface MigrationEngine {
     /**
      * @return a tag for {@link android.util.Log}
      */
-    @NonNull String getTag();
+    @NonNull
+    String getTag();
 
     /**
      * Starts migration for {@code db} with {@code schemas}.
      *
-     * @param db a writable database
+     * @param db      a writable database
      * @param schemas target table definitions
      */
     void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas);

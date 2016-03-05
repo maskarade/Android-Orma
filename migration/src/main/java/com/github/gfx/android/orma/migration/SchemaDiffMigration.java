@@ -268,6 +268,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         return createIndexStatements;
     }
 
+    @NonNull
     public List<String> tableDiff(String from, String to) {
         if (from.equals(to)) {
             return Collections.emptyList();

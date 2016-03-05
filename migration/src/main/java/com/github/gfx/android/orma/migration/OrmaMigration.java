@@ -52,16 +52,11 @@ public class OrmaMigration extends AbstractMigrationEngine {
      * @param manualStepMigration Used to control manual-step migration
      * @param schemaDiffMigration Used to control automatic migration
      */
-    protected OrmaMigration(ManualStepMigration manualStepMigration, SchemaDiffMigration schemaDiffMigration, TraceListener traceListener) {
+    protected OrmaMigration(ManualStepMigration manualStepMigration, SchemaDiffMigration schemaDiffMigration,
+            TraceListener traceListener) {
         super(traceListener);
         this.manualStepMigration = manualStepMigration;
         this.schemaDiffMigration = schemaDiffMigration;
-    }
-
-    @NonNull
-    @Override
-    public String getTag() {
-        return TAG;
     }
 
     /**
@@ -70,6 +65,12 @@ public class OrmaMigration extends AbstractMigrationEngine {
      */
     public static Builder builder(@NonNull Context context) {
         return new Builder(context);
+    }
+
+    @NonNull
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     public ManualStepMigration getManualStepMigration() {
@@ -139,7 +140,7 @@ public class OrmaMigration extends AbstractMigrationEngine {
             return this;
         }
 
-        public Builder trace(@NonNull  TraceListener traceListener) {
+        public Builder trace(@NonNull TraceListener traceListener) {
             this.traceListener = traceListener;
             return this;
         }
