@@ -8,6 +8,19 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.2.0 - 2016/03/05
+
+This release has no new feature, but because of lots of internal changes the minor version increases.
+
+### Bug Fixes
+
+* `SchemaDiffMigration` becomse more stable,
+   using `PRAGMA schema_version` to check whether migartion is required or not.
+* The AAR bundles proguard config, which was broken in the past versions
+* `SchemaDiffMigration` uses `SQLiteParser` to parse `CREATE INDEX` statements to parse them correctly
+* `OrmaDatabase#new${Model}FromCursor()` to retrieve a model from a cursor,
+  deprecating `#load${Model}fromCursor()`
+
 ## v2.1.0 - 2016/02/28
 
 * https://github.com/gfx/Android-Orma/compare/v2.0.6...v2.1.0
