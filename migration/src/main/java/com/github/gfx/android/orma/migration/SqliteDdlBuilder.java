@@ -20,7 +20,6 @@ import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +44,7 @@ public class SqliteDdlBuilder {
     }
 
     @NonNull
-    public String buildCreateTable(@NonNull SQLiteComponent.Name table, @NonNull List<String> columns) {
+    public String buildCreateTable(@NonNull SQLiteComponent.Name table, @NonNull List<CreateTableStatement.ColumnDef> columns) {
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE ");
         sb.append(table);
@@ -82,24 +81,7 @@ public class SqliteDdlBuilder {
 
         SQLiteComponent.Name tempTableName = new SQLiteComponent.Name("__temp_" + toTableName.getUnquotedToken());
 
-        statements.add(buildCreateTable(tempTableName,
-                map(toTable.getColumns(), new SqliteDdlBuilder.Func<CreateTableStatement.ColumnDef, String>() {
-                    @Override
-                    public String call(CreateTableStatement.ColumnDef arg) {
-                        StringBuilder columnSpecBuilder = new StringBuilder(arg.getName());
-
-                        if (arg.getType() != null) {
-                            columnSpecBuilder.append(' ');
-                            columnSpecBuilder.append(arg.getType());
-                        }
-
-                        if (!arg.getConstraints().isEmpty()) {
-                            columnSpecBuilder.append(' ');
-                            columnSpecBuilder.append(TextUtils.join(" ", arg.getConstraints()));
-                        }
-                        return columnSpecBuilder.toString();
-                    }
-                })));
+        statements.add(buildCreateTable(tempTableName, toTable.getColumns()));
 
         statements.add(buildInsertFromSelect(fromTableName, tempTableName, fromColumnNames, toColumnNames));
         statements.add(buildDropTable(fromTableName));
@@ -166,10 +148,10 @@ public class SqliteDdlBuilder {
         return result;
     }
 
-    public void appendWithSeparator(StringBuilder builder, String separator, Collection<? extends CharSequence> collection) {
+    public <T> void appendWithSeparator(StringBuilder builder, String separator, Collection<T> collection) {
         int i = 0;
         int size = collection.size();
-        for (CharSequence item : collection) {
+        for (T item : collection) {
             builder.append(item);
             if ((i + 1) != size) {
                 builder.append(separator);
