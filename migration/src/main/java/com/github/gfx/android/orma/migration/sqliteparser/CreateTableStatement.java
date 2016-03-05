@@ -71,6 +71,22 @@ public class CreateTableStatement extends SQLiteComponent {
             return constraints;
         }
 
+        @Override
+        public String toString() {
+            StringBuilder columnSpecBuilder = new StringBuilder(name);
+
+            if (type != null) {
+                columnSpecBuilder.append(' ');
+                columnSpecBuilder.append(type);
+            }
+
+            for (Constraint constraint : constraints) {
+                columnSpecBuilder.append(' ');
+                columnSpecBuilder.append(constraint);
+            }
+            return columnSpecBuilder.toString();
+        }
+
         public static class Constraint extends SQLiteComponent {
 
             boolean primaryKey;
