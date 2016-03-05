@@ -234,6 +234,18 @@ public class QueryTest {
     }
 
     @Test
+    public void newModelFromCursor() throws Exception {
+        Cursor cursor = db.selectFromBook().execute();
+        cursor.moveToFirst();
+
+        Book book = db.newBookFromCursor(cursor);
+
+        assertThat(book.title, is("today"));
+
+        cursor.close();
+    }
+
+    @Test
     public void whereEquals() throws Exception {
         List<Book> books = db.selectFromBook().where("title = ?", "today").toList();
         assertThat(books, hasSize(1));
