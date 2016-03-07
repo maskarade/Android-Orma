@@ -91,7 +91,16 @@ public class SchemaDefinition {
         this.deleterClassName = helperClassName(table.deleterClassName(), modelClassName, "_Deleter");
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
-        this.columns = collectColumns(typeElement);
+        columns = collectColumns(typeElement);
+        // Places primaryKey as the last in columns to handle withoutAutoId.
+        // See also the bindArgs() generator in SchemaWriter.
+        columns.sort((a, b) -> {
+            if (a.primaryKey || b.primaryKey) {
+                return -1;
+            }
+            return 0;
+        });
+
         this.primaryKey = findPrimaryKey(columns);
         this.constructorElement = findConstructor(context, typeElement);
         this.hasDirectAssociations = hasDirectAssociations(columns);
@@ -172,17 +181,24 @@ public class SchemaDefinition {
 
 
     List<ColumnDefinition> collectColumns(TypeElement typeElement) {
+        List<ColumnDefinition> columns = new ArrayList<>();
+
+        TypeMirror superclass = typeElement.getSuperclass();
+        if (!superclass.toString().contentEquals(Object.class.getCanonicalName())) {
+            TypeElement superclassElement = context.processingEnv.getElementUtils().getTypeElement(superclass.toString());
+            columns.addAll(collectColumns(superclassElement));
+        }
+
         Map<String, ExecutableElement> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         Map<String, ExecutableElement> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        List<VariableElement> primaryKeyElements = new ArrayList<>(); // 0 or 1 items
         List<VariableElement> columnElements = new ArrayList<>();
 
         typeElement.getEnclosedElements()
                 .forEach(element -> {
                     if (element instanceof VariableElement) {
                         if (element.getAnnotation(PrimaryKey.class) != null) {
-                            primaryKeyElements.add((VariableElement) element);
+                            columnElements.add((VariableElement) element);
                         } else if (element.getAnnotation(Column.class) != null) {
                             columnElements.add((VariableElement) element);
                         }
@@ -205,16 +221,14 @@ public class SchemaDefinition {
                     setters.put(extractNameFromSetter(setter, executableElement), executableElement);
                 });
 
-        // insert primaryKey as the last item in columns (see the bindArgs() generator in SchemaWriter)
-        columnElements.addAll(primaryKeyElements);
-
-        return columnElements.stream()
+        columns.addAll(columnElements.stream()
                 .map((element) -> {
                     ColumnDefinition column = new ColumnDefinition(this, element);
                     column.initGetterAndSetter(getters.get(column.columnName), setters.get(column.columnName));
                     return column;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        return columns;
     }
 
     private String extractNameFromGetter(Getter getter, ExecutableElement getterElement) {

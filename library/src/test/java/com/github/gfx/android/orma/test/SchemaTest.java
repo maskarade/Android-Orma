@@ -19,14 +19,19 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithInheritance;
+import com.github.gfx.android.orma.test.model.ModelWithInheritance_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithStorageTypes_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters_Schema;
 import com.github.gfx.android.orma.test.model.PublisherSchema;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.support.test.runner.AndroidJUnit4;
+
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -111,6 +116,21 @@ public class SchemaTest {
 
     @Test
     public void testStorageTypeForDirectAssociation() throws Exception {
-        assertThat(ModelWithDirectAssociation_Schema.author.storageType, is(Author_Schema.INSTANCE.getPrimaryKey().storageType));
+        assertThat(ModelWithDirectAssociation_Schema.author.storageType,
+                is(Author_Schema.INSTANCE.getPrimaryKey().storageType));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testInheritance() throws Exception {
+        List<ColumnDef<ModelWithInheritance, ?>> columns = ModelWithInheritance_Schema.INSTANCE.getColumns();
+
+        assertThat("Base columns first, PrimaryKey las...t",
+                columns,
+                Matchers.<ColumnDef<ModelWithInheritance, ?>>contains(
+                        ModelWithInheritance_Schema.baseColumn,
+                        ModelWithInheritance_Schema.value,
+                        ModelWithInheritance_Schema.id
+                ));
     }
 }
