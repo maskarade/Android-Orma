@@ -184,7 +184,7 @@ public class SchemaDefinition {
         List<ColumnDefinition> columns = new ArrayList<>();
 
         TypeMirror superclass = typeElement.getSuperclass();
-        if (!superclass.toString().contentEquals(Object.class.getCanonicalName())) {
+        if (!superclass.toString().equals(Object.class.getCanonicalName())) {
             TypeElement superclassElement = context.processingEnv.getElementUtils().getTypeElement(superclass.toString());
             columns.addAll(collectColumns(superclassElement));
         }
