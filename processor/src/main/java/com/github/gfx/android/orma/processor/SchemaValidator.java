@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 
 public class SchemaValidator {
 
@@ -47,6 +49,18 @@ public class SchemaValidator {
         validateAtLeastOneColumn(typeElement);
         validatePrimaryKey(typeElement);
         validateNames(typeElement);
+        validateNoOrmaModelInInheritance(typeElement.getSuperclass());
+    }
+
+    private void validateNoOrmaModelInInheritance(TypeMirror type) {
+        TypeElement t = context.processingEnv.getElementUtils().getTypeElement(type.toString());
+        if (t.getAnnotation(Table.class) != null) {
+            error("The superclasses of Orma models are not allowed to have @Table annotation", t);
+        }
+
+        if (!t.toString().equals(Object.class.getCanonicalName())) {
+            validateNoOrmaModelInInheritance(t.getSuperclass());
+        }
     }
 
     private void validateAtLeastOneColumn(TypeElement typeElement) {

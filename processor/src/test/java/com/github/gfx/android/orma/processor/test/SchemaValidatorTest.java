@@ -100,4 +100,15 @@ public class SchemaValidatorTest {
                 .withErrorContaining("Too many @Setter constructors");
     }
 
+    @Test
+    public void testModelInheritance() throws Exception {
+        JavaFileObject modelFile = JavaFileObjects.forResource("ModelInheritance.java");
+
+        assert_().about(javaSource())
+                .that(modelFile)
+                .processedWith(new OrmaProcessor())
+                .failsToCompile()
+                .withErrorCount(1)
+                .withErrorContaining("The superclasses of Orma models are not allowed to have @Table annotation");
+    }
 }
