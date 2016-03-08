@@ -8,6 +8,13 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.3.0 - 2016/03/08
+
+## New Features
+
+* Orma models now inherit @Columns from superclasses, which must not have @Table, though.
+  Note that STI (single table inheritance) is not (and won't be) supported.
+
 ## v2.2.0 - 2016/03/05
 
 This release has no new feature, but because of lots of internal changes the minor version increases.
