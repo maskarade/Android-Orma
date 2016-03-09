@@ -93,7 +93,9 @@ public class SchemaDefinition {
         // Places primaryKey as the last in columns to handle withoutAutoId.
         // See also the bindArgs() generator in SchemaWriter.
         columns.sort((a, b) -> {
-            if (a.primaryKey || b.primaryKey) {
+            if (a.primaryKey) {
+                return 1;
+            } else if (b.primaryKey) {
                 return -1;
             }
             return 0;
