@@ -71,8 +71,6 @@ public class SchemaDefinition {
     @Nullable
     final ExecutableElement constructorElement; // null if it has a default constructor
 
-    final boolean hasDirectAssociations;
-
     String createTableStatement = null;
 
     List<String> createIndexStatements = null;
@@ -103,7 +101,6 @@ public class SchemaDefinition {
 
         this.primaryKey = findPrimaryKey(columns);
         this.constructorElement = findConstructor(context, typeElement);
-        this.hasDirectAssociations = hasDirectAssociations(columns);
     }
 
     /**
@@ -175,7 +172,7 @@ public class SchemaDefinition {
         return null;
     }
 
-    static boolean hasDirectAssociations(List<ColumnDefinition> columns) {
+    public boolean hasDirectAssociations() {
         return columns.stream().anyMatch(ColumnDefinition::isDirectAssociation);
     }
 
@@ -371,10 +368,6 @@ public class SchemaDefinition {
         return CodeBlock.builder()
                 .add("$T.INSTANCE", schemaClassName)
                 .build();
-    }
-
-    public boolean hasDirectAssociations() {
-        return hasDirectAssociations;
     }
 
     public int calculateConsumingColumnSize() {
