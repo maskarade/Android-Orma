@@ -8,6 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.3.2 - 2016/03/10
+
+### Bug Fixes
+
+* Fixed ArrayIndexOutOfBoundsException with convertToArgs() (#218 by @jmatsu)
+
 ## v2.3.1 - 2016/03/09
 
 ### Bug Fixes
