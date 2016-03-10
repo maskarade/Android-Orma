@@ -21,6 +21,8 @@ import com.github.gfx.android.orma.test.model.Book_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithInheritance;
 import com.github.gfx.android.orma.test.model.ModelWithInheritance_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithPrimaryKeyIsNotFirst;
+import com.github.gfx.android.orma.test.model.ModelWithPrimaryKeyIsNotFirst_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithStorageTypes_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters_Schema;
 import com.github.gfx.android.orma.test.model.PublisherSchema;
@@ -131,6 +133,20 @@ public class SchemaTest {
                         ModelWithInheritance_Schema.baseColumn,
                         ModelWithInheritance_Schema.value,
                         ModelWithInheritance_Schema.id
+                ));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testPrimaryKeyPosition() throws Exception {
+        List<ColumnDef<ModelWithPrimaryKeyIsNotFirst, ?>> columns = ModelWithPrimaryKeyIsNotFirst_Schema.INSTANCE.getColumns();
+
+        assertThat("Base columns first, PrimaryKey las...t",
+                columns,
+                Matchers.<ColumnDef<ModelWithPrimaryKeyIsNotFirst, ?>>contains(
+                        ModelWithPrimaryKeyIsNotFirst_Schema.foo,
+                        ModelWithPrimaryKeyIsNotFirst_Schema.bar,
+                        ModelWithPrimaryKeyIsNotFirst_Schema.id
                 ));
     }
 }
