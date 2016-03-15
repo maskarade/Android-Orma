@@ -8,6 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.3.3 - 2016/03/15
+
+### Bug Fixes
+
+* `SchemaValidator` did not look at model inheritance, which caused errors if a derived model had no columns even if it inherited columns from superclasses (#221, reported as #220 by keima)
+
 ## v2.3.2 - 2016/03/10
 
 ### Bug Fixes
