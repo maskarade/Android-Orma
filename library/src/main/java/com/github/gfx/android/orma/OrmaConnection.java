@@ -48,8 +48,6 @@ public class OrmaConnection {
 
     static final String TAG = "Orma";
 
-    static final String[] countSelections = {"COUNT(*)"};
-
     final String name;
 
     /**
@@ -194,7 +192,7 @@ public class OrmaConnection {
         return db.rawQuery(sql, bindArgs);
     }
 
-    public long rawQueryForLong(@NonNull String sql, @NonNull String... bindArgs) {
+    public long rawQueryForLong(@NonNull String sql, String... bindArgs) {
         trace(sql, bindArgs);
         SQLiteDatabase db = getReadableDatabase();
         return DatabaseUtils.longForQuery(db, sql, bindArgs);
@@ -205,12 +203,6 @@ public class OrmaConnection {
         String sql = SQLiteQueryBuilder.buildQueryString(
                 false, schema.getSelectFromTableClause(), columns, whereClause, groupBy, having, orderBy, limit);
         return rawQuery(sql, bindArgs);
-    }
-
-    public int count(Schema<?> schema, String whereClause, String[] whereArgs) {
-        String sql = SQLiteQueryBuilder.buildQueryString(
-                false, schema.getSelectFromTableClause(), countSelections, whereClause, null, null, null, null);
-        return (int) rawQueryForLong(sql, whereArgs);
     }
 
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,

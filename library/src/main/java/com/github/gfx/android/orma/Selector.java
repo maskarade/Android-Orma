@@ -41,6 +41,8 @@ import rx.functions.FuncN;
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
 
+    protected static final String[] countSelections = {"COUNT(*)"};
+
     @Nullable
     protected String groupBy;
 
@@ -147,7 +149,9 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @IntRange(from = 0)
     public int count() {
-        return conn.count(schema, getWhereClause(), getBindArgs());
+        String sql = SQLiteQueryBuilder.buildQueryString(
+                false, schema.getSelectFromTableClause(), countSelections, getWhereClause(), null, null, null, null);
+        return (int) conn.rawQueryForLong(sql, getBindArgs());
     }
 
     /**
