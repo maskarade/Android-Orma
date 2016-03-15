@@ -127,19 +127,17 @@ public class OrmaProcessor extends AbstractProcessor {
     }
 
     public Stream<SchemaDefinition> buildTableSchemas(ProcessingContext context, RoundEnvironment roundEnv) {
-        SchemaValidator validator = new SchemaValidator(context);
         return roundEnv
                 .getElementsAnnotatedWith(Table.class)
                 .stream()
-                .map(element -> new SchemaDefinition(context, validator.validate(element)));
+                .map(element -> new SchemaDefinition(context, (TypeElement) element));
     }
 
     public Stream<SchemaDefinition> buildVirtualTableSchemas(ProcessingContext context, RoundEnvironment roundEnv) {
-        SchemaValidator validator = new SchemaValidator(context);
         return roundEnv
                 .getElementsAnnotatedWith(VirtualTable.class)
                 .stream()
-                .map(element -> new SchemaDefinition(context, validator.validate(element)));
+                .map(element -> new SchemaDefinition(context, (TypeElement) element));
     }
 
     public void writeCodeForEachModel(SchemaDefinition schema, BaseWriter writer) {
