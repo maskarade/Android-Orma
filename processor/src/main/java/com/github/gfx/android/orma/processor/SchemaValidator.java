@@ -15,15 +15,13 @@
  */
 package com.github.gfx.android.orma.processor;
 
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.processor.model.ColumnDefinition;
+import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -35,21 +33,22 @@ public class SchemaValidator {
 
     final ProcessingContext context;
 
-    public SchemaValidator(ProcessingContext context) {
+    final SchemaDefinition schema;
+
+    public static void validate(ProcessingContext context, SchemaDefinition schema) {
+        new SchemaValidator(context, schema).run();
+    }
+
+    public SchemaValidator(ProcessingContext context, SchemaDefinition schema) {
         this.context = context;
+        this.schema = schema;
     }
 
-    public TypeElement validate(Element element) {
-        TypeElement typeElement = (TypeElement) element;
-        validateTypeElement(typeElement);
-        return typeElement;
-    }
-
-    private void validateTypeElement(TypeElement typeElement) {
-        validateAtLeastOneColumn(typeElement);
-        validatePrimaryKey(typeElement);
-        validateNames(typeElement);
-        validateNoOrmaModelInInheritance(typeElement.getSuperclass());
+    public void run() {
+        validateAtLeastOneColumn();
+        validatePrimaryKey();
+        validateNames();
+        validateNoOrmaModelInInheritance(schema.getTypeElement().getSuperclass());
     }
 
     private void validateNoOrmaModelInInheritance(TypeMirror type) {
@@ -63,50 +62,42 @@ public class SchemaValidator {
         }
     }
 
-    private void validateAtLeastOneColumn(TypeElement typeElement) {
-        Optional<? extends Element> any = typeElement.getEnclosedElements().stream()
-                .filter(element -> element.getAnnotation(Column.class) != null
-                        || element.getAnnotation(PrimaryKey.class) != null)
-                .findAny();
-
-        if (!any.isPresent()) {
-            error("No @Column nor @PrimaryKey is defined", typeElement);
+    private void validateAtLeastOneColumn() {
+        if (schema.getColumns().isEmpty()) {
+            error("No @Column nor @PrimaryKey is defined", schema.getTypeElement());
         }
     }
 
-    private void validatePrimaryKey(TypeElement typeElement) {
-        List<Element> elements = typeElement.getEnclosedElements().stream()
-                .filter(element -> element.getAnnotation(PrimaryKey.class) != null)
+    private void validatePrimaryKey() {
+        List<ColumnDefinition> primaryKeys = schema.getColumns()
+                .stream().filter(column -> column.primaryKey)
                 .collect(Collectors.toList());
 
-        if (elements.size() > 1) {
-            elements.forEach(element -> {
-                error("Multiple @PrimaryKey found, but it must be once", element);
+        if (primaryKeys.size() > 1) {
+            primaryKeys.forEach(column -> {
+                error("Multiple @PrimaryKey found, but it must be once", column.element);
             });
         }
     }
 
-    private void validateNames(TypeElement typeElement) {
-        Map<String, List<Element>> unique = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private void validateNames() {
+        Map<String, List<ColumnDefinition>> unique = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        typeElement.getEnclosedElements().stream()
-                .filter(element -> element.getAnnotation(Column.class) != null
-                        || element.getAnnotation(PrimaryKey.class) != null)
-                .forEach(element -> {
-                    String name = ColumnDefinition.getColumnName(element);
+        for (ColumnDefinition column : schema.getColumns()) {
+            String name = column.columnName;
 
-                    List<Element> elements = unique.get(name);
-                    if (elements == null) {
-                        elements = new ArrayList<>();
-                    }
-                    elements.add(element);
-                    unique.put(name, elements);
-                });
+            List<ColumnDefinition> columns = unique.get(name);
+            if (columns == null) {
+                columns = new ArrayList<>();
+            }
+            columns.add(column);
+            unique.put(name, columns);
+        }
 
         unique.forEach((name, elements) -> {
             if (elements.size() > 1) {
-                elements.forEach(element -> {
-                    error("Duplicate column names \"" + name + "\" found", element);
+                elements.forEach(column -> {
+                    error("Duplicate column names \"" + name + "\" found", column.element);
                 });
             }
         });
