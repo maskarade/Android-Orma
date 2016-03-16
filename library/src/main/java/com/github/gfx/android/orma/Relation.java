@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -134,6 +135,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * @param item A model to delete.
      * @return An {@link Observable} that yields the position of the deleted item if the item is deleted.
      */
+    @CheckResult
     @NonNull
     public Observable<Integer> deleteAsObservable(@NonNull final Model item) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
@@ -169,6 +171,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * @param size Size to truncate the table
      * @return A {@link Single} that yields the number of rows deleted.
      */
+    @CheckResult
     @NonNull
     public Single<Integer> truncateAsObservable(@IntRange(from = 0) final int size) {
         return Single.create(new Single.OnSubscribe<Integer>() {
@@ -190,6 +193,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * @param factory A model to insert.
      * @return An {@link Single} that yields the newly inserted row id.
      */
+    @CheckResult
     @NonNull
     public Single<Long> insertAsObservable(@NonNull final ModelFactory<Model> factory) {
         return Single.create(new Single.OnSubscribe<Long>() {

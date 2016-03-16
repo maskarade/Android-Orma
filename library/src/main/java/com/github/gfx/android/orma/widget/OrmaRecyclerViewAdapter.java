@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 
 import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -83,6 +84,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      * @param factory A model factory invoked in a background thread.
      * @return A {@link Single} that yields the newly inserted row id.
      */
+    @CheckResult
     @NonNull
     public Single<Long> addItemAsObservable(@NonNull final ModelFactory<Model> factory) {
         return delegate.addItemAsObservable(factory)
@@ -105,6 +107,8 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      * @param item A model factory invoked in a background thread.
      * @return A hot {@link Observable} that yields the newly inserted row id.
      */
+    @CheckResult
+    @NonNull
     public Single<Long> addItemAsObservable(@NonNull final Model item) {
         return addItemAsObservable(new ModelFactory<Model>() {
             @NonNull
@@ -122,6 +126,8 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      * @return An {@link Observable} that yields the position at which the item was. {@code onNext()} is only called if the
      * item existed.
      */
+    @CheckResult
+    @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
         return delegate.removeItemAsObservable(item)
                 .doOnNext(new Action1<Integer>() {
@@ -142,6 +148,8 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      *
      * @return A {@link Single} that yields the number of deleted items.
      */
+    @CheckResult
+    @NonNull
     public Single<Integer> clearAsObservable() {
         return delegate.clearAsObservable()
                 .doOnSuccess(new Action1<Integer>() {

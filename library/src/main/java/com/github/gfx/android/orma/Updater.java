@@ -18,6 +18,7 @@ package com.github.gfx.android.orma;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.content.ContentValues;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
 import rx.Single;
@@ -47,6 +48,7 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
         return conn.update(schema, contents, getWhereClause(), getBindArgs());
     }
 
+    @CheckResult
     @NonNull
     public Single<Integer> executeAsObservable() {
         return Single.create(new Single.OnSubscribe<Integer>() {

@@ -17,6 +17,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
 import rx.Single;
@@ -39,6 +40,7 @@ public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaCo
         return conn.delete(schema, getWhereClause(), getBindArgs());
     }
 
+    @CheckResult
     @NonNull
     public Single<Integer> executeAsObservable() {
         return Single.create(new Single.OnSubscribe<Integer>() {

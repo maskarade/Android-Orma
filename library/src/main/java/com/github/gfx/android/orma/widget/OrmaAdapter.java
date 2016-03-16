@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.Relation;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 
@@ -84,6 +85,7 @@ public class OrmaAdapter<Model> {
         return relation.getAsObservable(position);
     }
 
+    @CheckResult
     @NonNull
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
         return relation.insertAsObservable(factory)
@@ -95,6 +97,7 @@ public class OrmaAdapter<Model> {
                 });
     }
 
+    @CheckResult
     @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
         return relation.deleteAsObservable(item)
@@ -106,6 +109,7 @@ public class OrmaAdapter<Model> {
                 });
     }
 
+    @CheckResult
     @NonNull
     public Single<Integer> clearAsObservable() {
         return relation.deleter()

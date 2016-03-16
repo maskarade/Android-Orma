@@ -23,6 +23,7 @@ import com.github.gfx.android.orma.internal.OrmaIterator;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.support.annotation.CheckResult;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -202,11 +203,13 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return model;
     }
 
+    @CheckResult
     @NonNull
     public Cursor execute() {
         return conn.rawQuery(buildQuery(), getBindArgs());
     }
 
+    @CheckResult
     @NonNull
     public Cursor executeWithColumns(@NonNull String... columns) {
         return conn.rawQuery(buildQueryWithColumns(columns), getBindArgs());

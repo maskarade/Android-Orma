@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 
 import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.widget.BaseAdapter;
@@ -107,6 +108,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
      * @param item A model factory invoked in a background thread.
      * @return A hot {@link Observable} that yields the new position of the item.
      */
+    @CheckResult
     public Single<Long> addItemAsObservable(final Model item) {
         return addItemAsObservable(new ModelFactory<Model>() {
             @NonNull
@@ -124,6 +126,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
      * @return A hot {@link Observable} that yields the position at which the item was. {@code onNext()} is only called if the
      * item existed.
      */
+    @CheckResult
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
         return delegate.removeItemAsObservable(item)
                 .doOnNext(new Action1<Integer>() {
@@ -144,6 +147,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
      *
      * @return A hot {@link Observable} that yields the new {@code totalCount()} (i.e. always {@code 0}).
      */
+    @CheckResult
     public Single<Integer> clearAsObservable() {
         return delegate.clearAsObservable()
                 .doOnSuccess(new Action1<Integer>() {
