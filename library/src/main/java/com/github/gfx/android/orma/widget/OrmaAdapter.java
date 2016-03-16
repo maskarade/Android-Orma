@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 
 import rx.Observable;
 import rx.Single;
-import rx.functions.Action1;
 
 /**
  * A helper class to provide Adapter method implementations.
@@ -43,12 +42,9 @@ public class OrmaAdapter<Model> {
 
     final Handler handler = new Handler(Looper.getMainLooper());
 
-    int totalCount = 0;
-
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
         this.relation = relation;
-        totalCount = relation.selector().count();
     }
 
     @NonNull
@@ -62,7 +58,7 @@ public class OrmaAdapter<Model> {
     }
 
     public int getItemCount() {
-        return totalCount;
+        return relation.count();
     }
 
     @SuppressWarnings("unchecked")
@@ -88,37 +84,18 @@ public class OrmaAdapter<Model> {
     @CheckResult
     @NonNull
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
-        return relation.insertAsObservable(factory)
-                .doOnSuccess(new Action1<Long>() {
-                    @Override
-                    public void call(Long rowId) {
-                        totalCount++;
-                    }
-                });
+        return relation.insertAsObservable(factory);
     }
 
     @CheckResult
     @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
-        return relation.deleteAsObservable(item)
-                .doOnNext(new Action1<Integer>() {
-                    @Override
-                    public void call(final Integer deletedPosition) {
-                        totalCount--;
-                    }
-                });
+        return relation.deleteAsObservable(item);
     }
 
     @CheckResult
     @NonNull
     public Single<Integer> clearAsObservable() {
-        return relation.deleter()
-                .executeAsObservable()
-                .doOnSuccess(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer deletedItems) {
-                        totalCount = 0;
-                    }
-                });
+        return relation.deleter().executeAsObservable();
     }
 }
