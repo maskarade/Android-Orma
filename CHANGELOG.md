@@ -8,11 +8,17 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.3.5 - 2016/03/16
+
+### Bug Fixes
+
+* `OrmaAdapter` crashed if conditions were set (#229, reported as #227 by @gen0083)
+
 ## v2.3.4 - 2016/03/16
 
 ### Bug Fixes
 
-* Setter and getter names were not used when field names didn't match accessor names (#222 reported by @gen0083). Now accessor names have to match field names, not database column names by default.
+* Setter and getter names were not used when field names didn't match accessor names (#224, reported as #222 by @gen0083). Now accessor names have to match field names, not database column names by default.
 
 ## v2.3.3 - 2016/03/15
 
