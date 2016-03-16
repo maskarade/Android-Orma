@@ -214,28 +214,28 @@ public class SchemaDefinition {
                         return;
                     }
 
-                    ExecutableElement executableElement = (ExecutableElement) element;
+                    ExecutableElement methodElement = (ExecutableElement) element;
 
-                    Getter getter = element.getAnnotation(Getter.class);
-                    Setter setter = element.getAnnotation(Setter.class);
+                    Getter getter = methodElement.getAnnotation(Getter.class);
+                    Setter setter = methodElement.getAnnotation(Setter.class);
 
-                    getters.put(extractNameFromGetter(getter, executableElement), executableElement);
-                    setters.put(extractNameFromSetter(setter, executableElement), executableElement);
+                    getters.put(extractNameFromGetter(getter, methodElement), methodElement);
+                    setters.put(extractNameFromSetter(setter, methodElement), methodElement);
                 });
 
         columns.addAll(columnElements.stream()
                 .map((element) -> {
                     ColumnDefinition column = new ColumnDefinition(this, element);
-                    column.initGetterAndSetter(getters.get(column.columnName), setters.get(column.columnName));
+                    column.initGetterAndSetter(getters.get(column.name), setters.get(column.name));
                     return column;
                 })
                 .collect(Collectors.toList()));
         return columns;
     }
 
-    private String extractNameFromGetter(Getter getter, ExecutableElement getterElement) {
-        if (getter != null && !Strings.isEmpty(getter.value())) {
-            return getter.value();
+    private String extractNameFromGetter(Getter annotation, ExecutableElement getterElement) {
+        if (annotation != null && !Strings.isEmpty(annotation.value())) {
+            return annotation.value();
         } else {
             String name = getterElement.getSimpleName().toString();
             if (isBooleanType(getterElement.getReturnType())) {
@@ -252,9 +252,9 @@ public class SchemaDefinition {
         }
     }
 
-    private String extractNameFromSetter(Setter setter, ExecutableElement setterElement) {
-        if (setter != null && !Strings.isEmpty(setter.value())) {
-            return setter.value();
+    private String extractNameFromSetter(Setter annotation, ExecutableElement setterElement) {
+        if (annotation != null && !Strings.isEmpty(annotation.value())) {
+            return annotation.value();
         } else {
             String name = setterElement.getSimpleName().toString();
             if (name.startsWith("set")) {
