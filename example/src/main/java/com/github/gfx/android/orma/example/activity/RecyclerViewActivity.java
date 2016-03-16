@@ -65,7 +65,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
                 .readOnMainThread(AccessThreadConstraint.NONE)
                 .build();
 
-        adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeAsc());
+        adapter = new Adapter(this, orma.relationOfTodo().doneEq(true).orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
 
         binding.fab.setOnClickListener(new View.OnClickListener() {
@@ -80,6 +80,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
                         todo.title = "RecyclerView item #" + number;
                         todo.content = ZonedDateTime.now().toString();
                         todo.createdTime = new Date();
+                        todo.done = System.currentTimeMillis() % 2 == 0;
                         return todo;
                     }
                 })
