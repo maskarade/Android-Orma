@@ -43,12 +43,9 @@ public class OrmaAdapter<Model> {
 
     final Handler handler = new Handler(Looper.getMainLooper());
 
-    int totalCount = 0;
-
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
         this.relation = relation;
-        totalCount = relation.selector().count();
     }
 
     @NonNull
@@ -62,7 +59,7 @@ public class OrmaAdapter<Model> {
     }
 
     public int getItemCount() {
-        return totalCount;
+        return relation.selector().count();
     }
 
     @SuppressWarnings("unchecked")
@@ -92,7 +89,6 @@ public class OrmaAdapter<Model> {
                 .doOnSuccess(new Action1<Long>() {
                     @Override
                     public void call(Long rowId) {
-                        totalCount++;
                     }
                 });
     }
@@ -104,7 +100,6 @@ public class OrmaAdapter<Model> {
                 .doOnNext(new Action1<Integer>() {
                     @Override
                     public void call(final Integer deletedPosition) {
-                        totalCount--;
                     }
                 });
     }
@@ -117,7 +112,6 @@ public class OrmaAdapter<Model> {
                 .doOnSuccess(new Action1<Integer>() {
                     @Override
                     public void call(Integer deletedItems) {
-                        totalCount = 0;
                     }
                 });
     }
