@@ -198,6 +198,7 @@ public class OrmaConnection {
         return DatabaseUtils.longForQuery(db, sql, bindArgs);
     }
 
+    @NonNull
     public Cursor query(Schema<?> schema, String[] columns, String whereClause, String[] bindArgs,
             String groupBy, String having, String orderBy, String limit) {
         String sql = SQLiteQueryBuilder.buildQueryString(
@@ -205,6 +206,7 @@ public class OrmaConnection {
         return rawQuery(sql, bindArgs);
     }
 
+    @NonNull
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
             String having, String orderBy, long offset) {
         SQLiteCursor cursor = (SQLiteCursor) query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy,

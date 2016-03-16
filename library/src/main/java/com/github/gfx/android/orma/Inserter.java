@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
 import rx.Observable;
@@ -89,6 +90,8 @@ public class Inserter<Model> {
      * @param model A model object to insert
      * @return An {@link Observable} for the last inserted row id
      */
+    @CheckResult
+    @NonNull
     public Single<Long> executeAsObservable(@NonNull final Model model) {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
@@ -106,6 +109,8 @@ public class Inserter<Model> {
      * @param modelFactory A model factory
      * @return An {@link Observable} for the last inserted row id
      */
+    @CheckResult
+    @NonNull
     public Single<Long> executeAsObservable(@NonNull final ModelFactory<Model> modelFactory) {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
@@ -122,6 +127,8 @@ public class Inserter<Model> {
      * @param models model objects to insert
      * @return An {@link Observable} for the last inserted row ids
      */
+    @CheckResult
+    @NonNull
     public Observable<Long> executeAllAsObservable(@NonNull final Iterable<Model> models) {
         return Observable.create(new Observable.OnSubscribe<Long>() {
             @Override
