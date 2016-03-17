@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "io.realm:realm-gradle-plugin:0.88.0"
+        classpath "io.realm:realm-gradle-plugin:0.88.2"
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.4.2'
     }
 }

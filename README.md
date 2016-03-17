@@ -12,10 +12,10 @@ generating helper classes at compile time with **annotation processing**, inspir
 
 Orma has the following features:
 
-* Fast as hand-written code with `SQLiteOpenHelper`
 * Annotation-based schema definitions with POJO model classes
-* Semi-automatic migration, as well as hand-written, step-by-step migration
-* Code generation by annotation processing
+* As fast as hand-written code with `SQLiteOpenHelper`
+* Smart migration, where you don't need to code migration steps
+* Generating bindings in compile time by annotation processing
 
 ## Getting Started
 
@@ -93,7 +93,7 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .build();
 ```
 
-Then, you can create, read, update and delete models:
+Then, you can create, read, update and delete models via `OrmaDatabase`:
 
 ```java
 Todo todo = ...;
@@ -162,6 +162,18 @@ which is an entry point of all the high-level database operations.
 
 For low-level operations, e.g. executing a raw SQL, you can also use
 `OrmaDatabase#getConnection()`, which returns `OrmaConnection`.
+
+The database class is configured by `@Database` annotation:
+
+```java
+@Database(
+    databaseClassName = "OrmaDatabase",
+    includes = { /* ... */ } // Give model classes to handle
+    excludes = { /* ... */ } // Give model classes not to handle
+)
+// The annotated class is not used, but the package name is used to place the OrmaDatabase class.
+public class DatabaseConfiguration { }
+```
 
 ### Models
 
@@ -568,7 +580,7 @@ Each target type has a corresponding SQLite storage type:
 
 ### Dynamic Type Adapters
 
-**This is removed in v2.0.**
+**Dynamic Type Adapters were removed in v2.0.**
 
 If you use type adapters, you can add type serializer instances to `OrmaDatabase`.
 
@@ -618,7 +630,7 @@ More classes? Patches welcome!
 Orma has pluggable migration mechanism via the `MigrationEngine` interface.
 
 The default migration engine is `SchemaDiffMigration`, which handles
-schema changes by making diff with old and new table definitions.
+schema changes by making diff with old and new DDL stored in `sqlite_master`.
 That is, you don't need migration steps for the following cases:
 
 * Adding tables
