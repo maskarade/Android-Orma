@@ -51,7 +51,7 @@ dependencies {
 
 ## Synopsis
 
-First, define model classes annotated with `@Table`, `@Column`, and `@PrimaryKey`.
+First, define model classes annotated with `@Table`, `@Column`, and `@PrimaryKey` and run the **Build APK** command to generate helper classes.
 
 ```java
 package com.github.gfx.android.orma.example;
@@ -740,6 +740,12 @@ If you give a custom migration engine to the orma builder, you have to enable
 boolean trace = true;
 SchemaDiffMigration migration = new SchemaDiffMigration(context, trace);
 ```
+
+### How can see the generated Java files?
+
+As other annotation processors do, Orma save files to `$modle/build/generated/source/apt/`.
+
+You can see [generated files for example models](example/build/generated/source/apt/debug/com/github/gfx/android/orma/example/orma).
 
 ### Does Orma support Kotlin?
 
