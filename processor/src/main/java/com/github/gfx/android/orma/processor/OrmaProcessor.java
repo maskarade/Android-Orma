@@ -156,12 +156,14 @@ public class OrmaProcessor extends AbstractProcessor {
         }
     }
 
-    private synchronized JavaFileObject createSourceFile(JavaFile javaFile, Filer filer) throws IOException {
+    private JavaFileObject createSourceFile(JavaFile javaFile, Filer filer) throws IOException {
         String fileName = javaFile.packageName.isEmpty()
                 ? javaFile.typeSpec.name
                 : javaFile.packageName + "." + javaFile.typeSpec.name;
         List<Element> originatingElements = javaFile.typeSpec.originatingElements;
-        return filer.createSourceFile(fileName, originatingElements.toArray(new Element[originatingElements.size()]));
+        synchronized (this) {
+            return filer.createSourceFile(fileName, originatingElements.toArray(new Element[originatingElements.size()]));
+        }
     }
 
     private void writeTo(JavaFile javaFile, Filer filer) throws IOException {
