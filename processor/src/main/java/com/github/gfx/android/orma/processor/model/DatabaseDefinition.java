@@ -22,10 +22,9 @@ import com.github.gfx.android.orma.processor.util.Mirrors;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
-import android.support.annotation.Nullable;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,19 +49,16 @@ public class DatabaseDefinition {
     public DatabaseDefinition(ProcessingContext context, TypeElement element) {
         this.context = context;
         this.element = element;
-        AnnotationMirror annotation = Mirrors.findAnnotationMirror(element, Database.class);
-        assert annotation != null;
+        AnnotationMirror annotation = Mirrors.findAnnotationMirror(element, Database.class).get();
 
         packageName = context.getElements().getPackageOf(element).toString();
-        String name = Mirrors.findAnnotationValueAsStringOrNull(annotation, "databaseClassName");
-        className = ClassName.get(packageName, name != null ? name : Database.DEFAULT_DATABASE_CLASS_NAME);
+        Optional<String> name = Mirrors.findAnnotationValueAsString(annotation, "databaseClassName");
+        className = ClassName.get(packageName, name.orElse(Database.DEFAULT_DATABASE_CLASS_NAME));
 
         includes = Mirrors.findAnnotationValueAsTypes(annotation, "includes")
-                .stream()
                 .collect(Collectors.toSet());
 
         excludes = Mirrors.findAnnotationValueAsTypes(annotation, "excludes")
-                .stream()
                 .collect(Collectors.toSet());
     }
 
@@ -75,9 +71,8 @@ public class DatabaseDefinition {
         this.excludes = Collections.emptySet();
     }
 
-    @Nullable
-    public TypeElement getElement() {
-        return element;
+    public Optional<TypeElement> getElement() {
+        return Optional.ofNullable(element);
     }
 
     public List<SchemaDefinition> getSchemas() {

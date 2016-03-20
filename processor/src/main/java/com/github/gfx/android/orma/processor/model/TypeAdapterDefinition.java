@@ -71,11 +71,11 @@ public class TypeAdapterDefinition {
         this.typeAdapterImpl = ClassName.get(this.element);
 
         StaticTypeAdapter annotation = element.getAnnotation(StaticTypeAdapter.class);
-        AnnotationMirror annotationMirror = Mirrors.findAnnotationMirror(element, StaticTypeAdapter.class);
+        AnnotationMirror annotationMirror = Mirrors.findAnnotationMirror(element, StaticTypeAdapter.class).get();
 
         // Can't access program class instances in annotation processing in , throwing MirroredTypeException
-        targetType = Mirrors.findAnnotationValueAsType(annotationMirror, "targetType");
-        serializedType = Mirrors.findAnnotationValueAsType(annotationMirror, "serializedType");
+        targetType = Mirrors.findAnnotationValueAsType(annotationMirror, "targetType").get();
+        serializedType = Mirrors.findAnnotationValueAsType(annotationMirror, "serializedType").get();
         serializer = annotation.serializer();
         deserializer = annotation.deserializer();
     }

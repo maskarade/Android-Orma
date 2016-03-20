@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 
@@ -65,7 +64,7 @@ public class SchemaWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    FieldSpec primaryKey;
+    FieldSpec primaryKeyFieldSpec;
 
     public SchemaWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
@@ -103,15 +102,15 @@ public class SchemaWriter extends BaseWriter {
             columns.add(fieldSpec);
 
             if (columnDef.primaryKey) {
-                primaryKey = fieldSpec;
+                primaryKeyFieldSpec = fieldSpec;
             }
         });
 
-        if (primaryKey == null) {
+        if (primaryKeyFieldSpec == null) {
             // Even if primary key is omitted, "_rowid_" is always available.
             // (WITHOUT ROWID is not supported by Orma)
-            primaryKey = buildPrimaryKeyColumn();
-            fieldSpecs.add(primaryKey);
+            primaryKeyFieldSpec = buildPrimaryKeyColumn();
+            fieldSpecs.add(primaryKeyFieldSpec);
         }
 
         fieldSpecs.addAll(columns);
@@ -148,8 +147,7 @@ public class SchemaWriter extends BaseWriter {
     public String buildJoins(ColumnDefinition column) {
         StringBuilder s = new StringBuilder();
         SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
-        ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
-        if (primaryKey != null) {
+        associatedSchema.getPrimaryKey().ifPresent(primaryKey -> {
             s.append(" JOIN ");
             context.sqlg.appendIdentifier(s, associatedSchema.getTableName());
             s.append(" ON ");
@@ -167,7 +165,8 @@ public class SchemaWriter extends BaseWriter {
                 s.append(' ');
                 s.append(nested);
             }
-        }
+
+        });
         return s.toString();
     }
 
@@ -200,7 +199,7 @@ public class SchemaWriter extends BaseWriter {
         }
         columnDefType.addMethod(getBuilder.build());
 
-        // ColumnDef#getSerialized()
+        // Define ColumnDef#getSerialized() if it uses type adapters
         MethodSpec.Builder getSerializedBuilder = MethodSpec.methodBuilder("getSerialized")
                 .addAnnotation(Annotations.override())
                 .addAnnotation(c.nullable ? Annotations.nullable() : Annotations.nonNull())
@@ -371,7 +370,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getColumnDef(schema.getModelClassName(), Types.WildcardType))
-                        .addStatement("return $N", primaryKey)
+                        .addStatement("return $N", primaryKeyFieldSpec)
                         .build()
         );
 
@@ -646,29 +645,32 @@ public class SchemaWriter extends BaseWriter {
     }
 
     private CodeBlock buildNewModelFromCursor() {
-        CodeBlock.Builder builder = CodeBlock.builder();
-        if (schema.hasDefaultConstructor()) {
-            builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
-            builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.of("model.")));
-            builder.addStatement("return model");
-        } else {
-            ExecutableElement constructorElement = schema.getConstructorElement();
-            assert constructorElement != null;
+        return schema.getConstructorElement().map(constructorElement -> {
+            CodeBlock.Builder block = CodeBlock.builder();
+
             if (schema.getColumns().size() != constructorElement.getParameters().size()) {
                 context.addError("The @Setter constructor parameters must satisfy all the @Column fields",
                         constructorElement);
             }
 
-            builder.add(buildPopulateValuesIntoCursor(
-                    column -> CodeBlock.of("$T ", column.getType())));
+            block.add(buildPopulateValuesIntoCursor(column -> CodeBlock.of("$T ", column.getType())));
 
-            builder.addStatement("return new $T($L)", schema.getModelClassName(),
+            block.addStatement("return new $T($L)", schema.getModelClassName(),
                     constructorElement.getParameters()
                             .stream()
                             .map(this::extractColumnNameFromParameterElement)
                             .collect(Collectors.joining(", ")));
-        }
-        return builder.build();
+
+            return block.build();
+        }).orElseGet(() -> {
+            CodeBlock.Builder block = CodeBlock.builder();
+
+            block.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
+            block.add(buildPopulateValuesIntoCursor(column -> CodeBlock.of("model.")));
+            block.addStatement("return model");
+
+            return block.build();
+        });
     }
 
     private String extractColumnNameFromParameterElement(VariableElement parameterElement) {

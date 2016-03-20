@@ -15,12 +15,12 @@
  */
 package com.github.gfx.android.orma.processor.generator;
 
-import com.github.gfx.android.orma.processor.util.Annotations;
-import com.github.gfx.android.orma.processor.model.AssociationDefinition;
-import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.AssociationDefinition;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -125,11 +125,9 @@ public class UpdaterWriter extends BaseWriter {
                     );
                 }
 
-                ColumnDefinition primaryKey = modelSchema.getPrimaryKey();
-                if (primaryKey == null) {
-                    throw new ProcessingException("SingleAssociation<T> requires the @PrimaryKey field",
-                            modelSchema.getElement());
-                }
+                ColumnDefinition primaryKey = modelSchema.getPrimaryKey()
+                        .orElseThrow(() -> new ProcessingException("SingleAssociation<T> requires the @PrimaryKey field",
+                                modelSchema.getElement()));
 
                 methodSpecs.add(
                         MethodSpec.methodBuilder(column.name)
@@ -142,7 +140,7 @@ public class UpdaterWriter extends BaseWriter {
                                 )
                                 .addStatement("contents.put($S, $L)",
                                         column.getEscapedColumnName(false),
-                                        modelSchema.getPrimaryKey().buildGetColumnExpr(column.name))
+                                        primaryKey.buildGetColumnExpr(column.name))
                                 .addStatement("return this")
                                 .build()
                 );

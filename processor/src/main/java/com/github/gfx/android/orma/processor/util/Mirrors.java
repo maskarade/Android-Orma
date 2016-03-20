@@ -18,21 +18,17 @@ package com.github.gfx.android.orma.processor.util;
 
 import com.squareup.javapoet.TypeName;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -40,77 +36,55 @@ import javax.lang.model.type.TypeMirror;
  */
 public class Mirrors {
 
-    @Nullable
-    public static AnnotationMirror findAnnotationMirror(Element element, Class<? extends Annotation> annotationClass) {
-        for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
-            DeclaredType declaredType = annotationMirror.getAnnotationType();
-            TypeElement typeElement = (TypeElement) declaredType.asElement();
-            if (typeElement.getQualifiedName().contentEquals(annotationClass.getName())) {
-                return annotationMirror;
-            }
-        }
-        return null;
+    public static Optional<? extends AnnotationMirror> findAnnotationMirror(Element element, Class<? extends Annotation> annotation) {
+        return element.getAnnotationMirrors()
+                .stream()
+                .filter(annotationMirror -> {
+                    TypeElement annotationTypeElement = (TypeElement) annotationMirror.getAnnotationType().asElement();
+                    return annotationTypeElement.getQualifiedName().contentEquals(annotation.getName());
+                })
+                .findFirst();
     }
 
-    @Nullable
-    public static AnnotationValue findAnnotationValue(AnnotationMirror annotation, String name) {
-        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
-                : annotation.getElementValues().entrySet()) {
-            if (entry.getKey().getSimpleName().contentEquals(name)) {
-                return entry.getValue();
-            }
-        }
-        return null;
+    public static Optional<? extends AnnotationValue> findAnnotationValue(AnnotationMirror annotation, String name) {
+        return annotation.getElementValues()
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().getSimpleName().contentEquals(name))
+                .map(Map.Entry::getValue)
+                .findFirst();
     }
 
-    @NonNull
-    public static TypeMirror findAnnotationValueAsTypeMirror(AnnotationMirror annotation, String name) {
-        AnnotationValue value = findAnnotationValue(annotation, name);
-        if (value != null) {
-            return (TypeMirror) value.getValue();
-        }
-        throw new AssertionError("No annotation value for " + annotation.getAnnotationType() + "#" + name + "()");
+    public static Optional<TypeMirror> findAnnotationValueAsTypeMirror(AnnotationMirror annotation, String name) {
+        return findAnnotationValue(annotation, name)
+                .map(annotationValue -> (TypeMirror) annotationValue.getValue());
     }
 
-    @NonNull
-    public static TypeName findAnnotationValueAsType(AnnotationMirror annotation, String name) {
-        return TypeName.get(findAnnotationValueAsTypeMirror(annotation, name));
+    public static Optional<TypeName> findAnnotationValueAsType(AnnotationMirror annotation, String name) {
+        return findAnnotationValueAsTypeMirror(annotation, name)
+                .map(TypeName::get);
     }
 
     @SuppressWarnings("unchecked")
-    @NonNull
     public static List<AnnotationValue> findAnnotationValueAsAnnotationValues(AnnotationMirror annotation, String name) {
-        AnnotationValue value = findAnnotationValue(annotation, name);
-        if (value != null) {
-            return (List<AnnotationValue>) value.getValue();
-        }
-        return Collections.emptyList();
+        return findAnnotationValue(annotation, name)
+                .map(annotationValue -> (List<AnnotationValue>) annotationValue.getValue())
+                .orElse(Collections.emptyList());
     }
 
-    @NonNull
-    public static List<TypeName> findAnnotationValueAsTypes(AnnotationMirror annotation, String name) {
-        List<TypeName> typeNames = new ArrayList<>();
-        for (AnnotationValue value : findAnnotationValueAsAnnotationValues(annotation, name)) {
-            typeNames.add(TypeName.get((TypeMirror)value.getValue()));
-        }
-        return typeNames;
+    public static Stream<TypeMirror> findAnnotationValueAsTypeMirrors(AnnotationMirror annotation, String name) {
+        return findAnnotationValueAsAnnotationValues(annotation, name)
+                .stream()
+                .map(value -> (TypeMirror) value.getValue());
     }
 
-    @Nullable
-    public static String findAnnotationValueAsStringOrNull(AnnotationMirror annotation, String name) {
-        AnnotationValue value = findAnnotationValue(annotation, name);
-        if (value != null) {
-            return (String) value.getValue();
-        }
-        return null;
+    public static Stream<TypeName> findAnnotationValueAsTypes(AnnotationMirror annotation, String name) {
+        return findAnnotationValueAsTypeMirrors(annotation, name)
+                .map(TypeName::get);
     }
 
-    @NonNull
-    public static String findAnnotationValueAsString(AnnotationMirror annotation, String name) {
-        String value = findAnnotationValueAsStringOrNull(annotation, name);
-        if (value != null) {
-            return value;
-        }
-        throw new AssertionError("No annotation value for " + annotation.getAnnotationType() + "#" + name + "()");
+    public static Optional<String> findAnnotationValueAsString(AnnotationMirror annotation, String name) {
+        return findAnnotationValue(annotation, name)
+                .map(annotationValue -> (String) annotationValue.getValue());
     }
 }

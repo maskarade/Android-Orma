@@ -26,7 +26,6 @@ import com.github.gfx.android.orma.processor.util.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -270,9 +269,8 @@ public class SchemaDefinition {
                 || context.isSameType(type, context.getTypeMirrorOf(Boolean.class));
     }
 
-    @Nullable
-    public ExecutableElement getConstructorElement() {
-        return constructorElement;
+    public Optional<ExecutableElement> getConstructorElement() {
+        return Optional.ofNullable(constructorElement);
     }
 
     public TypeElement getTypeElement() {
@@ -281,10 +279,6 @@ public class SchemaDefinition {
 
     public String[] getConstraints() {
         return constraints;
-    }
-
-    public boolean hasDefaultConstructor() {
-        return constructorElement == null;
     }
 
     public TypeElement getElement() {
@@ -339,9 +333,8 @@ public class SchemaDefinition {
         return columns.stream().filter(column -> column.columnName.contentEquals(name)).findFirst();
     }
 
-    @Nullable
-    public ColumnDefinition getPrimaryKey() {
-        return primaryKey;
+    public Optional<ColumnDefinition> getPrimaryKey() {
+        return Optional.ofNullable(primaryKey);
     }
 
     public String getPrimaryKeyName() {
@@ -353,7 +346,6 @@ public class SchemaDefinition {
         createIndexStatements = context.sqlg.buildCreateIndexStatements(this);
     }
 
-    @NonNull
     public synchronized String getCreateTableStatement() {
         if (createIndexStatements == null) {
             buildStatements();
@@ -361,7 +353,6 @@ public class SchemaDefinition {
         return createTableStatement;
     }
 
-    @NonNull
     public synchronized List<String> getCreateIndexStatements() {
         if (createIndexStatements == null) {
             buildStatements();

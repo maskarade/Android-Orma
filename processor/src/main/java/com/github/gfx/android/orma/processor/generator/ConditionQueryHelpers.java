@@ -79,11 +79,10 @@ public class ConditionQueryHelpers {
         CodeBlock serializedFieldExpr;
         if (isAssociation) {
             SchemaDefinition associatedSchema = context.getSchemaDef(type);
-            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
-            if (primaryKey == null) {
-                throw new ProcessingException("Missing @PrimaryKey for " + associatedSchema.getModelClassName().simpleName(),
-                        associatedSchema.getElement());
-            }
+            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey()
+                    .orElseThrow(() -> new ProcessingException(
+                            "Missing @PrimaryKey for " + associatedSchema.getModelClassName().simpleName(),
+                            associatedSchema.getElement()));
             serializedFieldExpr = CodeBlock.builder()
                     .add("$L /* primary key */", primaryKey.buildGetColumnExpr(paramSpec.name))
                     .build();
@@ -114,16 +113,14 @@ public class ConditionQueryHelpers {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(paramSpec)
                         .returns(targetClassName)
-                        .addStatement("return where($S, $L)", columnName + " = ?",
-                                serializedFieldExpr)
+                        .addStatement("return where($S, $L)", columnName + " = ?", serializedFieldExpr)
                         .build()
         );
 
         if (isAssociation) {
             // for foreign keys
             SchemaDefinition associatedSchema = column.getAssociatedSchema();
-            ColumnDefinition foreignKey = associatedSchema.getPrimaryKey();
-            if (foreignKey != null) {
+            associatedSchema.getPrimaryKey().ifPresent(foreignKey -> {
                 String paramName = column.name + Strings.toUpperFirst(foreignKey.name);
                 methodSpecs.add(
                         MethodSpec.methodBuilder(column.name + "Eq")
@@ -133,11 +130,10 @@ public class ConditionQueryHelpers {
                                                 .addAnnotations(foreignKey.nullabilityAnnotations())
                                                 .build())
                                 .returns(targetClassName)
-                                .addStatement("return where($S, $L)", columnName + " = ?",
-                                        paramName)
+                                .addStatement("return where($S, $L)", columnName + " = ?", paramName)
                                 .build()
                 );
-            }
+            });
 
             // generates only "*Eq" for associations
             return;
