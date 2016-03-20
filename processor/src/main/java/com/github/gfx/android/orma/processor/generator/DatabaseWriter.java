@@ -59,6 +59,19 @@ public class DatabaseWriter extends BaseWriter {
         this.database = database;
     }
 
+    // http://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
+    public static String bytesToHex(byte[] bytes) {
+        final char[] HEX_TABLE = "0123456789ABCDEF".toCharArray();
+
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_TABLE[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_TABLE[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     @Override
     public String getPackageName() {
         return database.getPackageName();
@@ -167,19 +180,6 @@ public class DatabaseWriter extends BaseWriter {
         });
 
         return bytesToHex(md.digest());
-    }
-
-    // http://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
-    public static String bytesToHex(byte[] bytes) {
-        final char[] HEX_TABLE = "0123456789ABCDEF".toCharArray();
-
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_TABLE[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_TABLE[v & 0x0F];
-        }
-        return new String(hexChars);
     }
 
     private CodeBlock buildSchemasInitializer() {

@@ -36,7 +36,8 @@ import javax.lang.model.type.TypeMirror;
  */
 public class Mirrors {
 
-    public static Optional<? extends AnnotationMirror> findAnnotationMirror(Element element, Class<? extends Annotation> annotation) {
+    public static Optional<? extends AnnotationMirror> findAnnotationMirror(Element element,
+            Class<? extends Annotation> annotation) {
         return element.getAnnotationMirrors()
                 .stream()
                 .filter(annotationMirror -> {

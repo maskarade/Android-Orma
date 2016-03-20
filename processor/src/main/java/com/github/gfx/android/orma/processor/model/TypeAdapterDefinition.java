@@ -37,20 +37,20 @@ import javax.lang.model.element.TypeElement;
 public class TypeAdapterDefinition {
 
     public static TypeAdapterDefinition[] BUILTINS = {
-            TypeAdapterDefinition.make(BigDecimal.class, String.class),
-            TypeAdapterDefinition.make(BigInteger.class, String.class),
-            TypeAdapterDefinition.make(ByteBuffer.class, byte[].class),
-            TypeAdapterDefinition.make(Currency.class, String.class),
-            TypeAdapterDefinition.make(java.util.Date.class, long.class),
-            TypeAdapterDefinition.make(java.sql.Date.class, String.class, "SqlDate"),
-            TypeAdapterDefinition.make(java.sql.Time.class, String.class, "SqlTime"),
-            TypeAdapterDefinition.make(java.sql.Timestamp.class, String.class, "SqlTimestamp"),
-            TypeAdapterDefinition.make(Types.getList(Types.String), String.class, "StringList"),
-            TypeAdapterDefinition.make(Types.getSet(Types.String), String.class, "StringSet"),
-            TypeAdapterDefinition.make(Types.getArrayList(Types.String), String.class, "StringArrayList"),
-            TypeAdapterDefinition.make(Types.getHashSet(Types.String), String.class, "StringHashSet"),
-            TypeAdapterDefinition.make(ClassName.get("android.net", "Uri"), String.class),
-            TypeAdapterDefinition.make(UUID.class, String.class),
+            make(BigDecimal.class, String.class),
+            make(BigInteger.class, String.class),
+            make(ByteBuffer.class, byte[].class),
+            make(Currency.class, String.class),
+            make(java.util.Date.class, long.class),
+            make(java.sql.Date.class, String.class, "SqlDate"),
+            make(java.sql.Time.class, String.class, "SqlTime"),
+            make(java.sql.Timestamp.class, String.class, "SqlTimestamp"),
+            make(Types.getList(Types.String), String.class, "StringList"),
+            make(Types.getSet(Types.String), String.class, "StringSet"),
+            make(Types.getArrayList(Types.String), String.class, "StringArrayList"),
+            make(Types.getHashSet(Types.String), String.class, "StringHashSet"),
+            make(ClassName.get("android.net", "Uri"), String.class),
+            make(UUID.class, String.class),
     };
 
     @Nullable
@@ -91,19 +91,19 @@ public class TypeAdapterDefinition {
     }
 
     public static TypeAdapterDefinition make(Class<?> targetType, Class<?> serializedType) {
-        return TypeAdapterDefinition.make(TypeName.get(targetType), TypeName.get(serializedType), targetType.getSimpleName());
+        return make(TypeName.get(targetType), TypeName.get(serializedType), targetType.getSimpleName());
     }
 
     public static TypeAdapterDefinition make(ClassName targetType, Class<?> serializedType) {
-        return TypeAdapterDefinition.make(targetType, TypeName.get(serializedType), targetType.simpleName());
+        return make(targetType, TypeName.get(serializedType), targetType.simpleName());
     }
 
     public static TypeAdapterDefinition make(Class<?> targetType, Class<?> serializedType, String typeId) {
-        return TypeAdapterDefinition.make(TypeName.get(targetType), serializedType, typeId);
+        return make(TypeName.get(targetType), serializedType, typeId);
     }
 
     public static TypeAdapterDefinition make(TypeName targetType, Class<?> serializedType, String typeId) {
-        return TypeAdapterDefinition.make(targetType, TypeName.get(serializedType), typeId);
+        return make(targetType, TypeName.get(serializedType), typeId);
     }
 
     public static TypeAdapterDefinition make(TypeName targetType, TypeName serializedType, String typeId) {

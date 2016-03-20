@@ -64,6 +64,11 @@ public class ProcessingContext {
         }
     }
 
+    private static boolean isDebugging() {
+        String debug = System.getProperty("orma.debug", "true");
+        return !Strings.isEmpty(debug) && !debug.equals("0") && !debug.equalsIgnoreCase("false");
+    }
+
     public void addError(String message, Element element) {
         addError(new ProcessingException(message, element));
     }
@@ -112,11 +117,6 @@ public class ProcessingContext {
 
     SchemaDefinition getFirstSchema() {
         return schemaMap.values().iterator().next();
-    }
-
-    private static boolean isDebugging() {
-        String debug = System.getProperty("orma.debug", "true");
-        return !Strings.isEmpty(debug) && !debug.equals("0") && !debug.equalsIgnoreCase("false");
     }
 
     public void note(String message) {

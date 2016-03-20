@@ -35,13 +35,13 @@ public class SchemaValidator {
 
     final SchemaDefinition schema;
 
-    public static void validate(ProcessingContext context, SchemaDefinition schema) {
-        new SchemaValidator(context, schema).run();
-    }
-
     public SchemaValidator(ProcessingContext context, SchemaDefinition schema) {
         this.context = context;
         this.schema = schema;
+    }
+
+    public static void validate(ProcessingContext context, SchemaDefinition schema) {
+        new SchemaValidator(context, schema).run();
     }
 
     public void run() {

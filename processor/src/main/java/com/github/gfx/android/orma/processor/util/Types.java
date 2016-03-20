@@ -61,7 +61,8 @@ public class Types {
 
     public static final ClassName SQLiteStatement = ClassName.get("android.database.sqlite", "SQLiteStatement");
 
-    public static final ClassName SQLiteConstraintException = ClassName.get("android.database.sqlite", "SQLiteConstraintException");
+    public static final ClassName SQLiteConstraintException = ClassName
+            .get("android.database.sqlite", "SQLiteConstraintException");
 
     public static final ClassName NonNull = ClassName.get("android.support.annotation", "NonNull");
 

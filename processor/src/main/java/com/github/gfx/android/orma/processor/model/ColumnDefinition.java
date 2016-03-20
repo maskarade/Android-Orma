@@ -253,7 +253,7 @@ public class ColumnDefinition {
 
     public TypeName getSerializedType() {
         if (isDirectAssociation() || isSingleAssociation()) {
-            return  getAssociatedSchema().getPrimaryKey()
+            return getAssociatedSchema().getPrimaryKey()
                     .map(ColumnDefinition::getSerializedType)
                     .orElseGet(() -> Types.ByteArray); // dummy
         } else if (typeAdapter != null) {
