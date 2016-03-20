@@ -370,9 +370,7 @@ public class SchemaDefinition {
     }
 
     public CodeBlock createSchemaInstanceExpr() {
-        return CodeBlock.builder()
-                .add("$T.INSTANCE", schemaClassName)
-                .build();
+        return CodeBlock.of("$T.INSTANCE", schemaClassName);
     }
 
     public int calculateConsumingColumnSize() {
