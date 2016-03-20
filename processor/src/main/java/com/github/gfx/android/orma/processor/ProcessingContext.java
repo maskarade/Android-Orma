@@ -24,6 +24,8 @@ import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
 import com.github.gfx.android.orma.processor.util.Strings;
 import com.squareup.javapoet.TypeName;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,8 +82,17 @@ public class ProcessingContext {
     public void printErrors() {
         Messager messager = processingEnv.getMessager();
 
-        errors.forEach(error -> messager.printMessage(
-                Diagnostic.Kind.ERROR, error.getMessage(), error.element));
+        errors.forEach(error -> {
+            if (error.getCause() != null) {
+                StringWriter s = new StringWriter();
+                s.append(error.getMessage());
+                s.append('\n');
+                error.getCause().printStackTrace(new PrintWriter(s));
+                messager.printMessage(Diagnostic.Kind.ERROR, s.toString(), error.element);
+            } else {
+                messager.printMessage(Diagnostic.Kind.ERROR, error.getMessage(), error.element);
+            }
+        });
     }
 
     public Elements getElements() {

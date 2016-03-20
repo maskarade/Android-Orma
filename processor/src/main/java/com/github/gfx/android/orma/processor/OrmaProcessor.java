@@ -146,8 +146,8 @@ public class OrmaProcessor extends AbstractProcessor {
     private void writeToFiler(Element element, JavaFile javaFile) {
         try {
             writeTo(javaFile, processingEnv.getFiler());
-        } catch (IOException e) {
-            throw new ProcessingException("Failed to write " + javaFile.typeSpec.name + ": " + e, element);
+        } catch (Exception e) {
+            throw new ProcessingException("Failed to write " + javaFile.typeSpec.name, element, e);
         }
     }
 
