@@ -98,10 +98,7 @@ public class OrmaProcessor extends AbstractProcessor {
                 context.setupDefaultDatabaseIfNeeded();
                 for (DatabaseDefinition database : context.databases) {
                     DatabaseWriter databaseWriter = new DatabaseWriter(context, database);
-                    writeToFiler(null,
-                            JavaFile.builder(databaseWriter.getPackageName(),
-                                    databaseWriter.buildTypeSpec())
-                                    .build());
+                    writeToFiler(null, databaseWriter.buildJavaFile());
                 }
             }
         } catch (ProcessingException e) {
@@ -143,9 +140,7 @@ public class OrmaProcessor extends AbstractProcessor {
     }
 
     public void writeCodeForEachModel(SchemaDefinition schema, BaseWriter writer) {
-        writeToFiler(schema.getElement(),
-                JavaFile.builder(schema.getPackageName(), writer.buildTypeSpec())
-                        .build());
+        writeToFiler(schema.getElement(), writer.buildJavaFile());
     }
 
     private void writeToFiler(Element element, JavaFile javaFile) {

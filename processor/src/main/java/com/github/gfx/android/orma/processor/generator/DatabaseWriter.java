@@ -59,6 +59,7 @@ public class DatabaseWriter extends BaseWriter {
         this.database = database;
     }
 
+    @Override
     public String getPackageName() {
         return database.getPackageName();
     }

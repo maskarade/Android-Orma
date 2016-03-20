@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.Deleter;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
-import java.lang.String;
 import java.util.Arrays;
 import java.util.Collection;
 
