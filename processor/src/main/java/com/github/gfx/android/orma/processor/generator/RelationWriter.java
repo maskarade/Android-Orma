@@ -49,7 +49,7 @@ public class RelationWriter extends BaseWriter {
 
     @Override
     public TypeSpec buildTypeSpec() {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getTargetClassName().simpleName());
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getTargetClassName());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getRelation(schema.getModelClassName(), getTargetClassName()));
 

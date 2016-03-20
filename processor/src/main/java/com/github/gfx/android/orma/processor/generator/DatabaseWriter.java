@@ -71,7 +71,7 @@ public class DatabaseWriter extends BaseWriter {
     public TypeSpec buildTypeSpec() {
         ClassName builderClass = ClassName.get(getPackageName(), getClassName().simpleName(), kBuilderClassName);
 
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getClassName().simpleName());
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getClassName());
         classBuilder.addJavadoc("<p>The Orma database handle class.</p>\n");
         classBuilder.addJavadoc("<p>To create instances: {@code $T.builder(context).build()}.</p>\n", getClassName());
         classBuilder.addJavadoc(
@@ -94,7 +94,7 @@ public class DatabaseWriter extends BaseWriter {
     }
 
     private TypeSpec buildBuilderTypeSpec(ClassName builderClass) {
-        TypeSpec.Builder builder = TypeSpec.classBuilder(builderClass.simpleName());
+        TypeSpec.Builder builder = TypeSpec.classBuilder(builderClass);
 
         builder.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 

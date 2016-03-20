@@ -293,18 +293,14 @@ public class ColumnDefinition {
 
     public CodeBlock buildSetColumnExpr(CodeBlock rhsExpr) {
         if (setter != null) {
-            return CodeBlock.builder()
-                    .add("$L($L)", setter.getSimpleName(), rhsExpr)
-                    .build();
+            return CodeBlock.of("$L($L)", setter.getSimpleName(), rhsExpr);
         } else {
-            return CodeBlock.builder()
-                    .add("$L = $L", name, rhsExpr)
-                    .build();
+            return CodeBlock.of("$L = $L", name, rhsExpr);
         }
     }
 
     public CodeBlock buildGetColumnExpr(String modelExpr) {
-        return buildGetColumnExpr(CodeBlock.builder().add("$L", modelExpr).build());
+        return buildGetColumnExpr(CodeBlock.of("$L", modelExpr));
     }
 
     public CodeBlock buildGetColumnExpr(CodeBlock modelExpr) {
@@ -317,14 +313,14 @@ public class ColumnDefinition {
         CodeBlock getColumnExpr = buildGetColumnExpr(modelExpr);
 
         if (isSingleAssociation()) {
-            return CodeBlock.builder().add("$L.getId()", getColumnExpr).build();
+            return CodeBlock.of("$L.getId()", getColumnExpr);
         } else if (isDirectAssociation()) {
             SchemaDefinition associatedSchema = getAssociatedSchema();
             ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
             if (primaryKey != null) {
                 return primaryKey.buildGetColumnExpr(getColumnExpr);
             } else {
-                return CodeBlock.builder().add("null /* missing @PrimaryKey */").build();
+                return CodeBlock.of("null /* missing @PrimaryKey */");
             }
         } else if (needsTypeAdapter()) {
             return CodeBlock.builder()
@@ -336,7 +332,7 @@ public class ColumnDefinition {
     }
 
     public CodeBlock buildSerializeExpr(String connectionExpr, String valueExpr) {
-        return buildSerializeExpr(connectionExpr, CodeBlock.builder().add("$L", valueExpr).build());
+        return buildSerializeExpr(connectionExpr, CodeBlock.of("$L", valueExpr));
     }
 
     public CodeBlock buildSerializeExpr(String connectionExpr, CodeBlock valueExpr) {
