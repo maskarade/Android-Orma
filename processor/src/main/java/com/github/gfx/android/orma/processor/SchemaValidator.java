@@ -48,7 +48,7 @@ public class SchemaValidator {
         validateAtLeastOneColumn();
         validatePrimaryKey();
         validateNames();
-        validateNoOrmaModelInInheritance(schema.getTypeElement().getSuperclass());
+        validateNoOrmaModelInInheritance(schema.getElement().getSuperclass());
     }
 
     private void validateNoOrmaModelInInheritance(TypeMirror type) {
@@ -64,7 +64,7 @@ public class SchemaValidator {
 
     private void validateAtLeastOneColumn() {
         if (schema.getColumns().isEmpty()) {
-            error("No @Column nor @PrimaryKey is defined", schema.getTypeElement());
+            error("No @Column nor @PrimaryKey is defined", schema.getElement());
         }
     }
 

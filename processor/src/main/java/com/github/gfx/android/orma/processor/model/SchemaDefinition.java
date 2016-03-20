@@ -273,10 +273,6 @@ public class SchemaDefinition {
         return Optional.ofNullable(constructorElement);
     }
 
-    public TypeElement getTypeElement() {
-        return typeElement;
-    }
-
     public String[] getConstraints() {
         return constraints;
     }
