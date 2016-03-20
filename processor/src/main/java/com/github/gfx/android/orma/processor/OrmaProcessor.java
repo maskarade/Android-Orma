@@ -33,21 +33,26 @@ import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
 import com.squareup.javapoet.JavaFile;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
-        "com.github.gfx.android.orma.annotation.*",
+        "com.github.gfx.android.orma.annotation.Table",
+        "com.github.gfx.android.orma.annotation.VirtualTable",
+        "com.github.gfx.android.orma.annotation.StaticTypeAdapter",
 })
 public class OrmaProcessor extends AbstractProcessor {
 
@@ -58,11 +63,9 @@ public class OrmaProcessor extends AbstractProcessor {
         if (annotations.size() == 0) {
             return true;
         }
-
         long t0 = System.currentTimeMillis();
 
         ProcessingContext context = new ProcessingContext(processingEnv);
-
         try {
             buildDatabase(context, roundEnv)
                     .forEach(context::addDatabaseDefinition);
@@ -78,14 +81,18 @@ public class OrmaProcessor extends AbstractProcessor {
                         throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
                     });
 
-            context.schemaMap.values().forEach((schema) -> {
-                writeCodeForEachModel(schema, new SchemaWriter(context, schema));
-                writeCodeForEachModel(schema, new RelationWriter(context, schema));
-                writeCodeForEachModel(schema, new SelectorWriter(context, schema));
-                writeCodeForEachModel(schema, new UpdaterWriter(context, schema));
-                writeCodeForEachModel(schema, new DeleterWriter(context, schema));
+            context.note(
+                    "built " + context.schemaMap.size() + " of schema models in " + (System.currentTimeMillis() - t0) + "ms");
 
-            });
+            context.schemaMap.values()
+                    .parallelStream()
+                    .forEach((schema) -> {
+                        writeCodeForEachModel(schema, new SchemaWriter(context, schema));
+                        writeCodeForEachModel(schema, new RelationWriter(context, schema));
+                        writeCodeForEachModel(schema, new SelectorWriter(context, schema));
+                        writeCodeForEachModel(schema, new UpdaterWriter(context, schema));
+                        writeCodeForEachModel(schema, new DeleterWriter(context, schema));
+                    });
 
             if (!context.schemaMap.isEmpty()) {
                 context.setupDefaultDatabaseIfNeeded();
@@ -97,17 +104,12 @@ public class OrmaProcessor extends AbstractProcessor {
                                     .build());
                 }
             }
-
         } catch (ProcessingException e) {
             context.addError(e);
         }
 
         context.printErrors();
-
-        if (context.isDebugging()) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                    "[OrmaProcessor] process classes in " + (System.currentTimeMillis() - t0) + "ms");
-        }
+        context.note("process classes in " + (System.currentTimeMillis() - t0) + "ms");
 
         return false;
     }
@@ -116,7 +118,7 @@ public class OrmaProcessor extends AbstractProcessor {
         return roundEnv
                 .getElementsAnnotatedWith(Database.class)
                 .stream()
-                .map(element -> new DatabaseDefinition(context, (TypeElement)element));
+                .map(element -> new DatabaseDefinition(context, (TypeElement) element));
     }
 
     public Stream<TypeAdapterDefinition> buildTypeAdapters(ProcessingContext context, RoundEnvironment roundEnv) {
@@ -146,11 +148,28 @@ public class OrmaProcessor extends AbstractProcessor {
                         .build());
     }
 
-    public void writeToFiler(Element element, JavaFile javaFile) {
+    private void writeToFiler(Element element, JavaFile javaFile) {
         try {
-            javaFile.writeTo(processingEnv.getFiler());
+            writeTo(javaFile, processingEnv.getFiler());
         } catch (IOException e) {
             throw new ProcessingException("Failed to write " + javaFile.typeSpec.name + ": " + e, element);
+        }
+    }
+
+    private JavaFileObject createSourceFile(JavaFile javaFile, Filer filer) throws IOException {
+        String fileName = javaFile.packageName.isEmpty()
+                ? javaFile.typeSpec.name
+                : javaFile.packageName + "." + javaFile.typeSpec.name;
+        List<Element> originatingElements = javaFile.typeSpec.originatingElements;
+        synchronized (this) {
+            return filer.createSourceFile(fileName, originatingElements.toArray(new Element[originatingElements.size()]));
+        }
+    }
+
+    private void writeTo(JavaFile javaFile, Filer filer) throws IOException {
+        JavaFileObject sourceFile = createSourceFile(javaFile, filer);
+        try (Writer writer = sourceFile.openWriter()) {
+            javaFile.writeTo(writer);
         }
     }
 }
