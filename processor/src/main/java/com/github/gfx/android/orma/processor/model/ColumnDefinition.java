@@ -194,13 +194,12 @@ public class ColumnDefinition {
             } else if (Types.isSingleAssociation(type)) {
                 return SqlTypes.getSqliteType(TypeName.LONG);
             } else if (Types.isDirectAssociation(context, type)) {
-                ColumnDefinition primaryKey = context.getSchemaDef(type).getPrimaryKey();
-                if (primaryKey != null) {
-                    return SqlTypes.getSqliteType(primaryKey.getType());
-                } else {
-                    context.addError("Missing @PrimaryKey", element);
-                    return "UNKNOWN";
-                }
+                return context.getSchemaDef(type).getPrimaryKey()
+                        .map(primaryKey -> SqlTypes.getSqliteType(primaryKey.getType()))
+                        .orElseGet(() -> {
+                            context.addError("Missing @PrimaryKey", element);
+                            return "UNKNOWN";
+                        });
             } else {
                 return SqlTypes.getSqliteType(type);
             }
@@ -254,13 +253,9 @@ public class ColumnDefinition {
 
     public TypeName getSerializedType() {
         if (isDirectAssociation() || isSingleAssociation()) {
-            SchemaDefinition associatedSchema = getAssociatedSchema();
-            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
-            if (primaryKey != null) {
-                return associatedSchema.getPrimaryKey().getSerializedType();
-            } else {
-                return Types.ByteArray; // dummy
-            }
+            return  getAssociatedSchema().getPrimaryKey()
+                    .map(ColumnDefinition::getSerializedType)
+                    .orElseGet(() -> Types.ByteArray); // dummy
         } else if (typeAdapter != null) {
             return Types.asUnboxType(typeAdapter.serializedType);
         } else {
@@ -315,13 +310,9 @@ public class ColumnDefinition {
         if (isSingleAssociation()) {
             return CodeBlock.of("$L.getId()", getColumnExpr);
         } else if (isDirectAssociation()) {
-            SchemaDefinition associatedSchema = getAssociatedSchema();
-            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey();
-            if (primaryKey != null) {
-                return primaryKey.buildGetColumnExpr(getColumnExpr);
-            } else {
-                return CodeBlock.of("null /* missing @PrimaryKey */");
-            }
+            return getAssociatedSchema().getPrimaryKey()
+                    .map(primaryKey -> primaryKey.buildGetColumnExpr(getColumnExpr))
+                    .orElseGet(() -> CodeBlock.of("null /* missing @PrimaryKey */"));
         } else if (needsTypeAdapter()) {
             return CodeBlock.builder()
                     .add(buildSerializeExpr(connectionExpr, getColumnExpr))

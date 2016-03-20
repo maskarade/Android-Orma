@@ -35,6 +35,11 @@ public class Annotations {
 
     private static final AnnotationSpec nullable = AnnotationSpec.builder(Types.Nullable).build();
 
+    private static final List<AnnotationSpec> safeVarArgsAnnotations = Arrays.asList(
+            AnnotationSpec.builder(SafeVarargs.class).build(),
+            suppressWarnings("varargs")
+    );
+
     private static List<AnnotationSpec> overrideAndNonNull = Arrays.asList(
             Annotations.nonNull(),
             Annotations.override()
@@ -71,11 +76,8 @@ public class Annotations {
     }
 
     public static List<AnnotationSpec> safeVarargsIfNeeded(TypeName type) {
-        if(type instanceof ParameterizedTypeName) {
-            return Arrays.asList(
-                    AnnotationSpec.builder(SafeVarargs.class).build(),
-                    suppressWarnings("varargs")
-            );
+        if (type instanceof ParameterizedTypeName) {
+            return safeVarArgsAnnotations;
         } else {
             return Collections.emptyList();
         }
