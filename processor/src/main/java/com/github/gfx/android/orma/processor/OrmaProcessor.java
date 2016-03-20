@@ -43,11 +43,12 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
-        "com.github.gfx.android.orma.annotation.*",
+        "com.github.gfx.android.orma.annotation.Table",
+        "com.github.gfx.android.orma.annotation.VirtualTable",
+        "com.github.gfx.android.orma.annotation.StaticTypeAdapter",
 })
 public class OrmaProcessor extends AbstractProcessor {
 
@@ -58,11 +59,9 @@ public class OrmaProcessor extends AbstractProcessor {
         if (annotations.size() == 0) {
             return true;
         }
-
         long t0 = System.currentTimeMillis();
 
         ProcessingContext context = new ProcessingContext(processingEnv);
-
         try {
             buildDatabase(context, roundEnv)
                     .forEach(context::addDatabaseDefinition);
@@ -77,6 +76,8 @@ public class OrmaProcessor extends AbstractProcessor {
                     .peek(schema -> {
                         throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
                     });
+
+            context.note("built " + context.schemaMap.size() + " of schema models in " + (System.currentTimeMillis() - t0) + "ms");
 
             context.schemaMap.values().forEach((schema) -> {
                 writeCodeForEachModel(schema, new SchemaWriter(context, schema));
@@ -103,11 +104,7 @@ public class OrmaProcessor extends AbstractProcessor {
         }
 
         context.printErrors();
-
-        if (context.isDebugging()) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                    "[OrmaProcessor] process classes in " + (System.currentTimeMillis() - t0) + "ms");
-        }
+        context.note("process classes in " + (System.currentTimeMillis() - t0) + "ms");
 
         return false;
     }
