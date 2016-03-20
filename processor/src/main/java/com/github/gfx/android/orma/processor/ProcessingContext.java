@@ -122,7 +122,7 @@ public class ProcessingContext {
     public void note(String message) {
         if (debug) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                    "[OrmaProcessor] " + message);
+                    "[" + OrmaProcessor.TAG + "] " + message);
         }
 
     }
