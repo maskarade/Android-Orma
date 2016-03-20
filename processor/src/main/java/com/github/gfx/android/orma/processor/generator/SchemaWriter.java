@@ -74,7 +74,7 @@ public class SchemaWriter extends BaseWriter {
 
     @Override
     public TypeSpec buildTypeSpec() {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getSchemaClassName().simpleName());
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getSchemaClassName());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.addSuperinterface(Types.getSchema(schema.getModelClassName()));
 
@@ -171,15 +171,10 @@ public class SchemaWriter extends BaseWriter {
 
         CodeBlock typeInstance;
         if (type instanceof ParameterizedTypeName) {
-            typeInstance = CodeBlock.builder()
-                    .add("new $T<$T>(){}.getType()", Types.TypeHolder, type
-                    ).build();
+            typeInstance = CodeBlock.of("new $T<$T>(){}.getType()", Types.TypeHolder, type);
         } else {
-            typeInstance = CodeBlock.builder()
-                    .add("$T.class", type)
-                    .build();
+            typeInstance = CodeBlock.of("$T.class", type);
         }
-
         TypeSpec.Builder columnDefType = TypeSpec.anonymousClassBuilder("INSTANCE, $S, $L, $S, $L",
                 c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c));
         columnDefType.superclass(c.getColumnDefType());
@@ -609,7 +604,7 @@ public class SchemaWriter extends BaseWriter {
             ColumnDefinition c = columns.get(i);
             TypeName type = c.getUnboxType();
 
-            CodeBlock index = CodeBlock.builder().add("offset + $L", i + offset).build();
+            CodeBlock index = CodeBlock.of("offset + $L", i + offset);
 
             if (Types.isDirectAssociation(context, type)) {
                 SchemaDefinition associatedSchema = c.getAssociatedSchema();
@@ -649,7 +644,7 @@ public class SchemaWriter extends BaseWriter {
         CodeBlock.Builder builder = CodeBlock.builder();
         if (schema.hasDefaultConstructor()) {
             builder.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
-            builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.builder().add("model.").build()));
+            builder.add(buildPopulateValuesIntoCursor(column -> CodeBlock.of("model.")));
             builder.addStatement("return model");
         } else {
             ExecutableElement constructorElement = schema.getConstructorElement();
@@ -660,7 +655,7 @@ public class SchemaWriter extends BaseWriter {
             }
 
             builder.add(buildPopulateValuesIntoCursor(
-                    column -> CodeBlock.builder().add("$T ", column.getType()).build()));
+                    column -> CodeBlock.of("$T ", column.getType())));
 
             builder.addStatement("return new $T($L)", schema.getModelClassName(),
                     constructorElement.getParameters()
@@ -684,19 +679,19 @@ public class SchemaWriter extends BaseWriter {
     private CodeBlock cursorGetter(ColumnDefinition column, CodeBlock index) {
         TypeName type = column.getSerializedType();
         if (type.equals(TypeName.BOOLEAN)) {
-            return CodeBlock.builder().add("cursor.getLong($L) != 0", index).build();
+            return CodeBlock.of("cursor.getLong($L) != 0", index);
         } else if (type.equals(TypeName.BYTE)) {
-            return CodeBlock.builder().add("(byte)cursor.getLong($L)", index).build();
+            return CodeBlock.of("(byte)cursor.getLong($L)", index);
         } else if (type.isPrimitive()) {
             String s = type.toString();
-            return CodeBlock.builder().add("cursor.get$L($L)", Strings.toUpperFirst(s), index).build();
+            return CodeBlock.of("cursor.get$L($L)", Strings.toUpperFirst(s), index);
         } else if (type.equals(Types.String)) {
-            return CodeBlock.builder().add("cursor.getString($L)", index).build();
+            return CodeBlock.of("cursor.getString($L)", index);
         } else if (type.equals(Types.ByteArray)) {
-            return CodeBlock.builder().add("cursor.getBlob($L)", index).build();
+            return CodeBlock.of("cursor.getBlob($L)", index);
         } else {
             // FIXME: not reached?
-            return CodeBlock.builder().add("cursor.getString($L)", index).build();
+            return CodeBlock.of("cursor.getString($L)", index);
         }
     }
 }

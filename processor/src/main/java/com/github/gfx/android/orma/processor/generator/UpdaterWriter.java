@@ -45,7 +45,7 @@ public class UpdaterWriter extends BaseWriter {
 
     @Override
     public TypeSpec buildTypeSpec() {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getUpdaterClassName().simpleName());
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getUpdaterClassName());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getUpdater(schema.getModelClassName(), schema.getUpdaterClassName()));
 

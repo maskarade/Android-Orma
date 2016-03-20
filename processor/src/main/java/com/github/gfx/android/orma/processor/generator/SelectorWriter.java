@@ -49,7 +49,7 @@ public class SelectorWriter extends BaseWriter {
 
     @Override
     public TypeSpec buildTypeSpec() {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getTargetClassName().simpleName());
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getTargetClassName());
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getSelector(schema.getModelClassName(), getTargetClassName()));
 
