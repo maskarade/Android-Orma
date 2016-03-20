@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.processor.generator;
 
 import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
 public abstract class BaseWriter {
@@ -27,4 +28,12 @@ public abstract class BaseWriter {
     }
 
     public abstract TypeSpec buildTypeSpec();
+
+    public abstract String getPackageName();
+
+    public JavaFile buildJavaFile() {
+        return JavaFile.builder(getPackageName(), buildTypeSpec())
+                .skipJavaLangImports(true)
+                .build();
+    }
 }

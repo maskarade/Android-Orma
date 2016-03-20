@@ -4,8 +4,6 @@ import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Updater;
-import java.lang.Long;
-import java.lang.String;
 import java.util.Arrays;
 import java.util.Collection;
 

@@ -14,9 +14,6 @@ import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
-import java.lang.Deprecated;
-import java.lang.Override;
-import java.lang.String;
 import java.util.Arrays;
 import java.util.List;
 

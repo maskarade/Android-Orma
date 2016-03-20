@@ -39,6 +39,11 @@ public class DeleterWriter extends BaseWriter {
     }
 
     @Override
+    public String getPackageName() {
+        return schema.getPackageName();
+    }
+
+    @Override
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getDeleterClassName());
         classBuilder.addModifiers(Modifier.PUBLIC);

@@ -5,8 +5,6 @@ import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
-import java.lang.Override;
-import java.lang.String;
 import java.util.Arrays;
 import java.util.Collection;
 
