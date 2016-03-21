@@ -206,7 +206,7 @@ public class OrmaConnection {
         return rawQuery(sql, bindArgs);
     }
 
-    @NonNull
+    @Nullable
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
             String having, String orderBy, long offset) {
         SQLiteCursor cursor = (SQLiteCursor) query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy,
