@@ -385,7 +385,7 @@ public class KeyValuePair {
     public final String value;
 
     @Setter
-    KeyVakuePair(String key, String value) {
+    KeyValuePair(String key, String value) {
         this.key = key;
         this.value = value;
     }
@@ -406,7 +406,7 @@ public class KeyValuePair {
     @Column(kValue)
     public final String value;
 
-    KeyVakuePair(@Setter(kKey) String key, @Setter(kValue) String value) {
+    KeyValuePair(@Setter(kKey) String key, @Setter(kValue) String value) {
         this.key = key;
         this.value = value;
     }
