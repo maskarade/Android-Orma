@@ -682,7 +682,7 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 [example/BenchmarkActivity](example/src/main/java/com/github/gfx/android/orma/example/activity/BenchmarkActivity.java)
 
 Here is a result performed on Android 5.0.2 / Xperia Z4
-as of Orma v0.9.0 and Realm 0.86.0:
+as of Orma v2.3.0 and Realm 0.87.2:
 
 <img src="benchmark_v2.3.png" alt="" width="420"/>
 
@@ -710,7 +710,7 @@ Check your toolchain. FYI here are my toolchain versions:
 * Android SDK Tools 24.4.1
 * Android SDK Platform Tools 23.1
 * Android SDK Build Tools 23.0.2
-* Android Gradle Plugin 1.5.0
+* Android Gradle Plugin 1.5.0 and 2.1.0-alpha3
 
 ### Is there a real-world example that uses Orma?
 
@@ -799,3 +799,5 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+
