@@ -63,8 +63,8 @@ public class OrmaAdapter<Model> {
 
     @SuppressWarnings("unchecked")
     @NonNull
-    public <T extends Relation<Model, ?>> Relation<Model, T> getRelation() {
-        return (Relation<Model, T>) relation;
+    public <R extends Relation<Model, R>> R getRelation() {
+        return (R) relation.clone();
     }
 
     public void runOnUiThread(@NonNull final Runnable task) {

@@ -83,10 +83,19 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @NonNull
+    public Model value() {
+        return selector().value();
+    }
+
+    @Nullable
+    public Model valueOrNull() {
+        return selector().valueOrNull();
+    }
+
+    @NonNull
     public Model get(@IntRange(from = 0) int position) {
         return selector().get(position);
     }
-
 
     @NonNull
     public Model getOrCreate(@IntRange(from = 0) long position, @NonNull ModelFactory<Model> factory) {

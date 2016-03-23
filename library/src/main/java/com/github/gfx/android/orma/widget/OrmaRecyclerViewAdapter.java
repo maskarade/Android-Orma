@@ -65,8 +65,8 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
 
     @SuppressWarnings("unchecked")
     @NonNull
-    public <T extends Relation<Model, ?>> Relation<Model, T> getRelation() {
-        return delegate.getRelation();
+    public <R extends Relation<Model, R>> R getRelation() {
+        return (R) delegate.getRelation();
     }
 
     public void runOnUiThreadSync(@NonNull Runnable task) {
