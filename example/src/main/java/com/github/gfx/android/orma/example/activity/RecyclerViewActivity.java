@@ -23,6 +23,7 @@ import com.github.gfx.android.orma.example.databinding.ActivityRecyclerViewBindi
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
+import com.github.gfx.android.orma.example.orma.Todo_Relation;
 import com.github.gfx.android.orma.widget.OrmaRecyclerViewAdapter;
 
 import org.threeten.bp.ZonedDateTime;
@@ -30,6 +31,7 @@ import org.threeten.bp.ZonedDateTime;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -37,9 +39,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.Date;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class RecyclerViewActivity extends AppCompatActivity {
@@ -105,6 +110,13 @@ public class RecyclerViewActivity extends AppCompatActivity {
             super(context, relation);
         }
 
+        @SuppressWarnings("unchecked")
+        @NonNull
+        @Override
+        public Todo_Relation getRelation() {
+            return (Todo_Relation) super.getRelation();
+        }
+
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
             return new VH(getLayoutInflater(), parent);
@@ -112,20 +124,52 @@ public class RecyclerViewActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final VH holder, int position) {
-            CardTodoBinding binding = holder.binding;
+            final CardTodoBinding binding = holder.binding;
             final Todo todo = getItem(position);
 
             binding.title.setText(todo.title);
             binding.content.setText(todo.content);
+            setStrike(binding.title, todo.done);
 
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Todo currentTodo = getRelation().idEq(todo.id).value();
+                    final boolean done = !currentTodo.done;
+
+                    getRelation()
+                            .updater()
+                            .idEq(todo.id)
+                            .done(done)
+                            .executeAsObservable()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Action1<Integer>() {
+                                @Override
+                                public void call(Integer integer) {
+                                    setStrike(binding.title, done);
+                                }
+                            });
+                }
+            });
+
+            binding.getRoot().setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
                     removeItemAsObservable(todo)
                             .subscribeOn(Schedulers.io())
                             .subscribe();
+                    return true;
                 }
             });
+        }
+
+        void setStrike(TextView textView, boolean value) {
+            if (value) {
+                textView.setPaintFlags(textView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                textView.setPaintFlags(textView.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+            }
         }
     }
 }
