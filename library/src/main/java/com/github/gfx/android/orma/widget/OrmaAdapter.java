@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.exception.NoValueException;
 
 import android.content.Context;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import android.view.LayoutInflater;
 
 import rx.Observable;
 import rx.Single;
+import rx.functions.Action1;
 
 /**
  * A helper class to provide Adapter method implementations.
@@ -41,6 +43,8 @@ public class OrmaAdapter<Model> {
     final Relation<Model, ?> relation;
 
     final Handler handler = new Handler(Looper.getMainLooper());
+
+    int count = -1;
 
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
@@ -57,8 +61,11 @@ public class OrmaAdapter<Model> {
         return LayoutInflater.from(context);
     }
 
-    public int getItemCount() {
-        return relation.count();
+    public synchronized int getItemCount() {
+        if (count == -1) {
+            count = relation.count();
+        }
+        return count;
     }
 
     @SuppressWarnings("unchecked")
@@ -68,11 +75,15 @@ public class OrmaAdapter<Model> {
     }
 
     public void runOnUiThread(@NonNull final Runnable task) {
-        handler.post(task);
+        handler.postDelayed(task, 1000 / 30);
     }
 
     @NonNull
     public Model getItem(int position) {
+        if (position >= getItemCount()) {
+            throw new NoValueException(
+                    "ouf of range: getItem(" + position + ") for the relation with " + getItemCount() + " items");
+        }
         return relation.get(position);
     }
 
@@ -84,18 +95,36 @@ public class OrmaAdapter<Model> {
     @CheckResult
     @NonNull
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
-        return relation.insertAsObservable(factory);
+        return relation.insertAsObservable(factory)
+                .doOnSuccess(new Action1<Long>() {
+                    @Override
+                    public void call(Long rowId) {
+                        count = -1;
+                    }
+                });
     }
 
     @CheckResult
     @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
-        return relation.deleteAsObservable(item);
+        return relation.deleteAsObservable(item)
+                .doOnNext(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer deletedRows) {
+                        count = -1;
+                    }
+                });
     }
 
     @CheckResult
     @NonNull
     public Single<Integer> clearAsObservable() {
-        return relation.deleter().executeAsObservable();
+        return relation.deleter().executeAsObservable()
+                .doOnSuccess(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer deletedRows) {
+                        count = -1;
+                    }
+                });
     }
 }
