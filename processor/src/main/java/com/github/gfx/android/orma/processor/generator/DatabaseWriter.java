@@ -248,9 +248,10 @@ public class DatabaseWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("transactionSync")
+                        .addAnnotation(Annotations.deprecated())
+                        .addAnnotation(Annotations.workerThread())
                         .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Annotations.workerThread())
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
                                         .addAnnotation(Annotations.nonNull())
@@ -260,7 +261,20 @@ public class DatabaseWriter extends BaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("transactionSync")
+                        .addAnnotation(Annotations.workerThread())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Runnable.class, "task")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .addStatement("$L.transactionSync(task)", connection)
+                        .build()
+        );
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("transactionAsync")
+                        .addAnnotation(Annotations.deprecated())
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
@@ -271,7 +285,21 @@ public class DatabaseWriter extends BaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("transactionAsync")
+                        .addAnnotation(Annotations.checkResult())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.Completable)
+                        .addParameter(
+                                ParameterSpec.builder(Runnable.class, "task")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .addStatement("return $L.transactionAsync(task)", connection)
+                        .build()
+        );
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("transactionNonExclusiveSync")
+                        .addAnnotation(Annotations.deprecated())
                         .addException(Types.TransactionAbortException)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
@@ -283,13 +311,39 @@ public class DatabaseWriter extends BaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("transactionNonExclusiveSync")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Runnable.class, "task")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .addStatement("$L.transactionNonExclusiveSync(task)", connection)
+                        .build()
+        );
+
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("transactionNonExclusiveAsync")
+                        .addAnnotation(Annotations.deprecated())
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Types.TransactionTask, "task")
                                         .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionNonExclusiveAsync(task)", connection)
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("transactionNonExclusiveAsync")
+                        .addAnnotation(Annotations.checkResult())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.Completable)
+                        .addParameter(
+                                ParameterSpec.builder(Runnable.class, "task")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .addStatement("return $L.transactionNonExclusiveAsync(task)", connection)
                         .build()
         );
 

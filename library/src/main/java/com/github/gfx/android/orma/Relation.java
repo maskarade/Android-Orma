@@ -150,9 +150,9 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
-                conn.transactionSync(new TransactionTask() {
+                conn.transactionAsync(new Runnable() {
                     @Override
-                    public void execute() throws Exception {
+                    public void run() {
                         int position = indexOf(item);
                         ColumnDef<Model, ?> pk = schema.getPrimaryKey();
                         int deletedRows = deleter()
@@ -162,14 +162,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                         if (deletedRows > 0) {
                             subscriber.onNext(position);
                         }
-                        subscriber.onCompleted();
                     }
-
-                    @Override
-                    public void onError(@NonNull Exception exception) {
-                        subscriber.onError(exception);
-                    }
-                });
+                }).subscribe(subscriber);
             }
         });
     }

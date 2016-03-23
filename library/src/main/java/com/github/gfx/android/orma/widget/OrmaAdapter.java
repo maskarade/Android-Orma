@@ -29,6 +29,7 @@ import android.view.LayoutInflater;
 
 import rx.Observable;
 import rx.Single;
+import rx.functions.Action0;
 import rx.functions.Action1;
 
 /**
@@ -108,9 +109,9 @@ public class OrmaAdapter<Model> {
     @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
         return relation.deleteAsObservable(item)
-                .doOnNext(new Action1<Integer>() {
+                .doOnCompleted(new Action0() {
                     @Override
-                    public void call(Integer deletedRows) {
+                    public void call() {
                         count = -1;
                     }
                 });

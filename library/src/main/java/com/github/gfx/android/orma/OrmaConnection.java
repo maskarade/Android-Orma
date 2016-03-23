@@ -41,6 +41,8 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.List;
 
+import rx.Completable;
+
 /**
  * Low-level interface to Orma database connection.
  */
@@ -238,6 +240,37 @@ public class OrmaConnection {
         }
     }
 
+    public void transactionNonExclusiveSync(@NonNull Runnable task) {
+        SQLiteDatabase db = getReadableDatabase();
+        trace("begin transaction (non exclusive)", null);
+        db.beginTransactionNonExclusive();
+
+        try {
+            task.run();
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            trace("end transaction (non exclusive)", null);
+        }
+    }
+
+    @NonNull
+    public Completable transactionNonExclusiveAsync(@NonNull final Runnable task) {
+        return Completable.create(new Completable.CompletableOnSubscribe() {
+            @Override
+            public void call(Completable.CompletableSubscriber subscriber) {
+                try {
+                    transactionNonExclusiveSync(task);
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        });
+    }
+
+
+    @Deprecated
     public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
         SQLiteDatabase db = getReadableDatabase();
         trace("begin transaction (non exclusive)", null);
@@ -254,6 +287,7 @@ public class OrmaConnection {
         }
     }
 
+    @Deprecated
     public void transactionNonExclusiveAsync(@NonNull final TransactionTask task) {
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
@@ -264,7 +298,23 @@ public class OrmaConnection {
     }
 
     @WorkerThread
-    public void transactionSync(@NonNull TransactionTask task) {
+    public void transactionSync(@NonNull Runnable task) {
+        SQLiteDatabase db = getWritableDatabase();
+        trace("begin transaction", null);
+        db.beginTransaction();
+
+        try {
+            task.run();
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            trace("end transaction", null);
+        }
+    }
+
+    @Deprecated
+    @WorkerThread
+    public void transactionSync(@NonNull final TransactionTask task) {
         SQLiteDatabase db = getWritableDatabase();
         trace("begin transaction", null);
         db.beginTransaction();
@@ -280,11 +330,27 @@ public class OrmaConnection {
         }
     }
 
+    @Deprecated
     public void transactionAsync(@NonNull final TransactionTask task) {
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
                 transactionSync(task);
+            }
+        });
+    }
+
+    @NonNull
+    public Completable transactionAsync(@NonNull final Runnable task) {
+        return Completable.create(new Completable.CompletableOnSubscribe() {
+            @Override
+            public void call(Completable.CompletableSubscriber subscriber) {
+                try {
+                    transactionSync(task);
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
             }
         });
     }

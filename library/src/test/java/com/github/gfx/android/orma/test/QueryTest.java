@@ -48,6 +48,8 @@ import java.util.concurrent.TimeUnit;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Action1;
+import rx.observers.TestSubscriber;
+import rx.schedulers.Schedulers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -565,6 +567,47 @@ public class QueryTest {
         });
 
         assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
+        assertThat(db.selectFromBook().count(), is(2));
+    }
+
+    @Test
+    public void transactionAsync2Success() throws Exception {
+        TestSubscriber<?> subscriber = TestSubscriber.create();
+
+        final Thread thread = Thread.currentThread();
+
+        db.transactionAsync(new Runnable() {
+            @Override
+            public void run() {
+                assertThat(Thread.currentThread(), is(not(thread)));
+
+                db.prepareInsertIntoBook().executeAll(someBooks());
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .subscribe(subscriber);
+
+        subscriber.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        subscriber.assertCompleted();
+
+        assertThat(db.selectFromBook().count(), is(7));
+    }
+
+    @Test
+    public void transactionAsync2Abort() throws Exception {
+        TestSubscriber<?> subscriber = TestSubscriber.create();
+
+        db.transactionAsync(new Runnable() {
+            @Override
+            public void run() {
+                db.prepareInsertIntoBook().executeAll(someBooks());
+                throw new RuntimeException("abort!");
+            }
+        }).subscribe(subscriber);
+
+        subscriber.awaitTerminalEvent(1, TimeUnit.SECONDS);
+        subscriber.assertError(RuntimeException.class);
+
         assertThat(db.selectFromBook().count(), is(2));
     }
 
