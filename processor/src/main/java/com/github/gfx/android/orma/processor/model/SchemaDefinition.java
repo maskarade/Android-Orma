@@ -160,7 +160,7 @@ public class SchemaDefinition {
 
     static String firstNonEmptyName(String... names) {
         for (String name : names) {
-            if (name != null && !name.equals("")) {
+≈            if (!Strings.isEmpty(name)) {
                 return name;
             }
         }
