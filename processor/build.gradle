@@ -16,7 +16,7 @@ dependencies {
     compile 'com.squareup:javapoet:1.6.1'
     testCompile project.rootProject.ext.ANDROID_JAR_23
     testCompile 'junit:junit:4.12'
-    testCompile 'com.google.testing.compile:compile-testing:0.8'
+    testCompile 'com.google.testing.compile:compile-testing:0.9'
 }
 
 publish {
