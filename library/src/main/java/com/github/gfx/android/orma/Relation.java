@@ -26,11 +26,13 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscriber;
+import rx.functions.Action0;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -147,6 +149,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @CheckResult
     @NonNull
     public Observable<Integer> deleteAsObservable(@NonNull final Model item) {
+        final AtomicInteger positionRef = new AtomicInteger(-1);
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
@@ -160,10 +163,20 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                                 .execute();
 
                         if (deletedRows > 0) {
-                            subscriber.onNext(position);
+                            positionRef.set(position);
                         }
                     }
-                }).subscribe(subscriber);
+                }).subscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        // transaction comitted
+
+                        if (positionRef.get() >= 0) {
+                            subscriber.onNext(positionRef.get());
+                        }
+                        subscriber.onCompleted();
+                    }
+                });
             }
         });
     }
