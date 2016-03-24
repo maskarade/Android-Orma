@@ -182,7 +182,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
-     * Truncates the table to the specified size. Operations are executed in a transaction.
+     * Truncates the table to the specified size.
      *
      * @param size Size to truncate the table
      * @return A {@link Single} that yields the number of rows deleted.
@@ -204,7 +204,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
-     * Inserts an item. Operations are executed in a transaction.
+     * Inserts an item.
      *
      * @param factory A model to insert.
      * @return An {@link Single} that yields the newly inserted row id.
