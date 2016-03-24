@@ -15,8 +15,6 @@
  */
 package com.github.gfx.android.orma.processor.util;
 
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
 import java.util.HashMap;
@@ -41,10 +39,10 @@ public class SqlTypes {
         javaToSqlite.put(TypeName.DOUBLE, "REAL");
         javaToSqlite.put(TypeName.DOUBLE.box(), "REAL");
 
-        javaToSqlite.put(ClassName.get(String.class), "TEXT");
+        javaToSqlite.put(Types.String, "TEXT");
         javaToSqlite.put(TypeName.CHAR, "TEXT");
         javaToSqlite.put(TypeName.CHAR.box(), "TEXT");
-        javaToSqlite.put(ArrayTypeName.of(TypeName.BYTE), "BLOB");
+        javaToSqlite.put(Types.ByteArray, "BLOB");
 
         javaToSqlite.put(TypeName.BOOLEAN, "BOOLEAN");
         javaToSqlite.put(TypeName.BOOLEAN.box(), "BOOLEAN");
