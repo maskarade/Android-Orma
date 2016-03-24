@@ -84,7 +84,18 @@ public class OrmaAdapterTest {
             }
         });
 
-        adapter = new OrmaAdapter<>(getContext(), orma.relationOfAuthor().orderByNameAsc());
+        inserter.execute(new ModelFactory<Author>() {
+            @NonNull
+            @Override
+            public Author call() {
+                Author author = new Author();
+                author.name = "Z";
+                return author;
+            }
+        });
+
+        adapter = new OrmaAdapter<>(getContext(),
+                orma.relationOfAuthor().noteIsNotNull().orderByNameAsc());
     }
 
     @Test
@@ -102,6 +113,7 @@ public class OrmaAdapterTest {
         assertThat(adapter.getItemCount(), is(3));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testGetRelation() throws Exception {
         assertThat(adapter.getRelation(), is(instanceOf(Relation.class)));

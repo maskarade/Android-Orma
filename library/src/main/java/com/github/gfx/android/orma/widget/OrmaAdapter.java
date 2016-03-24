@@ -32,7 +32,7 @@ import rx.Single;
 import rx.functions.Action1;
 
 /**
- * A helper class to provide Adapter method implementations.
+ * A helper class to provide adapter class implementations.
  *
  * @param <Model> An Orma model class
  */
