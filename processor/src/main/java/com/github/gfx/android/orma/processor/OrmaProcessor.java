@@ -30,23 +30,19 @@ import com.github.gfx.android.orma.processor.generator.UpdaterWriter;
 import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
+import com.github.gfx.android.orma.processor.tool.SynchronizedFiler;
 import com.squareup.javapoet.JavaFile;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
@@ -98,7 +94,7 @@ public class OrmaProcessor extends AbstractProcessor {
                 context.setupDefaultDatabaseIfNeeded();
                 for (DatabaseDefinition database : context.databases) {
                     DatabaseWriter databaseWriter = new DatabaseWriter(context, database);
-                    writeToFiler(null, databaseWriter.buildJavaFile());
+                    writeToFiler(database.getElement().orElse(null), databaseWriter.buildJavaFile());
                 }
             }
         } catch (ProcessingException e) {
@@ -145,26 +141,9 @@ public class OrmaProcessor extends AbstractProcessor {
 
     private void writeToFiler(Element element, JavaFile javaFile) {
         try {
-            writeTo(javaFile, processingEnv.getFiler());
+            javaFile.writeTo(new SynchronizedFiler(processingEnv.getFiler()));
         } catch (Exception e) {
             throw new ProcessingException("Failed to write " + javaFile.typeSpec.name, element, e);
-        }
-    }
-
-    private JavaFileObject createSourceFile(JavaFile javaFile, Filer filer) throws IOException {
-        String fileName = javaFile.packageName.isEmpty()
-                ? javaFile.typeSpec.name
-                : javaFile.packageName + "." + javaFile.typeSpec.name;
-        List<Element> originatingElements = javaFile.typeSpec.originatingElements;
-        synchronized (this) {
-            return filer.createSourceFile(fileName, originatingElements.toArray(new Element[originatingElements.size()]));
-        }
-    }
-
-    private void writeTo(JavaFile javaFile, Filer filer) throws IOException {
-        JavaFileObject sourceFile = createSourceFile(javaFile, filer);
-        try (Writer writer = sourceFile.openWriter()) {
-            javaFile.writeTo(writer);
         }
     }
 }
