@@ -19,7 +19,6 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.test.model.ModelWithDate;
 import com.github.gfx.android.orma.test.model.ModelWithDate_Relation;
 import com.github.gfx.android.orma.test.model.ModelWithMultipleSortableColumns;
@@ -50,9 +49,9 @@ public class RelationTest {
 
         final long t = System.currentTimeMillis();
 
-        orma.transactionSync(new TransactionTask() {
+        orma.transactionSync(new Runnable() {
             @Override
-            public void execute() throws Exception {
+            public void run() {
                 Inserter<ModelWithDate> inserter = orma.prepareInsertIntoModelWithDate();
                 inserter.execute(new ModelFactory<ModelWithDate>() {
                     @NonNull

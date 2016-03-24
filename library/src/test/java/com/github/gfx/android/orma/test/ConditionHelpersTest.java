@@ -44,9 +44,9 @@ public class ConditionHelpersTest {
     public void setUp() throws Exception {
         db = OrmaFactory.create();
 
-        db.transactionSync(new TransactionTask() {
+        db.transactionSync(new Runnable() {
             @Override
-            public void execute() throws Exception {
+            public void run() {
                 Inserter<ModelWithConditionHelpers> inserter = db.prepareInsertIntoModelWithConditionHelpers();
 
                 for (int i = 0; i < 10; i++) {

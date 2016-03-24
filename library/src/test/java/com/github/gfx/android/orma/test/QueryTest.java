@@ -500,6 +500,7 @@ public class QueryTest {
         return books;
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void transactionSyncSuccess() throws Exception {
         db.transactionSync(new TransactionTask() {
@@ -512,6 +513,7 @@ public class QueryTest {
         assertThat(db.selectFromBook().count(), is(7));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void transactionSyncAbort() throws Exception {
         try {
@@ -531,6 +533,7 @@ public class QueryTest {
         assertThat(db.selectFromBook().count(), is(2));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void transactionAsyncSuccess() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -547,6 +550,7 @@ public class QueryTest {
         assertThat(db.selectFromBook().count(), is(7));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void transactionAsyncAbort() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -611,6 +615,7 @@ public class QueryTest {
         assertThat(db.selectFromBook().count(), is(2));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void transactionNonExclusiveSync() throws Exception {
         Single<Integer> countObservable = Single.create(new Single.OnSubscribe<Integer>() {
@@ -628,6 +633,7 @@ public class QueryTest {
         assertThat(countObservable.toBlocking().value(), is(2));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void transactionNonExclusiveAsync() throws Exception {
         Single<Integer> countObservable = Single.create(new Single.OnSubscribe<Integer>() {
