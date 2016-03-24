@@ -158,11 +158,6 @@ public class ColumnDefinition {
         return new ColumnDefinition(schema);
     }
 
-    public static String getColumnName(Element element) {
-        Column column = element.getAnnotation(Column.class);
-        return columnName(column, element);
-    }
-
     static String columnName(Column column, Element element) {
         if (column != null && !column.value().equals("")) {
             return column.value();

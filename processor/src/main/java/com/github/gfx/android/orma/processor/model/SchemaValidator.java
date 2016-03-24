@@ -52,7 +52,7 @@ public class SchemaValidator {
     }
 
     private void validateNoOrmaModelInInheritance(TypeMirror type) {
-        TypeElement t = context.processingEnv.getElementUtils().getTypeElement(type.toString());
+        TypeElement t = context.getTypeElement(type);
         if (t.getAnnotation(Table.class) != null) {
             error("The superclasses of Orma models are not allowed to have @Table annotation", t);
         }

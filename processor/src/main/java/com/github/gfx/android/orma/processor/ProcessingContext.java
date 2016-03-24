@@ -36,6 +36,7 @@ import java.util.Map;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
@@ -112,7 +113,19 @@ public class ProcessingContext {
     }
 
     public TypeMirror getTypeMirrorOf(Type type) {
-        return processingEnv.getElementUtils().getTypeElement(type.getTypeName()).asType();
+        return getTypeElement(type).asType();
+    }
+
+    public TypeElement getTypeElement(CharSequence name) {
+        return processingEnv.getElementUtils().getTypeElement(name);
+    }
+
+    public TypeElement getTypeElement(TypeMirror name) {
+        return getTypeElement(name.toString());
+    }
+
+    public TypeElement getTypeElement(Type name) {
+        return getTypeElement(name.getTypeName());
     }
 
     public boolean isSameType(TypeMirror t1, TypeMirror t2) {

@@ -185,7 +185,7 @@ public class SchemaDefinition {
 
         TypeMirror superclass = typeElement.getSuperclass();
         if (!superclass.toString().equals(Object.class.getCanonicalName())) {
-            TypeElement superclassElement = context.processingEnv.getElementUtils().getTypeElement(superclass.toString());
+            TypeElement superclassElement = context.getTypeElement(superclass);
             columns.addAll(collectColumns(superclassElement));
         }
 
