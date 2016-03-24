@@ -70,10 +70,11 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
         return delegate.getLayoutInflater();
     }
 
+
     @SuppressWarnings("unchecked")
     @NonNull
-    public <T extends Relation<Model, ?>> Relation<Model, T> getRelation() {
-        return delegate.getRelation();
+    public <R extends Relation<Model, R>> R getRelation() {
+        return (R) delegate.getRelation();
     }
 
     public void runOnUiThread(@NonNull Runnable task) {

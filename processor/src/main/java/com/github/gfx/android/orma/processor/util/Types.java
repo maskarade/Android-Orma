@@ -70,6 +70,8 @@ public class Types {
 
     public static final ClassName WorkerThread = ClassName.get("android.support.annotation", "WorkerThread");
 
+    public static final ClassName CheckResult = ClassName.get("android.support.annotation", "CheckResult");
+
     public static final ClassName Single = ClassName.get("rx", "Single");
 
     public static final ClassName Observable = ClassName.get("rx", "Observable");
@@ -129,6 +131,8 @@ public class Types {
     public static final ClassName Schemas = ClassName.get(ormaPackageName + ".internal", "Schemas");
 
     public static final ClassName NullPointerException = ClassName.get(NullPointerException.class);
+
+    public static final ClassName Completable = ClassName.get("rx", "Completable");
 
     // helper methods
 

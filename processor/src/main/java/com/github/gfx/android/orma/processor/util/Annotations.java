@@ -35,6 +35,10 @@ public class Annotations {
 
     private static final AnnotationSpec nullable = AnnotationSpec.builder(Types.Nullable).build();
 
+    private static final AnnotationSpec checkResult = AnnotationSpec.builder(Types.CheckResult).build();
+
+    private static final AnnotationSpec deprecated = AnnotationSpec.builder(Deprecated.class).build();
+
     private static final List<AnnotationSpec> safeVarArgsAnnotations = Arrays.asList(
             AnnotationSpec.builder(SafeVarargs.class).build(),
             suppressWarnings("varargs")
@@ -101,5 +105,13 @@ public class Annotations {
             builder.addMember("value", "{$L}", names.build());
         }
         return builder.build();
+    }
+
+    public static AnnotationSpec deprecated() {
+        return deprecated;
+    }
+
+    public static AnnotationSpec checkResult() {
+        return checkResult;
     }
 }

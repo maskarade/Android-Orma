@@ -18,12 +18,12 @@ package com.github.gfx.android.orma.example.activity;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityListViewBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
+import com.github.gfx.android.orma.example.orma.Todo_Relation;
 import com.github.gfx.android.orma.widget.OrmaListAdapter;
 
 import org.threeten.bp.ZonedDateTime;
@@ -31,14 +31,18 @@ import org.threeten.bp.ZonedDateTime;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.Date;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class ListViewActivity extends AppCompatActivity {
@@ -90,8 +94,15 @@ public class ListViewActivity extends AppCompatActivity {
 
     static class Adapter extends OrmaListAdapter<Todo> {
 
-        public Adapter(@NonNull Context context, @NonNull Relation<Todo, ?> relation) {
+        public Adapter(@NonNull Context context, @NonNull Todo_Relation relation) {
             super(context, relation);
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
+        @Override
+        public Todo_Relation getRelation() {
+            return (Todo_Relation) super.getRelation();
         }
 
         @Override
@@ -101,21 +112,54 @@ public class ListViewActivity extends AppCompatActivity {
             }
 
             final Todo todo = getItem(position);
-            CardTodoBinding binding = DataBindingUtil.getBinding(convertView);
+            final CardTodoBinding binding = DataBindingUtil.getBinding(convertView);
 
             binding.title.setText(todo.title);
             binding.content.setText(todo.content);
 
+            setStrike(binding.title, todo.done);
+
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Todo currentTodo = getRelation().idEq(todo.id).value();
+                    final boolean done = !currentTodo.done;
+
+                    getRelation()
+                            .updater()
+                            .idEq(todo.id)
+                            .done(done)
+                            .executeAsObservable()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Action1<Integer>() {
+                                @Override
+                                public void call(Integer integer) {
+                                    setStrike(binding.title, done);
+                                }
+                            });
+                }
+            });
+
+            binding.getRoot().setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
                     removeItemAsObservable(todo)
                             .subscribeOn(Schedulers.io())
                             .subscribe();
+                    return true;
                 }
             });
 
             return convertView;
+        }
+
+        void setStrike(TextView textView, boolean value) {
+            if (value) {
+                textView.setPaintFlags(textView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                textView.setPaintFlags(textView.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+            }
         }
     }
 

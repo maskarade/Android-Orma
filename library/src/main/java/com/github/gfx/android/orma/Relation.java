@@ -26,11 +26,13 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.Subscriber;
+import rx.functions.Action0;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -83,10 +85,19 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @NonNull
+    public Model value() {
+        return selector().value();
+    }
+
+    @Nullable
+    public Model valueOrNull() {
+        return selector().valueOrNull();
+    }
+
+    @NonNull
     public Model get(@IntRange(from = 0) int position) {
         return selector().get(position);
     }
-
 
     @NonNull
     public Model getOrCreate(@IntRange(from = 0) long position, @NonNull ModelFactory<Model> factory) {
@@ -138,12 +149,13 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @CheckResult
     @NonNull
     public Observable<Integer> deleteAsObservable(@NonNull final Model item) {
+        final AtomicInteger positionRef = new AtomicInteger(-1);
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
-                conn.transactionSync(new TransactionTask() {
+                conn.transactionAsync(new Runnable() {
                     @Override
-                    public void execute() throws Exception {
+                    public void run() {
                         int position = indexOf(item);
                         ColumnDef<Model, ?> pk = schema.getPrimaryKey();
                         int deletedRows = deleter()
@@ -151,14 +163,18 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                                 .execute();
 
                         if (deletedRows > 0) {
-                            subscriber.onNext(position);
+                            positionRef.set(position);
+                        }
+                    }
+                }).subscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        // transaction comitted
+
+                        if (positionRef.get() >= 0) {
+                            subscriber.onNext(positionRef.get());
                         }
                         subscriber.onCompleted();
-                    }
-
-                    @Override
-                    public void onError(@NonNull Exception exception) {
-                        subscriber.onError(exception);
                     }
                 });
             }

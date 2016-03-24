@@ -3,6 +3,7 @@ package com.github.gfx.android.orma.example.orma;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.github.gfx.android.orma.DatabaseHandle;
@@ -16,6 +17,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.TransactionAbortException;
 import java.util.Arrays;
 import java.util.List;
+import rx.Completable;
 
 /**
  * <p>The Orma database handle class.</p>
@@ -68,21 +70,44 @@ public class OrmaDatabase implements DatabaseHandle {
     return connection;
   }
 
+  @Deprecated
   @WorkerThread
   public void transactionSync(@NonNull TransactionTask task) throws TransactionAbortException {
     connection.transactionSync(task);
   }
 
+  @WorkerThread
+  public void transactionSync(@NonNull Runnable task) {
+    connection.transactionSync(task);
+  }
+
+  @Deprecated
   public void transactionAsync(@NonNull TransactionTask task) {
     connection.transactionAsync(task);
   }
 
+  @CheckResult
+  public Completable transactionAsync(@NonNull Runnable task) {
+    return connection.transactionAsync(task);
+  }
+
+  @Deprecated
   public void transactionNonExclusiveSync(@NonNull TransactionTask task) throws TransactionAbortException {
     connection.transactionNonExclusiveSync(task);
   }
 
+  public void transactionNonExclusiveSync(@NonNull Runnable task) {
+    connection.transactionNonExclusiveSync(task);
+  }
+
+  @Deprecated
   public void transactionNonExclusiveAsync(@NonNull TransactionTask task) {
     connection.transactionNonExclusiveAsync(task);
+  }
+
+  @CheckResult
+  public Completable transactionNonExclusiveAsync(@NonNull Runnable task) {
+    return connection.transactionNonExclusiveAsync(task);
   }
 
   /**

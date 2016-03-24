@@ -214,9 +214,9 @@ public class BenchmarkActivity extends AppCompatActivity {
             public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
 
-                orma.transactionSync(new TransactionTask() {
+                orma.transactionSync(new Runnable() {
                     @Override
-                    public void execute() throws Exception {
+                    public void run() {
                         long now = System.currentTimeMillis();
 
                         Inserter<Todo> statement = orma.prepareInsertIntoTodo();
