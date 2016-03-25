@@ -113,7 +113,6 @@ public class OrmaAdapterTest {
         assertThat(adapter.getItemCount(), is(3));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testGetRelation() throws Exception {
         assertThat(adapter.getRelation(), is(instanceOf(Relation.class)));

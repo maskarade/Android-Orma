@@ -98,7 +98,6 @@ public class ListViewActivity extends AppCompatActivity {
             super(context, relation);
         }
 
-        @SuppressWarnings("unchecked")
         @NonNull
         @Override
         public Todo_Relation getRelation() {
