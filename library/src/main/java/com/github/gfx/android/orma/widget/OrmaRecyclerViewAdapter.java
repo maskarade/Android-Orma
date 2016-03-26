@@ -68,7 +68,12 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
         return delegate.getRelation();
     }
 
+    @Deprecated
     public void runOnUiThreadSync(@NonNull Runnable task) {
+        delegate.runOnUiThread(task);
+    }
+
+    public void runOnUiThread(@NonNull Runnable task) {
         delegate.runOnUiThread(task);
     }
 
@@ -90,7 +95,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
                 .doOnSuccess(new Action1<Long>() {
                     @Override
                     public void call(Long rowId) {
-                        runOnUiThreadSync(new Runnable() {
+                        runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 notifyItemInserted(getItemCount());
@@ -132,7 +137,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
                 .doOnNext(new Action1<Integer>() {
                     @Override
                     public void call(final Integer position) {
-                        runOnUiThreadSync(new Runnable() {
+                        runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 notifyItemRemoved(position);
@@ -154,7 +159,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
                 .doOnSuccess(new Action1<Integer>() {
                     @Override
                     public void call(Integer deletedItems) {
-                        runOnUiThreadSync(new Runnable() {
+                        runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 notifyDataSetChanged();
