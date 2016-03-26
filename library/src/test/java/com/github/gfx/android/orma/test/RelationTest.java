@@ -319,4 +319,14 @@ public class RelationTest {
         }
         assertThat(count, is(3));
     }
+
+    @Test
+    public void reload() throws Exception {
+        ModelWithDate model = rel().get(0);
+        rel().updater().nameEq(model.name).note("modified").execute();
+        ModelWithDate reloaded = rel().reload(model);
+
+        assertThat(reloaded.name, is(model.name));
+        assertThat(reloaded.note, is("modified"));
+    }
 }

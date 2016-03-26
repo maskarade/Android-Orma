@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
@@ -19,6 +20,12 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   @Override
   public Item_Relation clone() {
     return new Item_Relation(this);
+  }
+
+  @NonNull
+  @CheckResult
+  public Item reload(@NonNull Item model) {
+    return selector().nameEq(model.name).value();
   }
 
   @NonNull

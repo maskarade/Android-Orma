@@ -134,7 +134,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Todo currentTodo = getRelation().selector().idEq(todo.id).value();
+                    Todo currentTodo = getRelation().reload(todo);
                     final boolean done = !currentTodo.done;
 
                     getRelation()

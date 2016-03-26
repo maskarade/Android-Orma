@@ -23,6 +23,7 @@ import com.github.gfx.android.orma.processor.util.Strings;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -85,6 +86,21 @@ public class RelationWriter extends BaseWriter {
                 .returns(getTargetClassName())
                 .addStatement("return new $T(this)", getTargetClassName())
                 .build());
+
+
+        schema.getPrimaryKey().ifPresent(primaryKey -> {
+            methodSpecs.add(MethodSpec.methodBuilder("reload")
+                    .addAnnotation(Annotations.nonNull())
+                    .addAnnotation(Annotations.checkResult())
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(schema.getModelClassName())
+                    .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
+                            .addAnnotation(Annotations.nonNull())
+                            .build())
+                    .addStatement("return selector().$LEq($L).value()",
+                            primaryKey.name, primaryKey.buildGetColumnExpr("model"))
+                    .build());
+        });
 
         methodSpecs.add(MethodSpec.methodBuilder("selector")
                 .addAnnotations(Annotations.overrideAndNonNull())
