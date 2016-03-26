@@ -366,7 +366,7 @@ public class DatabaseWriter extends BaseWriter {
 
             methodSpecs.add(MethodSpec.methodBuilder("load" + simpleModelName + "fromCursor")
                     .addAnnotation(Annotations.nonNull())
-                    .addAnnotation(Deprecated.class)
+                    .addAnnotation(Annotations.deprecated())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
                     .addParameter(
