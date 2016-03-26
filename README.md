@@ -541,8 +541,8 @@ For example, here is a static type adapter for [LatLng](https://developers.googl
 
 ```java
 @StaticTypeAdapter(
-        targetType = LatLng.class,
-        serializedType = String.class
+    targetType = LatLng.class,
+    serializedType = String.class
 )
 public class LatLngAdapter {
 
@@ -563,9 +563,48 @@ public class LatLngAdapter {
 }
 ```
 
-Target type must be integers, floating point numbers, `boolean`, `String`, or `byte[]`.
+In addition, you can define multiple type serializers to single class with `@StaticTypeAdapters` annotation containers:
 
-Each target type has a corresponding SQLite storage type:
+```java
+@StaticTypeAdapters({
+    @StaticTypeAdapter(
+        targetType = MutableInt.class,
+        serializedType = int.class,
+        serializer = "serializeMutableInt",
+        deserializer = "deserializeMutableInt"
+    ),
+    @StaticTypeAdapter(
+        targetType = MutableLong.class,
+        serializedType = long.class,
+        serializer = "serializeMutableLong",
+        deserializer = "deserializeMutableLong"
+    )
+})
+public class TypeAdapters {
+
+    public static int serializeMutableInt(@NonNull MutableInt target) {
+        return target.value;
+    }
+
+    @NonNull
+    public static MutableInt deserializeMutableInt(int deserialized) {
+        return new MutableInt(deserialized);
+    }
+
+    public static long serializeMutableLong(@NonNull MutableLong target) {
+        return target.value;
+    }
+
+    @NonNull
+    public static MutableLong deserializeMutableLong(long deserialized) {
+        return new MutableLong(deserialized);
+    }
+}
+```
+
+Note that `serializedType` must be integers, floating point numbers, `boolean`, `String`, or `byte[]`.
+
+Each serialized type has a corresponding SQLite storage type:
 
 | Java Type | SQLite Type |
 |:---------:|:-----------:|

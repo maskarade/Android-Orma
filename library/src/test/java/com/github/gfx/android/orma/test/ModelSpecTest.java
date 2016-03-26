@@ -28,6 +28,8 @@ import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 import com.github.gfx.android.orma.test.toolbox.IntTuple2;
+import com.github.gfx.android.orma.test.toolbox.MutableInt;
+import com.github.gfx.android.orma.test.toolbox.MutableLong;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
@@ -163,6 +165,8 @@ public class ModelSpecTest {
                 model.bigInteger = bi;
                 model.currency = Currency.getInstance("JPY");
                 model.intTuple2 = new IntTuple2(-13, 17);
+                model.mutableInt = new MutableInt(42);
+                model.mutableLong = new MutableLong(43);
                 model.byteBuffer = ByteBuffer.wrap(new byte[]{0, 1, 2, 3});
                 return model;
             }
@@ -182,6 +186,8 @@ public class ModelSpecTest {
         assertThat(model.bigInteger, is(bi));
         assertThat(model.currency, is(Currency.getInstance("JPY")));
         assertThat(model.intTuple2, is(new IntTuple2(-13, 17)));
+        assertThat(model.mutableInt.value, is(42));
+        assertThat(model.mutableLong.value, is(43L));
         assertThat(model.byteBuffer, is(ByteBuffer.wrap(new byte[]{0, 1, 2, 3})));
 
         // nullable

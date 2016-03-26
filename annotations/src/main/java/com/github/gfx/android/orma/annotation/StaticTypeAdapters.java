@@ -21,32 +21,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * {@link StaticTypeAdapter} defines how a type is stored in a database column.
- */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-// @Repeatable(StaticTypeAdapters.class) // requires JDK 1.8
-public @interface StaticTypeAdapter {
+public @interface StaticTypeAdapters {
 
-    /**
-     * @return The name of a static method used to serialize {@link #targetType()} to {@link #serializedType()}
-     */
-    String serializer() default "serialize";
-
-    /**
-     * @return the name of a static method used to deserialize {@link #targetType()} from {@link #serializedType()}
-     */
-    String deserializer() default "deserialize";
-
-    /**
-     * @return A target type to serialize.
-     */
-    Class<?> targetType();
-
-    /**
-     * @return What {@link #targetType()}} is serialized to. Must be integers, floating point numbers, {@link String} and
-     * {@link byte[]}
-     */
-    Class<?> serializedType();
+    StaticTypeAdapter[] value();
 }

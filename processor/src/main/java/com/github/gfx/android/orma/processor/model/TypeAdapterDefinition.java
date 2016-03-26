@@ -17,7 +17,9 @@
 package com.github.gfx.android.orma.processor.model;
 
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
-import com.github.gfx.android.orma.processor.util.Mirrors;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.tool.AnnotationHandle;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -27,11 +29,15 @@ import android.support.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Currency;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 public class TypeAdapterDefinition {
@@ -66,18 +72,18 @@ public class TypeAdapterDefinition {
 
     public final String deserializer;
 
-    public TypeAdapterDefinition(Element element) {
+    public TypeAdapterDefinition(ProcessingContext context, Element element,
+            AnnotationHandle<StaticTypeAdapter> staticTypeAdapter) {
         this.element = (TypeElement) element;
         this.typeAdapterImpl = ClassName.get(this.element);
 
-        StaticTypeAdapter annotation = element.getAnnotation(StaticTypeAdapter.class);
-        AnnotationMirror annotationMirror = Mirrors.findAnnotationMirror(element, StaticTypeAdapter.class).get();
-
         // Can't access program class instances in annotation processing in , throwing MirroredTypeException
-        targetType = Mirrors.findAnnotationValueAsType(annotationMirror, "targetType").get();
-        serializedType = Mirrors.findAnnotationValueAsType(annotationMirror, "serializedType").get();
-        serializer = annotation.serializer();
-        deserializer = annotation.deserializer();
+        targetType = staticTypeAdapter.getValueAsTypeName("targetType");
+        serializedType = staticTypeAdapter.getValueAsTypeName("serializedType");
+        serializer = staticTypeAdapter.getOrDefault("serializer", String.class);
+        deserializer = staticTypeAdapter.getOrDefault("deserializer", String.class);
+
+        validate(context);
     }
 
     public TypeAdapterDefinition(ClassName typeAdapter, TypeName targetType, TypeName serializedType,
@@ -109,6 +115,28 @@ public class TypeAdapterDefinition {
     public static TypeAdapterDefinition make(TypeName targetType, TypeName serializedType, String typeId) {
         return new TypeAdapterDefinition(Types.BuiltInSerializers, targetType, serializedType,
                 "serialize" + typeId, "deserialize" + typeId);
+    }
+
+    private void validate(ProcessingContext context) {
+        assert element != null;
+        List<String> methods = element.getEnclosedElements()
+                .stream()
+                .filter(x -> x instanceof ExecutableElement)
+                .map(x -> (ExecutableElement) x)
+                .filter(x -> x.getModifiers().containsAll(Arrays.asList(Modifier.PUBLIC, Modifier.STATIC)))
+                .map(x -> x.getSimpleName().toString())
+                .collect(Collectors.toList());
+
+        if (!methods.contains(serializer)) {
+            context.addError(new ProcessingException(
+                    "Missing serializer: public static SerializedType "
+                            + serializer + "(TargetType target)", element));
+        }
+        if (!methods.contains(deserializer)) {
+            context.addError(new ProcessingException(
+                    "Missing deserializer: public static TargetType "
+                            + deserializer + "(SerializedType serialized)", element));
+        }
     }
 
     public String getSerializerName() {

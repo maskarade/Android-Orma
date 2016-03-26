@@ -18,7 +18,7 @@ package com.github.gfx.android.orma.processor.model;
 
 import com.github.gfx.android.orma.annotation.Database;
 import com.github.gfx.android.orma.processor.ProcessingContext;
-import com.github.gfx.android.orma.processor.util.Mirrors;
+import com.github.gfx.android.orma.processor.tool.AnnotationHandle;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 
 public class DatabaseDefinition {
 
@@ -49,16 +49,18 @@ public class DatabaseDefinition {
     public DatabaseDefinition(ProcessingContext context, TypeElement element) {
         this.context = context;
         this.element = element;
-        AnnotationMirror annotation = Mirrors.findAnnotationMirror(element, Database.class).get();
+        AnnotationHandle<Database> database = AnnotationHandle.find(element, Database.class).get();
 
         packageName = context.getElements().getPackageOf(element).toString();
-        Optional<String> name = Mirrors.findAnnotationValueAsString(annotation, "databaseClassName");
-        className = ClassName.get(packageName, name.orElse(Database.DEFAULT_DATABASE_CLASS_NAME));
+        String name = database.getOrDefault("databaseClassName", String.class);
+        className = ClassName.get(packageName, name);
 
-        includes = Mirrors.findAnnotationValueAsTypes(annotation, "includes")
+        includes = database.getValues("includes", TypeMirror.class)
+                .map(ClassName::get)
                 .collect(Collectors.toSet());
 
-        excludes = Mirrors.findAnnotationValueAsTypes(annotation, "excludes")
+        excludes = database.getValues("excludes", TypeMirror.class)
+                .map(ClassName::get)
                 .collect(Collectors.toSet());
     }
 
