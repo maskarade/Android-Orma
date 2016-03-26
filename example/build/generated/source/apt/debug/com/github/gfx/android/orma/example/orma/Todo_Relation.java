@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
@@ -22,6 +23,12 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   @Override
   public Todo_Relation clone() {
     return new Todo_Relation(this);
+  }
+
+  @NonNull
+  @CheckResult
+  public Todo reload(@NonNull Todo model) {
+    return selector().idEq(model.id).value();
   }
 
   @NonNull
