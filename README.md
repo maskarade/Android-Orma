@@ -68,8 +68,8 @@ Then, declare dependencies to use Orma.
 
 ```groovy
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:2.3.5'
-    compile 'com.github.gfx.android.orma:orma:2.3.5'
+    apt 'com.github.gfx.android.orma:orma-processor:2.4.0'
+    compile 'com.github.gfx.android.orma:orma:2.4.0'
 }
 ```
 

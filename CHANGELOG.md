@@ -8,6 +8,23 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.4.0 - 2016/03/26
+
+Here is the difference: [v2.3.5...v2.4.0](https://github.com/gfx/Android-Orma/compare/v2.3.5...v2.4.0)
+
+### New Features
+
+* `Relation#reload(Model)` to reload a model
+  * the model must have the primary key
+* `OrmaDatabase#transactionSync(Runnable)` to take lambda expressions
+* `OrmaDatabase#transactionAsync(Runnable) -> Completable` to handle transaction completion
+* `@StaticTypeAdapters` as a container of `@StaticTypeAdapter`
+  * See README.md for usage
+
+### Others
+
+* Lots of refactoring
+
 ## v2.3.5 - 2016/03/16
 
 ### Bug Fixes
