@@ -5,6 +5,7 @@ buildscript {
     dependencies {
         classpath "io.realm:realm-gradle-plugin:0.88.2"
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.4.2'
+        classpath 'me.tatarka:gradle-retrolambda:3.2.5'
     }
 }
 
@@ -12,6 +13,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
 apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 23
@@ -48,8 +50,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     lintOptions {

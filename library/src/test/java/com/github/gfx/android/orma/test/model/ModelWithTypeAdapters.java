@@ -19,6 +19,8 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.test.toolbox.IntTuple2;
+import com.github.gfx.android.orma.test.toolbox.MutableInt;
+import com.github.gfx.android.orma.test.toolbox.MutableLong;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
@@ -84,6 +86,12 @@ public class ModelWithTypeAdapters {
 
     @Column(indexed = true)
     public IntTuple2 intTuple2;
+
+    @Column(indexed = true)
+    public MutableInt mutableInt;
+
+    @Column(indexed = true)
+    public MutableLong mutableLong;
 
     @Nullable
     @Column(indexed = true)

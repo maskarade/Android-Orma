@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Database;
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
+import com.github.gfx.android.orma.annotation.StaticTypeAdapters;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
@@ -30,6 +31,7 @@ import com.github.gfx.android.orma.processor.generator.UpdaterWriter;
 import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
+import com.github.gfx.android.orma.processor.tool.AnnotationHandle;
 import com.github.gfx.android.orma.processor.tool.SynchronizedFiler;
 import com.squareup.javapoet.JavaFile;
 
@@ -49,6 +51,7 @@ import javax.lang.model.element.TypeElement;
         "com.github.gfx.android.orma.annotation.Table",
         "com.github.gfx.android.orma.annotation.VirtualTable",
         "com.github.gfx.android.orma.annotation.StaticTypeAdapter",
+        "com.github.gfx.android.orma.annotation.StaticTypeAdapters",
 })
 public class OrmaProcessor extends AbstractProcessor {
 
@@ -99,6 +102,8 @@ public class OrmaProcessor extends AbstractProcessor {
             }
         } catch (ProcessingException e) {
             context.addError(e);
+        } catch (Exception e) {
+            context.addError(new ProcessingException("Unexpected exception while processing annotations", null, e));
         }
 
         context.printErrors();
@@ -115,10 +120,14 @@ public class OrmaProcessor extends AbstractProcessor {
     }
 
     public Stream<TypeAdapterDefinition> buildTypeAdapters(ProcessingContext context, RoundEnvironment roundEnv) {
-        return roundEnv
-                .getElementsAnnotatedWith(StaticTypeAdapter.class)
-                .stream()
-                .map(TypeAdapterDefinition::new);
+        return Stream.concat(
+                roundEnv.getElementsAnnotatedWith(StaticTypeAdapters.class).stream()
+                        .flatMap(element -> AnnotationHandle
+                                .findRepeatable(element, StaticTypeAdapter.class, StaticTypeAdapters.class)),
+                roundEnv.getElementsAnnotatedWith(StaticTypeAdapter.class).stream()
+                        .map(element -> AnnotationHandle.find(element, StaticTypeAdapter.class).get())
+        )
+                .map(annotation -> new TypeAdapterDefinition(context, annotation.element, annotation));
     }
 
     public Stream<SchemaDefinition> buildTableSchemas(ProcessingContext context, RoundEnvironment roundEnv) {

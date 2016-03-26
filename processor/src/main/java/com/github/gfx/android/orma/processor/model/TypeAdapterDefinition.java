@@ -17,7 +17,8 @@
 package com.github.gfx.android.orma.processor.model;
 
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
-import com.github.gfx.android.orma.processor.util.Mirrors;
+import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.tool.AnnotationHandle;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -30,7 +31,6 @@ import java.nio.ByteBuffer;
 import java.util.Currency;
 import java.util.UUID;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -66,18 +66,15 @@ public class TypeAdapterDefinition {
 
     public final String deserializer;
 
-    public TypeAdapterDefinition(Element element) {
+    public TypeAdapterDefinition(ProcessingContext context, Element element, AnnotationHandle<StaticTypeAdapter> staticTypeAdapter) {
         this.element = (TypeElement) element;
         this.typeAdapterImpl = ClassName.get(this.element);
 
-        StaticTypeAdapter annotation = element.getAnnotation(StaticTypeAdapter.class);
-        AnnotationMirror annotationMirror = Mirrors.findAnnotationMirror(element, StaticTypeAdapter.class).get();
-
         // Can't access program class instances in annotation processing in , throwing MirroredTypeException
-        targetType = Mirrors.findAnnotationValueAsType(annotationMirror, "targetType").get();
-        serializedType = Mirrors.findAnnotationValueAsType(annotationMirror, "serializedType").get();
-        serializer = annotation.serializer();
-        deserializer = annotation.deserializer();
+        targetType = staticTypeAdapter.getValueAsTypeName("targetType");
+        serializedType = staticTypeAdapter.getValueAsTypeName("serializedType");
+        serializer = staticTypeAdapter.getOrDefault("serializer", String.class);
+        deserializer = staticTypeAdapter.getOrDefault("deserializer", String.class);
     }
 
     public TypeAdapterDefinition(ClassName typeAdapter, TypeName targetType, TypeName serializedType,

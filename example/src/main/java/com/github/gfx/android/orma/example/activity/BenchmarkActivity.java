@@ -17,7 +17,6 @@ package com.github.gfx.android.orma.example.activity;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.Inserter;
-import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityBenchmarkBinding;
 import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
