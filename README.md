@@ -723,6 +723,11 @@ as of Orma v2.3.0 and Realm 0.87.2:
 
 I welcome benchmark in another condition and/or another code.
 
+## Method Count
+
+Orma runtime is very lightweight: [Method Count for v2.4.0](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:2.4.0)
+
+
 ## FAQ
 
 ### Lint fails on InvalidPackage.
