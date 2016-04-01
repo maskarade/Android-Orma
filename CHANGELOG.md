@@ -8,6 +8,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.4.1 - 2016/04/01
+
+No code change. Just for repackaging the AARs.
+
 ## v2.4.0 - 2016/03/26
 
 Here is the difference: [v2.3.5...v2.4.0](https://github.com/gfx/Android-Orma/compare/v2.3.5...v2.4.0)
