@@ -21,7 +21,6 @@ import com.github.gfx.android.orma.processor.generator.SqlGenerator;
 import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
-import com.github.gfx.android.orma.processor.util.Strings;
 import com.squareup.javapoet.TypeName;
 
 import java.io.PrintWriter;
@@ -55,8 +54,6 @@ public class ProcessingContext {
 
     public final SqlGenerator sqlg;
 
-    public final boolean debug = isDebugging();
-
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
         this.schemaMap = new LinkedHashMap<>(); // the order matters
@@ -65,11 +62,6 @@ public class ProcessingContext {
         for (TypeAdapterDefinition typeAdapterDefinition : TypeAdapterDefinition.BUILTINS) {
             addTypeAdapterDefinition(typeAdapterDefinition);
         }
-    }
-
-    private static boolean isDebugging() {
-        String debug = System.getProperty("orma.debug", "true");
-        return !Strings.isEmpty(debug) && !debug.equals("0") && !debug.equalsIgnoreCase("false");
     }
 
     public void addError(String message, Element element) {
@@ -144,10 +136,7 @@ public class ProcessingContext {
     }
 
     public void note(String message) {
-        if (debug) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                    "[" + OrmaProcessor.TAG + "] " + message);
-        }
-
+        processingEnv.getMessager()
+                .printMessage(Diagnostic.Kind.NOTE, "[" + OrmaProcessor.TAG + "] " + message);
     }
 }
