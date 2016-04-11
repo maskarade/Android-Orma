@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.example.orma;
 
-import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
@@ -51,13 +50,7 @@ public class Category {
 
     @NonNull
     public Item createItem(OrmaDatabase orma, final String name) {
-        return orma.createItem(new ModelFactory<Item>() {
-            @NonNull
-            @Override
-            public Item call() {
-                return new Item(name, Category.this);
-            }
-        });
+        return orma.createItem(() -> new Item(name, Category.this));
     }
 
     @Override

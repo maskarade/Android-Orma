@@ -52,8 +52,6 @@ import io.requery.android.database.sqlite.SQLiteStatement;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class BenchmarkActivity extends AppCompatActivity {
@@ -91,12 +89,7 @@ public class BenchmarkActivity extends AppCompatActivity {
         adapter = new ResultAdapter();
         binding.list.setAdapter(adapter);
 
-        binding.run.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                run();
-            }
-        });
+        binding.run.setOnClickListener(v -> run());
     }
 
     @Override
@@ -109,19 +102,16 @@ public class BenchmarkActivity extends AppCompatActivity {
         Realm.deleteRealm(realmConf);
 
         realm = Realm.getDefaultInstance();
-        Schedulers.io().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
-                deleteDatabase("orma-benchmark.db");
-                orma = OrmaDatabase.builder(BenchmarkActivity.this)
-                        .name("orma-benchmark.db")
-                        .readOnMainThread(AccessThreadConstraint.NONE)
-                        .writeOnMainThread(AccessThreadConstraint.NONE)
-                        .writeAheadLogging(false)
-                        .trace(false)
-                        .build();
-                orma.migrate();
-            }
+        Schedulers.io().createWorker().schedule(() -> {
+            deleteDatabase("orma-benchmark.db");
+            orma = OrmaDatabase.builder(BenchmarkActivity.this)
+                    .name("orma-benchmark.db")
+                    .readOnMainThread(AccessThreadConstraint.NONE)
+                    .writeOnMainThread(AccessThreadConstraint.NONE)
+                    .writeAheadLogging(false)
+                    .trace(false)
+                    .build();
+            orma.migrate();
         });
 
         deleteDatabase("hand-written.db");
@@ -138,12 +128,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
 
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realm.clear(RealmTodo.class);
-            }
-        });
+        realm.executeTransaction(realm1 -> realm1.clear(RealmTodo.class));
 
         hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
@@ -151,59 +136,34 @@ public class BenchmarkActivity extends AppCompatActivity {
                 .executeAsObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(new Func1<Integer, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Integer integer) {
-                        return startInsertWithOrma();
-                    }
+                .flatMap(integer -> startInsertWithOrma())
+                .flatMap(result -> {
+                    adapter.add(result);
+                    return startInsertWithRealm(); // Realm objects can only be accessed on the thread they were created.
                 })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startInsertWithRealm(); // Realm objects can only be accessed on the thread they were created.
-                    }
+                .flatMap(result -> {
+                    adapter.add(result);
+                    return startInsertWithHandWritten();
                 })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startInsertWithHandWritten();
-                    }
+                .flatMap(result -> {
+                    adapter.add(result);
+                    return startSelectAllWithOrma();
                 })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startSelectAllWithOrma();
-                    }
+                .flatMap(result -> {
+                    adapter.add(result);
+                    return startSelectAllWithRealm(); // Realm objects can only be accessed on the thread they were created.
                 })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startSelectAllWithRealm(); // Realm objects can only be accessed on the thread they were created.
-                    }
+                .flatMap(result -> {
+                    adapter.add(result);
+                    return startSelectAllWithHandWritten();
                 })
-                .flatMap(new Func1<Result, Single<Result>>() {
-                    @Override
-                    public Single<Result> call(Result result) {
-                        adapter.add(result);
-                        return startSelectAllWithHandWritten();
-                    }
-                })
-                .subscribe(new SingleSubscriber<Result>() {
-                    @Override
-                    public void onSuccess(Result result) {
-                        adapter.add(result);
-                    }
+                .subscribe(
+                        result -> adapter.add(result),
+                        error -> {
+                            Log.wtf(TAG, error);
+                            Toast.makeText(BenchmarkActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
 
-                    @Override
-                    public void onError(Throwable error) {
-                        Log.wtf(TAG, error);
-                        Toast.makeText(BenchmarkActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
+                        });
     }
 
     Single<Result> startInsertWithOrma() {
@@ -212,22 +172,19 @@ public class BenchmarkActivity extends AppCompatActivity {
             public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
 
-                orma.transactionSync(new Runnable() {
-                    @Override
-                    public void run() {
-                        long now = System.currentTimeMillis();
+                orma.transactionSync(() -> {
+                    long now = System.currentTimeMillis();
 
-                        Inserter<Todo> statement = orma.prepareInsertIntoTodo();
+                    Inserter<Todo> statement = orma.prepareInsertIntoTodo();
 
-                        for (int i = 0; i < N; i++) {
-                            Todo todo = new Todo();
+                    for (int i = 0; i < N; i++) {
+                        Todo todo = new Todo();
 
-                            todo.title = titlePrefix + i;
-                            todo.content = contentPrefix + i;
-                            todo.createdTime = new Date(now);
+                        todo.title = titlePrefix + i;
+                        todo.content = contentPrefix + i;
+                        todo.createdTime = new Date(now);
 
-                            statement.execute(todo);
-                        }
+                        statement.execute(todo);
                     }
                 });
 
@@ -244,18 +201,15 @@ public class BenchmarkActivity extends AppCompatActivity {
             public void call(SingleSubscriber<? super Result> subscriber) {
                 long t0 = System.currentTimeMillis();
 
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        long now = System.currentTimeMillis();
+                realm.executeTransaction(realm1 -> {
+                    long now = System.currentTimeMillis();
 
-                        for (int i = 0; i < N; i++) {
-                            RealmTodo todo = realm.createObject(RealmTodo.class);
+                    for (int i = 0; i < N; i++) {
+                        RealmTodo todo = realm1.createObject(RealmTodo.class);
 
-                            todo.setTitle(titlePrefix + i);
-                            todo.setContent(contentPrefix + i);
-                            todo.setCreatedTime(new Date(now));
-                        }
+                        todo.setTitle(titlePrefix + i);
+                        todo.setContent(contentPrefix + i);
+                        todo.setCreatedTime(new Date(now));
                     }
                 });
 
@@ -407,7 +361,7 @@ public class BenchmarkActivity extends AppCompatActivity {
         Cursor cursor = db.rawQuery(sql, args);
         cursor.moveToFirst();
         long value = cursor.getLong(0);
-        cursor.close();;
+        cursor.close();
         return value;
     }
 

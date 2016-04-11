@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.example.activity;
 
-import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityMainBinding;
@@ -24,7 +23,6 @@ import com.github.gfx.android.orma.example.orma.Item;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
-import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.TraceListener;
 
 import org.threeten.bp.ZonedDateTime;
@@ -48,7 +46,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -122,39 +119,23 @@ public class MainActivity extends AppCompatActivity
                         helper.execSQL("ALTER TABLE Todo ADD COLUMN done INTEGER NOT NULL DEFAULT 0");
                     }
                 })
-                .migrationTraceListener(new TraceListener() {
-                    @Override
-                    public void onTrace(@NonNull final MigrationEngine engine, @NonNull final String format,
-                            @NonNull final Object[] args) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                logsAdapter.addAll(String.format(Locale.getDefault(), format, args));
-                                TraceListener.LOGCAT.onTrace(engine, format, args);
-                            }
-                        });
-                    }
-                })
+                .migrationTraceListener((engine, format, args) ->
+                        runOnUiThread(() -> {
+                            logsAdapter.addAll(String.format(Locale.getDefault(), format, args));
+                            TraceListener.LOGCAT.onTrace(engine, format, args);
+                        }))
                 .build();
 
-        AsyncTask.SERIAL_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    orma.migrate(); // may throws SQLiteConstraintException
+        AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+            try {
+                orma.migrate(); // may throws SQLiteConstraintException
 
-                    simpleCRUD();
-                    associations();
-                } catch (final Exception e) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
-                        }
-                    });
+                simpleCRUD();
+                associations();
+            } catch (final Exception e) {
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show());
 
-                    largeLogE(TAG, Log.getStackTraceString(e));
-                }
+                largeLogE(TAG, Log.getStackTraceString(e));
             }
         });
     }
@@ -192,13 +173,7 @@ public class MainActivity extends AppCompatActivity
         orma.deleteFromCategory().execute();
         orma.deleteFromItem().execute();
 
-        Category category = orma.relationOfCategory().getOrCreate(0, new ModelFactory<Category>() {
-            @NonNull
-            @Override
-            public Category call() {
-                return new Category("foo");
-            }
-        });
+        Category category = orma.relationOfCategory().getOrCreate(0, () -> new Category("foo"));
 
         Item item = category.createItem(orma, ZonedDateTime.now().toString());
         Log.d(TAG, "created: " + item);
@@ -215,20 +190,12 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = binding.appBarMain.fab;
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, ORMA_SITE, Snackbar.LENGTH_LONG)
-                        .setAction("Open", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(ORMA_SITE));
-                                startActivity(intent);
-                            }
-                        })
-                        .show();
-            }
-        });
+        fab.setOnClickListener(view -> Snackbar.make(view, ORMA_SITE, Snackbar.LENGTH_LONG)
+                .setAction("Open", v -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(ORMA_SITE));
+                    startActivity(intent);
+                })
+                .show());
 
         DrawerLayout drawer = binding.drawerLayout;
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

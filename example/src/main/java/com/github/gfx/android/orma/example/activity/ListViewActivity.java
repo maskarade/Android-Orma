@@ -17,7 +17,6 @@
 package com.github.gfx.android.orma.example.activity;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
-import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityListViewBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
@@ -42,7 +41,6 @@ import android.widget.TextView;
 import java.util.Date;
 
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class ListViewActivity extends AppCompatActivity {
@@ -71,25 +69,16 @@ public class ListViewActivity extends AppCompatActivity {
         adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
 
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                adapter.addItemAsObservable(new ModelFactory<Todo>() {
-                    @NonNull
-                    @Override
-                    public Todo call() {
-                        Todo todo = new Todo();
-                        number++;
-                        todo.title = "ListView item #" + number;
-                        todo.content = ZonedDateTime.now().toString();
-                        todo.createdTime = new Date();
-                        return todo;
-                    }
-                })
-                        .subscribeOn(Schedulers.io())
-                        .subscribe();
-            }
-        });
+        binding.fab.setOnClickListener(v -> adapter.addItemAsObservable(() -> {
+            Todo todo = new Todo();
+            number++;
+            todo.title = "ListView item #" + number;
+            todo.content = ZonedDateTime.now().toString();
+            todo.createdTime = new Date();
+            return todo;
+        })
+                .subscribeOn(Schedulers.io())
+                .subscribe());
     }
 
     static class Adapter extends OrmaListAdapter<Todo> {
@@ -118,36 +107,27 @@ public class ListViewActivity extends AppCompatActivity {
 
             setStrike(binding.title, todo.done);
 
-            binding.getRoot().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Todo currentTodo = getRelation().reload(todo);
-                    final boolean done = !currentTodo.done;
+            binding.getRoot().setOnClickListener(v -> {
+                Todo currentTodo = getRelation().reload(todo);
+                final boolean done = !currentTodo.done;
 
-                    getRelation()
-                            .updater()
-                            .idEq(todo.id)
-                            .done(done)
-                            .executeAsObservable()
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Action1<Integer>() {
-                                @Override
-                                public void call(Integer integer) {
-                                    setStrike(binding.title, done);
-                                }
-                            });
-                }
+                getRelation()
+                        .updater()
+                        .idEq(todo.id)
+                        .done(done)
+                        .executeAsObservable()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(integer -> {
+                            setStrike(binding.title, done);
+                        });
             });
 
-            binding.getRoot().setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    removeItemAsObservable(todo)
-                            .subscribeOn(Schedulers.io())
-                            .subscribe();
-                    return true;
-                }
+            binding.getRoot().setOnLongClickListener(v -> {
+                removeItemAsObservable(todo)
+                        .subscribeOn(Schedulers.io())
+                        .subscribe();
+                return true;
             });
 
             return convertView;
