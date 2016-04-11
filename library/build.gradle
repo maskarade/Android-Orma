@@ -36,7 +36,7 @@ android {
 dependencies {
     compile project(':migration')
     compile project(':annotations')
-    compile 'io.reactivex:rxjava:1.1.2'
+    compile 'io.reactivex:rxjava:1.1.3'
     compile "com.android.support:support-v4:${SUPPORT_LIBRARY_VERSION}"
     compile "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
     provided("com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}") {
@@ -50,7 +50,7 @@ dependencies {
     testCompile 'org.hamcrest:hamcrest-library:1.3'
     testCompile 'com.google.code.gson:gson:2.6.2'
     androidTestApt project(':processor')
-    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
     androidTestCompile 'com.google.code.gson:gson:2.6.2'
