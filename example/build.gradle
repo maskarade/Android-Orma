@@ -3,8 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "io.realm:realm-gradle-plugin:0.88.2"
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.4.2'
+        classpath "io.realm:realm-gradle-plugin:0.88.3"
         classpath 'me.tatarka:gradle-retrolambda:3.2.5'
     }
 }
@@ -12,7 +11,6 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
-apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
@@ -78,4 +76,5 @@ dependencies {
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.3'
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.facebook.stetho:stetho:1.3.0'
+    compile 'io.requery:sqlite-android:3.12.1'
 }

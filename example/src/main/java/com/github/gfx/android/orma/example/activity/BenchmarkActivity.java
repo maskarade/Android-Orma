@@ -30,9 +30,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -50,6 +47,8 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import io.requery.android.database.sqlite.SQLiteDatabase;
+import io.requery.android.database.sqlite.SQLiteStatement;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -390,7 +389,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 }
                 cursor.close();
 
-                long dbCount = DatabaseUtils.longForQuery(db, "SELECT COUNT(*) FROM todo", null);
+                long dbCount = longForQuery(db, "SELECT COUNT(*) FROM todo", null);
                 if (dbCount != count.get()) {
                     throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
                 }
@@ -401,6 +400,15 @@ public class BenchmarkActivity extends AppCompatActivity {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+
+    long longForQuery(SQLiteDatabase db, String sql, String[] args) {
+        Cursor cursor = db.rawQuery(sql, args);
+        cursor.moveToFirst();
+        long value = cursor.getLong(0);
+        cursor.close();;
+        return value;
     }
 
 

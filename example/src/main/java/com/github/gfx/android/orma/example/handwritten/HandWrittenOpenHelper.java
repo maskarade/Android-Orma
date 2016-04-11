@@ -16,8 +16,9 @@
 package com.github.gfx.android.orma.example.handwritten;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+
+import io.requery.android.database.sqlite.SQLiteDatabase;
+import io.requery.android.database.sqlite.SQLiteOpenHelper;
 
 public class HandWrittenOpenHelper extends SQLiteOpenHelper {
 
