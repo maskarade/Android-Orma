@@ -425,6 +425,19 @@ public class QueryTest {
             @Override
             public Book call() {
                 Book book = new Book();
+                book.title = "today";
+                book.content = "avocado";
+                book.inPrint = true;
+                book.publisher = SingleAssociation.id(publisher.id);
+                return book;
+            }
+        });
+
+        db.createBook(new ModelFactory<Book>() {
+            @NonNull
+            @Override
+            public Book call() {
+                Book book = new Book();
                 book.title = "friday";
                 book.content = "fig";
                 book.inPrint = false;
@@ -436,6 +449,7 @@ public class QueryTest {
         List<Book> books = db.selectFromBook().groupBy("title").having("title = ?", "today").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
+        assertThat(db.selectFromBook().groupBy("title").count(), is(2));
     }
 
     @Test
