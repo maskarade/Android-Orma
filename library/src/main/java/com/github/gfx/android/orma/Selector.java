@@ -151,7 +151,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @IntRange(from = 0)
     public int count() {
         String sql = SQLiteQueryBuilder.buildQueryString(
-                false, schema.getSelectFromTableClause(), countSelections, getWhereClause(), null, null, null, null);
+                false, schema.getSelectFromTableClause(), countSelections, getWhereClause(), groupBy, null, null, null);
         return (int) conn.rawQueryForLong(sql, getBindArgs());
     }
 
