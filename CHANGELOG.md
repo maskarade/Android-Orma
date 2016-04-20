@@ -8,6 +8,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.4.2 - 2016/04/21
+
+- Fix `groupBy()` with conditions (#246, #247 by @daisuke-nomura)
+
 ## v2.4.1 - 2016/04/01
 
 No code change. Just for repackaging the AARs.
