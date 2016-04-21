@@ -8,6 +8,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.4.3 - 2016/04/21
+
+-  Fix code generation failures with a model having the same-named setters and getters (#248, #250)
+
 ## v2.4.2 - 2016/04/21
 
 - Fix `groupBy()` with conditions (#246, #247 by @daisuke-nomura)
