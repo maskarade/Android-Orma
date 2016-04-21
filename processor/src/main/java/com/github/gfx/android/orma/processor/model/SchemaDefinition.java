@@ -217,8 +217,8 @@ public class SchemaDefinition {
                     Getter getter = methodElement.getAnnotation(Getter.class);
                     Setter setter = methodElement.getAnnotation(Setter.class);
 
-                    getters.put(extractNameFromGetter(getter, methodElement), methodElement);
-                    setters.put(extractNameFromSetter(setter, methodElement), methodElement);
+                    extractNameFromGetter(getters, getter, methodElement);
+                    extractNameFromSetter(setters, setter, methodElement);
                 });
 
         columns.addAll(columnElements.stream()
@@ -231,35 +231,33 @@ public class SchemaDefinition {
         return columns;
     }
 
-    private String extractNameFromGetter(Getter annotation, ExecutableElement getterElement) {
+    private void extractNameFromGetter(Map<String, ExecutableElement> map, Getter annotation, ExecutableElement accessor) {
         if (annotation != null && !Strings.isEmpty(annotation.value())) {
-            return annotation.value();
-        } else {
-            String name = getterElement.getSimpleName().toString();
-            if (isBooleanType(getterElement.getReturnType())) {
+            map.put(annotation.value(), accessor);
+        } else if (accessor.getParameters().isEmpty()) {
+            String name = accessor.getSimpleName().toString();
+            if (isBooleanType(accessor.getReturnType())) {
                 if (name.startsWith("is")) {
-                    return name.substring("is".length());
+                    map.put(name.substring("is".length()), accessor);
                 }
-                // fallback
             }
             if (name.startsWith("get")) {
-                return name.substring("get".length());
-            } else {
-                return name;
+                map.put(name.substring("get".length()), accessor);
             }
+            map.put(name, accessor);
         }
     }
 
-    private String extractNameFromSetter(Setter annotation, ExecutableElement setterElement) {
+    private void extractNameFromSetter(Map<String, ExecutableElement> map, Setter annotation, ExecutableElement accessor) {
         if (annotation != null && !Strings.isEmpty(annotation.value())) {
-            return annotation.value();
-        } else {
-            String name = setterElement.getSimpleName().toString();
+            map.put(annotation.value(), accessor);
+        } else if (accessor.getParameters().size() == 1) {
+            String name = accessor.getSimpleName().toString();
             if (name.startsWith("set")) {
-                return name.substring("set".length());
-            } else {
-                return name;
+                map.put(name.substring("set".length()), accessor);
             }
+            map.put(name, accessor);
+
         }
     }
 
