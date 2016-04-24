@@ -88,6 +88,8 @@ public class SchemaDefinition {
         this.deleterClassName = helperClassName(table.deleterClassName(), modelClassName, "_Deleter");
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
+        this.constructorElement = findSetterConstructor(context, typeElement);
+
         columns = collectColumns(typeElement);
         // Places primaryKey as the last in columns to handle withoutAutoId.
         // See also the bindArgs() generator in SchemaWriter.
@@ -101,7 +103,6 @@ public class SchemaDefinition {
         });
 
         this.primaryKey = findPrimaryKey(columns);
-        this.constructorElement = findConstructor(context, typeElement);
 
         SchemaValidator.validate(context, this);
     }
@@ -111,7 +112,7 @@ public class SchemaDefinition {
      * @return null if it has the default constructor
      */
     @Nullable
-    static ExecutableElement findConstructor(ProcessingContext context, TypeElement typeElement) {
+    static ExecutableElement findSetterConstructor(ProcessingContext context, TypeElement typeElement) {
         List<ExecutableElement> constructors = collectConstructors(typeElement);
 
         List<ExecutableElement> setterConstructors = collectSetterConstructors(constructors);
@@ -249,6 +250,13 @@ public class SchemaDefinition {
     }
 
     private void extractNameFromSetter(Map<String, ExecutableElement> map, Setter annotation, ExecutableElement accessor) {
+        if (constructorElement != null) {
+            if (annotation != null) {
+                context.addError("@Setter annotations are already used for the constructor", accessor);
+            }
+            return;
+        }
+
         if (annotation != null && !Strings.isEmpty(annotation.value())) {
             map.put(annotation.value(), accessor);
         } else if (accessor.getParameters().size() == 1) {
