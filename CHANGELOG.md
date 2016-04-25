@@ -8,6 +8,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.4.5 2016/04/25
+
+- Exclude `org.abego.treelayout`, which is an ANTLR4 dependency but isn't available for Android
+
 ## v2.4.4 - 2016/04/24
 
 - Fix code generation failures with a model having the `@Setter` constructor and setters (#251)
