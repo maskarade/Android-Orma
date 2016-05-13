@@ -33,6 +33,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -69,7 +70,7 @@ public class ConditionQueryHelpers {
         TypeName collectionType = Types.getCollection(type.box());
 
         ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
-                .addAnnotations(column.nullabilityAnnotations())
+                .addAnnotations(column.type.isPrimitive() ? Collections.emptyList() : Collections.singletonList(Annotations.nonNull()))
                 .build();
 
         List<AnnotationSpec> safeVarargsIfNeeded = Annotations.safeVarargsIfNeeded(column.getType());

@@ -197,6 +197,55 @@ public class ModelSpecTest {
     }
 
     @Test
+    public void testModelWithTypeAdaptersUpdater() throws Exception {
+        final long now = System.currentTimeMillis();
+        final UUID uuid = UUID.randomUUID();
+        final BigDecimal bd = BigDecimal.valueOf(Long.MAX_VALUE).add(BigDecimal.ONE);
+        final BigInteger bi = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.TEN);
+        final List<String> collection = Arrays.asList("foo", "bar baz", "42", "true");
+
+        db.createModelWithTypeAdapters(new ModelFactory<ModelWithTypeAdapters>() {
+            @NonNull
+            @Override
+            public ModelWithTypeAdapters call() {
+                ModelWithTypeAdapters model = new ModelWithTypeAdapters();
+                model.list = collection;
+                model.arrayList = new ArrayList<>(collection);
+                model.set = new LinkedHashSet<>(collection);
+                model.hashSet = new HashSet<>(collection);
+                model.uri = Uri.parse("http://example.com");
+                model.date = new Date(now);
+                model.sqlDate = new java.sql.Date(now);
+                model.sqlTime = new java.sql.Time(now);
+                model.sqlTimestamp = new java.sql.Timestamp(now);
+                model.uuid = uuid;
+                model.bigDecimal = bd;
+                model.bigInteger = bi;
+                model.currency = Currency.getInstance("JPY");
+                model.intTuple2 = new IntTuple2(-13, 17);
+                model.mutableInt = new MutableInt(42);
+                model.mutableLong = new MutableLong(43);
+                model.byteBuffer = ByteBuffer.wrap(new byte[]{0, 1, 2, 3});
+                return model;
+            }
+        });
+
+        db.updateModelWithTypeAdapters()
+                .nullableUri(null)
+                .nullableIntTuple2(null)
+                .nullableByteBuffer(null)
+                .execute();
+
+        ModelWithTypeAdapters model = db.selectFromModelWithTypeAdapters().value();
+
+        // nullable
+        assertThat(model.nullableUri, is(nullValue())); // TEXT
+        assertThat(model.nullableIntTuple2, is(nullValue())); // INTEGER
+        assertThat(model.nullableByteBuffer, is(nullValue())); // BLOB
+    }
+
+
+    @Test
     public void testPrimitives() throws Exception {
         ModelWithPrimitives model = db.createModelWithPrimitives(new ModelFactory<ModelWithPrimitives>() {
             @NonNull

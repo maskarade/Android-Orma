@@ -84,20 +84,30 @@ public class UpdaterWriter extends BaseWriter {
 
             if (r == null) {
                 String paramName = column.name;
-                methodSpecs.add(
-                        MethodSpec.methodBuilder(column.name)
-                                .addModifiers(Modifier.PUBLIC)
-                                .returns(schema.getUpdaterClassName())
-                                .addParameter(
-                                        ParameterSpec.builder(column.getType(), paramName)
-                                                .addAnnotations(column.nullabilityAnnotations())
-                                                .build()
-                                )
-                                .addStatement("contents.put($S, $L)", column.getEscapedColumnName(false),
-                                        column.buildSerializeExpr("conn", paramName))
-                                .addStatement("return this")
-                                .build()
-                );
+                MethodSpec.Builder methodSpecBuilder = MethodSpec.methodBuilder(column.name)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(schema.getUpdaterClassName())
+                        .addParameter(
+                                ParameterSpec.builder(column.getType(), paramName)
+                                        .addAnnotations(column.nullabilityAnnotations())
+                                        .build()
+                        );
+
+                if (column.isNullableInJava()) {
+                    methodSpecBuilder.beginControlFlow("if ($L == null)", paramName)
+                            .addStatement("contents.putNull($S)", column.getEscapedColumnName(false))
+                            .endControlFlow()
+                            .beginControlFlow("else");
+                }
+                methodSpecBuilder.addStatement("contents.put($S, $L)", column.getEscapedColumnName(false),
+                        column.buildSerializeExpr("conn", paramName));
+                if (column.isNullableInJava()) {
+                    methodSpecBuilder.endControlFlow();
+                }
+
+                methodSpecBuilder.addStatement("return this");
+
+                methodSpecs.add(methodSpecBuilder.build());
 
             } else {
                 if (r.isSingleAssociation()) {
