@@ -26,7 +26,12 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater content(@Nullable String content) {
-    contents.put("`content`", content);
+    if (content == null) {
+      contents.putNull("`content`");
+    }
+    else {
+      contents.put("`content`", content);
+    }
     return this;
   }
 
