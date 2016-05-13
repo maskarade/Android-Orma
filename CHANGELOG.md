@@ -8,6 +8,11 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.4.6 2016/05/13
+
+- Fix a bug that `ModelUpdater#field()` did not accept `null` even if the field is declared as nullable
+  (reported by twitter:okugawa3210)
+
 ## v2.4.5 2016/04/25
 
 - Exclude `org.abego.treelayout`, which is an ANTLR4 dependency but isn't available for Android
