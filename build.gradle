@@ -14,7 +14,7 @@ final ANDROID_SDK_PATH = {
 final ANDROID_SUPPORT_REPOSITORY = "${ANDROID_SDK_PATH}/extras/android/m2repository"
 
 ext {
-    SUPPORT_LIBRARY_VERSION = '23.3.0'
+    SUPPORT_LIBRARY_VERSION = '23.4.0'
     ANDROID_JAR_23 = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-23/", include: 'android.jar')
 
     versionFile = project.file("version.properties")
@@ -32,7 +32,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0'
+        classpath 'com.android.tools.build:gradle:2.1.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'com.novoda:bintray-release:0.3.4' // https://github.com/novoda/bintray-release
         classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
