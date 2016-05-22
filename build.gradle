@@ -37,6 +37,8 @@ buildscript {
         classpath 'com.novoda:bintray-release:0.3.4' // https://github.com/novoda/bintray-release
         classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
     }
+
+    // it conflicts with retrolambda
     configurations.classpath.exclude group: 'com.android.tools.external.lombok'
 }
 

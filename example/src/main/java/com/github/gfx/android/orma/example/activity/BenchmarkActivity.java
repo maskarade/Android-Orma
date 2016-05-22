@@ -128,7 +128,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
 
-        realm.executeTransaction(realm1 -> realm1.clear(RealmTodo.class));
+        realm.executeTransaction(realm -> realm.delete(RealmTodo.class));
 
         hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
@@ -290,8 +290,8 @@ public class BenchmarkActivity extends AppCompatActivity {
                 long t0 = System.currentTimeMillis();
                 AtomicInteger count = new AtomicInteger();
 
-                RealmResults<RealmTodo> results = realm.allObjectsSorted(
-                        RealmTodo.class, "createdTime", Sort.ASCENDING);
+                RealmResults<RealmTodo> results = realm.where(RealmTodo.class)
+                        .findAllSorted("createdTime", Sort.ASCENDING);
                 for (RealmTodo todo : results) {
                     @SuppressWarnings("unused")
                     String title = todo.getTitle();
