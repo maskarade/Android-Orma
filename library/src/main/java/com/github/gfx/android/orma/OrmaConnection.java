@@ -184,7 +184,41 @@ public class OrmaConnection {
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
         SQLiteDatabase db = getWritableDatabase();
+        if (trace) {
+            traceUpdateQuery(schema, values, whereClause, whereArgs);
+        }
         return db.update(schema.getEscapedTableName(), values, whereClause, whereArgs);
+    }
+
+    private void traceUpdateQuery(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
+        // copied from SQLiteDatabase#updateWithOnConflict()
+        StringBuilder sql = new StringBuilder();
+        sql.append("UPDATE ");
+        sql.append(schema.getEscapedTableName());
+        sql.append(" SET ");
+
+        // move all bind args to one array
+        int setValuesSize = values.size();
+        int bindArgsSize = (whereArgs == null) ? setValuesSize : (setValuesSize + whereArgs.length);
+        Object[] bindArgs = new Object[bindArgsSize];
+        int i = 0;
+        for (String colName : values.keySet()) {
+            sql.append((i > 0) ? "," : "");
+            sql.append(colName);
+            bindArgs[i++] = values.get(colName);
+            sql.append("=?");
+        }
+        if (whereArgs != null) {
+            for (i = setValuesSize; i < bindArgsSize; i++) {
+                bindArgs[i] = whereArgs[i - setValuesSize];
+            }
+        }
+        if (!TextUtils.isEmpty(whereClause)) {
+            sql.append(" WHERE ");
+            sql.append(whereClause);
+        }
+
+        trace(sql.toString(), bindArgs);
     }
 
     @NonNull
