@@ -8,6 +8,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.4.7 2016/05/26
+
+- Fix a bug that `UPDATE` statements were not traced (#245)
+
 ## v2.4.6 2016/05/13
 
 - Fix a bug that `ModelUpdater#field()` did not accept `null` even if the field is declared as nullable
