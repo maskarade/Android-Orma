@@ -32,7 +32,7 @@ public class ModelWithAccessors {
 
     @PrimaryKey
     @Column(kId)
-    private long id;
+    private long mId;
 
     @Column(kKey)
     private String key;
@@ -52,12 +52,12 @@ public class ModelWithAccessors {
 
     @Getter(kId)
     public long getId() {
-        return id;
+        return mId;
     }
 
     @Setter(kId)
     public void setId(long id) {
-        this.id = id;
+        this.mId = id;
     }
 
     @Getter(kKey)

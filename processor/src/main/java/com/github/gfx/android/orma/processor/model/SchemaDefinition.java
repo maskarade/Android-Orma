@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
@@ -225,7 +226,9 @@ public class SchemaDefinition {
         columns.addAll(columnElements.stream()
                 .map((element) -> {
                     ColumnDefinition column = new ColumnDefinition(this, element);
-                    column.initGetterAndSetter(getters.get(column.name), setters.get(column.name));
+                    column.initGetterAndSetter(
+                            getEither(getters, column.columnName, column.name),
+                            getEither(setters, column.columnName, column.name));
                     return column;
                 })
                 .collect(Collectors.toList()));
@@ -247,6 +250,17 @@ public class SchemaDefinition {
             }
             map.put(name, accessor);
         }
+    }
+
+    @SafeVarargs
+    private final <K, V> V getEither(Map<K, V> map, K... keys) {
+        for (K key : keys) {
+            V value = map.get(key);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private void extractNameFromSetter(Map<String, ExecutableElement> map, Setter annotation, ExecutableElement accessor) {
