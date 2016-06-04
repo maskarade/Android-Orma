@@ -86,7 +86,7 @@ public class OrmaConnection {
         this.tryParsingSql = builder.tryParsingSql;
         this.trace = builder.trace;
         this.readOnMainThread = builder.readOnMainThread;
-        this.writeOnMainThread = builder.readOnMainThread;
+        this.writeOnMainThread = builder.writeOnMainThread;
         this.db = openDatabase(builder.context);
 
         checkSchemas(schemas);
