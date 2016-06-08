@@ -148,7 +148,7 @@ public class SchemaWriter extends BaseWriter {
         StringBuilder s = new StringBuilder();
         SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
         associatedSchema.getPrimaryKey().ifPresent(primaryKey -> {
-            s.append(" JOIN ");
+            s.append(" LEFT OUTER JOIN ");
             context.sqlg.appendIdentifier(s, associatedSchema.getTableName());
             s.append(" ON ");
             s.append(column.getEscapedColumnName(true));
