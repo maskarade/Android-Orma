@@ -58,12 +58,8 @@ task generateParserSources(type: JavaExec) {
 tasks.preBuild.dependsOn(generateParserSources)
 
 dependencies {
-    antlr 'com.tunnelvisionlabs:antlr4:4.5'
-    compile('com.tunnelvisionlabs:antlr4-runtime:4.5') {
-        exclude group: 'com.tunnelvisionlabs', module: 'antlr4-annotations'
-        exclude group: 'org.abego.treelayout', module: 'org.abego.treelayout.core'
-    }
-    provided 'com.tunnelvisionlabs:antlr4-annotations:4.5'
+    antlr 'org.antlr:antlr4:4.5.3'
+    compile('org.antlr:antlr4-runtime:4.5.3')
 
     compile "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.0.8'
