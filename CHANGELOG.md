@@ -8,6 +8,11 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.5.0 2016/06/09
+
+* Nullable direct associations uses LEFT JOIN in select statements (#262 reported by jamesem)
+* Fix a bug that `writeOnMainThread` was ignored (#261 by kyokomi)
+
 ## v2.4.8 2016/05/31
 
 - Fix a bug that the annotation processor can't find the getters and setters even if `@Column#name` was set (#259)
