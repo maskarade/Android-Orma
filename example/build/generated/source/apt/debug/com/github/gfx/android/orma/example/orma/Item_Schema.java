@@ -76,7 +76,7 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Item` JOIN `Category` ON `Item`.`category` = `Category`.`id`";
+    return "`Item` LEFT OUTER JOIN `Category` ON `Item`.`category` = `Category`.`id`";
   }
 
   @NonNull
