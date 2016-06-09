@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Selector;
 import com.github.gfx.android.orma.test.model.ModelWithNestedDirectAssociations;
+import com.github.gfx.android.orma.test.model.ModelWithNullableDirectAssociations;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
@@ -349,5 +350,18 @@ public class DirectAssociationsTest {
                 .execute();
 
         assertThat(orma.selectFromModelWithDirectAssociation().isEmpty(), is(true));
+    }
+
+    @Test
+    public void testNullableDirectAssociations() throws Exception {
+        orma.createModelWithNullableDirectAssociations(new ModelFactory<ModelWithNullableDirectAssociations>() {
+            @NonNull
+            @Override
+            public ModelWithNullableDirectAssociations call() {
+                return new ModelWithNullableDirectAssociations();
+            }
+        });
+
+        assertThat(orma.selectFromModelWithNullableDirectAssociations().authorIsNull().count(), is(1));
     }
 }
