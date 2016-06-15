@@ -25,6 +25,7 @@ import com.github.gfx.android.orma.processor.util.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -182,11 +183,11 @@ public class SchemaDefinition {
     }
 
 
-    List<ColumnDefinition> collectColumns(TypeElement typeElement) {
+    List<ColumnDefinition> collectColumns(@NonNull TypeElement typeElement) {
         List<ColumnDefinition> columns = new ArrayList<>();
-
         TypeMirror superclass = typeElement.getSuperclass();
         if (!superclass.toString().equals(Object.class.getCanonicalName())) {
+            // superclass might represent  com.example.C<java.lang.String>
             TypeElement superclassElement = context.getTypeElement(superclass);
             columns.addAll(collectColumns(superclassElement));
         }
