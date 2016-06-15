@@ -36,8 +36,10 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.tools.Diagnostic;
 
 public class ProcessingContext {
@@ -108,12 +110,21 @@ public class ProcessingContext {
         return getTypeElement(type).asType();
     }
 
-    public TypeElement getTypeElement(CharSequence name) {
-        return processingEnv.getElementUtils().getTypeElement(name);
+    public TypeElement getTypeElement(CharSequence fqName) {
+        TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(fqName);
+        if (typeElement == null) {
+            throw new RuntimeException("No such class: " + fqName);
+        }
+        return typeElement;
     }
 
-    public TypeElement getTypeElement(TypeMirror name) {
-        return getTypeElement(name.toString());
+    public TypeElement getTypeElement(TypeMirror typeMirror) {
+        return typeMirror.accept(new SimpleTypeVisitor8<TypeElement, TypeMirror>() {
+            @Override
+            public TypeElement visitDeclared(DeclaredType declaredType, TypeMirror typeMirror) {
+                return (TypeElement)declaredType.asElement();
+            }
+        }, typeMirror);
     }
 
     public TypeElement getTypeElement(Type name) {
