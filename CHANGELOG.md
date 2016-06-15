@@ -8,6 +8,11 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v2.5.1 2016/06/15
+
+* Generic super classes caused compilation errors (#265)
+  * You can't use type parameters as the type of columns, though
+
 ## v2.5.0 2016/06/09
 
 * Nullable direct associations uses LEFT JOIN in select statements (#262 reported by jamesem)

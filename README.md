@@ -68,8 +68,8 @@ Then, declare dependencies to use Orma.
 
 ```groovy
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:2.5.0'
-    compile 'com.github.gfx.android.orma:orma:2.5.0'
+    apt 'com.github.gfx.android.orma:orma-processor:2.5.1'
+    compile 'com.github.gfx.android.orma:orma:2.5.1'
 }
 ```
 
@@ -725,7 +725,7 @@ I welcome benchmark in another condition and/or another code.
 
 ## Method Count
 
-Orma runtime is very lightweight: [Method Count for v2.5.0](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:2.5.0)
+Orma runtime is very lightweight: [Method Count for v2.5.1](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:2.5.1)
 
 
 ## FAQ
