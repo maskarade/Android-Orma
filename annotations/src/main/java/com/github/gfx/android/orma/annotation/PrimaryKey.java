@@ -33,7 +33,8 @@ public @interface PrimaryKey {
     boolean autoincrement() default false;
 
     /**
-     * Tell Orma that the primary key is automatically assigned if the primary key is a primitive integer type.
+     * Tells Orma that the primary key is automatically generated when the primary key is a primitive integral type,
+     * i.e. {@code byte}, {@code short}, {@code int} or {@code long}.
      * If true, any value you set to this column will be ignored in {@code INSERT}.
      */
     boolean auto() default true;
