@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'io.realm:realm-gradle-plugin:1.0.0'
+        classpath 'io.realm:realm-gradle-plugin:1.0.1'
         classpath 'me.tatarka:gradle-retrolambda:3.2.5'
         classpath 'net.orfjackal.retrolambda:retrolambda:2.3.0'
     }
