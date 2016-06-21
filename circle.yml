@@ -5,6 +5,8 @@ machine:
     TERM: dumb
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
 dependencies:
+  cache_directories:
+      - "~/.gradle"
   pre:
       - echo y | android -s update sdk -u -a -t "tools"
       - echo y | android -s update sdk -u -a -t "platform-tools,build-tools-24.0.0,android-24"
