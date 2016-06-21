@@ -14,8 +14,8 @@ final ANDROID_SDK_PATH = {
 final ANDROID_SUPPORT_REPOSITORY = "${ANDROID_SDK_PATH}/extras/android/m2repository"
 
 ext {
-    SUPPORT_LIBRARY_VERSION = '23.4.0'
-    ANDROID_JAR_23 = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-23/", include: 'android.jar')
+    SUPPORT_LIBRARY_VERSION = '24.0.0'
+    ANDROID_JAR = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-24/", include: 'android.jar')
 
     versionFile = project.file("version.properties")
 
