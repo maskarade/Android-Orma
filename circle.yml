@@ -1,32 +1,18 @@
 machine:
-    services:
-        - docker
-
+  java:
+    version: oraclejdk8
+  environment:
+    TERM: dumb
+    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
 dependencies:
-    cache_directories:
-        - "~/cache"
-    override:
-        - docker --version
-        - docker info
-        - |
-            set -xe
-            if [ -e ~/cache/docker-image.tar ] && [ $(md5sum Dockerfile | cut -d' ' -f1) = $(cat ~/cache/dockerfile.digest) ]
-            then
-              docker load < ~/cache/docker-image.tar
-            else
-              mkdir -p ~/cache
-              docker build -t test .
-              md5sum Dockerfile | cut -d' ' -f1 > ~/cache/dockerfile.digest
-              docker save test > ~/cache/docker-image.tar
-            fi
-
+  pre:
+      - echo y | android -s update sdk -u -a -t "tools"
+      - echo y | android -s update sdk -u -a -t "platform-tools,build-tools-24.0.0,android-24"
+      - echo y | android -s update sdk -u -a -t "extra-android-m2repository"
 test:
-    override:
-        - docker run --name runner test
-    post:
-        - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-        - |
-            set -xe
-            for module in processor library migration example ; do
-                docker cp runner:/project/$module/build/test-results $CIRCLE_TEST_REPORTS/junit/$module || true
-            done
+  override:
+    - ./gradlew --info check
+  post:
+    - cp -r example/build/outputs/ "$CIRCLE_ARTIFACTS/example"
+    - cp -r library/build/outputs/ "$CIRCLE_ARTIFACTS/library"
+    - cp -r migration/build/outputs/ "$CIRCLE_ARTIFACTS/migration"
