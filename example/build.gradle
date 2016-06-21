@@ -15,15 +15,13 @@ apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
-
+    compileSdkVersion 24
+    buildToolsVersion '24.0.0'
     dataBinding.enabled = true
-
     defaultConfig {
         applicationId "com.github.gfx.android.orma.example"
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 10
         versionName rootProject.ext.metadata.version
         multiDexEnabled true
@@ -52,13 +50,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     lintOptions {
         disable 'InvalidPackage'
         disable 'SetTextI18n'
     }
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
+    }
+    productFlavors {
     }
 }
 
