@@ -355,7 +355,7 @@ public class ColumnDefinition {
     }
 
     public boolean needsTypeAdapter() {
-        return Types.needsTypeAdapter(getUnboxType());
+        return Types.needsTypeAdapter(type);
     }
 
     public Collection<AnnotationSpec> nullabilityAnnotations() {
