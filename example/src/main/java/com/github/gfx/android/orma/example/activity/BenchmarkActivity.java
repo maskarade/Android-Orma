@@ -30,10 +30,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -47,8 +50,6 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import io.requery.android.database.sqlite.SQLiteDatabase;
-import io.requery.android.database.sqlite.SQLiteStatement;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -58,7 +59,9 @@ public class BenchmarkActivity extends AppCompatActivity {
 
     static final String TAG = BenchmarkActivity.class.getSimpleName();
 
-    final int N = 10000;
+    static final int N_ITEMS = 10;
+
+    static final int N_OPS = 100;
 
     final String titlePrefix = "title ";
 
@@ -86,7 +89,7 @@ public class BenchmarkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_benchmark);
 
-        adapter = new ResultAdapter();
+        adapter = new ResultAdapter(this);
         binding.list.setAdapter(adapter);
 
         binding.run.setOnClickListener(v -> run());
@@ -127,6 +130,8 @@ public class BenchmarkActivity extends AppCompatActivity {
 
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
+
+        adapter.clear();
 
         realm.executeTransaction(realm -> realm.delete(RealmTodo.class));
 
@@ -170,25 +175,24 @@ public class BenchmarkActivity extends AppCompatActivity {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
             public void call(SingleSubscriber<? super Result> subscriber) {
-                long t0 = System.currentTimeMillis();
+                long result = runWithBenchmark(() -> {
+                    orma.transactionSync(() -> {
+                        long now = System.currentTimeMillis();
 
-                orma.transactionSync(() -> {
-                    long now = System.currentTimeMillis();
+                        Inserter<Todo> statement = orma.prepareInsertIntoTodo();
 
-                    Inserter<Todo> statement = orma.prepareInsertIntoTodo();
+                        for (int i = 0; i < N_ITEMS; i++) {
+                            Todo todo = new Todo();
 
-                    for (int i = 0; i < N; i++) {
-                        Todo todo = new Todo();
+                            todo.title = titlePrefix + i;
+                            todo.content = contentPrefix + i;
+                            todo.createdTime = new Date(now);
 
-                        todo.title = titlePrefix + i;
-                        todo.content = contentPrefix + i;
-                        todo.createdTime = new Date(now);
-
-                        statement.execute(todo);
-                    }
+                            statement.execute(todo);
+                        }
+                    });
                 });
-
-                subscriber.onSuccess(new Result("Orma/insert", System.currentTimeMillis() - t0));
+                subscriber.onSuccess(new Result("Orma/insert", result));
             }
         })
                 .subscribeOn(Schedulers.io())
@@ -199,21 +203,20 @@ public class BenchmarkActivity extends AppCompatActivity {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
             public void call(SingleSubscriber<? super Result> subscriber) {
-                long t0 = System.currentTimeMillis();
+                long result = runWithBenchmark(() -> {
+                    realm.executeTransaction(realm1 -> {
+                        long now = System.currentTimeMillis();
 
-                realm.executeTransaction(realm1 -> {
-                    long now = System.currentTimeMillis();
+                        for (int i = 0; i < N_ITEMS; i++) {
+                            RealmTodo todo = realm1.createObject(RealmTodo.class);
 
-                    for (int i = 0; i < N; i++) {
-                        RealmTodo todo = realm1.createObject(RealmTodo.class);
-
-                        todo.setTitle(titlePrefix + i);
-                        todo.setContent(contentPrefix + i);
-                        todo.setCreatedTime(new Date(now));
-                    }
+                            todo.setTitle(titlePrefix + i);
+                            todo.setContent(contentPrefix + i);
+                            todo.setCreatedTime(new Date(now));
+                        }
+                    });
                 });
-
-                subscriber.onSuccess(new Result("Realm/insert", System.currentTimeMillis() - t0));
+                subscriber.onSuccess(new Result("Realm/insert", result));
             }
         });
     }
@@ -222,30 +225,29 @@ public class BenchmarkActivity extends AppCompatActivity {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
             public void call(SingleSubscriber<? super Result> subscriber) {
-                long t0 = System.currentTimeMillis();
+                long result = runWithBenchmark(() -> {
+                    SQLiteDatabase db = hw.getWritableDatabase();
+                    db.beginTransaction();
 
-                SQLiteDatabase db = hw.getWritableDatabase();
-                db.beginTransaction();
+                    SQLiteStatement inserter = db.compileStatement(
+                            "INSERT INTO todo (title, content, done, createdTime) VALUES (?, ?, ?, ?)");
 
-                SQLiteStatement inserter = db.compileStatement(
-                        "INSERT INTO todo (title, content, done, createdTime) VALUES (?, ?, ?, ?)");
+                    long now = System.currentTimeMillis();
 
-                long now = System.currentTimeMillis();
+                    for (int i = 1; i <= N_ITEMS; i++) {
+                        inserter.bindAllArgsAsStrings(new String[]{
+                                titlePrefix + i, // title
+                                contentPrefix + i, // content
+                                "0", // done
+                                String.valueOf(now), // createdTime
+                        });
+                        inserter.executeInsert();
+                    }
 
-                for (int i = 1; i <= N; i++) {
-                    inserter.bindAllArgsAsStrings(new String[]{
-                            titlePrefix + i, // title
-                            contentPrefix + i, // content
-                            "0", // done
-                            String.valueOf(now), // createdTime
-                    });
-                    inserter.executeInsert();
-                }
-
-                db.setTransactionSuccessful();
-                db.endTransaction();
-
-                subscriber.onSuccess(new Result("HandWritten/insert", System.currentTimeMillis() - t0));
+                    db.setTransactionSuccessful();
+                    db.endTransaction();
+                });
+                subscriber.onSuccess(new Result("HandWritten/insert", result));
             }
         })
                 .subscribeOn(Schedulers.io())
@@ -256,27 +258,28 @@ public class BenchmarkActivity extends AppCompatActivity {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
             public void call(SingleSubscriber<? super Result> subscriber) {
-                long t0 = System.currentTimeMillis();
-                final AtomicInteger count = new AtomicInteger();
+                long result = runWithBenchmark(() -> {
+                    final AtomicInteger count = new AtomicInteger();
 
-                Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeAsc();
+                    Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeAsc();
 
-                for (Todo todo : todos) {
-                    @SuppressWarnings("unused")
-                    String title = todo.title;
-                    @SuppressWarnings("unused")
-                    String content = todo.content;
-                    @SuppressWarnings("unused")
-                    Date createdTime = todo.createdTime;
+                    for (Todo todo : todos) {
+                        @SuppressWarnings("unused")
+                        String title = todo.title;
+                        @SuppressWarnings("unused")
+                        String content = todo.content;
+                        @SuppressWarnings("unused")
+                        Date createdTime = todo.createdTime;
 
-                    count.incrementAndGet();
-                }
+                        count.incrementAndGet();
+                    }
 
-                if (todos.count() != count.get()) {
-                    throw new AssertionError("unexpected value: " + count.get());
-                }
-                Log.d(TAG, "Orma/forEachAll count: " + count);
-                subscriber.onSuccess(new Result("Orma/forEachAll", System.currentTimeMillis() - t0));
+                    if (todos.count() != count.get()) {
+                        throw new AssertionError("unexpected value: " + count.get());
+                    }
+                    Log.d(TAG, "Orma/forEachAll count: " + count);
+                });
+                subscriber.onSuccess(new Result("Orma/forEachAll", result));
             }
         })
                 .subscribeOn(Schedulers.io())
@@ -287,27 +290,28 @@ public class BenchmarkActivity extends AppCompatActivity {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
             public void call(SingleSubscriber<? super Result> subscriber) {
-                long t0 = System.currentTimeMillis();
-                AtomicInteger count = new AtomicInteger();
+                long result = runWithBenchmark(() -> {
+                    AtomicInteger count = new AtomicInteger();
 
-                RealmResults<RealmTodo> results = realm.where(RealmTodo.class)
-                        .findAllSorted("createdTime", Sort.ASCENDING);
-                for (RealmTodo todo : results) {
-                    @SuppressWarnings("unused")
-                    String title = todo.getTitle();
-                    @SuppressWarnings("unused")
-                    String content = todo.getContent();
-                    @SuppressWarnings("unused")
-                    Date createdTime = todo.getCreatedTime();
+                    RealmResults<RealmTodo> results = realm.where(RealmTodo.class)
+                            .findAllSorted("createdTime", Sort.ASCENDING);
+                    for (RealmTodo todo : results) {
+                        @SuppressWarnings("unused")
+                        String title = todo.getTitle();
+                        @SuppressWarnings("unused")
+                        String content = todo.getContent();
+                        @SuppressWarnings("unused")
+                        Date createdTime = todo.getCreatedTime();
 
-                    count.incrementAndGet();
-                }
-                if (results.size() != count.get()) {
-                    throw new AssertionError("unexpected value: " + count.get());
-                }
+                        count.incrementAndGet();
+                    }
+                    if (results.size() != count.get()) {
+                        throw new AssertionError("unexpected value: " + count.get());
+                    }
 
-                Log.d(TAG, "Realm/forEachAll count: " + count);
-                subscriber.onSuccess(new Result("Realm/forEachAll", System.currentTimeMillis() - t0));
+                    Log.d(TAG, "Realm/forEachAll count: " + count);
+                });
+                subscriber.onSuccess(new Result("Realm/forEachAll", result));
             }
         });
     }
@@ -316,40 +320,41 @@ public class BenchmarkActivity extends AppCompatActivity {
         return Single.create(new Single.OnSubscribe<Result>() {
             @Override
             public void call(SingleSubscriber<? super Result> subscriber) {
-                long t0 = System.currentTimeMillis();
-                AtomicInteger count = new AtomicInteger();
+                long result = runWithBenchmark(() -> {
+                    AtomicInteger count = new AtomicInteger();
 
-                SQLiteDatabase db = hw.getReadableDatabase();
-                Cursor cursor = db.query(
-                        "todo",
-                        new String[]{"id, title, content, done, createdTime"},
-                        null, null, null, null, "createdTime ASC" // whereClause, whereArgs, groupBy, having, orderBy
-                );
+                    SQLiteDatabase db = hw.getReadableDatabase();
+                    Cursor cursor = db.query(
+                            "todo",
+                            new String[]{"id, title, content, done, createdTime"},
+                            null, null, null, null, "createdTime ASC" // whereClause, whereArgs, groupBy, having, orderBy
+                    );
 
-                if (cursor.moveToFirst()) {
-                    int titleIndex = cursor.getColumnIndexOrThrow("title");
-                    int contentIndex = cursor.getColumnIndexOrThrow("content");
-                    int createdTimeIndex = cursor.getColumnIndexOrThrow("createdTime");
-                    do {
-                        @SuppressWarnings("unused")
-                        String title = cursor.getString(titleIndex);
-                        @SuppressWarnings("unused")
-                        String content = cursor.getString(contentIndex);
-                        @SuppressWarnings("unused")
-                        Date createdTime = new Date(cursor.getLong(createdTimeIndex));
+                    if (cursor.moveToFirst()) {
+                        int titleIndex = cursor.getColumnIndexOrThrow("title");
+                        int contentIndex = cursor.getColumnIndexOrThrow("content");
+                        int createdTimeIndex = cursor.getColumnIndexOrThrow("createdTime");
+                        do {
+                            @SuppressWarnings("unused")
+                            String title = cursor.getString(titleIndex);
+                            @SuppressWarnings("unused")
+                            String content = cursor.getString(contentIndex);
+                            @SuppressWarnings("unused")
+                            Date createdTime = new Date(cursor.getLong(createdTimeIndex));
 
-                        count.incrementAndGet();
-                    } while (cursor.moveToNext());
-                }
-                cursor.close();
+                            count.incrementAndGet();
+                        } while (cursor.moveToNext());
+                    }
+                    cursor.close();
 
-                long dbCount = longForQuery(db, "SELECT COUNT(*) FROM todo", null);
-                if (dbCount != count.get()) {
-                    throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
-                }
+                    long dbCount = longForQuery(db, "SELECT COUNT(*) FROM todo", null);
+                    if (dbCount != count.get()) {
+                        throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
+                    }
 
-                Log.d(TAG, "HandWritten/forEachAll count: " + count);
-                subscriber.onSuccess(new Result("HandWritten/forEachAll", System.currentTimeMillis() - t0));
+                    Log.d(TAG, "HandWritten/forEachAll count: " + count);
+                });
+                subscriber.onSuccess(new Result("HandWritten/forEachAll", result));
             }
         })
                 .subscribeOn(Schedulers.io())
@@ -357,12 +362,22 @@ public class BenchmarkActivity extends AppCompatActivity {
     }
 
 
-    long longForQuery(SQLiteDatabase db, String sql, String[] args) {
+    static long longForQuery(SQLiteDatabase db, String sql, String[] args) {
         Cursor cursor = db.rawQuery(sql, args);
         cursor.moveToFirst();
         long value = cursor.getLong(0);
         cursor.close();
         return value;
+    }
+
+    static long runWithBenchmark(Runnable task) {
+        long t0 = System.nanoTime();
+
+        for (int i = 0; i < N_OPS; i++) {
+            task.run();
+        }
+
+        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0);
     }
 
 
@@ -378,23 +393,20 @@ public class BenchmarkActivity extends AppCompatActivity {
         }
     }
 
-    class ResultAdapter extends ArrayAdapter<Result> {
+    static class ResultAdapter extends ArrayAdapter<Result> {
 
-        public ResultAdapter() {
-            super(BenchmarkActivity.this, 0);
+        public ResultAdapter(Context context) {
+            super(context, 0);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             @SuppressLint("ViewHolder") ItemResultBinding binding = ItemResultBinding
-                    .inflate(getLayoutInflater(), parent, false);
+                    .inflate(LayoutInflater.from(getContext()), parent, false);
 
             Result result = getItem(position);
             binding.title.setText(result.title);
             binding.elapsed.setText(result.elapsedMillis + "ms");
-
-            long qps = (long) (TimeUnit.SECONDS.toMillis(1) / (result.elapsedMillis / (double) N));
-            binding.qps.setText(qps + "qps");
 
             return binding.getRoot();
         }
