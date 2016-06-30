@@ -34,6 +34,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -58,7 +59,9 @@ public class BenchmarkActivity extends AppCompatActivity {
 
     static final String TAG = BenchmarkActivity.class.getSimpleName();
 
-    final int N = 1000;
+    static final int N_ITEMS = 10;
+
+    static final int N_OPS = 100;
 
     final String titlePrefix = "title ";
 
@@ -86,7 +89,7 @@ public class BenchmarkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_benchmark);
 
-        adapter = new ResultAdapter();
+        adapter = new ResultAdapter(this);
         binding.list.setAdapter(adapter);
 
         binding.run.setOnClickListener(v -> run());
@@ -127,6 +130,8 @@ public class BenchmarkActivity extends AppCompatActivity {
 
     void run() {
         Log.d(TAG, "Start performing a set of benchmarks");
+
+        adapter.clear();
 
         realm.executeTransaction(realm -> realm.delete(RealmTodo.class));
 
@@ -176,7 +181,7 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                         Inserter<Todo> statement = orma.prepareInsertIntoTodo();
 
-                        for (int i = 0; i < N; i++) {
+                        for (int i = 0; i < N_ITEMS; i++) {
                             Todo todo = new Todo();
 
                             todo.title = titlePrefix + i;
@@ -202,7 +207,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                     realm.executeTransaction(realm1 -> {
                         long now = System.currentTimeMillis();
 
-                        for (int i = 0; i < N; i++) {
+                        for (int i = 0; i < N_ITEMS; i++) {
                             RealmTodo todo = realm1.createObject(RealmTodo.class);
 
                             todo.setTitle(titlePrefix + i);
@@ -229,7 +234,7 @@ public class BenchmarkActivity extends AppCompatActivity {
 
                     long now = System.currentTimeMillis();
 
-                    for (int i = 1; i <= N; i++) {
+                    for (int i = 1; i <= N_ITEMS; i++) {
                         inserter.bindAllArgsAsStrings(new String[]{
                                 titlePrefix + i, // title
                                 contentPrefix + i, // content
@@ -368,7 +373,7 @@ public class BenchmarkActivity extends AppCompatActivity {
     static long runWithBenchmark(Runnable task) {
         long t0 = System.nanoTime();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < N_OPS; i++) {
             task.run();
         }
 
@@ -388,23 +393,20 @@ public class BenchmarkActivity extends AppCompatActivity {
         }
     }
 
-    class ResultAdapter extends ArrayAdapter<Result> {
+    static class ResultAdapter extends ArrayAdapter<Result> {
 
-        public ResultAdapter() {
-            super(BenchmarkActivity.this, 0);
+        public ResultAdapter(Context context) {
+            super(context, 0);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             @SuppressLint("ViewHolder") ItemResultBinding binding = ItemResultBinding
-                    .inflate(getLayoutInflater(), parent, false);
+                    .inflate(LayoutInflater.from(getContext()), parent, false);
 
             Result result = getItem(position);
             binding.title.setText(result.title);
             binding.elapsed.setText(result.elapsedMillis + "ms");
-
-            long qps = (long) (TimeUnit.SECONDS.toMillis(1) / (result.elapsedMillis / (double) N));
-            binding.qps.setText(qps + "qps");
 
             return binding.getRoot();
         }
