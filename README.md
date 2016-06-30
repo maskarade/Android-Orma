@@ -716,10 +716,10 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 
 [example/BenchmarkActivity](example/src/main/java/com/github/gfx/android/orma/example/activity/BenchmarkActivity.java)
 
-Here is a result performed on Android 5.0.2 / Xperia Z4
-as of Orma v2.3.0 and Realm 0.87.2:
+Here is a result performed on Android 6.0.0 / Xperia Z4
+as of Orma v2.5.1 and Realm 1.0.1:
 
-<img src="benchmark_v2.3.png" alt="" width="420"/>
+<img src="benchmark_v2.5.png" alt="" width="420"/>
 
 I welcome benchmark in another condition and/or another code.
 
