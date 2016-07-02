@@ -249,7 +249,7 @@ public class QueryTest {
 
     @Test
     public void whereEquals() throws Exception {
-        List<Book> books = db.selectFromBook().where("title = ?", "today").toList();
+        List<Book> books = db.selectFromBook().titleEq("today").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
@@ -266,9 +266,9 @@ public class QueryTest {
     @Test
     public void whereConjunctionOr() throws Exception {
         List<Book> books = db.selectFromBook()
-                .where("title is ?", "today")
+                .titleEq("today")
                 .or()
-                .where("title is ?", "friday")
+                .titleEq("friday")
                 .toList();
         assertThat(books, hasSize(2));
     }
@@ -289,9 +289,9 @@ public class QueryTest {
     @Test
     public void whereConjunctionAnd() throws Exception {
         List<Book> books = db.selectFromBook()
-                .where("title is ?", "today")
+                .titleEq("today")
                 .and()
-                .where("title is ?", "friday")
+                .titleEq("friday")
                 .toList();
         assertThat(books, hasSize(0));
     }
@@ -341,7 +341,7 @@ public class QueryTest {
     public void limitAndOffset() throws Exception {
         for (int i = 0; i < 10; i++) {
             Book book = new Book();
-            book.title = "title #" + i;
+            book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
             book.publisher = SingleAssociation.id(publisher.id);
 
@@ -361,7 +361,7 @@ public class QueryTest {
     public void pageAndPer() throws Exception {
         for (int i = 0; i < 10; i++) {
             Book book = new Book();
-            book.title = "title #" + i;
+            book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
             book.publisher = SingleAssociation.id(publisher.id);
 
@@ -378,8 +378,8 @@ public class QueryTest {
 
         books = db.selectFromBook().page(2).per(2).toList();
         assertThat(books, hasSize(2));
-        assertThat(books.get(0).title, is("title #0"));
-        assertThat(books.get(1).title, is("title #1"));
+        assertThat(books.get(0).title, is("name #0"));
+        assertThat(books.get(1).title, is("name #1"));
     }
 
     @Test
@@ -455,13 +455,13 @@ public class QueryTest {
     @Test
     public void update() throws Exception {
         int count = db.updateBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .content("modified")
                 .execute();
 
         assertThat(count, is(1));
 
-        Book book = db.selectFromBook().where("title = ?", "today").value();
+        Book book = db.selectFromBook().titleEq("today").value();
         assertThat(book.content, is("modified"));
     }
 
@@ -482,7 +482,7 @@ public class QueryTest {
     @Test
     public void delete() throws Exception {
         int result = db.deleteFromBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .execute();
 
         assertThat(result, is(1));
@@ -747,22 +747,22 @@ public class QueryTest {
 
     @Test
     public void reuseCursor() throws Exception {
-        List<Book> books = db.selectFromBook().where("title = ?", "today").toList();
+        List<Book> books = db.selectFromBook().titleEq("today").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
 
-        books = db.selectFromBook().where("title = ?", "friday").toList();
+        books = db.selectFromBook().titleEq("friday").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("friday"));
         assertThat(books.get(0).content, is("apple"));
 
-        books = db.selectFromBook().where("title = ?", "today").toList();
+        books = db.selectFromBook().titleEq("today").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
 
-        books = db.selectFromBook().where("title = ?", "friday").toList();
+        books = db.selectFromBook().titleEq("friday").toList();
         assertThat(books, hasSize(1));
         assertThat(books.get(0).title, is("friday"));
         assertThat(books.get(0).content, is("apple"));

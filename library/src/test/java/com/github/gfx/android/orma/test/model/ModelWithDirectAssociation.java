@@ -24,7 +24,7 @@ import com.github.gfx.android.orma.annotation.Table;
 public class ModelWithDirectAssociation {
 
     @PrimaryKey
-    public String title;
+    public String name;
 
     @Column(indexed = true)
     public Author author;

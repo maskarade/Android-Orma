@@ -150,7 +150,7 @@ public class RxObservableTest {
                 .value();
 
         assertThat(count, is(1));
-        assertThat(db.selectFromBook().where("title = ?", "today").value().content, is("modified"));
+        assertThat(db.selectFromBook().titleEq("today").value().content, is("modified"));
     }
 
     @Test
@@ -162,7 +162,7 @@ public class RxObservableTest {
                 .value();
 
         assertThat(count, is(1));
-        assertThat(db.selectFromBook().where("title = ?", "today").valueOrNull(), is(nullValue()));
+        assertThat(db.selectFromBook().titleEq("today").valueOrNull(), is(nullValue()));
     }
 
     @Test

@@ -98,7 +98,7 @@ public class DirectAssociationsTest {
                     @Override
                     public ModelWithDirectAssociation call() {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                        model.title = "foo";
+                        model.name = "foo";
                         model.author = author1;
                         model.publisher = publisher;
                         model.note = "SQLite rocks";
@@ -106,7 +106,7 @@ public class DirectAssociationsTest {
                     }
                 });
 
-        assertThat(model.title, is("foo"));
+        assertThat(model.name, is("foo"));
         assertThat(model.note, is("SQLite rocks"));
         assertThat(model.author, is(notNullValue()));
         assertThat(model.author.name, is(author1.name));
@@ -132,7 +132,7 @@ public class DirectAssociationsTest {
                             @Override
                             public ModelWithDirectAssociation call() {
                                 ModelWithDirectAssociation md = new ModelWithDirectAssociation();
-                                md.title = "foo";
+                                md.name = "foo";
                                 md.author = author1;
                                 md.publisher = publisher;
                                 md.note = "SQLite rocks";
@@ -144,7 +144,7 @@ public class DirectAssociationsTest {
                 });
 
         assertThat(model.note, is("This is a nested model"));
-        assertThat(model.md.title, is("foo"));
+        assertThat(model.md.name, is("foo"));
         assertThat(model.md.note, is("SQLite rocks"));
         assertThat(model.md.author, is(notNullValue()));
         assertThat(model.md.author.name, is(author1.name));
@@ -164,7 +164,7 @@ public class DirectAssociationsTest {
                     @Override
                     public ModelWithDirectAssociation call() {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                        model.title = "foo";
+                        model.name = "foo";
                         model.author = author1;
                         model.publisher = publisher;
                         model.note = "SQLite rocks";
@@ -179,7 +179,7 @@ public class DirectAssociationsTest {
 
         ModelWithDirectAssociation model = orma.selectFromModelWithDirectAssociation().value();
 
-        assertThat(model.title, is("foo"));
+        assertThat(model.name, is("foo"));
         assertThat(model.note, is("SQLite rocks"));
         assertThat(model.author, is(notNullValue()));
         assertThat(model.author.name, is(author2.name));
@@ -194,7 +194,7 @@ public class DirectAssociationsTest {
                     @Override
                     public ModelWithDirectAssociation call() {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                        model.title = "foo";
+                        model.name = "foo";
                         model.author = author1;
                         model.publisher = publisher;
                         model.note = "SQLite rocks";
@@ -217,7 +217,7 @@ public class DirectAssociationsTest {
             @Override
             public ModelWithDirectAssociation call() {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                model.title = "foo";
+                model.name = "foo";
                 model.author = author1;
                 model.publisher = publisher;
                 model.note = "SQLite rocks";
@@ -229,7 +229,7 @@ public class DirectAssociationsTest {
             @Override
             public ModelWithDirectAssociation call() {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                model.title = "bar";
+                model.name = "bar";
                 model.author = author2;
                 model.publisher = publisher;
                 model.note = "SQLite supports most of SQL92";
@@ -243,7 +243,7 @@ public class DirectAssociationsTest {
         assertThat(selector.count(), is(1));
 
         ModelWithDirectAssociation model = selector.value();
-        assertThat(model.title, is("foo"));
+        assertThat(model.name, is("foo"));
         assertThat(model.note, is("SQLite rocks"));
         assertThat(model.author, is(notNullValue()));
         assertThat(model.author.name, is(author1.name));
@@ -258,7 +258,7 @@ public class DirectAssociationsTest {
             @Override
             public ModelWithDirectAssociation call() {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                model.title = "foo";
+                model.name = "foo";
                 model.author = author1;
                 model.publisher = publisher;
                 model.note = "SQLite rocks";
@@ -270,7 +270,7 @@ public class DirectAssociationsTest {
             @Override
             public ModelWithDirectAssociation call() {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                model.title = "bar";
+                model.name = "bar";
                 model.author = author2;
                 model.publisher = publisher;
                 model.note = "SQLite supports most of SQL92";
@@ -284,7 +284,7 @@ public class DirectAssociationsTest {
         assertThat(selector.count(), is(1));
 
         ModelWithDirectAssociation model = selector.value();
-        assertThat(model.title, is("foo"));
+        assertThat(model.name, is("foo"));
         assertThat(model.note, is("SQLite rocks"));
         assertThat(model.author, is(notNullValue()));
         assertThat(model.author.name, is(author1.name));
@@ -299,7 +299,7 @@ public class DirectAssociationsTest {
             @Override
             public ModelWithDirectAssociation call() {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                model.title = "foo";
+                model.name = "foo";
                 model.author = author1;
                 model.publisher = publisher;
                 model.note = "SQLite rocks";
@@ -311,7 +311,7 @@ public class DirectAssociationsTest {
             @Override
             public ModelWithDirectAssociation call() {
                 ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                model.title = "bar";
+                model.name = "bar";
                 model.author = author2;
                 model.publisher = publisher;
                 model.note = "SQLite supports most of SQL92";
@@ -326,7 +326,7 @@ public class DirectAssociationsTest {
         assertThat(selector.count(), is(1));
 
         ModelWithDirectAssociation model = selector.value();
-        assertThat(model.title, is("bar"));
+        assertThat(model.name, is("bar"));
     }
 
     @Test
@@ -337,7 +337,7 @@ public class DirectAssociationsTest {
                     @Override
                     public ModelWithDirectAssociation call() {
                         ModelWithDirectAssociation model = new ModelWithDirectAssociation();
-                        model.title = "foo";
+                        model.name = "foo";
                         model.author = author1;
                         model.publisher = publisher;
                         model.note = "SQLite rocks";
@@ -364,4 +364,5 @@ public class DirectAssociationsTest {
 
         assertThat(orma.selectFromModelWithNullableDirectAssociations().authorIsNull().count(), is(1));
     }
+
 }

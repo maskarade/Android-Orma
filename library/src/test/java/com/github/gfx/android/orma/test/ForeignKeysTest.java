@@ -165,13 +165,13 @@ public class ForeignKeysTest {
         });
 
         int count = db.updateBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .publisher(publisher)
                 .execute();
 
         assertThat(count, is(1));
 
-        Book book = db.selectFromBook().where("title = ?", "today").value();
+        Book book = db.selectFromBook().titleEq("today").value();
         assertThat(book.publisher.observable().toBlocking().value().name, is("The Nova"));
     }
 
@@ -190,13 +190,13 @@ public class ForeignKeysTest {
         });
 
         int count = db.updateBook()
-                .where("title = ?", "today")
+                .titleEq("today")
                 .publisher(SingleAssociation.<Publisher>id(publisher.id))
                 .execute();
 
         assertThat(count, is(1));
 
-        Book book = db.selectFromBook().where("title = ?", "today").value();
+        Book book = db.selectFromBook().titleEq("today").value();
         assertThat(book.publisher.observable().toBlocking().value().name, is("The Nova"));
     }
 
