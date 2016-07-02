@@ -33,6 +33,6 @@ public class OrderSpec<Model> {
 
     @Override
     public String toString() {
-        return column.getEscapedName() + " " + ordering;
+        return column.getFullyQualifiedName() + " " + ordering;
     }
 }

@@ -365,4 +365,47 @@ public class DirectAssociationsTest {
         assertThat(orma.selectFromModelWithNullableDirectAssociations().authorIsNull().count(), is(1));
     }
 
+    @Test
+    public void testRelationWithOrderByClauses() throws Exception {
+        Inserter<ModelWithDirectAssociation> inserter = orma.prepareInsertIntoModelWithDirectAssociation();
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.name = "foo";
+                model.author = author1;
+                model.publisher = publisher;
+                model.note = "SQLite rocks";
+                return model;
+            }
+        });
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.name = "bar";
+                model.author = author2;
+                model.publisher = publisher;
+                model.note = "SQLite supports most of SQL92";
+                return model;
+            }
+        });
+
+        ModelWithDirectAssociation_Selector selector = orma.relationOfModelWithDirectAssociation()
+                .authorEq(author1.name)
+                .orderByNameAsc()
+                .selector();
+
+        assertThat(selector.count(), is(1));
+
+        ModelWithDirectAssociation model = selector.value();
+        assertThat(model.name, is("foo"));
+        assertThat(model.note, is("SQLite rocks"));
+        assertThat(model.author, is(notNullValue()));
+        assertThat(model.author.name, is(author1.name));
+        assertThat(model.author.note, is(author1.note));
+    }
+
 }

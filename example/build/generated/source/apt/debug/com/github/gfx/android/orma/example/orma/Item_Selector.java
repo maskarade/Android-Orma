@@ -1,10 +1,12 @@
 package com.github.gfx.android.orma.example.orma;
 
-import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
+
+import android.support.annotation.NonNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -71,18 +73,18 @@ public class Item_Selector extends Selector<Item, Item_Selector> {
   }
 
   public Item_Selector orderByCategoryAsc() {
-    return orderBy("`Item`.`category` ASC");
+    return orderBy(Item_Schema.category.orderInAscending());
   }
 
   public Item_Selector orderByCategoryDesc() {
-    return orderBy("`Item`.`category` DESC");
+    return orderBy(Item_Schema.category.orderInDescending());
   }
 
   public Item_Selector orderByNameAsc() {
-    return orderBy("`Item`.`name` ASC");
+    return orderBy(Item_Schema.name.orderInAscending());
   }
 
   public Item_Selector orderByNameDesc() {
-    return orderBy("`Item`.`name` DESC");
+    return orderBy(Item_Schema.name.orderInDescending());
   }
 }

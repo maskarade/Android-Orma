@@ -102,6 +102,11 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @SuppressWarnings("unchecked")
+    public S orderBy(@NonNull OrderSpec<Model> orderSpec) {
+        return orderBy(orderSpec.toString());
+    }
+
+    @SuppressWarnings("unchecked")
     public S limit(@IntRange(from = 1, to = Integer.MAX_VALUE) long limit) {
         this.limit = limit;
         return (S) this;

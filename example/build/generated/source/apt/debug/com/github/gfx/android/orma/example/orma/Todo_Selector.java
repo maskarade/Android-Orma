@@ -1,14 +1,17 @@
 package com.github.gfx.android.orma.example.orma;
 
-import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
+
+import android.support.annotation.NonNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+
 import rx.functions.Func1;
 
 public class Todo_Selector extends Selector<Todo, Todo_Selector> {
@@ -196,26 +199,26 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
   }
 
   public Todo_Selector orderByTitleAsc() {
-    return orderBy("`title` ASC");
+    return orderBy(Todo_Schema.title.orderInAscending());
   }
 
   public Todo_Selector orderByTitleDesc() {
-    return orderBy("`title` DESC");
+    return orderBy(Todo_Schema.title.orderInDescending());
   }
 
   public Todo_Selector orderByDoneAsc() {
-    return orderBy("`done` ASC");
+    return orderBy(Todo_Schema.done.orderInAscending());
   }
 
   public Todo_Selector orderByDoneDesc() {
-    return orderBy("`done` DESC");
+    return orderBy(Todo_Schema.done.orderInDescending());
   }
 
   public Todo_Selector orderByCreatedTimeAsc() {
-    return orderBy("`createdTime` ASC");
+    return orderBy(Todo_Schema.createdTime.orderInAscending());
   }
 
   public Todo_Selector orderByCreatedTimeDesc() {
-    return orderBy("`createdTime` DESC");
+    return orderBy(Todo_Schema.createdTime.orderInDescending());
   }
 }
