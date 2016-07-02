@@ -35,6 +35,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
@@ -52,12 +53,25 @@ public class ConditionQueryHelpers {
         this.targetClassName = targetClassName;
     }
 
-    public List<MethodSpec> buildConditionHelpers() {
+    public ClassName getTargetClassName() {
+        return targetClassName;
+    }
+
+    public List<MethodSpec> buildConditionHelpers(boolean orderByHelpers) {
         List<MethodSpec> methodSpecs = new ArrayList<>();
         schema.getColumns()
                 .stream()
                 .filter(column -> column.indexed || column.primaryKey)
                 .forEach(column -> buildConditionHelpersForEachColumn(methodSpecs, column));
+
+        if (orderByHelpers) {
+            schema.getColumns()
+                    .stream()
+                    .filter(this::needsOrderByHelpers)
+                    .flatMap(this::buildOrderByHelpers)
+                    .forEach(methodSpecs::add);
+        }
+
         return methodSpecs;
     }
 
@@ -284,4 +298,26 @@ public class ConditionQueryHelpers {
                         .build()
         );
     }
+
+    boolean needsOrderByHelpers(ColumnDefinition column) {
+        return (column.indexed || (column.primaryKey && (column.autoincrement || !column.autoId)));
+    }
+
+    Stream<MethodSpec> buildOrderByHelpers(ColumnDefinition column) {
+        return Stream.of(
+                MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Asc")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(getTargetClassName())
+                        .addStatement("return orderBy($T.$L.orderInAscending())", schema.getSchemaClassName(),
+                                column.name)
+                        .build(),
+                MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Desc")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(getTargetClassName())
+                        .addStatement("return orderBy($T.$L.orderInDescending())", schema.getSchemaClassName(),
+                                column.name)
+                        .build()
+        );
+    }
+
 }

@@ -16,10 +16,8 @@
 package com.github.gfx.android.orma.processor.generator;
 
 import com.github.gfx.android.orma.processor.ProcessingContext;
-import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
-import com.github.gfx.android.orma.processor.util.Strings;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
@@ -28,7 +26,6 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
@@ -123,36 +120,8 @@ public class RelationWriter extends BaseWriter {
                 .addStatement("return new $T(this)", schema.getDeleterClassName())
                 .build());
 
-        methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers());
-
-        schema.getColumns()
-                .stream()
-                .filter(this::needsOrderByHelpers)
-                .flatMap(this::buildOrderByHelpers)
-                .forEach(methodSpecs::add);
+        methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers(true));
 
         return methodSpecs;
     }
-
-    boolean needsOrderByHelpers(ColumnDefinition column) {
-        return (column.indexed || (column.primaryKey && (column.autoincrement || !column.autoId)));
-    }
-
-    Stream<MethodSpec> buildOrderByHelpers(ColumnDefinition column) {
-        return Stream.of(
-                MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Asc")
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(getTargetClassName())
-                        .addStatement("return orderBy($T.$L.orderInAscending())", schema.getSchemaClassName(),
-                                column.name)
-                        .build(),
-                MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Desc")
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(getTargetClassName())
-                        .addStatement("return orderBy($T.$L.orderInDescending())", schema.getSchemaClassName(),
-                                column.name)
-                        .build()
-        );
-    }
-
 }
