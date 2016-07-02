@@ -8,7 +8,7 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
-## v2.5.3 2016/07/02
+## v2.5.2 2016/07/02
 
 * Column names used in ORDER BY clauses were not fully qualified and might cause errors in queries (#277)
 
