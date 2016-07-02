@@ -1,17 +1,14 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
-
-import android.support.annotation.NonNull;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-
 import rx.functions.Func1;
 
 public class Todo_Selector extends Selector<Todo, Todo_Selector> {
