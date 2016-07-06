@@ -717,7 +717,7 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 [example/BenchmarkActivity](example/src/main/java/com/github/gfx/android/orma/example/activity/BenchmarkActivity.java)
 
 Here is a result performed on Android 6.0.0 / Xperia Z4
-as of Orma v2.5.2 and Realm 1.0.1:
+as of Orma v2.5.2 and Realm 1.1.0, processing 10 items x 100 times:
 
 <img src="benchmark_v2.5.png" alt="" width="420"/>
 
