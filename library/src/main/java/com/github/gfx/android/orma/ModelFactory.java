@@ -17,14 +17,14 @@ package com.github.gfx.android.orma;
 
 import android.support.annotation.NonNull;
 
-import rx.functions.Func0;
+import java.util.concurrent.Callable;
 
 /**
  * A helper method to make a scope or task.
  *
  * @param <T> Type of a model to create
  */
-public interface ModelFactory<T> extends Func0<T> {
+public interface ModelFactory<T> extends Callable<T> {
 
     @Override
     @NonNull
