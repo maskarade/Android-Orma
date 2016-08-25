@@ -9,7 +9,7 @@ dependencies:
       - "~/.gradle"
   pre:
       - echo y | android -s update sdk -u -a -t "tools"
-      - echo y | android -s update sdk -u -a -t "platform-tools,build-tools-24.0.0,android-24"
+      - echo y | android -s update sdk -u -a -t "platform-tools,build-tools-24.0.1,android-24"
       - echo y | android -s update sdk -u -a -t "extra-android-m2repository"
 test:
   override:
