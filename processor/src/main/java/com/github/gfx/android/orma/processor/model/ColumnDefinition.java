@@ -81,6 +81,8 @@ public class ColumnDefinition {
 
     public final String storageType;
 
+    public final long helperFlags;
+
     public final TypeAdapterDefinition typeAdapter;
 
     public ExecutableElement getter;
@@ -103,20 +105,6 @@ public class ColumnDefinition {
         typeAdapter = schema.context.typeAdapterMap.get(type);
         storageType = storageType(context, element, column, type, typeAdapter);
 
-        if (column != null) {
-            indexed = column.indexed();
-            uniqueOnConflict = column.uniqueOnConflict();
-            unique = uniqueOnConflict != OnConflict.NONE || column.unique();
-            collate = column.collate();
-            defaultExpr = column.defaultExpr();
-        } else {
-            indexed = false;
-            uniqueOnConflict = OnConflict.NONE;
-            unique = false;
-            defaultExpr = null;
-            collate = Column.Collate.BINARY;
-        }
-
         if (primaryKeyAnnotation != null) {
             primaryKeyOnConflict = primaryKeyAnnotation.onConflict();
             primaryKey = true;
@@ -127,6 +115,22 @@ public class ColumnDefinition {
             primaryKey = false;
             autoincrement = false;
             autoId = false;
+        }
+
+        if (column != null) {
+            indexed = column.indexed();
+            uniqueOnConflict = column.uniqueOnConflict();
+            unique = uniqueOnConflict != OnConflict.NONE || column.unique();
+            collate = column.collate();
+            defaultExpr = column.defaultExpr();
+            helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, column.helpers());
+        } else {
+            indexed = false;
+            uniqueOnConflict = OnConflict.NONE;
+            unique = false;
+            defaultExpr = null;
+            collate = Column.Collate.BINARY;
+            helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, Column.Helpers.AUTO);
         }
 
         nullable = hasNullableAnnotation(element);
@@ -150,6 +154,7 @@ public class ColumnDefinition {
         uniqueOnConflict = OnConflict.NONE;
         defaultExpr = "";
         collate = Column.Collate.BINARY;
+        helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, Column.Helpers.AUTO);
         typeAdapter = schema.context.typeAdapterMap.get(type);
         storageType = storageType(context, null, null, type, typeAdapter);
     }
@@ -209,6 +214,22 @@ public class ColumnDefinition {
             }
         }
         return false;
+    }
+
+    @Column.Helpers
+    static long normalizeHelperFlags(boolean primaryKey, boolean indexed, boolean autoincrement, boolean autoId, long flags) {
+        if (flags == Column.Helpers.AUTO) {
+            if (primaryKey) {
+                return (autoincrement || !autoId) ? Column.Helpers.ALL : Column.Helpers.CONDITIONS;
+            }
+            else if (indexed) {
+                return Column.Helpers.ALL;
+            } else {
+                return Column.Helpers.NONE;
+            }
+        } else {
+            return flags;
+        }
     }
 
     public void initGetterAndSetter(ExecutableElement getter, ExecutableElement setter) {
@@ -393,4 +414,18 @@ public class ColumnDefinition {
         assert r != null;
         return context.getSchemaDef(r.modelType);
     }
+
+    public boolean hasConditionHelpers() {
+        return (helperFlags & Column.Helpers.CONDITIONS) != 0;
+    }
+
+    public boolean hasOrderHelpers() {
+        return (helperFlags & Column.Helpers.ORDERS) != 0;
+    }
+
+    public boolean hasHelper(@Column.Helpers long f) {
+        assert f != Column.Helpers.NONE && f != Column.Helpers.AUTO;
+        return (helperFlags & f) == f;
+    }
+
 }

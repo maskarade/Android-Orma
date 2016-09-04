@@ -30,12 +30,12 @@ public class DeleterWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final ConditionQueryHelpers conditionQueryHelpers;
+    private final QueryHelpers queryHelpers;
 
     public DeleterWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
-        conditionQueryHelpers = new ConditionQueryHelpers(context, schema, schema.getDeleterClassName());
+        queryHelpers = new QueryHelpers(context, schema, schema.getDeleterClassName());
     }
 
     @Override
@@ -74,7 +74,7 @@ public class DeleterWriter extends BaseWriter {
                         .build()
         );
 
-        methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers(false));
+        methodSpecs.addAll(queryHelpers.buildConditionHelpers(false));
 
         return methodSpecs;
     }

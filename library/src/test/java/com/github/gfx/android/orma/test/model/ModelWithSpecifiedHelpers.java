@@ -20,13 +20,16 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
-abstract class P<T> {
-    @PrimaryKey
-    long id;
-}
-
 @Table
-public class ModelWithGenericSuperClass extends P<String> {
+public class ModelWithSpecifiedHelpers {
 
+    @PrimaryKey
+    @Column(helpers = Column.Helpers.NONE)
+    public long id;
 
+    @Column(helpers = Column.Helpers.CONDITIONS)
+    public int conditionsOnly;
+
+    @Column(helpers = Column.Helpers.ORDERS)
+    public int ordersOnly;
 }

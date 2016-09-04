@@ -17,8 +17,10 @@ package com.github.gfx.android.orma.annotation;
 
 import android.support.annotation.IntDef;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Conflict resolution algorithms.
@@ -33,6 +35,7 @@ import java.lang.annotation.RetentionPolicy;
         OnConflict.REPLACE,
         OnConflict.ROLLBACK,
 })
+@Target({ElementType.FIELD, ElementType.LOCAL_VARIABLE, ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.CLASS)
 public @interface OnConflict {
 
