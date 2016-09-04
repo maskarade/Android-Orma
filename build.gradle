@@ -1,12 +1,11 @@
-import java.util.regex.Pattern
-
 apply from: project.file('metadata.gradle')
 
 final ANDROID_SDK_PATH = {
     final localProperties = new Properties()
     try {
         localProperties.load(new FileInputStream("${project.rootProject.projectDir}/local.properties"))
-    } catch (IOException e) { /* ignore errors */ }
+    } catch (IOException e) { /* ignore errors */
+    }
     def androidSdkPath = localProperties['sdk.dir'] ?: System.getenv('ANDROID_HOME')
     if (!androidSdkPath) {
         throw new RuntimeException("Missing local.properties")
@@ -19,14 +18,9 @@ ext {
     SUPPORT_LIBRARY_VERSION = '24.2.0'
     ANDROID_JAR = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-24/", include: 'android.jar')
 
-    versionFile = project.file("version.properties")
-
-    versionName = {
-        def versionProps = getVersionProps()
-        "${versionProps['major']}.${versionProps['minor']}.${versionProps['patch']}"
-    }
-
-    metadata.version = versionName()
+    versionFile = project.file("VERSION")
+    versionName = versionFile.readLines()[0].trim()
+    metadata.version = versionName
 }
 
 buildscript {
@@ -70,48 +64,42 @@ task clean(type: Delete) {
 
 def updateReadme(oldVersion, newVersion) {
     def template = file('README.md').text
-    def result = template.replaceAll(Pattern.quote(oldVersion), newVersion)
+    def result = template.replaceAll(java.util.regex.Pattern.quote(oldVersion), newVersion)
     file("README.md").withWriter { it << result }
 }
 
-def Properties getVersionProps() {
-    def Properties versionProps = new Properties()
-    versionProps.load(new FileInputStream(versionFile))
-    return versionProps
-}
-
 task bumpMajor << {
-    def oldVersion = versionName()
-    ant.propertyfile(file: versionFile) {
-        entry(key: 'major', type: 'int', operation: '+', value: 1)
-        entry(key: 'minor', type: 'int', operation: '=', value: 0)
-        entry(key: 'patch', type: 'int', operation: '=', value: 0)
-    }
-    updateReadme(oldVersion, versionName())
+    def oldVersion = versionName
+    def versionParts = versionName.split(/\./)
+    versionParts[0] = (versionParts[0] as int) + 1
+    def newVersion = "${versionParts[0]}.0.0"
+    versionFile.write(newVersion + "\n")
+    updateReadme(oldVersion, newVersion)
     tasks.version.execute()
 }
 
 task bumpMinor << {
-    def oldVersion = versionName()
-    ant.propertyfile(file: versionFile) {
-        entry(key: 'minor', type: 'int', operation: '+', value: 1)
-        entry(key: 'patch', type: 'int', operation: '=', value: 0)
-    }
-    updateReadme(oldVersion, versionName())
+    def oldVersion = versionName
+    def versionParts = versionName.split(/\./)
+    versionParts[1] = (versionParts[1] as int) + 1
+    def newVersion = "${versionParts[0]}.${versionParts[1]}.0"
+    versionFile.write(newVersion + "\n")
+    updateReadme(oldVersion, newVersion)
     tasks.version.execute()
 }
 
 task bumpPatch << {
-    def oldVersion = versionName()
-    ant.propertyfile(file: versionFile) {
-        entry(key: 'patch', type: 'int', operation: '+', value: 1)
-    }
-    updateReadme(oldVersion, versionName())
+    def oldVersion = versionName
+    def versionParts = versionName.split(/\./)
+    versionParts[2] = (versionParts[2].split(/\D/)[0] as int) + 1
+    def newVersion = "${versionParts[0]}.${versionParts[1]}.${versionParts[2]}"
+    versionFile.write(newVersion + "\n")
+    updateReadme(oldVersion, newVersion)
     tasks.version.execute()
 }
 
 task version << {
-    println "v" + versionName()
+    println "v" + versionFile.readLines()[0]
 }
 
 String shell(String command) {
