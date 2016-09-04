@@ -35,12 +35,12 @@ public class UpdaterWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final QueryHelpers queryHelpers;
+    private final ConditionQueryHelpers queryHelpers;
 
     public UpdaterWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
-        queryHelpers = new QueryHelpers(context, schema, schema.getUpdaterClassName());
+        queryHelpers = new ConditionQueryHelpers(context, schema, schema.getUpdaterClassName());
     }
 
     @Override

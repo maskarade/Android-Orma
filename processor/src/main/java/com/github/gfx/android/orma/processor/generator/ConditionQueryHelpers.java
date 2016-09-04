@@ -39,7 +39,7 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
-public class QueryHelpers {
+public class ConditionQueryHelpers {
 
     private final ProcessingContext context;
 
@@ -47,7 +47,7 @@ public class QueryHelpers {
 
     private final ClassName targetClassName;
 
-    public QueryHelpers(ProcessingContext context, SchemaDefinition schema, ClassName targetClassName) {
+    public ConditionQueryHelpers(ProcessingContext context, SchemaDefinition schema, ClassName targetClassName) {
         this.context = context;
         this.schema = schema;
         this.targetClassName = targetClassName;

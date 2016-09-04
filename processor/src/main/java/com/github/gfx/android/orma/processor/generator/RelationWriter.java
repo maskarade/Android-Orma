@@ -33,12 +33,12 @@ public class RelationWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final QueryHelpers queryHelpers;
+    private final ConditionQueryHelpers queryHelpers;
 
     public RelationWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
-        this.queryHelpers = new QueryHelpers(context, schema, getTargetClassName());
+        this.queryHelpers = new ConditionQueryHelpers(context, schema, getTargetClassName());
     }
 
     ClassName getTargetClassName() {
