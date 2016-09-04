@@ -274,15 +274,16 @@ Todo_Deleter deleter = relation().deleter();
 
 This is a query builder for `DELETE FROM *` statements.
 
-## Condition Query Helpers
+## Query Helpers
 
-There are Condition Query Helpers, e.g. `titleEq()` shown in the synopsis
-section, which are methods to help make `WHERE` and `ORDER BY` clauses, for
-`Relation`, `Selecotr`, `Deleter`, and `Updater`.
+There are Query Helpers which are generated to query conditions and orders in a type-safe way
+
+For example, `titleEq()` shown in the synopsis section, are generated to help make `WHERE` and `ORDER BY` clauses,
+for `Relation`, `Selecotr`, `Deleter`, and `Updater`.
 
 They are generated for columns with `indexed = true` or the `@PrimaryKey` column.
 
-Here is a list of Condition Query Helpers that are generated for all the `indexed` columns:
+Here is a list of Query Helpers that are generated for all the `indexed` columns:
 
 * `*Eq(value)` to make `WHERE * = ?`, which is also generated for `@PrimaryKey`
 * `*NotEq(values)` to make `WHERE * <> ?`
@@ -306,6 +307,49 @@ And `ORDER BY` helpers:
 
 * `orderBy*Asc()` to make `ORDER BY * ASC`
 * `orderBy*Desc()` to make `ORDER BY * DESC`
+
+### Control Generation of Query Helpers
+
+**This is an advanced setting for those who know what they do.
+
+You can control which Query Helpers are generater for a column by `@Column(helpers = ...)` attribute:
+
+```java
+@Column(
+    helpers = Column.Helpers.AUTO // default to AUTO
+)
+```
+
+Here are the definition of options defined in [Column.java](annotations/src/main/java/com/github/gfx/android/orma/annotation/Column.java):
+
+```java
+long AUTO = -1; // the default, a smart way
+long NONE = 0;
+
+long CONDITION_EQ = 0b01;
+long CONDITION_NOT_EQ = CONDITION_EQ << 1;
+long CONDITION_IS_NULL = CONDITION_NOT_EQ << 1;
+long CONDITION_IS_NOT_NULL = CONDITION_IS_NULL << 1;
+long CONDITION_IN = CONDITION_IS_NOT_NULL << 1;
+long CONDITION_NOT_IN = CONDITION_IN << 1;
+
+long CONDITION_LT = CONDITION_NOT_IN;
+long CONDITION_LE = CONDITION_LT;
+long CONDITION_GT = CONDITION_LE;
+long CONDITION_GE = CONDITION_GT;
+long CONDITION_BETWEEN = CONDITION_GE;
+
+long CONDITIONS = CONDITION_EQ | CONDITION_NOT_EQ | CONDITION_IS_NULL | CONDITION_IS_NOT_NULL
+        | CONDITION_IN | CONDITION_NOT_IN
+        | CONDITION_LT | CONDITION_LE | CONDITION_GT | CONDITION_GE | CONDITION_BETWEEN;
+
+long ORDER_IN_ASC = CONDITION_BETWEEN << 1;
+long ORDER_IN_DESC = ORDER_IN_ASC << 1;
+
+long ORDERS = ORDER_IN_ASC | ORDER_IN_DESC;
+
+long ALL = CONDITIONS | ORDERS;
+```
 
 ## The Inserter Helper
 
