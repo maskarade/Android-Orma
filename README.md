@@ -310,7 +310,7 @@ And `ORDER BY` helpers:
 
 ### Control Generation of Query Helpers
 
-**This is an advanced setting for those who know what they do.
+**This is an advanced setting for those who know what they do.**
 
 You can control which Query Helpers are generater for a column by `@Column(helpers = ...)` attribute:
 
@@ -835,6 +835,8 @@ You can see [generated files for example models](example/build/generated/source/
 
 Yes. Here is an example to use Orma with Kotlin: https://github.com/gfx/Orma-Kotlin-Example
 
+NOTE: Kotlin APT support, a.k.a. _kapt_, is not stable. Don't ask me for kapt problems.
+
 ## Support
 
 * Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
@@ -842,7 +844,7 @@ Yes. Here is an example to use Orma with Kotlin: https://github.com/gfx/Orma-Kot
 
 ## Contribution
 
-Patches welcome!
+Patches are welcome!
 
 ## Licenses in Runtime Dependencies
 
