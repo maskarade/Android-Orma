@@ -9,7 +9,6 @@ import com.github.gfx.android.orma.Updater;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import rx.functions.Func1;
 
 public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   public Todo_Updater(OrmaConnection conn, Schema<Todo> schema) {
@@ -123,56 +122,6 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
 
   public Todo_Updater doneGe(boolean done) {
     return where("`done` >= ?", done);
-  }
-
-  public Todo_Updater createdTimeEq(@NonNull Date createdTime) {
-    return where("`createdTime` = ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Updater createdTimeNotEq(@NonNull Date createdTime) {
-    return where("`createdTime` <> ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Updater createdTimeIn(@NonNull Collection<Date> values) {
-    return in(false, "`createdTime`", values, new Func1<Date, Long>() {
-      @Override
-      public Long call(Date value) {
-        return BuiltInSerializers.serializeDate(value);
-      }
-    });
-  }
-
-  public Todo_Updater createdTimeNotIn(@NonNull Collection<Date> values) {
-    return in(true, "`createdTime`", values, new Func1<Date, Long>() {
-      @Override
-      public Long call(Date value) {
-        return BuiltInSerializers.serializeDate(value);
-      }
-    });
-  }
-
-  public final Todo_Updater createdTimeIn(@NonNull Date... values) {
-    return createdTimeIn(Arrays.asList(values));
-  }
-
-  public final Todo_Updater createdTimeNotIn(@NonNull Date... values) {
-    return createdTimeNotIn(Arrays.asList(values));
-  }
-
-  public Todo_Updater createdTimeLt(@NonNull Date createdTime) {
-    return where("`createdTime` < ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Updater createdTimeLe(@NonNull Date createdTime) {
-    return where("`createdTime` <= ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Updater createdTimeGt(@NonNull Date createdTime) {
-    return where("`createdTime` > ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Updater createdTimeGe(@NonNull Date createdTime) {
-    return where("`createdTime` >= ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Updater idEq(long id) {

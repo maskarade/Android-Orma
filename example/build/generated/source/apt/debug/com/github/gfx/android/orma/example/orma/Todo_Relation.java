@@ -2,14 +2,11 @@ package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
-import rx.functions.Func1;
 
 public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   public Todo_Relation(OrmaConnection conn, Schema<Todo> schema) {
@@ -127,56 +124,6 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
 
   public Todo_Relation doneGe(boolean done) {
     return where("`done` >= ?", done);
-  }
-
-  public Todo_Relation createdTimeEq(@NonNull Date createdTime) {
-    return where("`createdTime` = ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Relation createdTimeNotEq(@NonNull Date createdTime) {
-    return where("`createdTime` <> ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Relation createdTimeIn(@NonNull Collection<Date> values) {
-    return in(false, "`createdTime`", values, new Func1<Date, Long>() {
-      @Override
-      public Long call(Date value) {
-        return BuiltInSerializers.serializeDate(value);
-      }
-    });
-  }
-
-  public Todo_Relation createdTimeNotIn(@NonNull Collection<Date> values) {
-    return in(true, "`createdTime`", values, new Func1<Date, Long>() {
-      @Override
-      public Long call(Date value) {
-        return BuiltInSerializers.serializeDate(value);
-      }
-    });
-  }
-
-  public final Todo_Relation createdTimeIn(@NonNull Date... values) {
-    return createdTimeIn(Arrays.asList(values));
-  }
-
-  public final Todo_Relation createdTimeNotIn(@NonNull Date... values) {
-    return createdTimeNotIn(Arrays.asList(values));
-  }
-
-  public Todo_Relation createdTimeLt(@NonNull Date createdTime) {
-    return where("`createdTime` < ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Relation createdTimeLe(@NonNull Date createdTime) {
-    return where("`createdTime` <= ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Relation createdTimeGt(@NonNull Date createdTime) {
-    return where("`createdTime` > ?", BuiltInSerializers.serializeDate(createdTime));
-  }
-
-  public Todo_Relation createdTimeGe(@NonNull Date createdTime) {
-    return where("`createdTime` >= ?", BuiltInSerializers.serializeDate(createdTime));
   }
 
   public Todo_Relation idEq(long id) {
