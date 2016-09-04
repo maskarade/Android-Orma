@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.processor.generator;
 
+import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
 import com.github.gfx.android.orma.processor.model.AssociationDefinition;
@@ -35,7 +36,6 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
@@ -61,15 +61,14 @@ public class ConditionQueryHelpers {
         List<MethodSpec> methodSpecs = new ArrayList<>();
         schema.getColumns()
                 .stream()
-                .filter(column -> column.indexed || column.primaryKey)
+                .filter(ColumnDefinition::hasConditionHelpers)
                 .forEach(column -> buildConditionHelpersForEachColumn(methodSpecs, column));
 
         if (orderByHelpers) {
             schema.getColumns()
                     .stream()
-                    .filter(this::needsOrderByHelpers)
-                    .flatMap(this::buildOrderByHelpers)
-                    .forEach(methodSpecs::add);
+                    .filter(ColumnDefinition::hasOrderHelpers)
+                    .forEach(column -> buildOrderByHelpers(methodSpecs, column));
         }
 
         return methodSpecs;
@@ -84,7 +83,8 @@ public class ConditionQueryHelpers {
         TypeName collectionType = Types.getCollection(type.box());
 
         ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
-                .addAnnotations(column.type.isPrimitive() ? Collections.emptyList() : Collections.singletonList(Annotations.nonNull()))
+                .addAnnotations(
+                        column.type.isPrimitive() ? Collections.emptyList() : Collections.singletonList(Annotations.nonNull()))
                 .build();
 
         List<AnnotationSpec> safeVarargsIfNeeded = Annotations.safeVarargsIfNeeded(column.getType());
@@ -105,219 +105,231 @@ public class ConditionQueryHelpers {
             serializedFieldExpr = column.buildSerializeExpr("conn", paramSpec.name);
         }
 
-        if (column.nullable) {
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "IsNull")
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(targetClassName)
-                            .addStatement("return where($S)", columnName + " IS NULL")
-                            .build()
-            );
-
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "IsNotNull")
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(targetClassName)
-                            .addStatement("return where($S)", columnName + " IS NOT NULL")
-                            .build()
+        if (column.nullable && column.hasHelper(Column.Helpers.CONDITION_IS_NULL)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "IsNull")
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(targetClassName)
+                    .addStatement("return where($S)", columnName + " IS NULL")
+                    .build()
             );
         }
 
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "Eq")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpec)
-                        .returns(targetClassName)
-                        .addStatement("return where($S, $L)", columnName + " = ?", serializedFieldExpr)
-                        .build()
-        );
+        if (column.nullable && column.hasHelper(Column.Helpers.CONDITION_IS_NOT_NULL)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "IsNotNull")
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(targetClassName)
+                    .addStatement("return where($S)", columnName + " IS NOT NULL")
+                    .build()
+            );
+        }
+
+        if (column.hasHelper(Column.Helpers.CONDITION_EQ)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Eq")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(paramSpec)
+                    .returns(targetClassName)
+                    .addStatement("return where($S, $L)", columnName + " = ?", serializedFieldExpr)
+                    .build()
+            );
+        }
 
         if (isAssociation) {
             // for foreign keys
-            SchemaDefinition associatedSchema = column.getAssociatedSchema();
-            associatedSchema.getPrimaryKey().ifPresent(foreignKey -> {
-                String paramName = column.name + Strings.toUpperFirst(foreignKey.name);
-                methodSpecs.add(
-                        MethodSpec.methodBuilder(column.name + "Eq")
-                                .addModifiers(Modifier.PUBLIC)
-                                .addParameter(
-                                        ParameterSpec.builder(foreignKey.getType(), paramName)
-                                                .addAnnotations(foreignKey.nullabilityAnnotations())
-                                                .build())
-                                .returns(targetClassName)
-                                .addStatement("return where($S, $L)", columnName + " = ?", paramName)
-                                .build()
-                );
-            });
+            if (column.hasHelper(Column.Helpers.CONDITION_EQ)) {
+                SchemaDefinition associatedSchema = column.getAssociatedSchema();
+                associatedSchema.getPrimaryKey().ifPresent(foreignKey -> {
+                    String paramName = column.name + Strings.toUpperFirst(foreignKey.name);
+                    methodSpecs.add(
+                            MethodSpec.methodBuilder(column.name + "Eq")
+                                    .addModifiers(Modifier.PUBLIC)
+                                    .addParameter(
+                                            ParameterSpec.builder(foreignKey.getType(), paramName)
+                                                    .addAnnotations(foreignKey.nullabilityAnnotations())
+                                                    .build())
+                                    .returns(targetClassName)
+                                    .addStatement("return where($S, $L)", columnName + " = ?", paramName)
+                                    .build()
+                    );
+                });
+            }
 
             // generates only "*Eq" for associations
             return;
         }
 
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "NotEq")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpec)
-                        .returns(targetClassName)
-                        .addStatement("return where($S, $L)", columnName + " <> ?",
-                                serializedFieldExpr)
-                        .build()
-        );
+        if (column.hasHelper(Column.Helpers.CONDITION_NOT_EQ)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "NotEq")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(paramSpec)
+                    .returns(targetClassName)
+                    .addStatement("return where($S, $L)", columnName + " <> ?",
+                            serializedFieldExpr)
+                    .build()
+            );
+        }
 
         if (column.needsTypeAdapter()) {
             TypeSpec serializerFunction = TypeSpec.anonymousClassBuilder("")
                     .superclass(Types.getFunc1(type.box(), column.getSerializedBoxType()))
-                    .addMethod(
-                            MethodSpec.methodBuilder("call")
-                                    .addAnnotation(Annotations.override())
-                                    .addModifiers(Modifier.PUBLIC)
-                                    .returns(column.getSerializedBoxType())
-                                    .addParameter(ParameterSpec.builder(type.box(), "value").build())
-                                    .addStatement("return $L", column.buildSerializeExpr("conn", "value"))
-                                    .build())
+                    .addMethod(MethodSpec.methodBuilder("call")
+                            .addAnnotation(Annotations.override())
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(column.getSerializedBoxType())
+                            .addParameter(ParameterSpec.builder(type.box(), "value").build())
+                            .addStatement("return $L", column.buildSerializeExpr("conn", "value"))
+                            .build())
                     .build();
 
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "In")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Annotations.nonNull())
-                                    .build())
-                            .returns(targetClassName)
-                            .addStatement("return in(false, $S, values, $L)",
-                                    columnName, serializerFunction)
-                            .build()
-            );
+            if (column.hasHelper(Column.Helpers.CONDITION_IN)) {
+                methodSpecs.add(MethodSpec.methodBuilder(column.name + "In")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(ParameterSpec.builder(collectionType, "values")
+                                .addAnnotation(Annotations.nonNull())
+                                .build())
+                        .returns(targetClassName)
+                        .addStatement("return in(false, $S, values, $L)",
+                                columnName, serializerFunction)
+                        .build()
+                );
+            }
 
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "NotIn")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Annotations.nonNull())
-                                    .build())
-                            .returns(targetClassName)
-                            .addStatement("return in(true, $S, values, $L)",
-                                    columnName, serializerFunction)
-                            .build()
-            );
+            if (column.hasHelper(Column.Helpers.CONDITION_NOT_IN)) {
+                methodSpecs.add(MethodSpec.methodBuilder(column.name + "NotIn")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(ParameterSpec.builder(collectionType, "values")
+                                .addAnnotation(Annotations.nonNull())
+                                .build())
+                        .returns(targetClassName)
+                        .addStatement("return in(true, $S, values, $L)",
+                                columnName, serializerFunction)
+                        .build()
+                );
+            }
 
         } else {
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "In")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Annotations.nonNull())
-                                    .build())
-                            .returns(targetClassName)
-                            .addStatement("return in(false, $S, values)",
-                                    columnName)
-                            .build()
-            );
+            if (column.hasHelper(Column.Helpers.CONDITION_IN)) {
+                methodSpecs.add(MethodSpec.methodBuilder(column.name + "In")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(ParameterSpec.builder(collectionType, "values")
+                                .addAnnotation(Annotations.nonNull())
+                                .build())
+                        .returns(targetClassName)
+                        .addStatement("return in(false, $S, values)",
+                                columnName)
+                        .build()
+                );
+            }
 
-            methodSpecs.add(
-                    MethodSpec.methodBuilder(column.name + "NotIn")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(collectionType, "values")
-                                    .addAnnotation(Annotations.nonNull())
-                                    .build())
-                            .returns(targetClassName)
-                            .addStatement("return in(true, $S, values)",
-                                    columnName)
-                            .build()
+            if (column.hasHelper(Column.Helpers.CONDITION_NOT_IN)) {
+                methodSpecs.add(MethodSpec.methodBuilder(column.name + "NotIn")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(ParameterSpec.builder(collectionType, "values")
+                                .addAnnotation(Annotations.nonNull())
+                                .build())
+                        .returns(targetClassName)
+                        .addStatement("return in(true, $S, values)",
+                                columnName)
+                        .build()
+                );
+            }
+        }
+
+        if (column.hasHelper(Column.Helpers.CONDITION_IN)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "In")
+                    .addAnnotations(safeVarargsIfNeeded)
+                    .varargs(true)
+                    .addModifiers(Modifier.FINAL) // to use SafeVarargs
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
+                            .addAnnotation(Annotations.nonNull())
+                            .build())
+                    .returns(targetClassName)
+                    .addStatement("return $L($T.asList(values))",
+                            column.name + "In", Types.Arrays)
+                    .build()
             );
         }
 
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "In")
-                        .addAnnotations(safeVarargsIfNeeded)
-                        .varargs(true)
-                        .addModifiers(Modifier.FINAL) // to use SafeVarargs
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
-                                .addAnnotation(Annotations.nonNull())
-                                .build())
-                        .returns(targetClassName)
-                        .addStatement("return $L($T.asList(values))",
-                                column.name + "In", Types.Arrays)
-                        .build()
-        );
+        if (column.hasHelper(Column.Helpers.CONDITION_NOT_IN)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "NotIn")
+                    .addAnnotations(safeVarargsIfNeeded)
+                    .varargs(true)
+                    .addModifiers(Modifier.FINAL) // to use @SafeVarargs
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
+                            .addAnnotation(Annotations.nonNull())
+                            .build())
+                    .returns(targetClassName)
+                    .addStatement("return $L($T.asList(values))",
+                            column.name + "NotIn", Types.Arrays)
+                    .build()
+            );
+        }
 
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "NotIn")
-                        .addAnnotations(safeVarargsIfNeeded)
-                        .varargs(true)
-                        .addModifiers(Modifier.FINAL) // to use @SafeVarargs
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(ParameterSpec.builder(ArrayTypeName.of(type.box()), "values")
-                                .addAnnotation(Annotations.nonNull())
-                                .build())
-                        .returns(targetClassName)
-                        .addStatement("return $L($T.asList(values))",
-                                column.name + "NotIn", Types.Arrays)
-                        .build()
-        );
-
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "Lt")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpec)
-                        .returns(targetClassName)
-                        .addStatement("return where($S, $L)",
-                                columnName + " < ?",
-                                serializedFieldExpr)
-                        .build()
-        );
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "Le")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpec)
-                        .returns(targetClassName)
-                        .addStatement("return where($S, $L)",
-                                columnName + " <= ?",
-                                serializedFieldExpr)
-                        .build()
-        );
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "Gt")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpec)
-                        .returns(targetClassName)
-                        .addStatement("return where($S, $L)",
-                                columnName + " > ?",
-                                serializedFieldExpr)
-                        .build()
-        );
-        methodSpecs.add(
-                MethodSpec.methodBuilder(column.name + "Ge")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(paramSpec)
-                        .returns(targetClassName)
-                        .addStatement("return where($S, $L)",
-                                columnName + " >= ?",
-                                serializedFieldExpr)
-                        .build()
-        );
+        if (column.hasHelper(Column.Helpers.CONDITION_LT)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Lt")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(paramSpec)
+                    .returns(targetClassName)
+                    .addStatement("return where($S, $L)",
+                            columnName + " < ?",
+                            serializedFieldExpr)
+                    .build()
+            );
+        }
+        if (column.hasHelper(Column.Helpers.CONDITION_LE)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Le")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(paramSpec)
+                    .returns(targetClassName)
+                    .addStatement("return where($S, $L)",
+                            columnName + " <= ?",
+                            serializedFieldExpr)
+                    .build()
+            );
+        }
+        if (column.hasHelper(Column.Helpers.CONDITION_GT)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Gt")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(paramSpec)
+                    .returns(targetClassName)
+                    .addStatement("return where($S, $L)",
+                            columnName + " > ?",
+                            serializedFieldExpr)
+                    .build()
+            );
+        }
+        if (column.hasHelper(Column.Helpers.CONDITION_GE)) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Ge")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(paramSpec)
+                    .returns(targetClassName)
+                    .addStatement("return where($S, $L)",
+                            columnName + " >= ?",
+                            serializedFieldExpr)
+                    .build()
+            );
+        }
     }
 
-    boolean needsOrderByHelpers(ColumnDefinition column) {
-        return (column.indexed || (column.primaryKey && (column.autoincrement || !column.autoId)));
-    }
-
-    Stream<MethodSpec> buildOrderByHelpers(ColumnDefinition column) {
-        return Stream.of(
-                MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Asc")
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(getTargetClassName())
-                        .addStatement("return orderBy($T.$L.orderInAscending())", schema.getSchemaClassName(),
-                                column.name)
-                        .build(),
-                MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Desc")
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(getTargetClassName())
-                        .addStatement("return orderBy($T.$L.orderInDescending())", schema.getSchemaClassName(),
-                                column.name)
-                        .build()
-        );
+    void buildOrderByHelpers(List<MethodSpec> methodSpecs, ColumnDefinition column) {
+        if (column.hasHelper(Column.Helpers.ORDER_IN_ASC)) {
+            methodSpecs.add(MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Asc")
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(getTargetClassName())
+                    .addStatement("return orderBy($T.$L.orderInAscending())", schema.getSchemaClassName(),
+                            column.name)
+                    .build());
+        }
+        if (column.hasHelper(Column.Helpers.ORDER_IN_DESC)) {
+            methodSpecs.add(MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Desc")
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(getTargetClassName())
+                    .addStatement("return orderBy($T.$L.orderInDescending())", schema.getSchemaClassName(),
+                            column.name)
+                    .build()
+            );
+        }
     }
 
 }

@@ -33,12 +33,12 @@ public class RelationWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final ConditionQueryHelpers conditionQueryHelpers;
+    private final ConditionQueryHelpers queryHelpers;
 
     public RelationWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
-        this.conditionQueryHelpers = new ConditionQueryHelpers(context, schema, getTargetClassName());
+        this.queryHelpers = new ConditionQueryHelpers(context, schema, getTargetClassName());
     }
 
     ClassName getTargetClassName() {
@@ -84,20 +84,21 @@ public class RelationWriter extends BaseWriter {
                 .addStatement("return new $T(this)", getTargetClassName())
                 .build());
 
-
-        schema.getPrimaryKey().ifPresent(primaryKey -> {
-            methodSpecs.add(MethodSpec.methodBuilder("reload")
-                    .addAnnotation(Annotations.nonNull())
-                    .addAnnotation(Annotations.checkResult())
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(schema.getModelClassName())
-                    .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
-                            .addAnnotation(Annotations.nonNull())
-                            .build())
-                    .addStatement("return selector().$LEq($L).value()",
-                            primaryKey.name, primaryKey.buildGetColumnExpr("model"))
-                    .build());
-        });
+        if (schema.hasPrimaryIdEqHelper()) {
+            schema.getPrimaryKey().ifPresent(primaryKey -> {
+                methodSpecs.add(MethodSpec.methodBuilder("reload")
+                        .addAnnotation(Annotations.nonNull())
+                        .addAnnotation(Annotations.checkResult())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(schema.getModelClassName())
+                        .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
+                                .addAnnotation(Annotations.nonNull())
+                                .build())
+                        .addStatement("return selector().$LEq($L).value()",
+                                primaryKey.name, primaryKey.buildGetColumnExpr("model"))
+                        .build());
+            });
+        }
 
         methodSpecs.add(MethodSpec.methodBuilder("selector")
                 .addAnnotations(Annotations.overrideAndNonNull())
@@ -120,7 +121,7 @@ public class RelationWriter extends BaseWriter {
                 .addStatement("return new $T(this)", schema.getDeleterClassName())
                 .build());
 
-        methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers(true));
+        methodSpecs.addAll(queryHelpers.buildConditionHelpers(true));
 
         return methodSpecs;
     }

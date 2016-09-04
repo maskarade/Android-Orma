@@ -33,12 +33,12 @@ public class SelectorWriter extends BaseWriter {
 
     private final SchemaDefinition schema;
 
-    private final ConditionQueryHelpers conditionQueryHelpers;
+    private final ConditionQueryHelpers queryHelpers;
 
     public SelectorWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
-        this.conditionQueryHelpers = new ConditionQueryHelpers(context, schema, getTargetClassName());
+        this.queryHelpers = new ConditionQueryHelpers(context, schema, getTargetClassName());
     }
 
     ClassName getTargetClassName() {
@@ -84,7 +84,7 @@ public class SelectorWriter extends BaseWriter {
                 .addStatement("return new $T(this)", getTargetClassName())
                 .build());
 
-        methodSpecs.addAll(conditionQueryHelpers.buildConditionHelpers(true));
+        methodSpecs.addAll(queryHelpers.buildConditionHelpers(true));
 
         return methodSpecs;
     }

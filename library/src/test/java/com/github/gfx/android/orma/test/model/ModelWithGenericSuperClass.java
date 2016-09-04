@@ -20,7 +20,7 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
-class P<T> {
+abstract class P<T> {
     @PrimaryKey
     long id;
 }

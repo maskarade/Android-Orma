@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
@@ -385,6 +384,10 @@ public class SchemaDefinition {
                 .filter(ColumnDefinition::isDirectAssociation)
                 .map(column -> column.getAssociatedSchema().calculateConsumingColumnSize())
                 .reduce(0, (a, b) -> a + b);
+    }
+
+    public boolean hasPrimaryIdEqHelper() {
+        return primaryKey != null && primaryKey.hasHelper(Column.Helpers.CONDITION_EQ);
     }
 
     @Override

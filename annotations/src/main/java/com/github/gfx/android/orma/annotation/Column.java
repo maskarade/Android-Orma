@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma.annotation;
 
+import android.support.annotation.IntDef;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -71,6 +73,8 @@ public @interface Column {
      */
     String storageType() default "";
 
+    @Helpers long helpers() default Helpers.AUTO;
+
     /**
      * Set of {@code COLLATE} algorithms.
      *
@@ -94,5 +98,43 @@ public @interface Column {
          * characters are ignored.</blockquote>
          */
         RTRIM
+    }
+
+    @Target({ElementType.FIELD, ElementType.LOCAL_VARIABLE, ElementType.PARAMETER, ElementType.METHOD})
+    @Retention(RetentionPolicy.CLASS)
+    @IntDef(flag = true, value = {
+            Helpers.NONE,
+            Helpers.CONDITIONS,
+            Helpers.ORDERS,
+            Helpers.ALL,
+    })
+    @interface Helpers {
+
+        long AUTO = -1;
+        long NONE = 0;
+
+        long CONDITION_EQ = 0b01;
+        long CONDITION_NOT_EQ = CONDITION_EQ << 1;
+        long CONDITION_IS_NULL = CONDITION_NOT_EQ << 1;
+        long CONDITION_IS_NOT_NULL = CONDITION_IS_NULL << 1;
+        long CONDITION_IN = CONDITION_IS_NOT_NULL << 1;
+        long CONDITION_NOT_IN = CONDITION_IN << 1;
+
+        long CONDITION_LT = CONDITION_NOT_IN;
+        long CONDITION_LE = CONDITION_LT;
+        long CONDITION_GT = CONDITION_LE;
+        long CONDITION_GE = CONDITION_GT;
+        long CONDITION_BETWEEN = CONDITION_GE;
+
+        long CONDITIONS = CONDITION_EQ | CONDITION_NOT_EQ | CONDITION_IS_NULL | CONDITION_IS_NOT_NULL
+                | CONDITION_IN | CONDITION_NOT_IN
+                | CONDITION_LT | CONDITION_LE | CONDITION_GT | CONDITION_GE | CONDITION_BETWEEN;
+
+        long ORDER_IN_ASC = CONDITION_BETWEEN << 1;
+        long ORDER_IN_DESC = ORDER_IN_ASC << 1;
+
+        long ORDERS = ORDER_IN_ASC | ORDER_IN_DESC;
+
+        long ALL = CONDITIONS | ORDERS;
     }
 }

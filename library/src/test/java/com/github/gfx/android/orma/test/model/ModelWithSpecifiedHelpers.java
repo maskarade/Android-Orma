@@ -13,32 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.example.orma;
+
+package com.github.gfx.android.orma.test.model;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
-import android.support.annotation.Nullable;
-
-import java.util.Date;
-
 @Table
-public class Todo {
+public class ModelWithSpecifiedHelpers {
 
     @PrimaryKey
+    @Column(helpers = Column.Helpers.NONE)
     public long id;
 
-    @Column(indexed = true)
-    public String title;
+    @Column(helpers = Column.Helpers.CONDITIONS)
+    public int conditionsOnly;
 
-    @Column
-    @Nullable
-    public String content;
-
-    @Column(indexed = true, defaultExpr = "0")
-    public boolean done;
-
-    @Column(indexed = true, helpers = Column.Helpers.ORDERS, defaultExpr = "0")
-    public Date createdTime;
+    @Column(helpers = Column.Helpers.ORDERS)
+    public int ordersOnly;
 }
