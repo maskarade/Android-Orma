@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.example.activity;
 
-import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityListViewBinding;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
@@ -63,7 +62,6 @@ public class ListViewActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_list_view);
 
         orma = OrmaDatabase.builder(this)
-                .readOnMainThread(AccessThreadConstraint.NONE)
                 .build();
 
         adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeAsc());

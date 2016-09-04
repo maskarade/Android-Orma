@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma.example.activity;
 
-import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.databinding.ActivityRecyclerViewBinding;
@@ -64,7 +63,6 @@ public class RecyclerViewActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_recycler_view);
 
         orma = OrmaDatabase.builder(this)
-                .readOnMainThread(AccessThreadConstraint.NONE)
                 .build();
 
         adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeAsc());
