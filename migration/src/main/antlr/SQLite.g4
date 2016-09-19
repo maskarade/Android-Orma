@@ -37,7 +37,7 @@ parse
 error
  : UNEXPECTED_CHAR 
    { 
-     throw new RuntimeException("SQLiteParser: UNEXPECTED_CHAR=" + $UNEXPECTED_CHAR.text);
+     throw new RuntimeException("UNEXPECTED_CHAR=" + $UNEXPECTED_CHAR.text); 
    }
  ;
 
@@ -102,7 +102,7 @@ commit_stmt
  ;
 
 compound_select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
+ : with_clause?
    select_core ( ( K_UNION K_ALL? | K_INTERSECT | K_EXCEPT ) select_core )+
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
@@ -175,7 +175,7 @@ drop_view_stmt
  ;
 
 factored_select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
+ : with_clause?
    select_core ( compound_operator select_core )*
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
@@ -220,13 +220,13 @@ savepoint_stmt
  ;
 
 simple_select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
+ : with_clause?
    select_core ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
 
 select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
+ : with_clause?
    select_or_values ( compound_operator select_or_values )*
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
@@ -319,7 +319,7 @@ expr
  | expr ( '+' | '-' ) expr
  | expr ( '<<' | '>>' | '&' | '|' ) expr
  | expr ( '<' | '<=' | '>' | '>=' ) expr
- | expr ( '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | K_IN | K_LIKE | K_GLOB | K_MATCH | K_REGEXP ) expr
+ | expr ( '=' | '==' | '!=' | '<>' ) expr
  | expr K_AND expr
  | expr K_OR expr
  | function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
@@ -372,7 +372,7 @@ table_constraint
  ;
 
 with_clause
- : K_WITH K_RECURSIVE? cte_table_name K_AS '(' select_stmt ')' ( ',' cte_table_name K_AS '(' select_stmt ')' )*
+ : K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )*
  ;
 
 qualified_table_name
@@ -401,12 +401,13 @@ result_column
  ;
 
 table_or_subquery
- : ( database_name '.' )? table_name ( K_AS? table_alias )?
+ : ( schema_name '.' )? table_name ( K_AS? table_alias )?
    ( K_INDEXED K_BY index_name
    | K_NOT K_INDEXED )?
+ | ( schema_name '.' )? table_function_name '(' ( expr ( ',' expr )* )? ')' ( K_AS? table_alias )?
  | '(' ( table_or_subquery ( ',' table_or_subquery )*
        | join_clause )
-   ')' ( K_AS? table_alias )?
+   ')'
  | '(' select_stmt ')' ( K_AS? table_alias )?
  ;
 
@@ -437,10 +438,6 @@ compound_operator
  | K_UNION K_ALL
  | K_INTERSECT
  | K_EXCEPT
- ;
-
-cte_table_name
- : table_name ( '(' column_name ( ',' column_name )* ')' )?
  ;
 
 signed_number
@@ -616,6 +613,14 @@ function_name
  ;
 
 database_name
+ : any_name
+ ;
+
+schema_name
+ : any_name
+ ;
+
+table_function_name
  : any_name
  ;
 
