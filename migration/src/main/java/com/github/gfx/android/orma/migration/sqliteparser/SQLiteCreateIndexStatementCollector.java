@@ -19,33 +19,31 @@ package com.github.gfx.android.orma.migration.sqliteparser;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteBaseListener;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
-import org.antlr.v4.runtime.misc.NotNull;
-
 public class SQLiteCreateIndexStatementCollector extends SQLiteBaseListener {
 
     CreateIndexStatement createIndexStatement;
 
     @Override
-    public void enterCreate_index_stmt(@NotNull SQLiteParser.Create_index_stmtContext ctx) {
+    public void enterCreate_index_stmt(SQLiteParser.Create_index_stmtContext ctx) {
         createIndexStatement = new CreateIndexStatement();
     }
 
     @Override
-    public void exitIndex_name(@NotNull SQLiteParser.Index_nameContext ctx) {
+    public void exitIndex_name(SQLiteParser.Index_nameContext ctx) {
         if (createIndexStatement.indexName == null) {
             createIndexStatement.indexName = new SQLiteComponent.Name(ctx.getText());
         }
     }
 
     @Override
-    public void exitTable_name(@NotNull SQLiteParser.Table_nameContext ctx) {
+    public void exitTable_name(SQLiteParser.Table_nameContext ctx) {
         if (createIndexStatement.tableName == null) {
             createIndexStatement.tableName = new SQLiteComponent.Name(ctx.getText());
         }
     }
 
     @Override
-    public void exitIndexed_column(@NotNull SQLiteParser.Indexed_columnContext ctx) {
+    public void exitIndexed_column(SQLiteParser.Indexed_columnContext ctx) {
         createIndexStatement.columns.add(new SQLiteComponent.Name(ctx.getText()));
     }
 }
