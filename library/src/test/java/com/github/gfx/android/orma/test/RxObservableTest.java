@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.test.model.Book;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rx.Single;
 import rx.functions.Func1;
 import rx.observers.TestSubscriber;
 
@@ -121,21 +123,27 @@ public class RxObservableTest {
 
     @Test
     public void inserterObservable() throws Exception {
-        long rowid = db.prepareInsertIntoBook()
-                .executeAsObservable(new ModelFactory<Book>() {
-                    @NonNull
+        long rowid = db.prepareInsertIntoBookAsObservable()
+                .flatMap(new Func1<Inserter<Book>, Single<Long>>() {
                     @Override
-                    public Book call() {
-                        Book book = new Book();
-                        book.title = "observable days";
-                        book.content = "reactive";
-                        book.inPrint = false;
-                        book.publisher = SingleAssociation.id(publisher.id);
-                        return book;
+                    public Single<Long> call(Inserter<Book> bookInserter) {
+                        return bookInserter.executeAsObservable(new ModelFactory<Book>() {
+                            @NonNull
+                            @Override
+                            public Book call() {
+                                Book book = new Book();
+                                book.title = "observable days";
+                                book.content = "reactive";
+                                book.inPrint = false;
+                                book.publisher = SingleAssociation.id(publisher.id);
+                                return book;
+                            }
+                        });
                     }
                 })
                 .toBlocking()
                 .value();
+
         assertThat(rowid, is(not(0L)));
         assertThat(db.selectFromBook().count(), is(4));
     }

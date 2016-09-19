@@ -28,6 +28,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.nio.charset.Charset;
@@ -318,6 +319,7 @@ public class DatabaseWriter extends BaseWriter {
                                     + " and retrieves it which is just inserted.\n"
                                     + " The return value has the row ID.\n")
                     .addAnnotation(Annotations.nonNull())
+                    .addAnnotation(Annotations.workerThread())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
                     .addParameter(
@@ -356,6 +358,7 @@ public class DatabaseWriter extends BaseWriter {
             methodSpecs.add(
                     MethodSpec.methodBuilder("update" + simpleModelName)
                             .addJavadoc("Starts building a query: {@code UPDATE $T ...}.\n", schema.getModelClassName())
+                            .addAnnotation(Annotations.workerThread())
                             .addAnnotation(Annotations.nonNull())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getUpdaterClassName())
@@ -368,6 +371,7 @@ public class DatabaseWriter extends BaseWriter {
             methodSpecs.add(
                     MethodSpec.methodBuilder("deleteFrom" + simpleModelName)
                             .addJavadoc("Starts building a query: {@code DELETE FROM $T ...}.\n", schema.getModelClassName())
+                            .addAnnotation(Annotations.workerThread())
                             .addAnnotation(Annotations.nonNull())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(schema.getDeleterClassName())
@@ -380,6 +384,7 @@ public class DatabaseWriter extends BaseWriter {
             methodSpecs.add(
                     MethodSpec.methodBuilder("insertInto" + simpleModelName)
                             .addJavadoc("Executes a query: {@code INSERT INTO $T ...}.\n", schema.getModelClassName())
+                            .addAnnotation(Annotations.workerThread())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(long.class)
                             .addParameter(
@@ -392,10 +397,13 @@ public class DatabaseWriter extends BaseWriter {
                             )
                             .build());
 
+            // For prepared statements
+
             methodSpecs.add(
                     MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
                             .addJavadoc("Create a prepared statement for {@code INSERT INTO $T ...}.\n",
                                     schema.getModelClassName())
+                            .addAnnotation(Annotations.workerThread())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(Types.getInserter(schema.getModelClassName()))
                             .addStatement("return prepareInsertInto$L($T.NONE, true)",
@@ -408,6 +416,7 @@ public class DatabaseWriter extends BaseWriter {
                     MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
                             .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
                                     schema.getModelClassName())
+                            .addAnnotation(Annotations.workerThread())
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
                                     .addAnnotation(OnConflict.class)
@@ -422,6 +431,7 @@ public class DatabaseWriter extends BaseWriter {
                     MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
                             .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
                                     schema.getModelClassName())
+                            .addAnnotation(Annotations.workerThread())
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
                                     .addAnnotation(OnConflict.class)
@@ -436,6 +446,71 @@ public class DatabaseWriter extends BaseWriter {
                             )
                             .build());
 
+            // For prepared statements as observables
+
+            TypeName inserterType = Types.getInserter(schema.getModelClassName());
+            TypeName inserterObservableType = Types.getSingle(inserterType);
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsObservable")
+                            .addJavadoc("Create a prepared statement for {@code INSERT INTO $T ...}.\n",
+                                    schema.getModelClassName())
+                            .addAnnotation(Annotations.checkResult())
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(inserterObservableType)
+                            .addStatement("return prepareInsertInto$LAsObservable($T.NONE, true)",
+                                    simpleModelName,
+                                    OnConflict.class
+                            )
+                            .build());
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsObservable")
+                            .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
+                                    schema.getModelClassName())
+                            .addAnnotation(Annotations.checkResult())
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                    .addAnnotation(OnConflict.class)
+                                    .build())
+                            .returns(inserterObservableType)
+                            .addStatement("return prepareInsertInto$LAsObservable(onConflictAlgorithm, true)",
+                                    simpleModelName
+                            )
+                            .build());
+
+            MethodSpec onSubscribeCall = MethodSpec.methodBuilder("call")
+                    .addAnnotation(Annotations.override())
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(Types.getSingleSubscriber(inserterType), "subscriber")
+                    .addStatement("subscriber.onSuccess(new $T($L, $L, onConflictAlgorithm, withoutAutoId))",
+                            inserterType,
+                            connection,
+                            schemaInstance
+                    )
+                    .build();
+
+            TypeSpec onSubscribe = TypeSpec.anonymousClassBuilder("")
+                    .superclass(Types.getSingleOnSubscribe(inserterType))
+                    .addMethod(onSubscribeCall)
+                    .build();
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsObservable")
+                            .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
+                                    schema.getModelClassName())
+                            .addAnnotation(Annotations.checkResult())
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                    .addModifiers(Modifier.FINAL)
+                                    .addAnnotation(OnConflict.class)
+                                    .build())
+                            .addParameter(ParameterSpec.builder(boolean.class, "withoutAutoId")
+                                    .addModifiers(Modifier.FINAL)
+                                    .build())
+                            .returns(inserterObservableType)
+                            .addStatement("return $T.create($L)", Types.Single, onSubscribe)
+                            .build());
         });
 
         return methodSpecs;

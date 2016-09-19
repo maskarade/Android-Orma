@@ -16,6 +16,8 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import java.util.Arrays;
 import java.util.List;
 import rx.Completable;
+import rx.Single;
+import rx.SingleSubscriber;
 
 /**
  * <p>The Orma database handle class.</p>
@@ -99,6 +101,7 @@ public class OrmaDatabase implements DatabaseHandle {
    *  The return value has the row ID.
    */
   @NonNull
+  @WorkerThread
   public Category createCategory(@NonNull ModelFactory<Category> factory) {
     return connection.createModel(Category_Schema.INSTANCE, factory);
   }
@@ -122,6 +125,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Starts building a query: {@code UPDATE Category ...}.
    */
+  @WorkerThread
   @NonNull
   public Category_Updater updateCategory() {
     return new Category_Updater(connection, Category_Schema.INSTANCE);
@@ -130,6 +134,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Starts building a query: {@code DELETE FROM Category ...}.
    */
+  @WorkerThread
   @NonNull
   public Category_Deleter deleteFromCategory() {
     return new Category_Deleter(connection, Category_Schema.INSTANCE);
@@ -138,6 +143,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Executes a query: {@code INSERT INTO Category ...}.
    */
+  @WorkerThread
   public long insertIntoCategory(@NonNull Category model) {
     return prepareInsertIntoCategory().execute(model);
   }
@@ -145,6 +151,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT INTO Category ...}.
    */
+  @WorkerThread
   public Inserter<Category> prepareInsertIntoCategory() {
     return prepareInsertIntoCategory(OnConflict.NONE, true);
   }
@@ -152,6 +159,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
+  @WorkerThread
   public Inserter<Category> prepareInsertIntoCategory(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoCategory(onConflictAlgorithm, true);
   }
@@ -159,8 +167,38 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
+  @WorkerThread
   public Inserter<Category> prepareInsertIntoCategory(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
     return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Category ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable() {
+    return prepareInsertIntoCategoryAsObservable(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoCategoryAsObservable(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.create(new Single.OnSubscribe<Inserter<Category>>() {
+      @Override
+      public void call(SingleSubscriber<? super Inserter<Category>> subscriber) {
+        subscriber.onSuccess(new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
+      }
+    });
   }
 
   /**
@@ -175,6 +213,7 @@ public class OrmaDatabase implements DatabaseHandle {
    *  The return value has the row ID.
    */
   @NonNull
+  @WorkerThread
   public Item createItem(@NonNull ModelFactory<Item> factory) {
     return connection.createModel(Item_Schema.INSTANCE, factory);
   }
@@ -198,6 +237,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Starts building a query: {@code UPDATE Item ...}.
    */
+  @WorkerThread
   @NonNull
   public Item_Updater updateItem() {
     return new Item_Updater(connection, Item_Schema.INSTANCE);
@@ -206,6 +246,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Starts building a query: {@code DELETE FROM Item ...}.
    */
+  @WorkerThread
   @NonNull
   public Item_Deleter deleteFromItem() {
     return new Item_Deleter(connection, Item_Schema.INSTANCE);
@@ -214,6 +255,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Executes a query: {@code INSERT INTO Item ...}.
    */
+  @WorkerThread
   public long insertIntoItem(@NonNull Item model) {
     return prepareInsertIntoItem().execute(model);
   }
@@ -221,6 +263,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT INTO Item ...}.
    */
+  @WorkerThread
   public Inserter<Item> prepareInsertIntoItem() {
     return prepareInsertIntoItem(OnConflict.NONE, true);
   }
@@ -228,6 +271,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
+  @WorkerThread
   public Inserter<Item> prepareInsertIntoItem(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoItem(onConflictAlgorithm, true);
   }
@@ -235,8 +279,38 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
+  @WorkerThread
   public Inserter<Item> prepareInsertIntoItem(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
     return new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Item ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable() {
+    return prepareInsertIntoItemAsObservable(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItemAsObservable(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.create(new Single.OnSubscribe<Inserter<Item>>() {
+      @Override
+      public void call(SingleSubscriber<? super Inserter<Item>> subscriber) {
+        subscriber.onSuccess(new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
+      }
+    });
   }
 
   /**
@@ -251,6 +325,7 @@ public class OrmaDatabase implements DatabaseHandle {
    *  The return value has the row ID.
    */
   @NonNull
+  @WorkerThread
   public Todo createTodo(@NonNull ModelFactory<Todo> factory) {
     return connection.createModel(Todo_Schema.INSTANCE, factory);
   }
@@ -274,6 +349,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Starts building a query: {@code UPDATE Todo ...}.
    */
+  @WorkerThread
   @NonNull
   public Todo_Updater updateTodo() {
     return new Todo_Updater(connection, Todo_Schema.INSTANCE);
@@ -282,6 +358,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Starts building a query: {@code DELETE FROM Todo ...}.
    */
+  @WorkerThread
   @NonNull
   public Todo_Deleter deleteFromTodo() {
     return new Todo_Deleter(connection, Todo_Schema.INSTANCE);
@@ -290,6 +367,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Executes a query: {@code INSERT INTO Todo ...}.
    */
+  @WorkerThread
   public long insertIntoTodo(@NonNull Todo model) {
     return prepareInsertIntoTodo().execute(model);
   }
@@ -297,6 +375,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT INTO Todo ...}.
    */
+  @WorkerThread
   public Inserter<Todo> prepareInsertIntoTodo() {
     return prepareInsertIntoTodo(OnConflict.NONE, true);
   }
@@ -304,6 +383,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
+  @WorkerThread
   public Inserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoTodo(onConflictAlgorithm, true);
   }
@@ -311,8 +391,38 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
+  @WorkerThread
   public Inserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
     return new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Todo ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable() {
+    return prepareInsertIntoTodoAsObservable(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoTodoAsObservable(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.create(new Single.OnSubscribe<Inserter<Todo>>() {
+      @Override
+      public void call(SingleSubscriber<? super Inserter<Todo>> subscriber) {
+        subscriber.onSuccess(new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
+      }
+    });
   }
 
   public static class Builder extends OrmaDatabaseBuilderBase<Builder> {

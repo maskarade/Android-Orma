@@ -164,7 +164,7 @@ public class BuiltInSerializers {
     }
 
     @NonNull
-    public static <C extends Collection<String>> C deserializeStringCollection(@NonNull String serialized, C collection) {
+    public static <C extends Collection<String>> C deserializeStringCollection(@NonNull String serialized, @NonNull C collection) {
         StringReader reader = new StringReader(serialized);
         JsonReader jsonReader = new JsonReader(reader);
 
