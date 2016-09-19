@@ -74,6 +74,10 @@ public class Types {
 
     public static final ClassName Single = ClassName.get("rx", "Single");
 
+    public static final ClassName SingleOnSubscribe = ClassName.get("rx", "Single", "OnSubscribe");
+
+    public static final ClassName SingleSubscriber = ClassName.get("rx", "SingleSubscriber");
+
     public static final ClassName Observable = ClassName.get("rx", "Observable");
 
     public static final ClassName Func1 = ClassName.get("rx.functions", "Func1");
@@ -195,6 +199,18 @@ public class Types {
 
     public static ParameterizedTypeName getSingle(TypeName typeName) {
         return ParameterizedTypeName.get(Single, typeName);
+    }
+
+    public static ParameterizedTypeName getSingleOnSubscribe(TypeName typeName) {
+        return ParameterizedTypeName.get(SingleOnSubscribe, typeName);
+    }
+
+    /**
+     * @param typeName A type to be yielded by the subscriber
+     * @return the type of <code>SingleSubscriber&lt;? super typeName&gt;</typeName></code>
+     */
+    public static ParameterizedTypeName getSingleSubscriber(TypeName typeName) {
+        return ParameterizedTypeName.get(Types.SingleSubscriber, WildcardTypeName.supertypeOf(typeName));
     }
 
     public static ParameterizedTypeName getObservable(TypeName typeName) {
