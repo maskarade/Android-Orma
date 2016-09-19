@@ -58,6 +58,11 @@ task generateParserSources(type: JavaExec) {
 
 tasks.preBuild.dependsOn(generateParserSources)
 
+task updateSqliteGrammar(type: Exec) {
+    final url = "https://raw.githubusercontent.com/bkiers/sqlite-parser/master/src/main/antlr4/nl/bigo/sqliteparser/SQLite.g4"
+    commandLine "curl", "-L", url, "-o", GRAMMAR_FILE
+}
+
 dependencies {
     antlr 'org.antlr:antlr4:4.5.3'
     compile('org.antlr:antlr4-runtime:4.5.3')
