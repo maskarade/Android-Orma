@@ -1,4 +1,4 @@
-# Android Orma [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/) [![waffle.io](https://badge.waffle.io/gfx/Android-Orma.svg)](https://waffle.io/gfx/Android-Orma/)
+# Android Orma [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/)
 
 <p align="center">
 <img src="Orma.png" width="256" height="256"  alt="Android Orma" />
