@@ -514,80 +514,6 @@ public class QueryTest {
         return books;
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void transactionSyncSuccess() throws Exception {
-        db.transactionSync(new TransactionTask() {
-            @Override
-            public void execute() throws Exception {
-                db.prepareInsertIntoBook().executeAll(someBooks());
-            }
-        });
-
-        assertThat(db.selectFromBook().count(), is(7));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void transactionSyncAbort() throws Exception {
-        try {
-            db.transactionSync(new TransactionTask() {
-                @Override
-                public void execute() throws Exception {
-                    db.prepareInsertIntoBook().executeAll(someBooks());
-                    throw new RuntimeException("abort!");
-                }
-            });
-            fail("not reached");
-        } catch (TransactionAbortException e) {
-            assertThat(e.getCause(), instanceOf(RuntimeException.class));
-            assertThat(e.getCause().getMessage(), is("abort!"));
-        }
-
-        assertThat(db.selectFromBook().count(), is(2));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void transactionAsyncSuccess() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        db.transactionAsync(new TransactionTask() {
-            @Override
-            public void execute() throws Exception {
-                db.prepareInsertIntoBook().executeAll(someBooks());
-                latch.countDown();
-            }
-        });
-
-        assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
-        assertThat(db.selectFromBook().count(), is(7));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void transactionAsyncAbort() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        db.transactionAsync(new TransactionTask() {
-            @Override
-            public void execute() throws Exception {
-                db.prepareInsertIntoBook().executeAll(someBooks());
-                throw new RuntimeException("abort!");
-            }
-
-            @Override
-            public void onError(@NonNull Exception exception) {
-                assertThat(exception, is(instanceOf(RuntimeException.class)));
-                assertThat(exception.getMessage(), is("abort!"));
-                latch.countDown();
-            }
-        });
-
-        assertThat(latch.await(1, TimeUnit.SECONDS), is(true));
-        assertThat(db.selectFromBook().count(), is(2));
-    }
-
     @Test
     public void transactionAsync2Success() throws Exception {
         TestSubscriber<?> subscriber = TestSubscriber.create();
@@ -627,42 +553,6 @@ public class QueryTest {
         subscriber.assertError(RuntimeException.class);
 
         assertThat(db.selectFromBook().count(), is(2));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void transactionNonExclusiveSync() throws Exception {
-        Single<Integer> countObservable = Single.create(new Single.OnSubscribe<Integer>() {
-            @Override
-            public void call(final SingleSubscriber<? super Integer> subscriber) {
-                db.transactionNonExclusiveSync(new TransactionTask() {
-                    @Override
-                    public void execute() throws Exception {
-                        subscriber.onSuccess(db.selectFromBook().count());
-                    }
-                });
-            }
-        });
-
-        assertThat(countObservable.toBlocking().value(), is(2));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void transactionNonExclusiveAsync() throws Exception {
-        Single<Integer> countObservable = Single.create(new Single.OnSubscribe<Integer>() {
-            @Override
-            public void call(final SingleSubscriber<? super Integer> subscriber) {
-                db.transactionNonExclusiveAsync(new TransactionTask() {
-                    @Override
-                    public void execute() throws Exception {
-                        subscriber.onSuccess(db.selectFromBook().count());
-                    }
-                });
-            }
-        });
-
-        assertThat(countObservable.toBlocking().value(), is(2));
     }
 
     @Test(expected = SQLiteException.class)

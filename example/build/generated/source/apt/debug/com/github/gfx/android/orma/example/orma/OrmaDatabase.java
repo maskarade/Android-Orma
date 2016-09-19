@@ -12,9 +12,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.OrmaDatabaseBuilderBase;
 import com.github.gfx.android.orma.Schema;
-import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.annotation.OnConflict;
-import com.github.gfx.android.orma.exception.TransactionAbortException;
 import java.util.Arrays;
 import java.util.List;
 import rx.Completable;
@@ -70,20 +68,9 @@ public class OrmaDatabase implements DatabaseHandle {
     return connection;
   }
 
-  @Deprecated
-  @WorkerThread
-  public void transactionSync(@NonNull TransactionTask task) throws TransactionAbortException {
-    connection.transactionSync(task);
-  }
-
   @WorkerThread
   public void transactionSync(@NonNull Runnable task) {
     connection.transactionSync(task);
-  }
-
-  @Deprecated
-  public void transactionAsync(@NonNull TransactionTask task) {
-    connection.transactionAsync(task);
   }
 
   @CheckResult
@@ -91,18 +78,8 @@ public class OrmaDatabase implements DatabaseHandle {
     return connection.transactionAsync(task);
   }
 
-  @Deprecated
-  public void transactionNonExclusiveSync(@NonNull TransactionTask task) throws TransactionAbortException {
-    connection.transactionNonExclusiveSync(task);
-  }
-
   public void transactionNonExclusiveSync(@NonNull Runnable task) {
     connection.transactionNonExclusiveSync(task);
-  }
-
-  @Deprecated
-  public void transactionNonExclusiveAsync(@NonNull TransactionTask task) {
-    connection.transactionNonExclusiveAsync(task);
   }
 
   @CheckResult
@@ -114,12 +91,6 @@ public class OrmaDatabase implements DatabaseHandle {
    * Retrieves a model from a cursor. */
   @NonNull
   public Category newCategoryFromCursor(@NonNull Cursor cursor) {
-    return Category_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
-  }
-
-  @NonNull
-  @Deprecated
-  public Category loadCategoryfromCursor(@NonNull Cursor cursor) {
     return Category_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
   }
 
@@ -199,12 +170,6 @@ public class OrmaDatabase implements DatabaseHandle {
     return Item_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
   }
 
-  @NonNull
-  @Deprecated
-  public Item loadItemfromCursor(@NonNull Cursor cursor) {
-    return Item_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
-  }
-
   /**
    * Inserts a model created by {@code ModelFactory<T>}, and retrieves it which is just inserted.
    *  The return value has the row ID.
@@ -278,12 +243,6 @@ public class OrmaDatabase implements DatabaseHandle {
    * Retrieves a model from a cursor. */
   @NonNull
   public Todo newTodoFromCursor(@NonNull Cursor cursor) {
-    return Todo_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
-  }
-
-  @NonNull
-  @Deprecated
-  public Todo loadTodofromCursor(@NonNull Cursor cursor) {
     return Todo_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
   }
 

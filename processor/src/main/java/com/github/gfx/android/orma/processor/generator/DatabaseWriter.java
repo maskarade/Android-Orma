@@ -248,20 +248,6 @@ public class DatabaseWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("transactionSync")
-                        .addAnnotation(Annotations.deprecated())
-                        .addAnnotation(Annotations.workerThread())
-                        .addException(Types.TransactionAbortException)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(
-                                ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Annotations.nonNull())
-                                        .build())
-                        .addStatement("$L.transactionSync(task)", connection)
-                        .build()
-        );
-
-        methodSpecs.add(
-                MethodSpec.methodBuilder("transactionSync")
                         .addAnnotation(Annotations.workerThread())
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
@@ -269,18 +255,6 @@ public class DatabaseWriter extends BaseWriter {
                                         .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionSync(task)", connection)
-                        .build()
-        );
-
-        methodSpecs.add(
-                MethodSpec.methodBuilder("transactionAsync")
-                        .addAnnotation(Annotations.deprecated())
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(
-                                ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Annotations.nonNull())
-                                        .build())
-                        .addStatement("$L.transactionAsync(task)", connection)
                         .build()
         );
 
@@ -299,38 +273,12 @@ public class DatabaseWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("transactionNonExclusiveSync")
-                        .addAnnotation(Annotations.deprecated())
-                        .addException(Types.TransactionAbortException)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(
-                                ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Annotations.nonNull())
-                                        .build())
-                        .addStatement("$L.transactionNonExclusiveSync(task)", connection)
-                        .build()
-        );
-
-        methodSpecs.add(
-                MethodSpec.methodBuilder("transactionNonExclusiveSync")
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
                                 ParameterSpec.builder(Runnable.class, "task")
                                         .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionNonExclusiveSync(task)", connection)
-                        .build()
-        );
-
-
-        methodSpecs.add(
-                MethodSpec.methodBuilder("transactionNonExclusiveAsync")
-                        .addAnnotation(Annotations.deprecated())
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(
-                                ParameterSpec.builder(Types.TransactionTask, "task")
-                                        .addAnnotation(Annotations.nonNull())
-                                        .build())
-                        .addStatement("$L.transactionNonExclusiveAsync(task)", connection)
                         .build()
         );
 
@@ -354,19 +302,6 @@ public class DatabaseWriter extends BaseWriter {
             methodSpecs.add(MethodSpec.methodBuilder("new" + simpleModelName + "FromCursor")
                     .addJavadoc("Retrieves a model from a cursor.")
                     .addAnnotation(Annotations.nonNull())
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(schema.getModelClassName())
-                    .addParameter(
-                            ParameterSpec.builder(Types.Cursor, "cursor")
-                                    .addAnnotation(Annotations.nonNull())
-                                    .build()
-                    )
-                    .addStatement("return $L.newModelFromCursor($L, cursor, 0)", schemaInstance, connection)
-                    .build());
-
-            methodSpecs.add(MethodSpec.methodBuilder("load" + simpleModelName + "fromCursor")
-                    .addAnnotation(Annotations.nonNull())
-                    .addAnnotation(Annotations.deprecated())
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
                     .addParameter(

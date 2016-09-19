@@ -29,7 +29,6 @@ import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.database.sqlite.SQLiteStatement;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -304,34 +303,6 @@ public class OrmaConnection {
         });
     }
 
-
-    @Deprecated
-    public void transactionNonExclusiveSync(@NonNull TransactionTask task) {
-        SQLiteDatabase db = getReadableDatabase();
-        trace("begin transaction (non exclusive)", null);
-        db.beginTransactionNonExclusive();
-
-        try {
-            task.execute();
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            task.onError(e);
-        } finally {
-            db.endTransaction();
-            trace("end transaction (non exclusive)", null);
-        }
-    }
-
-    @Deprecated
-    public void transactionNonExclusiveAsync(@NonNull final TransactionTask task) {
-        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                transactionNonExclusiveSync(task);
-            }
-        });
-    }
-
     @WorkerThread
     public void transactionSync(@NonNull Runnable task) {
         SQLiteDatabase db = getWritableDatabase();
@@ -345,34 +316,6 @@ public class OrmaConnection {
             db.endTransaction();
             trace("end transaction", null);
         }
-    }
-
-    @Deprecated
-    @WorkerThread
-    public void transactionSync(@NonNull final TransactionTask task) {
-        SQLiteDatabase db = getWritableDatabase();
-        trace("begin transaction", null);
-        db.beginTransaction();
-
-        try {
-            task.execute();
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            task.onError(e);
-        } finally {
-            db.endTransaction();
-            trace("end transaction", null);
-        }
-    }
-
-    @Deprecated
-    public void transactionAsync(@NonNull final TransactionTask task) {
-        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                transactionSync(task);
-            }
-        });
     }
 
     @NonNull
