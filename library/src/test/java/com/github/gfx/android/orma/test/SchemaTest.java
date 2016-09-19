@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.ColumnDef;
+import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
@@ -25,6 +26,7 @@ import com.github.gfx.android.orma.test.model.ModelWithPrimaryKeyIsNotFirst;
 import com.github.gfx.android.orma.test.model.ModelWithPrimaryKeyIsNotFirst_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithStorageTypes_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters_Schema;
+import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.model.PublisherSchema;
 
 import org.hamcrest.Matchers;
@@ -46,11 +48,15 @@ public class SchemaTest {
         PublisherSchema schema = PublisherSchema.INSTANCE;
 
         assertThat(schema.getTableName(), is("publishers"));
-        assertThat(schema.getPrimaryKey(), is((ColumnDef) PublisherSchema.id));
+        assertThat(schema.getPrimaryKey(), is((ColumnDef) schema.id));
 
-        assertThat(PublisherSchema.name.name, is("name"));
-        assertThat(PublisherSchema.startedYear.name, is("started_year"));
-        assertThat(PublisherSchema.startedMonth.name, is("started_month"));
+        assertThat(schema.name.name, is("name"));
+        assertThat(schema.name.schema, is((Schema<Publisher>) schema));
+        assertThat(schema.name.getEscapedName(), is(notNullValue()));
+        assertThat(schema.name.getFullyQualifiedName(), is(notNullValue()));
+
+        assertThat(schema.startedYear.name, is("started_year"));
+        assertThat(schema.startedMonth.name, is("started_month"));
 
         assertThat("PRIMARY KEY is placed in the last",
                 schema.getCreateTableStatement(), is(
@@ -63,16 +69,16 @@ public class SchemaTest {
         Book_Schema schema = Book_Schema.INSTANCE;
 
         assertThat(schema.getTableName(), is("Book"));
-        assertThat(schema.getPrimaryKey(), is((ColumnDef) Book_Schema.bookId));
+        assertThat(schema.getPrimaryKey(), is((ColumnDef) schema.bookId));
 
-        assertThat(Book_Schema.bookId.name, is("bookId"));
-        assertThat(Book_Schema.bookId.storageType, is("INTEGER"));
-        assertThat(Book_Schema.title.name, is("title"));
-        assertThat(Book_Schema.title.storageType, is("TEXT"));
-        assertThat(Book_Schema.content.name, is("content"));
-        assertThat(Book_Schema.content.storageType, is("TEXT"));
-        assertThat(Book_Schema.publisher.name, is("publisher"));
-        assertThat(Book_Schema.publisher.storageType, is("INTEGER"));
+        assertThat(schema.bookId.name, is("bookId"));
+        assertThat(schema.bookId.storageType, is("INTEGER"));
+        assertThat(schema.title.name, is("title"));
+        assertThat(schema.title.storageType, is("TEXT"));
+        assertThat(schema.content.name, is("content"));
+        assertThat(schema.content.storageType, is("TEXT"));
+        assertThat(schema.publisher.name, is("publisher"));
+        assertThat(schema.publisher.storageType, is("INTEGER"));
     }
 
     @Test
@@ -80,45 +86,47 @@ public class SchemaTest {
         Author_Schema schema = Author_Schema.INSTANCE;
 
         assertThat(schema.getTableName(), is("Author"));
-        assertThat(schema.getPrimaryKey(), is((ColumnDef) Author_Schema.name));
+        assertThat(schema.getPrimaryKey(), is((ColumnDef) schema.name));
     }
 
     @Test
     public void testPrimaryKeyAttributes() throws Exception {
-        assertThat(PublisherSchema.id.isPrimaryKey(), is(true));
-        assertThat(PublisherSchema.id.isAutoincremnt(), is(true));
-        assertThat(PublisherSchema.id.isAutoValue(), is(true));
+        assertThat(PublisherSchema.INSTANCE.id.isPrimaryKey(), is(true));
+        assertThat(PublisherSchema.INSTANCE.id.isAutoincremnt(), is(true));
+        assertThat(PublisherSchema.INSTANCE.id.isAutoValue(), is(true));
 
-        assertThat(Book_Schema.bookId.isPrimaryKey(), is(true));
-        assertThat(Book_Schema.bookId.isAutoincremnt(), is(false));
-        assertThat(Book_Schema.bookId.isAutoValue(), is(true));
+        assertThat(Book_Schema.INSTANCE.bookId.isPrimaryKey(), is(true));
+        assertThat(Book_Schema.INSTANCE.bookId.isAutoincremnt(), is(false));
+        assertThat(Book_Schema.INSTANCE.bookId.isAutoValue(), is(true));
 
-        assertThat(Author_Schema.name.isPrimaryKey(), is(true));
-        assertThat(Author_Schema.name.isAutoincremnt(), is(false));
-        assertThat(Author_Schema.name.isAutoValue(), is(false));
+        assertThat(Author_Schema.INSTANCE.name.isPrimaryKey(), is(true));
+        assertThat(Author_Schema.INSTANCE.name.isAutoincremnt(), is(false));
+        assertThat(Author_Schema.INSTANCE.name.isAutoValue(), is(false));
     }
 
     @Test
     public void testColumnStorageTypes() throws Exception {
-        assertThat(ModelWithStorageTypes_Schema.date.storageType, is("INTEGER"));
-        assertThat(ModelWithStorageTypes_Schema.timestamp.storageType, is("DATETIME"));
-        assertThat(ModelWithStorageTypes_Schema.INSTANCE.getCreateTableStatement(), is(
+        ModelWithStorageTypes_Schema schema = ModelWithStorageTypes_Schema.INSTANCE;
+        assertThat(schema.date.storageType, is("INTEGER"));
+        assertThat(schema.timestamp.storageType, is("DATETIME"));
+        assertThat(schema.INSTANCE.getCreateTableStatement(), is(
                 "CREATE TABLE `ModelWithStorageTypes` (`date` INTEGER NOT NULL, `timestamp` DATETIME NOT NULL)"
         ));
     }
 
     @Test
     public void testStaticTypeAdapterStorageTypes() throws Exception {
-        assertThat(ModelWithTypeAdapters_Schema.date.storageType, is("INTEGER"));
-        assertThat(ModelWithTypeAdapters_Schema.sqlDate.storageType, is("TEXT"));
-        assertThat(ModelWithTypeAdapters_Schema.sqlTime.storageType, is("TEXT"));
-        assertThat(ModelWithTypeAdapters_Schema.sqlTimestamp.storageType, is("TEXT"));
-        assertThat(ModelWithTypeAdapters_Schema.intTuple2.storageType, is("INTEGER"));
+        ModelWithTypeAdapters_Schema schema = ModelWithTypeAdapters_Schema.INSTANCE;
+        assertThat(schema.date.storageType, is("INTEGER"));
+        assertThat(schema.sqlDate.storageType, is("TEXT"));
+        assertThat(schema.sqlTime.storageType, is("TEXT"));
+        assertThat(schema.sqlTimestamp.storageType, is("TEXT"));
+        assertThat(schema.intTuple2.storageType, is("INTEGER"));
     }
 
     @Test
     public void testStorageTypeForDirectAssociation() throws Exception {
-        assertThat(ModelWithDirectAssociation_Schema.author.storageType,
+        assertThat(ModelWithDirectAssociation_Schema.INSTANCE.author.storageType,
                 is(Author_Schema.INSTANCE.getPrimaryKey().storageType));
     }
 
@@ -130,9 +138,9 @@ public class SchemaTest {
         assertThat("Base columns first, PrimaryKey las...t",
                 columns,
                 Matchers.<ColumnDef<ModelWithInheritance, ?>>contains(
-                        ModelWithInheritance_Schema.baseColumn,
-                        ModelWithInheritance_Schema.value,
-                        ModelWithInheritance_Schema.id
+                        ModelWithInheritance_Schema.INSTANCE.baseColumn,
+                        ModelWithInheritance_Schema.INSTANCE.value,
+                        ModelWithInheritance_Schema.INSTANCE.id
                 ));
     }
 
@@ -144,9 +152,9 @@ public class SchemaTest {
         assertThat("Base columns first, PrimaryKey las...t",
                 columns,
                 Matchers.<ColumnDef<ModelWithPrimaryKeyIsNotFirst, ?>>contains(
-                        ModelWithPrimaryKeyIsNotFirst_Schema.foo,
-                        ModelWithPrimaryKeyIsNotFirst_Schema.bar,
-                        ModelWithPrimaryKeyIsNotFirst_Schema.id
+                        ModelWithPrimaryKeyIsNotFirst_Schema.INSTANCE.foo,
+                        ModelWithPrimaryKeyIsNotFirst_Schema.INSTANCE.bar,
+                        ModelWithPrimaryKeyIsNotFirst_Schema.INSTANCE.id
                 ));
     }
 }

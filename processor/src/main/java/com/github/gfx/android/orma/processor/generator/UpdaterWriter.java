@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Types;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -54,6 +55,8 @@ public class UpdaterWriter extends BaseWriter {
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getUpdater(schema.getModelClassName(), schema.getUpdaterClassName()));
 
+        classBuilder.addField(FieldSpec.builder(schema.getSchemaClassName(), "schema", Modifier.FINAL).build());
+
         classBuilder.addMethods(buildMethodSpecs());
 
         return classBuilder.build();
@@ -66,8 +69,9 @@ public class UpdaterWriter extends BaseWriter {
                 MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(Types.OrmaConnection, "conn")
-                        .addParameter(Types.getSchema(schema.getModelClassName()), "schema")
-                        .addStatement("super(conn, schema)")
+                        .addParameter(schema.getSchemaClassName(), "schema")
+                        .addStatement("super(conn)")
+                        .addStatement("this.schema = schema")
                         .build()
         );
 
@@ -76,8 +80,17 @@ public class UpdaterWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(schema.getRelationClassName(), "relation")
                         .addStatement("super(relation)")
+                        .addStatement("this.schema = ($T) relation.getSchema()", schema.getSchemaClassName())
                         .build()
         );
+
+        methodSpecs.add(MethodSpec.methodBuilder("getSchema")
+                .addAnnotation(Annotations.override())
+                .addAnnotation(Annotations.nonNull())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSchemaClassName())
+                .addStatement("return schema")
+                .build());
 
         schema.getColumnsWithoutAutoId().forEach(column -> {
             AssociationDefinition r = column.getAssociation();

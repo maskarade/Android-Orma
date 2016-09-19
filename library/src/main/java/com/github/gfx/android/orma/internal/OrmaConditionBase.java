@@ -32,8 +32,6 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
 
     protected final OrmaConnection conn;
 
-    protected final Schema<Model> schema;
-
     protected String whereConjunction = " AND ";
 
     @Nullable
@@ -42,13 +40,12 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     @Nullable
     protected ArrayList<String> bindArgs;
 
-    public OrmaConditionBase(@NonNull OrmaConnection conn, @NonNull Schema<Model> schema) {
+    public OrmaConditionBase(@NonNull OrmaConnection conn) {
         this.conn = conn;
-        this.schema = schema;
     }
 
     public OrmaConditionBase(@NonNull OrmaConditionBase<Model, ?> condition) {
-        this(condition.conn, condition.schema);
+        this(condition.conn);
         where(condition);
     }
 
@@ -56,9 +53,7 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
         return conn;
     }
 
-    public Schema<Model> getSchema() {
-        return schema;
-    }
+    public abstract Schema<Model> getSchema();
 
     protected void appendBindArgs(@NonNull Object... args) {
         if (bindArgs == null) {

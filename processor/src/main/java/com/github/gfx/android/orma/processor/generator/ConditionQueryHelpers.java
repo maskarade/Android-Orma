@@ -317,16 +317,14 @@ public class ConditionQueryHelpers {
             methodSpecs.add(MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Asc")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(getTargetClassName())
-                    .addStatement("return orderBy($T.$L.orderInAscending())", schema.getSchemaClassName(),
-                            column.name)
+                    .addStatement("return orderBy(schema.$L.orderInAscending())", column.name)
                     .build());
         }
         if (column.hasHelper(Column.Helpers.ORDER_IN_DESC)) {
             methodSpecs.add(MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Desc")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(getTargetClassName())
-                    .addStatement("return orderBy($T.$L.orderInDescending())", schema.getSchemaClassName(),
-                            column.name)
+                    .addStatement("return orderBy(schema.$L.orderInDescending())", column.name)
                     .build()
             );
         }

@@ -62,6 +62,11 @@ public class SchemaWriter extends BaseWriter {
             Modifier.FINAL,
     };
 
+    static final Modifier[] publicFinal = {
+            Modifier.PUBLIC,
+            Modifier.FINAL,
+    };
+
     private final SchemaDefinition schema;
 
     FieldSpec primaryKeyFieldSpec;
@@ -95,6 +100,9 @@ public class SchemaWriter extends BaseWriter {
                 .initializer("$T.register(new $T())", Types.Schemas, schema.getSchemaClassName())
                 .build());
 
+        fieldSpecs.add(FieldSpec.builder(Types.String, "alias", publicFinal)
+                .build());
+
         List<FieldSpec> columns = new ArrayList<>();
 
         schema.getColumns().forEach(columnDef -> {
@@ -117,14 +125,14 @@ public class SchemaWriter extends BaseWriter {
 
         fieldSpecs.add(
                 FieldSpec.builder(Types.getColumnDefList(schema.getModelClassName()), COLUMNS)
-                        .addModifiers(publicStaticFinal)
+                        .addModifiers(Modifier.FINAL)
                         .initializer(buildColumnsInitializer(columns))
                         .build()
         );
 
         fieldSpecs.add(
                 FieldSpec.builder(Types.StringArray, DEFAULT_RESULT_COLUMNS)
-                        .addModifiers(publicStaticFinal)
+                        .addModifiers(Modifier.FINAL)
                         .initializer("{\n$L}", buildEscapedColumnNamesInitializer(schema, schema.hasDirectAssociations()))
                         .build()
         );
@@ -179,7 +187,7 @@ public class SchemaWriter extends BaseWriter {
         } else {
             typeInstance = CodeBlock.of("$T.class", type);
         }
-        TypeSpec.Builder columnDefType = TypeSpec.anonymousClassBuilder("INSTANCE, $S, $L, $S, $L",
+        TypeSpec.Builder columnDefType = TypeSpec.anonymousClassBuilder("this, $S, $L, $S, $L",
                 c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c));
         columnDefType.superclass(c.getColumnDefType());
 
@@ -216,7 +224,7 @@ public class SchemaWriter extends BaseWriter {
         columnDefType.addMethod(getSerializedBuilder.build());
 
         return FieldSpec.builder(c.getColumnDefType(), c.name)
-                .addModifiers(publicStaticFinal)
+                .addModifiers(publicFinal)
                 .initializer("$L", columnDefType.build())
                 .build();
     }
@@ -330,6 +338,21 @@ public class SchemaWriter extends BaseWriter {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
         methodSpecs.add(
+                MethodSpec.constructorBuilder()
+                        .addParameter(ParameterSpec.builder(Types.String, "alias")
+                                .addAnnotation(Annotations.nonNull())
+                                .build())
+                        .addStatement("this.alias = alias")
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.constructorBuilder()
+                        .addStatement("this($S)", schema.getTableName())
+                        .build()
+        );
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("getModelClass")
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
@@ -353,6 +376,24 @@ public class SchemaWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
                         .addStatement("return $S", schema.getEscapedTableName())
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getTableAlias")
+                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return alias")
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("getEscapedTableAlias")
+                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.String)
+                        .addStatement("return '`' + alias + '`'")
                         .build()
         );
 

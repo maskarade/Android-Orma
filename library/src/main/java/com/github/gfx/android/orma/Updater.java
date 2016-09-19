@@ -28,8 +28,8 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
 
     final protected ContentValues contents = new ContentValues();
 
-    public Updater(@NonNull OrmaConnection conn, @NonNull Schema<Model> schema) {
-        super(conn, schema);
+    public Updater(@NonNull OrmaConnection conn) {
+        super(conn);
     }
 
     public Updater(@NonNull Relation<Model, ?> relation) {
@@ -45,7 +45,7 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
      * @return The number of rows updated.
      */
     public int execute() {
-        return conn.update(schema, contents, getWhereClause(), getBindArgs());
+        return conn.update(getSchema(), contents, getWhereClause(), getBindArgs());
     }
 
     @CheckResult

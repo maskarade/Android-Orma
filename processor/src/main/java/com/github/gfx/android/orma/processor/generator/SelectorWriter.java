@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
@@ -56,6 +57,8 @@ public class SelectorWriter extends BaseWriter {
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getSelector(schema.getModelClassName(), getTargetClassName()));
 
+        classBuilder.addField(FieldSpec.builder(schema.getSchemaClassName(), "schema", Modifier.FINAL).build());
+
         classBuilder.addMethods(buildMethodSpecs());
 
         return classBuilder.build();
@@ -67,14 +70,16 @@ public class SelectorWriter extends BaseWriter {
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(Types.OrmaConnection, "conn")
-                .addParameter(Types.getSchema(schema.getModelClassName()), "schema")
-                .addCode("super(conn, schema);\n")
+                .addParameter(schema.getSchemaClassName(), "schema")
+                .addStatement("super(conn)")
+                .addStatement("this.schema = schema")
                 .build());
 
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(Types.getOrmaConditionBase(schema.getModelClassName()), "condition")
-                .addCode("super(condition);\n")
+                .addStatement("super(condition)")
+                .addStatement("this.schema = ($T) condition.getSchema()", schema.getSchemaClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("clone")
@@ -83,6 +88,14 @@ public class SelectorWriter extends BaseWriter {
                 .returns(getTargetClassName())
                 .addStatement("return new $T(this)", getTargetClassName())
                 .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("getSchema")
+                .addAnnotation(Annotations.override())
+                .addAnnotation(Annotations.nonNull())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSchemaClassName())
+                .addStatement("return schema")
+        .build());
 
         methodSpecs.addAll(queryHelpers.buildConditionHelpers(true));
 

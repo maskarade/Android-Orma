@@ -17,7 +17,9 @@ package com.github.gfx.android.orma.processor.generator;
 
 import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Types;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
@@ -49,6 +51,8 @@ public class DeleterWriter extends BaseWriter {
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getDeleter(schema.getModelClassName(), schema.getDeleterClassName()));
 
+        classBuilder.addField(FieldSpec.builder(schema.getSchemaClassName(), "schema", Modifier.FINAL).build());
+
         classBuilder.addMethods(buildMethodSpecs());
 
         return classBuilder.build();
@@ -61,8 +65,9 @@ public class DeleterWriter extends BaseWriter {
                 MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(Types.OrmaConnection, "conn")
-                        .addParameter(Types.getSchema(schema.getModelClassName()), "schema")
-                        .addStatement("super(conn, schema)")
+                        .addParameter(schema.getSchemaClassName(), "schema")
+                        .addStatement("super(conn)")
+                        .addStatement("this.schema = schema")
                         .build()
         );
 
@@ -71,8 +76,17 @@ public class DeleterWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(schema.getRelationClassName(), "relation")
                         .addStatement("super(relation)")
+                        .addStatement("this.schema = ($T) relation.getSchema()", schema.getSchemaClassName())
                         .build()
         );
+
+        methodSpecs.add(MethodSpec.methodBuilder("getSchema")
+                .addAnnotation(Annotations.override())
+                .addAnnotation(Annotations.nonNull())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSchemaClassName())
+                .addStatement("return schema")
+                .build());
 
         methodSpecs.addAll(queryHelpers.buildConditionHelpers(false));
 

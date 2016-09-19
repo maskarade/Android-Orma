@@ -20,8 +20,11 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
+/**
+ * Models which have multiple direct associations
+ */
 @Table
-public class ModelWithDirectAssociation {
+public class ModelWithDirectAssociation2 {
 
     @PrimaryKey
     public String name;
@@ -30,7 +33,13 @@ public class ModelWithDirectAssociation {
     public Author author;
 
     @Column(indexed = true)
+    public Author author2;
+
+    @Column(indexed = true)
     public Publisher publisher;
+
+    @Column(indexed = true)
+    public Publisher publisher2;
 
     @Column(indexed = true)
     public String note; // the same name as Author#note

@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -56,6 +57,8 @@ public class RelationWriter extends BaseWriter {
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getRelation(schema.getModelClassName(), getTargetClassName()));
 
+        classBuilder.addField(FieldSpec.builder(schema.getSchemaClassName(), "schema", Modifier.FINAL).build());
+
         classBuilder.addMethods(buildMethodSpecs());
 
         return classBuilder.build();
@@ -67,14 +70,16 @@ public class RelationWriter extends BaseWriter {
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(Types.OrmaConnection, "conn")
-                .addParameter(Types.getSchema(schema.getModelClassName()), "schema")
-                .addCode("super(conn, schema);\n")
+                .addParameter(schema.getSchemaClassName(), "schema")
+                .addStatement("super(conn)")
+                .addStatement("this.schema = schema")
                 .build());
 
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(getTargetClassName(), "relation")
-                .addCode("super(relation);\n")
+                .addStatement("super(relation)")
+                .addStatement("this.schema = ($T) relation.getSchema()", schema.getSchemaClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("clone")
@@ -82,6 +87,14 @@ public class RelationWriter extends BaseWriter {
                 .addAnnotation(Annotations.override())
                 .returns(getTargetClassName())
                 .addStatement("return new $T(this)", getTargetClassName())
+                .build());
+
+        methodSpecs.add(MethodSpec.methodBuilder("getSchema")
+                .addAnnotation(Annotations.override())
+                .addAnnotation(Annotations.nonNull())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(schema.getSchemaClassName())
+                .addStatement("return schema")
                 .build());
 
         if (schema.hasPrimaryIdEqHelper()) {
