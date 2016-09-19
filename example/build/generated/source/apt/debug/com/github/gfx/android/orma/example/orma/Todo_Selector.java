@@ -2,24 +2,33 @@ package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Todo_Selector extends Selector<Todo, Todo_Selector> {
-  public Todo_Selector(OrmaConnection conn, Schema<Todo> schema) {
-    super(conn, schema);
+  final Todo_Schema schema;
+
+  public Todo_Selector(OrmaConnection conn, Todo_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Todo_Selector(OrmaConditionBase<Todo, ?> condition) {
     super(condition);
+    this.schema = (Todo_Schema) condition.getSchema();
   }
 
   @Override
   public Todo_Selector clone() {
     return new Todo_Selector(this);
+  }
+
+  @Override
+  @NonNull
+  public Todo_Schema getSchema() {
+    return schema;
   }
 
   public Todo_Selector titleEq(@NonNull String title) {
@@ -143,26 +152,26 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
   }
 
   public Todo_Selector orderByTitleAsc() {
-    return orderBy(Todo_Schema.title.orderInAscending());
+    return orderBy(schema.title.orderInAscending());
   }
 
   public Todo_Selector orderByTitleDesc() {
-    return orderBy(Todo_Schema.title.orderInDescending());
+    return orderBy(schema.title.orderInDescending());
   }
 
   public Todo_Selector orderByDoneAsc() {
-    return orderBy(Todo_Schema.done.orderInAscending());
+    return orderBy(schema.done.orderInAscending());
   }
 
   public Todo_Selector orderByDoneDesc() {
-    return orderBy(Todo_Schema.done.orderInDescending());
+    return orderBy(schema.done.orderInDescending());
   }
 
   public Todo_Selector orderByCreatedTimeAsc() {
-    return orderBy(Todo_Schema.createdTime.orderInAscending());
+    return orderBy(schema.createdTime.orderInAscending());
   }
 
   public Todo_Selector orderByCreatedTimeDesc() {
-    return orderBy(Todo_Schema.createdTime.orderInDescending());
+    return orderBy(schema.createdTime.orderInDescending());
   }
 }

@@ -14,7 +14,9 @@ import java.util.List;
 public class Item_Schema implements Schema<Item> {
   public static final Item_Schema INSTANCE = Schemas.register(new Item_Schema());
 
-  public static final ColumnDef<Item, Category> category = new ColumnDef<Item, Category>(INSTANCE, "category", Category.class, "INTEGER", ColumnDef.INDEXED) {
+  public final String alias;
+
+  public final ColumnDef<Item, Category> category = new ColumnDef<Item, Category>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED) {
     @Override
     @NonNull
     public Category get(@NonNull Item model) {
@@ -28,7 +30,7 @@ public class Item_Schema implements Schema<Item> {
     }
   };
 
-  public static final ColumnDef<Item, String> name = new ColumnDef<Item, String>(INSTANCE, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
+  public final ColumnDef<Item, String> name = new ColumnDef<Item, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
     @Override
     @NonNull
     public String get(@NonNull Item model) {
@@ -42,18 +44,26 @@ public class Item_Schema implements Schema<Item> {
     }
   };
 
-  public static final List<ColumnDef<Item, ?>> $COLUMNS = Arrays.<ColumnDef<Item, ?>>asList(
+  final List<ColumnDef<Item, ?>> $COLUMNS = Arrays.<ColumnDef<Item, ?>>asList(
     category,
     name
   );
 
-  public static final String[] $DEFAULT_RESULT_COLUMNS = {
+  final String[] $DEFAULT_RESULT_COLUMNS = {
     "`Item`.`category`",
       "`Category`.`name`",
       "`Category`.`id`"
     ,
     "`Item`.`name`"
   };
+
+  Item_Schema(@NonNull String alias) {
+    this.alias = alias;
+  }
+
+  Item_Schema() {
+    this("Item");
+  }
 
   @NonNull
   @Override
@@ -71,6 +81,18 @@ public class Item_Schema implements Schema<Item> {
   @Override
   public String getEscapedTableName() {
     return "`Item`";
+  }
+
+  @NonNull
+  @Override
+  public String getTableAlias() {
+    return alias;
+  }
+
+  @NonNull
+  @Override
+  public String getEscapedTableAlias() {
+    return '`' + alias + '`';
   }
 
   @NonNull

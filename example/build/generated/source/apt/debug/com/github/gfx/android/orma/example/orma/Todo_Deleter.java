@@ -3,17 +3,26 @@ package com.github.gfx.android.orma.example.orma;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.Deleter;
 import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
-  public Todo_Deleter(OrmaConnection conn, Schema<Todo> schema) {
-    super(conn, schema);
+  final Todo_Schema schema;
+
+  public Todo_Deleter(OrmaConnection conn, Todo_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Todo_Deleter(Todo_Relation relation) {
     super(relation);
+    this.schema = (Todo_Schema) relation.getSchema();
+  }
+
+  @Override
+  @NonNull
+  public Todo_Schema getSchema() {
+    return schema;
   }
 
   public Todo_Deleter titleEq(@NonNull String title) {

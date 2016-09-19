@@ -15,7 +15,9 @@ import java.util.List;
 public class Category_Schema implements Schema<Category> {
   public static final Category_Schema INSTANCE = Schemas.register(new Category_Schema());
 
-  public static final ColumnDef<Category, String> name = new ColumnDef<Category, String>(INSTANCE, "name", String.class, "TEXT", ColumnDef.UNIQUE) {
+  public final String alias;
+
+  public final ColumnDef<Category, String> name = new ColumnDef<Category, String>(this, "name", String.class, "TEXT", ColumnDef.UNIQUE) {
     @Override
     @NonNull
     public String get(@NonNull Category model) {
@@ -29,7 +31,7 @@ public class Category_Schema implements Schema<Category> {
     }
   };
 
-  public static final ColumnDef<Category, Long> id = new ColumnDef<Category, Long>(INSTANCE, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
+  public final ColumnDef<Category, Long> id = new ColumnDef<Category, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
     @Override
     @NonNull
     public Long get(@NonNull Category model) {
@@ -43,15 +45,23 @@ public class Category_Schema implements Schema<Category> {
     }
   };
 
-  public static final List<ColumnDef<Category, ?>> $COLUMNS = Arrays.<ColumnDef<Category, ?>>asList(
+  final List<ColumnDef<Category, ?>> $COLUMNS = Arrays.<ColumnDef<Category, ?>>asList(
     name,
     id
   );
 
-  public static final String[] $DEFAULT_RESULT_COLUMNS = {
+  final String[] $DEFAULT_RESULT_COLUMNS = {
     "`name`",
     "`id`"
   };
+
+  Category_Schema(@NonNull String alias) {
+    this.alias = alias;
+  }
+
+  Category_Schema() {
+    this("Category");
+  }
 
   @NonNull
   @Override
@@ -69,6 +79,18 @@ public class Category_Schema implements Schema<Category> {
   @Override
   public String getEscapedTableName() {
     return "`Category`";
+  }
+
+  @NonNull
+  @Override
+  public String getTableAlias() {
+    return alias;
+  }
+
+  @NonNull
+  @Override
+  public String getEscapedTableAlias() {
+    return '`' + alias + '`';
   }
 
   @NonNull

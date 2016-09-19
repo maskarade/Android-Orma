@@ -3,17 +3,26 @@ package com.github.gfx.android.orma.example.orma;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.Deleter;
 import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Category_Deleter extends Deleter<Category, Category_Deleter> {
-  public Category_Deleter(OrmaConnection conn, Schema<Category> schema) {
-    super(conn, schema);
+  final Category_Schema schema;
+
+  public Category_Deleter(OrmaConnection conn, Category_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Category_Deleter(Category_Relation relation) {
     super(relation);
+    this.schema = (Category_Schema) relation.getSchema();
+  }
+
+  @Override
+  @NonNull
+  public Category_Schema getSchema() {
+    return schema;
   }
 
   public Category_Deleter idEq(long id) {

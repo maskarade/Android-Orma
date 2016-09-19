@@ -4,22 +4,31 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Todo_Relation extends Relation<Todo, Todo_Relation> {
-  public Todo_Relation(OrmaConnection conn, Schema<Todo> schema) {
-    super(conn, schema);
+  final Todo_Schema schema;
+
+  public Todo_Relation(OrmaConnection conn, Todo_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Todo_Relation(Todo_Relation relation) {
     super(relation);
+    this.schema = (Todo_Schema) relation.getSchema();
   }
 
   @Override
   public Todo_Relation clone() {
     return new Todo_Relation(this);
+  }
+
+  @Override
+  @NonNull
+  public Todo_Schema getSchema() {
+    return schema;
   }
 
   @NonNull
@@ -167,26 +176,26 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation orderByTitleAsc() {
-    return orderBy(Todo_Schema.title.orderInAscending());
+    return orderBy(schema.title.orderInAscending());
   }
 
   public Todo_Relation orderByTitleDesc() {
-    return orderBy(Todo_Schema.title.orderInDescending());
+    return orderBy(schema.title.orderInDescending());
   }
 
   public Todo_Relation orderByDoneAsc() {
-    return orderBy(Todo_Schema.done.orderInAscending());
+    return orderBy(schema.done.orderInAscending());
   }
 
   public Todo_Relation orderByDoneDesc() {
-    return orderBy(Todo_Schema.done.orderInDescending());
+    return orderBy(schema.done.orderInDescending());
   }
 
   public Todo_Relation orderByCreatedTimeAsc() {
-    return orderBy(Todo_Schema.createdTime.orderInAscending());
+    return orderBy(schema.createdTime.orderInAscending());
   }
 
   public Todo_Relation orderByCreatedTimeDesc() {
-    return orderBy(Todo_Schema.createdTime.orderInDescending());
+    return orderBy(schema.createdTime.orderInDescending());
   }
 }

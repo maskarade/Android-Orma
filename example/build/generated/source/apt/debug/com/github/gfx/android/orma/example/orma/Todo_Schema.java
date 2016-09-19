@@ -17,7 +17,9 @@ import java.util.List;
 public class Todo_Schema implements Schema<Todo> {
   public static final Todo_Schema INSTANCE = Schemas.register(new Todo_Schema());
 
-  public static final ColumnDef<Todo, String> title = new ColumnDef<Todo, String>(INSTANCE, "title", String.class, "TEXT", ColumnDef.INDEXED) {
+  public final String alias;
+
+  public final ColumnDef<Todo, String> title = new ColumnDef<Todo, String>(this, "title", String.class, "TEXT", ColumnDef.INDEXED) {
     @Override
     @NonNull
     public String get(@NonNull Todo model) {
@@ -31,7 +33,7 @@ public class Todo_Schema implements Schema<Todo> {
     }
   };
 
-  public static final ColumnDef<Todo, String> content = new ColumnDef<Todo, String>(INSTANCE, "content", String.class, "TEXT", ColumnDef.NULLABLE) {
+  public final ColumnDef<Todo, String> content = new ColumnDef<Todo, String>(this, "content", String.class, "TEXT", ColumnDef.NULLABLE) {
     @Override
     @Nullable
     public String get(@NonNull Todo model) {
@@ -45,7 +47,7 @@ public class Todo_Schema implements Schema<Todo> {
     }
   };
 
-  public static final ColumnDef<Todo, Boolean> done = new ColumnDef<Todo, Boolean>(INSTANCE, "done", boolean.class, "BOOLEAN", ColumnDef.INDEXED) {
+  public final ColumnDef<Todo, Boolean> done = new ColumnDef<Todo, Boolean>(this, "done", boolean.class, "BOOLEAN", ColumnDef.INDEXED) {
     @Override
     @NonNull
     public Boolean get(@NonNull Todo model) {
@@ -59,7 +61,7 @@ public class Todo_Schema implements Schema<Todo> {
     }
   };
 
-  public static final ColumnDef<Todo, Date> createdTime = new ColumnDef<Todo, Date>(INSTANCE, "createdTime", Date.class, "INTEGER", ColumnDef.INDEXED) {
+  public final ColumnDef<Todo, Date> createdTime = new ColumnDef<Todo, Date>(this, "createdTime", Date.class, "INTEGER", ColumnDef.INDEXED) {
     @Override
     @NonNull
     public Date get(@NonNull Todo model) {
@@ -73,7 +75,7 @@ public class Todo_Schema implements Schema<Todo> {
     }
   };
 
-  public static final ColumnDef<Todo, Long> id = new ColumnDef<Todo, Long>(INSTANCE, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
+  public final ColumnDef<Todo, Long> id = new ColumnDef<Todo, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
     @Override
     @NonNull
     public Long get(@NonNull Todo model) {
@@ -87,7 +89,7 @@ public class Todo_Schema implements Schema<Todo> {
     }
   };
 
-  public static final List<ColumnDef<Todo, ?>> $COLUMNS = Arrays.<ColumnDef<Todo, ?>>asList(
+  final List<ColumnDef<Todo, ?>> $COLUMNS = Arrays.<ColumnDef<Todo, ?>>asList(
     title,
     content,
     done,
@@ -95,13 +97,21 @@ public class Todo_Schema implements Schema<Todo> {
     id
   );
 
-  public static final String[] $DEFAULT_RESULT_COLUMNS = {
+  final String[] $DEFAULT_RESULT_COLUMNS = {
     "`title`",
     "`content`",
     "`done`",
     "`createdTime`",
     "`id`"
   };
+
+  Todo_Schema(@NonNull String alias) {
+    this.alias = alias;
+  }
+
+  Todo_Schema() {
+    this("Todo");
+  }
 
   @NonNull
   @Override
@@ -119,6 +129,18 @@ public class Todo_Schema implements Schema<Todo> {
   @Override
   public String getEscapedTableName() {
     return "`Todo`";
+  }
+
+  @NonNull
+  @Override
+  public String getTableAlias() {
+    return alias;
+  }
+
+  @NonNull
+  @Override
+  public String getEscapedTableAlias() {
+    return '`' + alias + '`';
   }
 
   @NonNull

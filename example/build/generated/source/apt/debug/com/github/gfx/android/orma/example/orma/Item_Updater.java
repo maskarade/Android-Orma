@@ -2,18 +2,27 @@ package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Updater;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Item_Updater extends Updater<Item, Item_Updater> {
-  public Item_Updater(OrmaConnection conn, Schema<Item> schema) {
-    super(conn, schema);
+  final Item_Schema schema;
+
+  public Item_Updater(OrmaConnection conn, Item_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Item_Updater(Item_Relation relation) {
     super(relation);
+    this.schema = (Item_Schema) relation.getSchema();
+  }
+
+  @Override
+  @NonNull
+  public Item_Schema getSchema() {
+    return schema;
   }
 
   public Item_Updater category(@NonNull Category category) {

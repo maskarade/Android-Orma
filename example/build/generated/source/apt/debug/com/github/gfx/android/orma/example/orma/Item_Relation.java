@@ -4,22 +4,31 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Item_Relation extends Relation<Item, Item_Relation> {
-  public Item_Relation(OrmaConnection conn, Schema<Item> schema) {
-    super(conn, schema);
+  final Item_Schema schema;
+
+  public Item_Relation(OrmaConnection conn, Item_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Item_Relation(Item_Relation relation) {
     super(relation);
+    this.schema = (Item_Schema) relation.getSchema();
   }
 
   @Override
   public Item_Relation clone() {
     return new Item_Relation(this);
+  }
+
+  @Override
+  @NonNull
+  public Item_Schema getSchema() {
+    return schema;
   }
 
   @NonNull
@@ -95,18 +104,18 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   }
 
   public Item_Relation orderByCategoryAsc() {
-    return orderBy(Item_Schema.category.orderInAscending());
+    return orderBy(schema.category.orderInAscending());
   }
 
   public Item_Relation orderByCategoryDesc() {
-    return orderBy(Item_Schema.category.orderInDescending());
+    return orderBy(schema.category.orderInDescending());
   }
 
   public Item_Relation orderByNameAsc() {
-    return orderBy(Item_Schema.name.orderInAscending());
+    return orderBy(schema.name.orderInAscending());
   }
 
   public Item_Relation orderByNameDesc() {
-    return orderBy(Item_Schema.name.orderInDescending());
+    return orderBy(schema.name.orderInDescending());
   }
 }

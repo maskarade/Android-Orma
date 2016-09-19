@@ -4,19 +4,28 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Updater;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
 public class Todo_Updater extends Updater<Todo, Todo_Updater> {
-  public Todo_Updater(OrmaConnection conn, Schema<Todo> schema) {
-    super(conn, schema);
+  final Todo_Schema schema;
+
+  public Todo_Updater(OrmaConnection conn, Todo_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Todo_Updater(Todo_Relation relation) {
     super(relation);
+    this.schema = (Todo_Schema) relation.getSchema();
+  }
+
+  @Override
+  @NonNull
+  public Todo_Schema getSchema() {
+    return schema;
   }
 
   public Todo_Updater title(@NonNull String title) {

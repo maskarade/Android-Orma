@@ -4,22 +4,31 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Category_Relation extends Relation<Category, Category_Relation> {
-  public Category_Relation(OrmaConnection conn, Schema<Category> schema) {
-    super(conn, schema);
+  final Category_Schema schema;
+
+  public Category_Relation(OrmaConnection conn, Category_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Category_Relation(Category_Relation relation) {
     super(relation);
+    this.schema = (Category_Schema) relation.getSchema();
   }
 
   @Override
   public Category_Relation clone() {
     return new Category_Relation(this);
+  }
+
+  @Override
+  @NonNull
+  public Category_Schema getSchema() {
+    return schema;
   }
 
   @NonNull
