@@ -116,7 +116,7 @@ String shell(String command) {
 }
 
 task releng << {
-    def tag = "v" + versionName()
+    def tag = "v" + versionName
     println "Release engineering for ${tag}"
 
     def changes = shell "git status -s"
