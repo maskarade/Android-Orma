@@ -8,6 +8,19 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v3.0.0-rc1 2016/09/20
+
+https://github.com/gfx/Android-Orma/compare/v2.6.0...v3.0.0-rc1
+
+**This release includes incompatible changes.**
+
+You must upgrade Android Gradle Plugin to v2.2.0, and RxJava to v1.2.0.
+
+* Add `OrmaDatabase#prepareInsertInto*AsObservable` ([#288](https://github.com/gfx/Android-Orma/pull/288))
+* Remove deprecated transaction methods
+* Depend on RxJava to v1.2.0 to use the beta version of `Completable`
+* Use the original ANTLR4, which conflicts with Android Gradle Plugin v2.1.x
+
 ## v2.6.0 2016/09/04
 
 * Add a way to control helper methods by `@Column(helpers = ...)`(#282 by @jozn)
