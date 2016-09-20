@@ -3,6 +3,7 @@ package com.github.gfx.android.orma.example.orma;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
@@ -15,6 +16,7 @@ import java.util.List;
 public class Category_Schema implements Schema<Category> {
   public static final Category_Schema INSTANCE = Schemas.register(new Category_Schema());
 
+  @Nullable
   public final String alias;
 
   public final ColumnDef<Category, String> name = new ColumnDef<Category, String>(this, "name", String.class, "TEXT", ColumnDef.UNIQUE) {
@@ -51,16 +53,16 @@ public class Category_Schema implements Schema<Category> {
   );
 
   final String[] $DEFAULT_RESULT_COLUMNS = {
-    "`name`",
-    "`id`"
+    name.getSafeName(),
+    id.getSafeName()
   };
 
-  Category_Schema(@NonNull String alias) {
+  Category_Schema(@Nullable String alias) {
     this.alias = alias;
   }
 
   Category_Schema() {
-    this("Category");
+    this(null);
   }
 
   @NonNull
@@ -90,7 +92,7 @@ public class Category_Schema implements Schema<Category> {
   @NonNull
   @Override
   public String getEscapedTableAlias() {
-    return '`' + alias + '`';
+    return alias != null ? '`' + alias + '`' : null;
   }
 
   @NonNull

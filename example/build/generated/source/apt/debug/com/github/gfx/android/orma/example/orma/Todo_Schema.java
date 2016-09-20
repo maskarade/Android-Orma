@@ -17,6 +17,7 @@ import java.util.List;
 public class Todo_Schema implements Schema<Todo> {
   public static final Todo_Schema INSTANCE = Schemas.register(new Todo_Schema());
 
+  @Nullable
   public final String alias;
 
   public final ColumnDef<Todo, String> title = new ColumnDef<Todo, String>(this, "title", String.class, "TEXT", ColumnDef.INDEXED) {
@@ -98,19 +99,19 @@ public class Todo_Schema implements Schema<Todo> {
   );
 
   final String[] $DEFAULT_RESULT_COLUMNS = {
-    "`title`",
-    "`content`",
-    "`done`",
-    "`createdTime`",
-    "`id`"
+    title.getSafeName(),
+    content.getSafeName(),
+    done.getSafeName(),
+    createdTime.getSafeName(),
+    id.getSafeName()
   };
 
-  Todo_Schema(@NonNull String alias) {
+  Todo_Schema(@Nullable String alias) {
     this.alias = alias;
   }
 
   Todo_Schema() {
-    this("Todo");
+    this(null);
   }
 
   @NonNull
@@ -140,7 +141,7 @@ public class Todo_Schema implements Schema<Todo> {
   @NonNull
   @Override
   public String getEscapedTableAlias() {
-    return '`' + alias + '`';
+    return alias != null ? '`' + alias + '`' : null;
   }
 
   @NonNull

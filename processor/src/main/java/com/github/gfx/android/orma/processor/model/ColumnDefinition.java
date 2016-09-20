@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.tool.AliasAllocator;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.SqlTypes;
 import com.github.gfx.android.orma.processor.util.Strings;
@@ -255,6 +256,13 @@ public class ColumnDefinition {
         return sb.toString();
     }
 
+    public String getSafeColumnName(@Nullable AliasAllocator.ColumnPath parent) {
+        AliasAllocator.ColumnPath path = AliasAllocator.ColumnPath.builder(parent)
+                .add(schema.getTableName(), columnName)
+                .build();
+        return context.aliasAllocator.getQualifiedName(path, context.sqlg);
+    }
+
     public TypeName getType() {
         return type;
     }
@@ -299,7 +307,11 @@ public class ColumnDefinition {
      * @return A representation of {@code ColumnDef<T>}
      */
     public ParameterizedTypeName getColumnDefType() {
-        return Types.getColumnDef(schema.getModelClassName(), getBoxType());
+        if (isDirectAssociation()) {
+            return Types.getAssociationDef(schema.getModelClassName(), getBoxType(), getAssociatedSchema().getSchemaClassName());
+        } else {
+            return Types.getColumnDef(schema.getModelClassName(), getBoxType());
+        }
     }
 
     public CodeBlock buildSetColumnExpr(CodeBlock rhsExpr) {

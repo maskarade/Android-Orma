@@ -3,6 +3,8 @@ package com.github.gfx.android.orma.example.orma;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import com.github.gfx.android.orma.AssociationDef;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
@@ -14,9 +16,10 @@ import java.util.List;
 public class Item_Schema implements Schema<Item> {
   public static final Item_Schema INSTANCE = Schemas.register(new Item_Schema());
 
+  @Nullable
   public final String alias;
 
-  public final ColumnDef<Item, Category> category = new ColumnDef<Item, Category>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED) {
+  public final AssociationDef<Item, Category, Category_Schema> category = new AssociationDef<Item, Category, Category_Schema>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c2")) {
     @Override
     @NonNull
     public Category get(@NonNull Item model) {
@@ -50,19 +53,19 @@ public class Item_Schema implements Schema<Item> {
   );
 
   final String[] $DEFAULT_RESULT_COLUMNS = {
-    "`Item`.`category`",
-      "`Category`.`name`",
-      "`Category`.`id`"
+    category.getSafeName(),
+      category.associationSchema.name.getSafeName(),
+      category.associationSchema.id.getSafeName()
     ,
-    "`Item`.`name`"
+    name.getSafeName()
   };
 
-  Item_Schema(@NonNull String alias) {
+  Item_Schema(@Nullable String alias) {
     this.alias = alias;
   }
 
   Item_Schema() {
-    this("Item");
+    this(null);
   }
 
   @NonNull
@@ -92,13 +95,14 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public String getEscapedTableAlias() {
-    return '`' + alias + '`';
+    return alias != null ? '`' + alias + '`' : null;
   }
 
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Item` LEFT OUTER JOIN `Category` ON `Item`.`category` = `Category`.`id`";
+    return "`Item` AS `i5`\n"
+            + " LEFT OUTER JOIN `Category` AS `c2` ON `i5`.`category` = `c2`.`id`";
   }
 
   @NonNull

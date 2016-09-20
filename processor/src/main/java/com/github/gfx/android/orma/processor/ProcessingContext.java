@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.processor.generator.SqlGenerator;
 import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
+import com.github.gfx.android.orma.processor.tool.AliasAllocator;
 import com.squareup.javapoet.TypeName;
 
 import java.io.PrintWriter;
@@ -50,17 +51,16 @@ public class ProcessingContext {
 
     public final List<DatabaseDefinition> databases = new ArrayList<>();
 
-    public final Map<TypeName, SchemaDefinition> schemaMap;
+    public final Map<TypeName, SchemaDefinition> schemaMap = new LinkedHashMap<>(); // the order matters
 
-    public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap;
+    public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap = new HashMap<>();
 
-    public final SqlGenerator sqlg;
+    public final SqlGenerator sqlg = new SqlGenerator();
+
+    public final AliasAllocator aliasAllocator = new AliasAllocator();
 
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
-        this.schemaMap = new LinkedHashMap<>(); // the order matters
-        this.typeAdapterMap = new HashMap<>();
-        this.sqlg = new SqlGenerator();
         for (TypeAdapterDefinition typeAdapterDefinition : TypeAdapterDefinition.BUILTINS) {
             addTypeAdapterDefinition(typeAdapterDefinition);
         }
@@ -142,8 +142,16 @@ public class ProcessingContext {
         }
     }
 
-    SchemaDefinition getFirstSchema() {
+    public SchemaDefinition getFirstSchema() {
         return schemaMap.values().iterator().next();
+    }
+
+    public String getAliasName(AliasAllocator.ColumnPath path) {
+        return aliasAllocator.getAlias(path);
+    }
+
+    public String getAliasName(String tableName) {
+        return aliasAllocator.getAlias(AliasAllocator.ColumnPath.builder().add(tableName).build());
     }
 
     public void note(String message) {

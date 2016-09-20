@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.processor.exception.ProcessingException;
 import com.github.gfx.android.orma.processor.model.AssociationDefinition;
 import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
+import com.github.gfx.android.orma.processor.tool.AliasAllocator;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Strings;
 import com.github.gfx.android.orma.processor.util.Types;
@@ -36,6 +37,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -101,6 +104,7 @@ public class SchemaWriter extends BaseWriter {
                 .build());
 
         fieldSpecs.add(FieldSpec.builder(Types.String, "alias", publicFinal)
+                .addAnnotation(Annotations.nullable())
                 .build());
 
         List<FieldSpec> columns = new ArrayList<>();
@@ -133,7 +137,7 @@ public class SchemaWriter extends BaseWriter {
         fieldSpecs.add(
                 FieldSpec.builder(Types.StringArray, DEFAULT_RESULT_COLUMNS)
                         .addModifiers(Modifier.FINAL)
-                        .initializer("{\n$L}", buildEscapedColumnNamesInitializer(schema, schema.hasDirectAssociations()))
+                        .initializer("{\n$L}", buildEscapedColumnNamesInitializer(schema, Collections.emptyList()))
                         .build()
         );
 
@@ -144,41 +148,54 @@ public class SchemaWriter extends BaseWriter {
         StringBuilder sb = new StringBuilder();
         context.sqlg.appendIdentifier(sb, schema.getTableName());
 
-        sb.append(schema.getColumns().stream()
+        String[] joins = schema.getColumns().stream()
                 .filter(ColumnDefinition::isDirectAssociation)
-                .map(this::buildJoins)
-                .collect(Collectors.joining(" ")));
+                .map(column -> {
+                    AliasAllocator.ColumnPath rootPath = AliasAllocator.ColumnPath.builder()
+                            .add(schema.getTableName(), column.columnName)
+                            .build();
+                    return buildJoins(rootPath, column);
+                })
+                .toArray(String[]::new);
+
+        if (joins.length != 0) {
+            sb.append(" AS ");
+            context.sqlg.appendIdentifier(sb, context.getAliasName(schema.getTableName()));
+            for (String join : joins) {
+                sb.append(join);
+            }
+        }
 
         return sb.toString();
     }
 
-    public String buildJoins(ColumnDefinition column) {
+    public String buildJoins(AliasAllocator.ColumnPath parent, ColumnDefinition column) {
         StringBuilder s = new StringBuilder();
         SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
         associatedSchema.getPrimaryKey().ifPresent(primaryKey -> {
-            s.append(" LEFT OUTER JOIN ");
+            s.append("\n LEFT OUTER JOIN ");
             context.sqlg.appendIdentifier(s, associatedSchema.getTableName());
+            s.append(" AS ");
+            context.sqlg.appendIdentifier(s, context.getAliasName(
+                    parent.withColumnName(column.columnName).add(associatedSchema.getTableName(), primaryKey.columnName)));
             s.append(" ON ");
-            s.append(column.getEscapedColumnName(true));
+            s.append(column.getSafeColumnName(parent.parent));
             s.append(" = ");
-            s.append(primaryKey.getEscapedColumnName(true));
+            s.append(primaryKey.getSafeColumnName(parent));
 
             String nested = associatedSchema.getColumns()
                     .stream()
                     .filter(ColumnDefinition::isDirectAssociation)
-                    .map(this::buildJoins)
+                    .map((columnDefinition) -> buildJoins(parent, columnDefinition))
                     .collect(Collectors.joining(" "));
-
-            if (!Strings.isEmpty(nested)) {
-                s.append(' ');
-                s.append(nested);
-            }
-
+            s.append(nested);
         });
         return s.toString();
     }
 
     public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
+        AliasAllocator.ColumnPath parent = new AliasAllocator.ColumnPath(null, schema.getTableName(), c.columnName);
+
         TypeName type = c.getType();
 
         CodeBlock typeInstance;
@@ -187,8 +204,19 @@ public class SchemaWriter extends BaseWriter {
         } else {
             typeInstance = CodeBlock.of("$T.class", type);
         }
-        TypeSpec.Builder columnDefType = TypeSpec.anonymousClassBuilder("this, $S, $L, $S, $L",
-                c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c));
+
+        TypeSpec.Builder columnDefType;
+
+        if (!c.isDirectAssociation()) {
+            columnDefType = TypeSpec.anonymousClassBuilder("this, $S, $L, $S, $L",
+                    c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c));
+        } else {
+            // ColumnDef with new $Schema(alias)
+            String alias = context.getAliasName(parent.add(c.getAssociatedSchema().getTableName()));
+            columnDefType = TypeSpec.anonymousClassBuilder("this, $S, $L, $S, $L, new $T($S)",
+                    c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c),
+                    c.getAssociatedSchema().getSchemaClassName(), alias);
+        }
         columnDefType.superclass(c.getColumnDefType());
 
         // ColumnDef#get()
@@ -308,7 +336,7 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    public CodeBlock buildEscapedColumnNamesInitializer(SchemaDefinition schema, boolean fqn) {
+    public CodeBlock buildEscapedColumnNamesInitializer(SchemaDefinition schema, List<ColumnDefinition> upstream) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         builder.indent();
@@ -317,10 +345,13 @@ public class SchemaWriter extends BaseWriter {
 
         for (int i = 0, size = columns.size(); i < size; i++) {
             ColumnDefinition column = columns.get(i);
-            builder.add("$S", column.getEscapedColumnName(fqn));
+            for (ColumnDefinition upstreamColumnDef : upstream) {
+                builder.add("$L.associationSchema.", upstreamColumnDef.name);
+            }
+            builder.add("$L.getSafeName()", column.name);
             if (column.isDirectAssociation()) {
-                builder.add(",\n")
-                        .add(buildEscapedColumnNamesInitializer(column.getAssociatedSchema(), fqn));
+                builder.add(",\n");
+                builder.add(buildEscapedColumnNamesInitializer(column.getAssociatedSchema(), addList(upstream, column)));
             }
             if ((i + 1) != size) {
                 builder.add(",\n");
@@ -334,13 +365,19 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
+    private List<ColumnDefinition> addList(List<ColumnDefinition> list, ColumnDefinition value) {
+        ColumnDefinition[] a = list.toArray(new ColumnDefinition[list.size() + 1]);
+        a[list.size()] = value; // add
+        return Arrays.asList(a);
+    }
+
     public List<MethodSpec> buildMethodSpecs() {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
         methodSpecs.add(
                 MethodSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder(Types.String, "alias")
-                                .addAnnotation(Annotations.nonNull())
+                                .addAnnotation(Annotations.nullable())
                                 .build())
                         .addStatement("this.alias = alias")
                         .build()
@@ -348,7 +385,7 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.constructorBuilder()
-                        .addStatement("this($S)", schema.getTableName())
+                        .addStatement("this(null)")
                         .build()
         );
 
@@ -381,7 +418,7 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getTableAlias")
-                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addAnnotations(Annotations.overrideAndNullable())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
                         .addStatement("return alias")
@@ -390,10 +427,10 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getEscapedTableAlias")
-                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addAnnotations(Annotations.overrideAndNullable())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return '`' + alias + '`'")
+                        .addStatement("return alias != null ? '`' + alias + '`' : null")
                         .build()
         );
 

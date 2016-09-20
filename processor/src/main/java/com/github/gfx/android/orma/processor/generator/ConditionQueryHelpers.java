@@ -89,7 +89,7 @@ public class ConditionQueryHelpers {
 
         List<AnnotationSpec> safeVarargsIfNeeded = Annotations.safeVarargsIfNeeded(column.getType());
 
-        String columnName = column.getEscapedColumnName();
+        String columnName = column.getSafeColumnName(null);
 
         CodeBlock serializedFieldExpr;
         if (isAssociation) {
