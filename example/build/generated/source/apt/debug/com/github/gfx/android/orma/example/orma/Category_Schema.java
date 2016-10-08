@@ -52,13 +52,14 @@ public class Category_Schema implements Schema<Category> {
     id
   );
 
-  final String[] $DEFAULT_RESULT_COLUMNS = {
-    name.getQualifiedName(),
-    id.getQualifiedName()
-  };
+  final String[] $DEFAULT_RESULT_COLUMNS;
 
   Category_Schema(@Nullable String alias) {
     this.alias = alias;
+    $DEFAULT_RESULT_COLUMNS = new String[]{
+          name.getQualifiedName(),
+          id.getQualifiedName()
+        };
   }
 
   Category_Schema() {

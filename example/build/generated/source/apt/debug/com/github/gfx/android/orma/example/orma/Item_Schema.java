@@ -14,12 +14,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Item_Schema implements Schema<Item> {
-  public static final Item_Schema INSTANCE = Schemas.register(new Item_Schema());
+  public static final Item_Schema INSTANCE = Schemas.register(new Item_Schema("i1"));
 
   @Nullable
   public final String alias;
 
-  public final AssociationDef<Item, Category, Category_Schema> category = new AssociationDef<Item, Category, Category_Schema>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c2")) {
+  public final AssociationDef<Item, Category, Category_Schema> category = new AssociationDef<Item, Category, Category_Schema>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c3")) {
     @Override
     @NonNull
     public Category get(@NonNull Item model) {
@@ -52,16 +52,17 @@ public class Item_Schema implements Schema<Item> {
     name
   );
 
-  final String[] $DEFAULT_RESULT_COLUMNS = {
-    category.getQualifiedName(),
-      category.associationSchema.name.getQualifiedName(),
-      category.associationSchema.id.getQualifiedName()
-    ,
-    name.getQualifiedName()
-  };
+  final String[] $DEFAULT_RESULT_COLUMNS;
 
   Item_Schema(@Nullable String alias) {
     this.alias = alias;
+    $DEFAULT_RESULT_COLUMNS = new String[]{
+          category.getQualifiedName(),
+            category.associationSchema.name.getQualifiedName(),
+            category.associationSchema.id.getQualifiedName()
+          ,
+          name.getQualifiedName()
+        };
   }
 
   Item_Schema() {
@@ -101,8 +102,8 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Item` AS `i4`\n"
-            + " LEFT OUTER JOIN `Category` AS `c2` ON `i4`.`category` = `c2`.`id`";
+    return "`Item` AS `i1`\n"
+            + " LEFT OUTER JOIN `Category` AS `c3` ON `i1`.`category` = `c3`.`id`";
   }
 
   @NonNull

@@ -14,12 +14,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Item2_Schema implements Schema<Item2> {
-  public static final Item2_Schema INSTANCE = Schemas.register(new Item2_Schema());
+  public static final Item2_Schema INSTANCE = Schemas.register(new Item2_Schema("i2"));
 
   @Nullable
   public final String alias;
 
-  public final AssociationDef<Item2, Category, Category_Schema> category1 = new AssociationDef<Item2, Category, Category_Schema>(this, "category1", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c1")) {
+  public final AssociationDef<Item2, Category, Category_Schema> category1 = new AssociationDef<Item2, Category, Category_Schema>(this, "category1", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c4")) {
     @Override
     @NonNull
     public Category get(@NonNull Item2 model) {
@@ -33,7 +33,7 @@ public class Item2_Schema implements Schema<Item2> {
     }
   };
 
-  public final AssociationDef<Item2, Category, Category_Schema> category2 = new AssociationDef<Item2, Category, Category_Schema>(this, "category2", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c3")) {
+  public final AssociationDef<Item2, Category, Category_Schema> category2 = new AssociationDef<Item2, Category, Category_Schema>(this, "category2", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c5")) {
     @Override
     @NonNull
     public Category get(@NonNull Item2 model) {
@@ -67,20 +67,21 @@ public class Item2_Schema implements Schema<Item2> {
     name
   );
 
-  final String[] $DEFAULT_RESULT_COLUMNS = {
-    category1.getQualifiedName(),
-      category1.associationSchema.name.getQualifiedName(),
-      category1.associationSchema.id.getQualifiedName()
-    ,
-    category2.getQualifiedName(),
-      category2.associationSchema.name.getQualifiedName(),
-      category2.associationSchema.id.getQualifiedName()
-    ,
-    name.getQualifiedName()
-  };
+  final String[] $DEFAULT_RESULT_COLUMNS;
 
   Item2_Schema(@Nullable String alias) {
     this.alias = alias;
+    $DEFAULT_RESULT_COLUMNS = new String[]{
+          category1.getQualifiedName(),
+            category1.associationSchema.name.getQualifiedName(),
+            category1.associationSchema.id.getQualifiedName()
+          ,
+          category2.getQualifiedName(),
+            category2.associationSchema.name.getQualifiedName(),
+            category2.associationSchema.id.getQualifiedName()
+          ,
+          name.getQualifiedName()
+        };
   }
 
   Item2_Schema() {
@@ -120,9 +121,9 @@ public class Item2_Schema implements Schema<Item2> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Item2` AS `i4`\n"
-            + " LEFT OUTER JOIN `Category` AS `c1` ON `i4`.`category1` = `c1`.`id`\n"
-            + " LEFT OUTER JOIN `Category` AS `c3` ON `i4`.`category2` = `c3`.`id`";
+    return "`Item2` AS `i2`\n"
+            + " LEFT OUTER JOIN `Category` AS `c4` ON `i2`.`category1` = `c4`.`id`\n"
+            + " LEFT OUTER JOIN `Category` AS `c5` ON `i2`.`category2` = `c5`.`id`";
   }
 
   @NonNull

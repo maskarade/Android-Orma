@@ -98,16 +98,17 @@ public class Todo_Schema implements Schema<Todo> {
     id
   );
 
-  final String[] $DEFAULT_RESULT_COLUMNS = {
-    title.getQualifiedName(),
-    content.getQualifiedName(),
-    done.getQualifiedName(),
-    createdTime.getQualifiedName(),
-    id.getQualifiedName()
-  };
+  final String[] $DEFAULT_RESULT_COLUMNS;
 
   Todo_Schema(@Nullable String alias) {
     this.alias = alias;
+    $DEFAULT_RESULT_COLUMNS = new String[]{
+          title.getQualifiedName(),
+          content.getQualifiedName(),
+          done.getQualifiedName(),
+          createdTime.getQualifiedName(),
+          id.getQualifiedName()
+        };
   }
 
   Todo_Schema() {

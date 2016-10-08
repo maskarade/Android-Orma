@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithInheritance;
 import com.github.gfx.android.orma.test.model.ModelWithInheritance_Schema;
@@ -156,5 +157,19 @@ public class SchemaTest {
                         ModelWithPrimaryKeyIsNotFirst_Schema.INSTANCE.bar,
                         ModelWithPrimaryKeyIsNotFirst_Schema.INSTANCE.id
                 ));
+    }
+
+    @Test
+    public void multipleDirectAssociations() throws Exception {
+        ModelWithDirectAssociation2_Schema schema = ModelWithDirectAssociation2_Schema.INSTANCE;
+
+        assertThat(schema.alias, is(notNullValue()));
+
+        assertThat(schema.note.getQualifiedName(), is("`" + schema.alias + "`.`note`"));
+        assertThat(schema.note.orderInAscending().toString(), is(schema.getEscapedTableAlias() + ".`note` ASC"));
+        assertThat(schema.note.orderInDescending().toString(), is(schema.getEscapedTableAlias() + ".`note` DESC"));
+
+        assertThat(schema.author.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`author`"));
+        assertThat(schema.author2.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`author2`"));
     }
 }
