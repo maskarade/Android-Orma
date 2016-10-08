@@ -22,6 +22,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,7 +133,7 @@ public class Types {
 
     public static final ClassName Schemas = ClassName.get(ormaPackageName + ".internal", "Schemas");
 
-    public static final ClassName NullPointerException = ClassName.get(NullPointerException.class);
+    public static final ClassName InvalidArgumentException = ClassName.get(InvalidArgumentException.class);
 
     public static final ClassName Completable = ClassName.get("rx", "Completable");
 
