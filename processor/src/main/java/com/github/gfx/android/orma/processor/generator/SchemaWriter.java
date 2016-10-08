@@ -138,7 +138,6 @@ public class SchemaWriter extends BaseWriter {
         fieldSpecs.add(
                 FieldSpec.builder(Types.StringArray, DEFAULT_RESULT_COLUMNS)
                         .addModifiers(Modifier.FINAL)
-                        .initializer("{\n$L}", buildEscapedColumnNamesInitializer(schema, Collections.emptyList()))
                         .build()
         );
 
@@ -381,6 +380,8 @@ public class SchemaWriter extends BaseWriter {
                                 .addAnnotation(Annotations.nullable())
                                 .build())
                         .addStatement("this.alias = alias")
+                        .addStatement("$L = new String[]{\n$L}",
+                                DEFAULT_RESULT_COLUMNS, buildEscapedColumnNamesInitializer(schema, Collections.emptyList()))
                         .build()
         );
 
