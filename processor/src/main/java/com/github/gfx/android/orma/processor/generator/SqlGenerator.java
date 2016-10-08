@@ -209,6 +209,8 @@ public class SqlGenerator {
                 .addStatement("case $T.IGNORE: s.append($S); break", OnConflict.class, " OR IGNORE")
                 .addStatement("case $T.REPLACE: s.append($S); break", OnConflict.class, " OR REPLACE")
                 .addStatement("case $T.ROLLBACK: s.append($S); break", OnConflict.class, " OR ROLLBACK")
+                .addStatement("default: throw new $T($S + $L)", Types.IllegalArgumentException,
+                        "Invalid OnConflict algorithm: ", onConflictAlgorithmParamName)
                 .endControlFlow();
 
         String insertWithoutAutoId = buildInsertComponent(schema, true);

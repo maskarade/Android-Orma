@@ -150,6 +150,7 @@ public class Category_Schema implements Schema<Category> {
       case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
       case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
+      default: throw new IllegalArgumentException("Invalid OnConflict algorithm: " + onConflictAlgorithm);
     }
     if (withoutAutoId) {
       s.append(" INTO `Category` (`name`) VALUES (?)");
@@ -171,7 +172,7 @@ public class Category_Schema implements Schema<Category> {
       args[0] = model.name;
     }
     else {
-      throw new NullPointerException("Category.name" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Category.name" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (!withoutAutoId) {
       args[1] = model.id;

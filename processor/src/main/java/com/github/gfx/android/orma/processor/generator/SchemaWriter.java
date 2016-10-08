@@ -616,7 +616,7 @@ public class SchemaWriter extends BaseWriter {
                 if (!c.isNullableInJava()) {
                     // check nullability even if it is not declared as @Nullable
                     builder.beginControlFlow("else");
-                    builder.addStatement("throw new $T($S + $S)", Types.InvalidArgumentException,
+                    builder.addStatement("throw new $T($S + $S)", Types.IllegalArgumentException,
                             schema.getModelClassName().simpleName() + '.' + c.name,
                             " must not be null, or use @Nullable to declare it as NULL");
                     builder.endControlFlow();

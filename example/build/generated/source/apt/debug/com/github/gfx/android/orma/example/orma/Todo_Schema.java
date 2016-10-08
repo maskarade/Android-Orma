@@ -203,6 +203,7 @@ public class Todo_Schema implements Schema<Todo> {
       case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
       case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
+      default: throw new IllegalArgumentException("Invalid OnConflict algorithm: " + onConflictAlgorithm);
     }
     if (withoutAutoId) {
       s.append(" INTO `Todo` (`title`,`content`,`done`,`createdTime`) VALUES (?,?,?,?)");
@@ -224,7 +225,7 @@ public class Todo_Schema implements Schema<Todo> {
       args[0] = model.title;
     }
     else {
-      throw new NullPointerException("Todo.title" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Todo.title" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (model.content != null) {
       args[1] = model.content;
@@ -234,7 +235,7 @@ public class Todo_Schema implements Schema<Todo> {
       args[3] = BuiltInSerializers.serializeDate(model.createdTime);
     }
     else {
-      throw new NullPointerException("Todo.createdTime" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Todo.createdTime" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (!withoutAutoId) {
       args[4] = model.id;

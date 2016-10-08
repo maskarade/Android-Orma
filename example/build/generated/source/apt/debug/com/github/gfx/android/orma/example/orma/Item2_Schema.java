@@ -177,6 +177,7 @@ public class Item2_Schema implements Schema<Item2> {
       case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
       case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
+      default: throw new IllegalArgumentException("Invalid OnConflict algorithm: " + onConflictAlgorithm);
     }
     s.append(" INTO `Item2` (`category1`,`category2`,`name`) VALUES (?,?,?)");
     return s.toString();
@@ -193,19 +194,19 @@ public class Item2_Schema implements Schema<Item2> {
       args[0] = model.category1.id;
     }
     else {
-      throw new NullPointerException("Item2.category1" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Item2.category1" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (model.category2 != null) {
       args[1] = model.category2.id;
     }
     else {
-      throw new NullPointerException("Item2.category2" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Item2.category2" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (model.name != null) {
       args[2] = model.name;
     }
     else {
-      throw new NullPointerException("Item2.name" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Item2.name" + " must not be null, or use @Nullable to declare it as NULL");
     }
     return args;
   }

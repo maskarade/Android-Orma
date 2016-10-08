@@ -156,6 +156,7 @@ public class Item_Schema implements Schema<Item> {
       case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
       case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
+      default: throw new IllegalArgumentException("Invalid OnConflict algorithm: " + onConflictAlgorithm);
     }
     s.append(" INTO `Item` (`category`,`name`) VALUES (?,?)");
     return s.toString();
@@ -172,13 +173,13 @@ public class Item_Schema implements Schema<Item> {
       args[0] = model.category.id;
     }
     else {
-      throw new NullPointerException("Item.category" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Item.category" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (model.name != null) {
       args[1] = model.name;
     }
     else {
-      throw new NullPointerException("Item.name" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Item.name" + " must not be null, or use @Nullable to declare it as NULL");
     }
     return args;
   }
