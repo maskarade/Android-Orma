@@ -99,11 +99,11 @@ public class Todo_Schema implements Schema<Todo> {
   );
 
   final String[] $DEFAULT_RESULT_COLUMNS = {
-    title.getSafeName(),
-    content.getSafeName(),
-    done.getSafeName(),
-    createdTime.getSafeName(),
-    id.getSafeName()
+    title.getQualifiedName(),
+    content.getQualifiedName(),
+    done.getQualifiedName(),
+    createdTime.getQualifiedName(),
+    id.getQualifiedName()
   };
 
   Todo_Schema(@Nullable String alias) {

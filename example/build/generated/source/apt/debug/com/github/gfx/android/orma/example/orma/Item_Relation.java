@@ -56,27 +56,27 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   }
 
   public Item_Relation categoryEq(@NonNull Category category) {
-    return where("`i5`.`category` = ?", category.id /* primary key */);
+    return where(schema.category.getQualifiedName() + " = ?", category.id /* primary key */);
   }
 
   public Item_Relation categoryEq(long categoryId) {
-    return where("`i5`.`category` = ?", categoryId);
+    return where(schema.category.getQualifiedName() + " = ?", categoryId);
   }
 
   public Item_Relation nameEq(@NonNull String name) {
-    return where("`i5`.`name` = ?", name);
+    return where(schema.name.getQualifiedName() + " = ?", name);
   }
 
   public Item_Relation nameNotEq(@NonNull String name) {
-    return where("`i5`.`name` <> ?", name);
+    return where(schema.name.getQualifiedName() + " <> ?", name);
   }
 
   public Item_Relation nameIn(@NonNull Collection<String> values) {
-    return in(false, "`i5`.`name`", values);
+    return in(false, schema.name.getQualifiedName(), values);
   }
 
   public Item_Relation nameNotIn(@NonNull Collection<String> values) {
-    return in(true, "`i5`.`name`", values);
+    return in(true, schema.name.getQualifiedName(), values);
   }
 
   public final Item_Relation nameIn(@NonNull String... values) {
@@ -88,19 +88,19 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   }
 
   public Item_Relation nameLt(@NonNull String name) {
-    return where("`i5`.`name` < ?", name);
+    return where(schema.name.getQualifiedName() + " < ?", name);
   }
 
   public Item_Relation nameLe(@NonNull String name) {
-    return where("`i5`.`name` <= ?", name);
+    return where(schema.name.getQualifiedName() + " <= ?", name);
   }
 
   public Item_Relation nameGt(@NonNull String name) {
-    return where("`i5`.`name` > ?", name);
+    return where(schema.name.getQualifiedName() + " > ?", name);
   }
 
   public Item_Relation nameGe(@NonNull String name) {
-    return where("`i5`.`name` >= ?", name);
+    return where(schema.name.getQualifiedName() + " >= ?", name);
   }
 
   public Item_Relation orderByCategoryAsc() {

@@ -32,35 +32,35 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
   }
 
   public Item2_Selector category1Eq(@NonNull Category category1) {
-    return where("`i4`.`category1` = ?", category1.id /* primary key */);
+    return where(schema.category1.getQualifiedName() + " = ?", category1.id /* primary key */);
   }
 
   public Item2_Selector category1Eq(long category1Id) {
-    return where("`i4`.`category1` = ?", category1Id);
+    return where(schema.category1.getQualifiedName() + " = ?", category1Id);
   }
 
   public Item2_Selector category2Eq(@NonNull Category category2) {
-    return where("`i4`.`category2` = ?", category2.id /* primary key */);
+    return where(schema.category2.getQualifiedName() + " = ?", category2.id /* primary key */);
   }
 
   public Item2_Selector category2Eq(long category2Id) {
-    return where("`i4`.`category2` = ?", category2Id);
+    return where(schema.category2.getQualifiedName() + " = ?", category2Id);
   }
 
   public Item2_Selector nameEq(@NonNull String name) {
-    return where("`i4`.`name` = ?", name);
+    return where(schema.name.getQualifiedName() + " = ?", name);
   }
 
   public Item2_Selector nameNotEq(@NonNull String name) {
-    return where("`i4`.`name` <> ?", name);
+    return where(schema.name.getQualifiedName() + " <> ?", name);
   }
 
   public Item2_Selector nameIn(@NonNull Collection<String> values) {
-    return in(false, "`i4`.`name`", values);
+    return in(false, schema.name.getQualifiedName(), values);
   }
 
   public Item2_Selector nameNotIn(@NonNull Collection<String> values) {
-    return in(true, "`i4`.`name`", values);
+    return in(true, schema.name.getQualifiedName(), values);
   }
 
   public final Item2_Selector nameIn(@NonNull String... values) {
@@ -72,19 +72,19 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
   }
 
   public Item2_Selector nameLt(@NonNull String name) {
-    return where("`i4`.`name` < ?", name);
+    return where(schema.name.getQualifiedName() + " < ?", name);
   }
 
   public Item2_Selector nameLe(@NonNull String name) {
-    return where("`i4`.`name` <= ?", name);
+    return where(schema.name.getQualifiedName() + " <= ?", name);
   }
 
   public Item2_Selector nameGt(@NonNull String name) {
-    return where("`i4`.`name` > ?", name);
+    return where(schema.name.getQualifiedName() + " > ?", name);
   }
 
   public Item2_Selector nameGe(@NonNull String name) {
-    return where("`i4`.`name` >= ?", name);
+    return where(schema.name.getQualifiedName() + " >= ?", name);
   }
 
   public Item2_Selector orderByCategory1Asc() {

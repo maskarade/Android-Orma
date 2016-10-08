@@ -68,15 +68,15 @@ public class Item2_Schema implements Schema<Item2> {
   );
 
   final String[] $DEFAULT_RESULT_COLUMNS = {
-    category1.getSafeName(),
-      category1.associationSchema.name.getSafeName(),
-      category1.associationSchema.id.getSafeName()
+    category1.getQualifiedName(),
+      category1.associationSchema.name.getQualifiedName(),
+      category1.associationSchema.id.getQualifiedName()
     ,
-    category2.getSafeName(),
-      category2.associationSchema.name.getSafeName(),
-      category2.associationSchema.id.getSafeName()
+    category2.getQualifiedName(),
+      category2.associationSchema.name.getQualifiedName(),
+      category2.associationSchema.id.getQualifiedName()
     ,
-    name.getSafeName()
+    name.getQualifiedName()
   };
 
   Item2_Schema(@Nullable String alias) {

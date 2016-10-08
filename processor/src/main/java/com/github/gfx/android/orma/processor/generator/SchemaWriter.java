@@ -348,7 +348,7 @@ public class SchemaWriter extends BaseWriter {
             for (ColumnDefinition upstreamColumnDef : upstream) {
                 builder.add("$L.associationSchema.", upstreamColumnDef.name);
             }
-            builder.add("$L.getSafeName()", column.name);
+            builder.add("$L.getQualifiedName()", column.name);
             if (column.isDirectAssociation()) {
                 builder.add(",\n");
                 builder.add(buildEscapedColumnNamesInitializer(column.getAssociatedSchema(), addList(upstream, column)));

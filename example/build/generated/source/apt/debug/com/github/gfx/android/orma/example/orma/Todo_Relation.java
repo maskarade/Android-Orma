@@ -56,19 +56,19 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation titleEq(@NonNull String title) {
-    return where("`t7`.`title` = ?", title);
+    return where(schema.title.getQualifiedName() + " = ?", title);
   }
 
   public Todo_Relation titleNotEq(@NonNull String title) {
-    return where("`t7`.`title` <> ?", title);
+    return where(schema.title.getQualifiedName() + " <> ?", title);
   }
 
   public Todo_Relation titleIn(@NonNull Collection<String> values) {
-    return in(false, "`t7`.`title`", values);
+    return in(false, schema.title.getQualifiedName(), values);
   }
 
   public Todo_Relation titleNotIn(@NonNull Collection<String> values) {
-    return in(true, "`t7`.`title`", values);
+    return in(true, schema.title.getQualifiedName(), values);
   }
 
   public final Todo_Relation titleIn(@NonNull String... values) {
@@ -80,35 +80,35 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation titleLt(@NonNull String title) {
-    return where("`t7`.`title` < ?", title);
+    return where(schema.title.getQualifiedName() + " < ?", title);
   }
 
   public Todo_Relation titleLe(@NonNull String title) {
-    return where("`t7`.`title` <= ?", title);
+    return where(schema.title.getQualifiedName() + " <= ?", title);
   }
 
   public Todo_Relation titleGt(@NonNull String title) {
-    return where("`t7`.`title` > ?", title);
+    return where(schema.title.getQualifiedName() + " > ?", title);
   }
 
   public Todo_Relation titleGe(@NonNull String title) {
-    return where("`t7`.`title` >= ?", title);
+    return where(schema.title.getQualifiedName() + " >= ?", title);
   }
 
   public Todo_Relation doneEq(boolean done) {
-    return where("`t7`.`done` = ?", done);
+    return where(schema.done.getQualifiedName() + " = ?", done);
   }
 
   public Todo_Relation doneNotEq(boolean done) {
-    return where("`t7`.`done` <> ?", done);
+    return where(schema.done.getQualifiedName() + " <> ?", done);
   }
 
   public Todo_Relation doneIn(@NonNull Collection<Boolean> values) {
-    return in(false, "`t7`.`done`", values);
+    return in(false, schema.done.getQualifiedName(), values);
   }
 
   public Todo_Relation doneNotIn(@NonNull Collection<Boolean> values) {
-    return in(true, "`t7`.`done`", values);
+    return in(true, schema.done.getQualifiedName(), values);
   }
 
   public final Todo_Relation doneIn(@NonNull Boolean... values) {
@@ -120,35 +120,35 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation doneLt(boolean done) {
-    return where("`t7`.`done` < ?", done);
+    return where(schema.done.getQualifiedName() + " < ?", done);
   }
 
   public Todo_Relation doneLe(boolean done) {
-    return where("`t7`.`done` <= ?", done);
+    return where(schema.done.getQualifiedName() + " <= ?", done);
   }
 
   public Todo_Relation doneGt(boolean done) {
-    return where("`t7`.`done` > ?", done);
+    return where(schema.done.getQualifiedName() + " > ?", done);
   }
 
   public Todo_Relation doneGe(boolean done) {
-    return where("`t7`.`done` >= ?", done);
+    return where(schema.done.getQualifiedName() + " >= ?", done);
   }
 
   public Todo_Relation idEq(long id) {
-    return where("`t7`.`id` = ?", id);
+    return where(schema.id.getQualifiedName() + " = ?", id);
   }
 
   public Todo_Relation idNotEq(long id) {
-    return where("`t7`.`id` <> ?", id);
+    return where(schema.id.getQualifiedName() + " <> ?", id);
   }
 
   public Todo_Relation idIn(@NonNull Collection<Long> values) {
-    return in(false, "`t7`.`id`", values);
+    return in(false, schema.id.getQualifiedName(), values);
   }
 
   public Todo_Relation idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "`t7`.`id`", values);
+    return in(true, schema.id.getQualifiedName(), values);
   }
 
   public final Todo_Relation idIn(@NonNull Long... values) {
@@ -160,19 +160,19 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation idLt(long id) {
-    return where("`t7`.`id` < ?", id);
+    return where(schema.id.getQualifiedName() + " < ?", id);
   }
 
   public Todo_Relation idLe(long id) {
-    return where("`t7`.`id` <= ?", id);
+    return where(schema.id.getQualifiedName() + " <= ?", id);
   }
 
   public Todo_Relation idGt(long id) {
-    return where("`t7`.`id` > ?", id);
+    return where(schema.id.getQualifiedName() + " > ?", id);
   }
 
   public Todo_Relation idGe(long id) {
-    return where("`t7`.`id` >= ?", id);
+    return where(schema.id.getQualifiedName() + " >= ?", id);
   }
 
   public Todo_Relation orderByTitleAsc() {

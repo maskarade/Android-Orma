@@ -53,11 +53,11 @@ public class Item_Schema implements Schema<Item> {
   );
 
   final String[] $DEFAULT_RESULT_COLUMNS = {
-    category.getSafeName(),
-      category.associationSchema.name.getSafeName(),
-      category.associationSchema.id.getSafeName()
+    category.getQualifiedName(),
+      category.associationSchema.name.getQualifiedName(),
+      category.associationSchema.id.getQualifiedName()
     ,
-    name.getSafeName()
+    name.getQualifiedName()
   };
 
   Item_Schema(@Nullable String alias) {
@@ -101,8 +101,8 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Item` AS `i5`\n"
-            + " LEFT OUTER JOIN `Category` AS `c2` ON `i5`.`category` = `c2`.`id`";
+    return "`Item` AS `i4`\n"
+            + " LEFT OUTER JOIN `Category` AS `c2` ON `i4`.`category` = `c2`.`id`";
   }
 
   @NonNull

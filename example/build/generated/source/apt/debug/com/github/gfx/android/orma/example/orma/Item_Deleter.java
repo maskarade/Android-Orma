@@ -26,27 +26,27 @@ public class Item_Deleter extends Deleter<Item, Item_Deleter> {
   }
 
   public Item_Deleter categoryEq(@NonNull Category category) {
-    return where("`i5`.`category` = ?", category.id /* primary key */);
+    return where(schema.category.getQualifiedName() + " = ?", category.id /* primary key */);
   }
 
   public Item_Deleter categoryEq(long categoryId) {
-    return where("`i5`.`category` = ?", categoryId);
+    return where(schema.category.getQualifiedName() + " = ?", categoryId);
   }
 
   public Item_Deleter nameEq(@NonNull String name) {
-    return where("`i5`.`name` = ?", name);
+    return where(schema.name.getQualifiedName() + " = ?", name);
   }
 
   public Item_Deleter nameNotEq(@NonNull String name) {
-    return where("`i5`.`name` <> ?", name);
+    return where(schema.name.getQualifiedName() + " <> ?", name);
   }
 
   public Item_Deleter nameIn(@NonNull Collection<String> values) {
-    return in(false, "`i5`.`name`", values);
+    return in(false, schema.name.getQualifiedName(), values);
   }
 
   public Item_Deleter nameNotIn(@NonNull Collection<String> values) {
-    return in(true, "`i5`.`name`", values);
+    return in(true, schema.name.getQualifiedName(), values);
   }
 
   public final Item_Deleter nameIn(@NonNull String... values) {
@@ -58,18 +58,18 @@ public class Item_Deleter extends Deleter<Item, Item_Deleter> {
   }
 
   public Item_Deleter nameLt(@NonNull String name) {
-    return where("`i5`.`name` < ?", name);
+    return where(schema.name.getQualifiedName() + " < ?", name);
   }
 
   public Item_Deleter nameLe(@NonNull String name) {
-    return where("`i5`.`name` <= ?", name);
+    return where(schema.name.getQualifiedName() + " <= ?", name);
   }
 
   public Item_Deleter nameGt(@NonNull String name) {
-    return where("`i5`.`name` > ?", name);
+    return where(schema.name.getQualifiedName() + " > ?", name);
   }
 
   public Item_Deleter nameGe(@NonNull String name) {
-    return where("`i5`.`name` >= ?", name);
+    return where(schema.name.getQualifiedName() + " >= ?", name);
   }
 }

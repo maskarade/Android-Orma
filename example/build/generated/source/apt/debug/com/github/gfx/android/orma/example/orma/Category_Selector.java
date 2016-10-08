@@ -32,19 +32,19 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
   }
 
   public Category_Selector idEq(long id) {
-    return where("`c6`.`id` = ?", id);
+    return where(schema.id.getQualifiedName() + " = ?", id);
   }
 
   public Category_Selector idNotEq(long id) {
-    return where("`c6`.`id` <> ?", id);
+    return where(schema.id.getQualifiedName() + " <> ?", id);
   }
 
   public Category_Selector idIn(@NonNull Collection<Long> values) {
-    return in(false, "`c6`.`id`", values);
+    return in(false, schema.id.getQualifiedName(), values);
   }
 
   public Category_Selector idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "`c6`.`id`", values);
+    return in(true, schema.id.getQualifiedName(), values);
   }
 
   public final Category_Selector idIn(@NonNull Long... values) {
@@ -56,18 +56,18 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
   }
 
   public Category_Selector idLt(long id) {
-    return where("`c6`.`id` < ?", id);
+    return where(schema.id.getQualifiedName() + " < ?", id);
   }
 
   public Category_Selector idLe(long id) {
-    return where("`c6`.`id` <= ?", id);
+    return where(schema.id.getQualifiedName() + " <= ?", id);
   }
 
   public Category_Selector idGt(long id) {
-    return where("`c6`.`id` > ?", id);
+    return where(schema.id.getQualifiedName() + " > ?", id);
   }
 
   public Category_Selector idGe(long id) {
-    return where("`c6`.`id` >= ?", id);
+    return where(schema.id.getQualifiedName() + " >= ?", id);
   }
 }

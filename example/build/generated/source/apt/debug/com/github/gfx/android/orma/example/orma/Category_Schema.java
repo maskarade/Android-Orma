@@ -53,8 +53,8 @@ public class Category_Schema implements Schema<Category> {
   );
 
   final String[] $DEFAULT_RESULT_COLUMNS = {
-    name.getSafeName(),
-    id.getSafeName()
+    name.getQualifiedName(),
+    id.getQualifiedName()
   };
 
   Category_Schema(@Nullable String alias) {

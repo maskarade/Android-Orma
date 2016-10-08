@@ -26,19 +26,19 @@ public class Category_Deleter extends Deleter<Category, Category_Deleter> {
   }
 
   public Category_Deleter idEq(long id) {
-    return where("`c6`.`id` = ?", id);
+    return where(schema.id.getQualifiedName() + " = ?", id);
   }
 
   public Category_Deleter idNotEq(long id) {
-    return where("`c6`.`id` <> ?", id);
+    return where(schema.id.getQualifiedName() + " <> ?", id);
   }
 
   public Category_Deleter idIn(@NonNull Collection<Long> values) {
-    return in(false, "`c6`.`id`", values);
+    return in(false, schema.id.getQualifiedName(), values);
   }
 
   public Category_Deleter idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "`c6`.`id`", values);
+    return in(true, schema.id.getQualifiedName(), values);
   }
 
   public final Category_Deleter idIn(@NonNull Long... values) {
@@ -50,18 +50,18 @@ public class Category_Deleter extends Deleter<Category, Category_Deleter> {
   }
 
   public Category_Deleter idLt(long id) {
-    return where("`c6`.`id` < ?", id);
+    return where(schema.id.getQualifiedName() + " < ?", id);
   }
 
   public Category_Deleter idLe(long id) {
-    return where("`c6`.`id` <= ?", id);
+    return where(schema.id.getQualifiedName() + " <= ?", id);
   }
 
   public Category_Deleter idGt(long id) {
-    return where("`c6`.`id` > ?", id);
+    return where(schema.id.getQualifiedName() + " > ?", id);
   }
 
   public Category_Deleter idGe(long id) {
-    return where("`c6`.`id` >= ?", id);
+    return where(schema.id.getQualifiedName() + " >= ?", id);
   }
 }

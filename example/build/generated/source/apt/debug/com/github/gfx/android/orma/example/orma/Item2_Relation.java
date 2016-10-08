@@ -56,35 +56,35 @@ public class Item2_Relation extends Relation<Item2, Item2_Relation> {
   }
 
   public Item2_Relation category1Eq(@NonNull Category category1) {
-    return where("`i4`.`category1` = ?", category1.id /* primary key */);
+    return where(schema.category1.getQualifiedName() + " = ?", category1.id /* primary key */);
   }
 
   public Item2_Relation category1Eq(long category1Id) {
-    return where("`i4`.`category1` = ?", category1Id);
+    return where(schema.category1.getQualifiedName() + " = ?", category1Id);
   }
 
   public Item2_Relation category2Eq(@NonNull Category category2) {
-    return where("`i4`.`category2` = ?", category2.id /* primary key */);
+    return where(schema.category2.getQualifiedName() + " = ?", category2.id /* primary key */);
   }
 
   public Item2_Relation category2Eq(long category2Id) {
-    return where("`i4`.`category2` = ?", category2Id);
+    return where(schema.category2.getQualifiedName() + " = ?", category2Id);
   }
 
   public Item2_Relation nameEq(@NonNull String name) {
-    return where("`i4`.`name` = ?", name);
+    return where(schema.name.getQualifiedName() + " = ?", name);
   }
 
   public Item2_Relation nameNotEq(@NonNull String name) {
-    return where("`i4`.`name` <> ?", name);
+    return where(schema.name.getQualifiedName() + " <> ?", name);
   }
 
   public Item2_Relation nameIn(@NonNull Collection<String> values) {
-    return in(false, "`i4`.`name`", values);
+    return in(false, schema.name.getQualifiedName(), values);
   }
 
   public Item2_Relation nameNotIn(@NonNull Collection<String> values) {
-    return in(true, "`i4`.`name`", values);
+    return in(true, schema.name.getQualifiedName(), values);
   }
 
   public final Item2_Relation nameIn(@NonNull String... values) {
@@ -96,19 +96,19 @@ public class Item2_Relation extends Relation<Item2, Item2_Relation> {
   }
 
   public Item2_Relation nameLt(@NonNull String name) {
-    return where("`i4`.`name` < ?", name);
+    return where(schema.name.getQualifiedName() + " < ?", name);
   }
 
   public Item2_Relation nameLe(@NonNull String name) {
-    return where("`i4`.`name` <= ?", name);
+    return where(schema.name.getQualifiedName() + " <= ?", name);
   }
 
   public Item2_Relation nameGt(@NonNull String name) {
-    return where("`i4`.`name` > ?", name);
+    return where(schema.name.getQualifiedName() + " > ?", name);
   }
 
   public Item2_Relation nameGe(@NonNull String name) {
-    return where("`i4`.`name` >= ?", name);
+    return where(schema.name.getQualifiedName() + " >= ?", name);
   }
 
   public Item2_Relation orderByCategory1Asc() {

@@ -53,7 +53,7 @@ public class SchemaTest {
         assertThat(schema.name.name, is("name"));
         assertThat(schema.name.schema, is((Schema<Publisher>) schema));
         assertThat(schema.name.getEscapedName(), is(notNullValue()));
-        assertThat(schema.name.getFullyQualifiedName(), is(notNullValue()));
+        assertThat(schema.name.getQualifiedName(), is(notNullValue()));
 
         assertThat(schema.startedYear.name, is("started_year"));
         assertThat(schema.startedMonth.name, is("started_month"));
