@@ -99,8 +99,9 @@ public class SchemaWriter extends BaseWriter {
     public List<FieldSpec> buildFieldSpecs() {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
 
+        String alias = schema.hasDirectAssociations() ? '"' + context.getAliasName(schema.getTableName()) + '"' : "";
         fieldSpecs.add(FieldSpec.builder(schema.getSchemaClassName(), "INSTANCE", publicStaticFinal)
-                .initializer("$T.register(new $T())", Types.Schemas, schema.getSchemaClassName())
+                .initializer("$T.register(new $T($L))", Types.Schemas, schema.getSchemaClassName(), alias)
                 .build());
 
         fieldSpecs.add(FieldSpec.builder(Types.String, "alias", publicFinal)
