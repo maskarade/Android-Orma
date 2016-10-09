@@ -54,19 +54,19 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater titleEq(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " = ?", title);
+    return where(schema.title, "=", title);
   }
 
   public Todo_Updater titleNotEq(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " <> ?", title);
+    return where(schema.title, "<>", title);
   }
 
   public Todo_Updater titleIn(@NonNull Collection<String> values) {
-    return in(false, schema.title.getQualifiedName(), values);
+    return in(false, schema.title, values);
   }
 
   public Todo_Updater titleNotIn(@NonNull Collection<String> values) {
-    return in(true, schema.title.getQualifiedName(), values);
+    return in(true, schema.title, values);
   }
 
   public final Todo_Updater titleIn(@NonNull String... values) {
@@ -78,35 +78,35 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater titleLt(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " < ?", title);
+    return where(schema.title, "<", title);
   }
 
   public Todo_Updater titleLe(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " <= ?", title);
+    return where(schema.title, "<=", title);
   }
 
   public Todo_Updater titleGt(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " > ?", title);
+    return where(schema.title, ">", title);
   }
 
   public Todo_Updater titleGe(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " >= ?", title);
+    return where(schema.title, ">=", title);
   }
 
   public Todo_Updater doneEq(boolean done) {
-    return where(schema.done.getQualifiedName() + " = ?", done);
+    return where(schema.done, "=", done);
   }
 
   public Todo_Updater doneNotEq(boolean done) {
-    return where(schema.done.getQualifiedName() + " <> ?", done);
+    return where(schema.done, "<>", done);
   }
 
   public Todo_Updater doneIn(@NonNull Collection<Boolean> values) {
-    return in(false, schema.done.getQualifiedName(), values);
+    return in(false, schema.done, values);
   }
 
   public Todo_Updater doneNotIn(@NonNull Collection<Boolean> values) {
-    return in(true, schema.done.getQualifiedName(), values);
+    return in(true, schema.done, values);
   }
 
   public final Todo_Updater doneIn(@NonNull Boolean... values) {
@@ -118,35 +118,35 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater doneLt(boolean done) {
-    return where(schema.done.getQualifiedName() + " < ?", done);
+    return where(schema.done, "<", done);
   }
 
   public Todo_Updater doneLe(boolean done) {
-    return where(schema.done.getQualifiedName() + " <= ?", done);
+    return where(schema.done, "<=", done);
   }
 
   public Todo_Updater doneGt(boolean done) {
-    return where(schema.done.getQualifiedName() + " > ?", done);
+    return where(schema.done, ">", done);
   }
 
   public Todo_Updater doneGe(boolean done) {
-    return where(schema.done.getQualifiedName() + " >= ?", done);
+    return where(schema.done, ">=", done);
   }
 
   public Todo_Updater idEq(long id) {
-    return where(schema.id.getQualifiedName() + " = ?", id);
+    return where(schema.id, "=", id);
   }
 
   public Todo_Updater idNotEq(long id) {
-    return where(schema.id.getQualifiedName() + " <> ?", id);
+    return where(schema.id, "<>", id);
   }
 
   public Todo_Updater idIn(@NonNull Collection<Long> values) {
-    return in(false, schema.id.getQualifiedName(), values);
+    return in(false, schema.id, values);
   }
 
   public Todo_Updater idNotIn(@NonNull Collection<Long> values) {
-    return in(true, schema.id.getQualifiedName(), values);
+    return in(true, schema.id, values);
   }
 
   public final Todo_Updater idIn(@NonNull Long... values) {
@@ -158,18 +158,18 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater idLt(long id) {
-    return where(schema.id.getQualifiedName() + " < ?", id);
+    return where(schema.id, "<", id);
   }
 
   public Todo_Updater idLe(long id) {
-    return where(schema.id.getQualifiedName() + " <= ?", id);
+    return where(schema.id, "<=", id);
   }
 
   public Todo_Updater idGt(long id) {
-    return where(schema.id.getQualifiedName() + " > ?", id);
+    return where(schema.id, ">", id);
   }
 
   public Todo_Updater idGe(long id) {
-    return where(schema.id.getQualifiedName() + " >= ?", id);
+    return where(schema.id, ">=", id);
   }
 }

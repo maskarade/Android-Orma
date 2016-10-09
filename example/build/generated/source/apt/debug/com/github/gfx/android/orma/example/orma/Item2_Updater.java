@@ -41,35 +41,35 @@ public class Item2_Updater extends Updater<Item2, Item2_Updater> {
   }
 
   public Item2_Updater category1Eq(@NonNull Category category1) {
-    return where(schema.category1.getQualifiedName() + " = ?", category1.id /* primary key */);
+    return where(schema.category1, "=", category1.id /* primary key */);
   }
 
   public Item2_Updater category1Eq(long category1Id) {
-    return where(schema.category1.getQualifiedName() + " = ?", category1Id);
+    return where(schema.category1, "=", category1Id);
   }
 
   public Item2_Updater category2Eq(@NonNull Category category2) {
-    return where(schema.category2.getQualifiedName() + " = ?", category2.id /* primary key */);
+    return where(schema.category2, "=", category2.id /* primary key */);
   }
 
   public Item2_Updater category2Eq(long category2Id) {
-    return where(schema.category2.getQualifiedName() + " = ?", category2Id);
+    return where(schema.category2, "=", category2Id);
   }
 
   public Item2_Updater nameEq(@NonNull String name) {
-    return where(schema.name.getQualifiedName() + " = ?", name);
+    return where(schema.name, "=", name);
   }
 
   public Item2_Updater nameNotEq(@NonNull String name) {
-    return where(schema.name.getQualifiedName() + " <> ?", name);
+    return where(schema.name, "<>", name);
   }
 
   public Item2_Updater nameIn(@NonNull Collection<String> values) {
-    return in(false, schema.name.getQualifiedName(), values);
+    return in(false, schema.name, values);
   }
 
   public Item2_Updater nameNotIn(@NonNull Collection<String> values) {
-    return in(true, schema.name.getQualifiedName(), values);
+    return in(true, schema.name, values);
   }
 
   public final Item2_Updater nameIn(@NonNull String... values) {
@@ -81,18 +81,18 @@ public class Item2_Updater extends Updater<Item2, Item2_Updater> {
   }
 
   public Item2_Updater nameLt(@NonNull String name) {
-    return where(schema.name.getQualifiedName() + " < ?", name);
+    return where(schema.name, "<", name);
   }
 
   public Item2_Updater nameLe(@NonNull String name) {
-    return where(schema.name.getQualifiedName() + " <= ?", name);
+    return where(schema.name, "<=", name);
   }
 
   public Item2_Updater nameGt(@NonNull String name) {
-    return where(schema.name.getQualifiedName() + " > ?", name);
+    return where(schema.name, ">", name);
   }
 
   public Item2_Updater nameGe(@NonNull String name) {
-    return where(schema.name.getQualifiedName() + " >= ?", name);
+    return where(schema.name, ">=", name);
   }
 }

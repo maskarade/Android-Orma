@@ -32,19 +32,19 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
   }
 
   public Todo_Selector titleEq(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " = ?", title);
+    return where(schema.title, "=", title);
   }
 
   public Todo_Selector titleNotEq(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " <> ?", title);
+    return where(schema.title, "<>", title);
   }
 
   public Todo_Selector titleIn(@NonNull Collection<String> values) {
-    return in(false, schema.title.getQualifiedName(), values);
+    return in(false, schema.title, values);
   }
 
   public Todo_Selector titleNotIn(@NonNull Collection<String> values) {
-    return in(true, schema.title.getQualifiedName(), values);
+    return in(true, schema.title, values);
   }
 
   public final Todo_Selector titleIn(@NonNull String... values) {
@@ -56,35 +56,35 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
   }
 
   public Todo_Selector titleLt(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " < ?", title);
+    return where(schema.title, "<", title);
   }
 
   public Todo_Selector titleLe(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " <= ?", title);
+    return where(schema.title, "<=", title);
   }
 
   public Todo_Selector titleGt(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " > ?", title);
+    return where(schema.title, ">", title);
   }
 
   public Todo_Selector titleGe(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " >= ?", title);
+    return where(schema.title, ">=", title);
   }
 
   public Todo_Selector doneEq(boolean done) {
-    return where(schema.done.getQualifiedName() + " = ?", done);
+    return where(schema.done, "=", done);
   }
 
   public Todo_Selector doneNotEq(boolean done) {
-    return where(schema.done.getQualifiedName() + " <> ?", done);
+    return where(schema.done, "<>", done);
   }
 
   public Todo_Selector doneIn(@NonNull Collection<Boolean> values) {
-    return in(false, schema.done.getQualifiedName(), values);
+    return in(false, schema.done, values);
   }
 
   public Todo_Selector doneNotIn(@NonNull Collection<Boolean> values) {
-    return in(true, schema.done.getQualifiedName(), values);
+    return in(true, schema.done, values);
   }
 
   public final Todo_Selector doneIn(@NonNull Boolean... values) {
@@ -96,35 +96,35 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
   }
 
   public Todo_Selector doneLt(boolean done) {
-    return where(schema.done.getQualifiedName() + " < ?", done);
+    return where(schema.done, "<", done);
   }
 
   public Todo_Selector doneLe(boolean done) {
-    return where(schema.done.getQualifiedName() + " <= ?", done);
+    return where(schema.done, "<=", done);
   }
 
   public Todo_Selector doneGt(boolean done) {
-    return where(schema.done.getQualifiedName() + " > ?", done);
+    return where(schema.done, ">", done);
   }
 
   public Todo_Selector doneGe(boolean done) {
-    return where(schema.done.getQualifiedName() + " >= ?", done);
+    return where(schema.done, ">=", done);
   }
 
   public Todo_Selector idEq(long id) {
-    return where(schema.id.getQualifiedName() + " = ?", id);
+    return where(schema.id, "=", id);
   }
 
   public Todo_Selector idNotEq(long id) {
-    return where(schema.id.getQualifiedName() + " <> ?", id);
+    return where(schema.id, "<>", id);
   }
 
   public Todo_Selector idIn(@NonNull Collection<Long> values) {
-    return in(false, schema.id.getQualifiedName(), values);
+    return in(false, schema.id, values);
   }
 
   public Todo_Selector idNotIn(@NonNull Collection<Long> values) {
-    return in(true, schema.id.getQualifiedName(), values);
+    return in(true, schema.id, values);
   }
 
   public final Todo_Selector idIn(@NonNull Long... values) {
@@ -136,19 +136,19 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
   }
 
   public Todo_Selector idLt(long id) {
-    return where(schema.id.getQualifiedName() + " < ?", id);
+    return where(schema.id, "<", id);
   }
 
   public Todo_Selector idLe(long id) {
-    return where(schema.id.getQualifiedName() + " <= ?", id);
+    return where(schema.id, "<=", id);
   }
 
   public Todo_Selector idGt(long id) {
-    return where(schema.id.getQualifiedName() + " > ?", id);
+    return where(schema.id, ">", id);
   }
 
   public Todo_Selector idGe(long id) {
-    return where(schema.id.getQualifiedName() + " >= ?", id);
+    return where(schema.id, ">=", id);
   }
 
   public Todo_Selector orderByTitleAsc() {

@@ -89,8 +89,7 @@ public class ConditionQueryHelpers {
 
         List<AnnotationSpec> safeVarargsIfNeeded = Annotations.safeVarargsIfNeeded(column.getType());
 
-        // TODO: Use column.getSafeColumnName(null) if there is no direct association
-        String columnNameExpr = "schema." + column.name + ".getQualifiedName()";
+        String columnExpr = "schema." + column.name;
 
         CodeBlock serializedFieldExpr;
         if (isAssociation) {
@@ -110,7 +109,7 @@ public class ConditionQueryHelpers {
             methodSpecs.add(MethodSpec.methodBuilder(column.name + "IsNull")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(targetClassName)
-                    .addStatement("return where($L + $S)", columnNameExpr, " IS NULL")
+                    .addStatement("return where($L, $S)", columnExpr, " IS NULL")
                     .build()
             );
         }
@@ -119,7 +118,7 @@ public class ConditionQueryHelpers {
             methodSpecs.add(MethodSpec.methodBuilder(column.name + "IsNotNull")
                     .addModifiers(Modifier.PUBLIC)
                     .returns(targetClassName)
-                    .addStatement("return where($L + $S)", columnNameExpr, " IS NOT NULL")
+                    .addStatement("return where($L, $S)", columnExpr, " IS NOT NULL")
                     .build()
             );
         }
@@ -129,7 +128,7 @@ public class ConditionQueryHelpers {
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(paramSpec)
                     .returns(targetClassName)
-                    .addStatement("return where($L + $S, $L)", columnNameExpr, " = ?", serializedFieldExpr)
+                    .addStatement("return where($L, $S, $L)", columnExpr, "=", serializedFieldExpr)
                     .build()
             );
         }
@@ -148,7 +147,7 @@ public class ConditionQueryHelpers {
                                                     .addAnnotations(foreignKey.nullabilityAnnotations())
                                                     .build())
                                     .returns(targetClassName)
-                                    .addStatement("return where($L + $S, $L)", columnNameExpr, " = ?", paramName)
+                                    .addStatement("return where($L, $S, $L)", columnExpr, "=", paramName)
                                     .build()
                     );
                 });
@@ -163,7 +162,7 @@ public class ConditionQueryHelpers {
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(paramSpec)
                     .returns(targetClassName)
-                    .addStatement("return where($L + $S, $L)", columnNameExpr, " <> ?",
+                    .addStatement("return where($L, $S, $L)", columnExpr, "<>",
                             serializedFieldExpr)
                     .build()
             );
@@ -189,7 +188,7 @@ public class ConditionQueryHelpers {
                                 .build())
                         .returns(targetClassName)
                         .addStatement("return in(false, $L, values, $L)",
-                                columnNameExpr, serializerFunction)
+                                columnExpr, serializerFunction)
                         .build()
                 );
             }
@@ -202,7 +201,7 @@ public class ConditionQueryHelpers {
                                 .build())
                         .returns(targetClassName)
                         .addStatement("return in(true, $L, values, $L)",
-                                columnNameExpr, serializerFunction)
+                                columnExpr, serializerFunction)
                         .build()
                 );
             }
@@ -216,7 +215,7 @@ public class ConditionQueryHelpers {
                                 .build())
                         .returns(targetClassName)
                         .addStatement("return in(false, $L, values)",
-                                columnNameExpr)
+                                columnExpr)
                         .build()
                 );
             }
@@ -229,7 +228,7 @@ public class ConditionQueryHelpers {
                                 .build())
                         .returns(targetClassName)
                         .addStatement("return in(true, $L, values)",
-                                columnNameExpr)
+                                columnExpr)
                         .build()
                 );
             }
@@ -272,8 +271,8 @@ public class ConditionQueryHelpers {
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(paramSpec)
                     .returns(targetClassName)
-                    .addStatement("return where($L + $S, $L)",
-                            columnNameExpr, " < ?",
+                    .addStatement("return where($L, $S, $L)",
+                            columnExpr, "<",
                             serializedFieldExpr)
                     .build()
             );
@@ -283,8 +282,8 @@ public class ConditionQueryHelpers {
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(paramSpec)
                     .returns(targetClassName)
-                    .addStatement("return where($L + $S, $L)",
-                            columnNameExpr, " <= ?",
+                    .addStatement("return where($L, $S, $L)",
+                            columnExpr, "<=",
                             serializedFieldExpr)
                     .build()
             );
@@ -294,8 +293,8 @@ public class ConditionQueryHelpers {
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(paramSpec)
                     .returns(targetClassName)
-                    .addStatement("return where($L + $S, $L)",
-                            columnNameExpr, " > ?",
+                    .addStatement("return where($L, $S, $L)",
+                            columnExpr, ">",
                             serializedFieldExpr)
                     .build()
             );
@@ -305,8 +304,8 @@ public class ConditionQueryHelpers {
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(paramSpec)
                     .returns(targetClassName)
-                    .addStatement("return where($L + $S, $L)",
-                            columnNameExpr, " >= ?",
+                    .addStatement("return where($L, $S, $L)",
+                            columnExpr, ">=",
                             serializedFieldExpr)
                     .build()
             );

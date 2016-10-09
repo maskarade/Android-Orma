@@ -26,19 +26,19 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter titleEq(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " = ?", title);
+    return where(schema.title, "=", title);
   }
 
   public Todo_Deleter titleNotEq(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " <> ?", title);
+    return where(schema.title, "<>", title);
   }
 
   public Todo_Deleter titleIn(@NonNull Collection<String> values) {
-    return in(false, schema.title.getQualifiedName(), values);
+    return in(false, schema.title, values);
   }
 
   public Todo_Deleter titleNotIn(@NonNull Collection<String> values) {
-    return in(true, schema.title.getQualifiedName(), values);
+    return in(true, schema.title, values);
   }
 
   public final Todo_Deleter titleIn(@NonNull String... values) {
@@ -50,35 +50,35 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter titleLt(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " < ?", title);
+    return where(schema.title, "<", title);
   }
 
   public Todo_Deleter titleLe(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " <= ?", title);
+    return where(schema.title, "<=", title);
   }
 
   public Todo_Deleter titleGt(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " > ?", title);
+    return where(schema.title, ">", title);
   }
 
   public Todo_Deleter titleGe(@NonNull String title) {
-    return where(schema.title.getQualifiedName() + " >= ?", title);
+    return where(schema.title, ">=", title);
   }
 
   public Todo_Deleter doneEq(boolean done) {
-    return where(schema.done.getQualifiedName() + " = ?", done);
+    return where(schema.done, "=", done);
   }
 
   public Todo_Deleter doneNotEq(boolean done) {
-    return where(schema.done.getQualifiedName() + " <> ?", done);
+    return where(schema.done, "<>", done);
   }
 
   public Todo_Deleter doneIn(@NonNull Collection<Boolean> values) {
-    return in(false, schema.done.getQualifiedName(), values);
+    return in(false, schema.done, values);
   }
 
   public Todo_Deleter doneNotIn(@NonNull Collection<Boolean> values) {
-    return in(true, schema.done.getQualifiedName(), values);
+    return in(true, schema.done, values);
   }
 
   public final Todo_Deleter doneIn(@NonNull Boolean... values) {
@@ -90,35 +90,35 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter doneLt(boolean done) {
-    return where(schema.done.getQualifiedName() + " < ?", done);
+    return where(schema.done, "<", done);
   }
 
   public Todo_Deleter doneLe(boolean done) {
-    return where(schema.done.getQualifiedName() + " <= ?", done);
+    return where(schema.done, "<=", done);
   }
 
   public Todo_Deleter doneGt(boolean done) {
-    return where(schema.done.getQualifiedName() + " > ?", done);
+    return where(schema.done, ">", done);
   }
 
   public Todo_Deleter doneGe(boolean done) {
-    return where(schema.done.getQualifiedName() + " >= ?", done);
+    return where(schema.done, ">=", done);
   }
 
   public Todo_Deleter idEq(long id) {
-    return where(schema.id.getQualifiedName() + " = ?", id);
+    return where(schema.id, "=", id);
   }
 
   public Todo_Deleter idNotEq(long id) {
-    return where(schema.id.getQualifiedName() + " <> ?", id);
+    return where(schema.id, "<>", id);
   }
 
   public Todo_Deleter idIn(@NonNull Collection<Long> values) {
-    return in(false, schema.id.getQualifiedName(), values);
+    return in(false, schema.id, values);
   }
 
   public Todo_Deleter idNotIn(@NonNull Collection<Long> values) {
-    return in(true, schema.id.getQualifiedName(), values);
+    return in(true, schema.id, values);
   }
 
   public final Todo_Deleter idIn(@NonNull Long... values) {
@@ -130,18 +130,18 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   }
 
   public Todo_Deleter idLt(long id) {
-    return where(schema.id.getQualifiedName() + " < ?", id);
+    return where(schema.id, "<", id);
   }
 
   public Todo_Deleter idLe(long id) {
-    return where(schema.id.getQualifiedName() + " <= ?", id);
+    return where(schema.id, "<=", id);
   }
 
   public Todo_Deleter idGt(long id) {
-    return where(schema.id.getQualifiedName() + " > ?", id);
+    return where(schema.id, ">", id);
   }
 
   public Todo_Deleter idGe(long id) {
-    return where(schema.id.getQualifiedName() + " >= ?", id);
+    return where(schema.id, ">=", id);
   }
 }

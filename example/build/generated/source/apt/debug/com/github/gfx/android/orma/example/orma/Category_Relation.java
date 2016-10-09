@@ -56,19 +56,19 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
   }
 
   public Category_Relation idEq(long id) {
-    return where(schema.id.getQualifiedName() + " = ?", id);
+    return where(schema.id, "=", id);
   }
 
   public Category_Relation idNotEq(long id) {
-    return where(schema.id.getQualifiedName() + " <> ?", id);
+    return where(schema.id, "<>", id);
   }
 
   public Category_Relation idIn(@NonNull Collection<Long> values) {
-    return in(false, schema.id.getQualifiedName(), values);
+    return in(false, schema.id, values);
   }
 
   public Category_Relation idNotIn(@NonNull Collection<Long> values) {
-    return in(true, schema.id.getQualifiedName(), values);
+    return in(true, schema.id, values);
   }
 
   public final Category_Relation idIn(@NonNull Long... values) {
@@ -80,18 +80,18 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
   }
 
   public Category_Relation idLt(long id) {
-    return where(schema.id.getQualifiedName() + " < ?", id);
+    return where(schema.id, "<", id);
   }
 
   public Category_Relation idLe(long id) {
-    return where(schema.id.getQualifiedName() + " <= ?", id);
+    return where(schema.id, "<=", id);
   }
 
   public Category_Relation idGt(long id) {
-    return where(schema.id.getQualifiedName() + " > ?", id);
+    return where(schema.id, ">", id);
   }
 
   public Category_Relation idGe(long id) {
-    return where(schema.id.getQualifiedName() + " >= ?", id);
+    return where(schema.id, ">=", id);
   }
 }

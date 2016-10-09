@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.internal;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
+import com.github.gfx.android.orma.Selector;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -96,7 +97,14 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
 
     @SuppressWarnings("unchecked")
     public C where(@NonNull ColumnDef<Model, ?> column, @NonNull String operator, @NonNull Object value) {
-        return where(column.getQualifiedName() + ' ' + operator + " ?", value);
+        String columnName = (this instanceof Selector) ? column.getQualifiedName() : column.getEscapedName();
+        return where(columnName + ' ' + operator + " ?", value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public C where(@NonNull ColumnDef<Model, ?> column, @NonNull String postfixOperator) {
+        String columnName = (this instanceof Selector) ? column.getQualifiedName() : column.getEscapedName();
+        return where(columnName + ' ' + postfixOperator);
     }
 
     @SuppressWarnings("unchecked")
@@ -105,7 +113,9 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     }
 
     @SuppressWarnings("unchecked")
-    protected C in(boolean not, @NonNull String columnName, @NonNull Collection<?> values) {
+    protected C in(boolean not, @NonNull ColumnDef<Model, ?> column, @NonNull Collection<?> values) {
+        String columnName = (this instanceof Selector) ? column.getQualifiedName() : column.getEscapedName();
+
         StringBuilder clause = new StringBuilder();
 
         clause.append(columnName);
@@ -126,15 +136,14 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     }
 
     @SuppressWarnings("unchecked")
-    protected <ColumnType, SerializedType> C in(boolean not, @NonNull String columnName,
+    protected <ColumnType, SerializedType> C in(boolean not, @NonNull ColumnDef<Model, ?> column,
             @NonNull Collection<ColumnType> values, Func1<ColumnType, SerializedType> serializer) {
         List<SerializedType> serializedValues = new ArrayList<>(values.size());
         for (ColumnType value : values) {
             serializedValues.add(serializer.call(value));
         }
-        return in(not, columnName, serializedValues);
+        return in(not, column, serializedValues);
     }
-
 
     /**
      * {@code and()} changes the conjunction to {@code AND} (default).
