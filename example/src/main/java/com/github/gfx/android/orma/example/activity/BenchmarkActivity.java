@@ -93,14 +93,15 @@ public class BenchmarkActivity extends AppCompatActivity {
         binding.list.setAdapter(adapter);
 
         binding.run.setOnClickListener(v -> run());
+
+        Realm.init(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        RealmConfiguration realmConf = new RealmConfiguration.Builder(BenchmarkActivity.this)
-                .build();
+        RealmConfiguration realmConf = new RealmConfiguration.Builder().build();
         Realm.setDefaultConfiguration(realmConf);
         Realm.deleteRealm(realmConf);
 
@@ -111,7 +112,6 @@ public class BenchmarkActivity extends AppCompatActivity {
                     .name("orma-benchmark.db")
                     .readOnMainThread(AccessThreadConstraint.NONE)
                     .writeOnMainThread(AccessThreadConstraint.NONE)
-                    .writeAheadLogging(false)
                     .trace(false)
                     .build();
             orma.migrate();
