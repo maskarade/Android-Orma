@@ -784,15 +784,6 @@ Check your toolchain. FYI here are my toolchain versions:
 * Android SDK Build Tools 24 or later
 * Android Gradle Plugin 2.2.0 or later
 
-### Is there a real-world example that uses Orma?
-
-* [gfx/Android-Helium](https://github.com/gfx/Android-Helium)
-* [konifar/droidkaigi2016](https://github.com/konifar/droidkaigi2016)
-
-They are Android apps which uses Orma and are released to Google Play.
-
-They also uses Google Dagger, Android DataBinding, Google Play Services, and etc.
-
 ### How can I enable debug logging on release build?
 
 Call `OrmaDatabase.Builder#trace(boolean)` with `true`:
@@ -823,7 +814,23 @@ You can see [generated files for example models](example/build/generated/source/
 
 Yes. Here is an example to use Orma with Kotlin: https://github.com/gfx/Orma-Kotlin-Example
 
-NOTE: Kotlin APT support, a.k.a. _kapt_, is not stable. Don't ask me for kapt problems.
+NOTE: Kotlin APT support, a.k.a. _kapt_, is **not stable**. Don't ask me for kapt problems.
+
+### Is there a real-world example that uses Orma?
+
+* [gfx/Android-Helium](https://github.com/gfx/Android-Helium)
+* [konifar/droidkaigi2016](https://github.com/konifar/droidkaigi2016)
+
+They are open-source Android apps which use Orma, and are released to Google Play.
+
+### Who uses Orma in production?
+
+As far as I know, those Android apps use Orma:
+
+* [Cookpad (ja)](https://play.google.com/store/apps/details?id=com.cookpad.android.activities)
+* [Abema TV (ja)](https://play.google.com/store/apps/details?id=tv.abema)
+
+Tell me if you use Orma!
 
 ## Support
 
