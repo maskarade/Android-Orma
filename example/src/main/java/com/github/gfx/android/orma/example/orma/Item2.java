@@ -14,24 +14,36 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.test.model;
+package com.github.gfx.android.orma.example.orma;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 
+import android.support.annotation.NonNull;
+
+/**
+ * To demonstrate multiple associations to the same model.
+ *
+ * @see Item2_Schema
+ */
 @Table
-public class ModelWithDirectAssociation {
+public class Item2 {
 
     @PrimaryKey
-    public String name;
+    public final String name;
 
     @Column(indexed = true)
-    public Author author;
+    public final Category category1;
 
     @Column(indexed = true)
-    public Publisher publisher;
+    public final Category category2;
 
-    @Column(indexed = true)
-    public String note; // the same name as Author#note
+    @Setter
+    public Item2(@NonNull String name, @NonNull Category category1, @NonNull Category category2) {
+        this.name = name;
+        this.category1 = category1;
+        this.category2 = category2;
+    }
 }

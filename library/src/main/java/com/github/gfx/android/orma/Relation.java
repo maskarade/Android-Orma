@@ -44,8 +44,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     final protected ArrayList<OrderSpec<Model>> orderSpecs = new ArrayList<>();
 
-    public Relation(@NonNull OrmaConnection connection, @NonNull Schema<Model> schema) {
-        super(connection, schema);
+    public Relation(@NonNull OrmaConnection connection) {
+        super(connection);
     }
 
     public Relation(@NonNull Relation<Model, ?> relation) {
@@ -92,7 +92,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     public Model getOrCreate(@IntRange(from = 0) long position, @NonNull ModelFactory<Model> factory) {
         Model model = selector().getOrNull(position);
         if (model == null) {
-            return conn.createModel(schema, factory);
+            return conn.createModel(getSchema(), factory);
         } else {
             return model;
         }
@@ -146,7 +146,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                     @Override
                     public void run() {
                         int position = indexOf(item);
-                        ColumnDef<Model, ?> pk = schema.getPrimaryKey();
+                        ColumnDef<Model, ?> pk = getSchema().getPrimaryKey();
                         int deletedRows = deleter()
                                 .where(pk, "=", pk.getSerialized(item))
                                 .execute();
@@ -176,11 +176,11 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return Single.create(new Single.OnSubscribe<Integer>() {
             @Override
             public void call(SingleSubscriber<? super Integer> subscriber) {
-                String pk = schema.getPrimaryKey().getEscapedName();
+                String pk = getSchema().getPrimaryKey().getEscapedName();
                 Selector<Model, ?> subquery = selector();
                 subquery.limit(Integer.MAX_VALUE);
                 subquery.offset(size);
-                int deletedRows = conn.delete(schema, pk + " IN (" + subquery.buildQueryWithColumns(pk) + ")", getBindArgs());
+                int deletedRows = conn.delete(getSchema(), pk + " IN (" + subquery.buildQueryWithColumns(pk) + ")", getBindArgs());
                 subscriber.onSuccess(deletedRows);
             }
         });
@@ -225,7 +225,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     @NonNull
     public Inserter<Model> inserter(@OnConflict int onConflictAlgorithm) {
-        return new Inserter<>(conn, schema, onConflictAlgorithm, true);
+        return new Inserter<>(conn, getSchema(), onConflictAlgorithm, true);
     }
 
     /**
@@ -236,7 +236,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @NonNull
     public Inserter<Model> inserter(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
-        return new Inserter<>(conn, schema, onConflictAlgorithm, withoutAutoId);
+        return new Inserter<>(conn, getSchema(), onConflictAlgorithm, withoutAutoId);
     }
 
     /**

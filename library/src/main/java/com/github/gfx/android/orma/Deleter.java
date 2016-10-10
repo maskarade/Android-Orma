@@ -25,8 +25,8 @@ import rx.SingleSubscriber;
 
 public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaConditionBase<Model, D> {
 
-    public Deleter(@NonNull OrmaConnection connection, @NonNull Schema<Model> schema) {
-        super(connection, schema);
+    public Deleter(@NonNull OrmaConnection connection) {
+        super(connection);
     }
 
     public Deleter(@NonNull Relation<Model, ?> relation) {
@@ -37,7 +37,7 @@ public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaCo
      * @return Number of rows deleted.
      */
     public int execute() {
-        return conn.delete(schema, getWhereClause(), getBindArgs());
+        return conn.delete(getSchema(), getWhereClause(), getBindArgs());
     }
 
     @CheckResult

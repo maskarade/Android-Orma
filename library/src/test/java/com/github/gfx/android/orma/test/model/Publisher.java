@@ -21,6 +21,8 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
+import android.support.annotation.NonNull;
+
 @Table(value = "publishers",
         schemaClassName = "PublisherSchema",
         relationClassName = "PublisherRelation",
@@ -45,5 +47,13 @@ public class Publisher {
 
     public Book_Selector books(OrmaDatabase orma) {
         return orma.selectFromBook().publisherEq(this);
+    }
+
+    public static Publisher create(@NonNull String name, int startedYear, int startedMonth) {
+        Publisher publisher = new Publisher();
+        publisher.name = name;
+        publisher.startedYear = startedYear;
+        publisher.startedMonth = startedMonth;
+        return publisher;
     }
 }

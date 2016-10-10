@@ -3,10 +3,12 @@ package com.github.gfx.android.orma.example.orma;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,43 +17,52 @@ import java.util.List;
 public class Category_Schema implements Schema<Category> {
   public static final Category_Schema INSTANCE = Schemas.register(new Category_Schema());
 
-  public static final ColumnDef<Category, String> name = new ColumnDef<Category, String>(INSTANCE, "name", String.class, "TEXT", ColumnDef.UNIQUE) {
-    @Override
-    @NonNull
-    public String get(@NonNull Category model) {
-      return model.name;
-    }
+  @Nullable
+  public final String alias;
 
-    @Override
-    @NonNull
-    public String getSerialized(@NonNull Category model) {
-      return model.name;
-    }
-  };
+  public final ColumnDef<Category, String> name;
 
-  public static final ColumnDef<Category, Long> id = new ColumnDef<Category, Long>(INSTANCE, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
-    @Override
-    @NonNull
-    public Long get(@NonNull Category model) {
-      return model.id;
-    }
+  public final ColumnDef<Category, Long> id;
 
-    @Override
-    @NonNull
-    public Long getSerialized(@NonNull Category model) {
-      return model.id;
-    }
-  };
+  private final String[] $DEFAULT_RESULT_COLUMNS;
 
-  public static final List<ColumnDef<Category, ?>> $COLUMNS = Arrays.<ColumnDef<Category, ?>>asList(
-    name,
-    id
-  );
+  public Category_Schema() {
+    this(null);
+  }
 
-  public static final String[] $DEFAULT_RESULT_COLUMNS = {
-    "`name`",
-    "`id`"
-  };
+  Category_Schema(@Nullable Aliases.ColumnPath current) {
+    this.alias = current != null ? current.getAlias() : null;
+    this.id = new ColumnDef<Category, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
+      @Override
+      @NonNull
+      public Long get(@NonNull Category model) {
+        return model.id;
+      }
+
+      @Override
+      @NonNull
+      public Long getSerialized(@NonNull Category model) {
+        return model.id;
+      }
+    };
+    this.name = new ColumnDef<Category, String>(this, "name", String.class, "TEXT", ColumnDef.UNIQUE) {
+      @Override
+      @NonNull
+      public String get(@NonNull Category model) {
+        return model.name;
+      }
+
+      @Override
+      @NonNull
+      public String getSerialized(@NonNull Category model) {
+        return model.name;
+      }
+    };
+    $DEFAULT_RESULT_COLUMNS = new String[]{
+          name.getQualifiedName(),
+          id.getQualifiedName()
+        };
+  }
 
   @NonNull
   @Override
@@ -71,6 +82,18 @@ public class Category_Schema implements Schema<Category> {
     return "`Category`";
   }
 
+  @Nullable
+  @Override
+  public String getTableAlias() {
+    return alias;
+  }
+
+  @Nullable
+  @Override
+  public String getEscapedTableAlias() {
+    return alias != null ? '`' + alias + '`' : null;
+  }
+
   @NonNull
   @Override
   public String getSelectFromTableClause() {
@@ -86,7 +109,10 @@ public class Category_Schema implements Schema<Category> {
   @NonNull
   @Override
   public List<ColumnDef<Category, ?>> getColumns() {
-    return $COLUMNS;
+    return Arrays.<ColumnDef<Category, ?>>asList(
+          name,
+          id
+        );
   }
 
   @NonNull
@@ -125,6 +151,7 @@ public class Category_Schema implements Schema<Category> {
       case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
       case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
+      default: throw new IllegalArgumentException("Invalid OnConflict algorithm: " + onConflictAlgorithm);
     }
     if (withoutAutoId) {
       s.append(" INTO `Category` (`name`) VALUES (?)");
@@ -146,7 +173,7 @@ public class Category_Schema implements Schema<Category> {
       args[0] = model.name;
     }
     else {
-      throw new NullPointerException("Category.name" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Category.name" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (!withoutAutoId) {
       args[1] = model.id;

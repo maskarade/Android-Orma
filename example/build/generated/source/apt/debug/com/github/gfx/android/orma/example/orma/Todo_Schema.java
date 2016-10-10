@@ -9,6 +9,7 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.util.Arrays;
 import java.util.Date;
@@ -17,91 +18,100 @@ import java.util.List;
 public class Todo_Schema implements Schema<Todo> {
   public static final Todo_Schema INSTANCE = Schemas.register(new Todo_Schema());
 
-  public static final ColumnDef<Todo, String> title = new ColumnDef<Todo, String>(INSTANCE, "title", String.class, "TEXT", ColumnDef.INDEXED) {
-    @Override
-    @NonNull
-    public String get(@NonNull Todo model) {
-      return model.title;
-    }
+  @Nullable
+  public final String alias;
 
-    @Override
-    @NonNull
-    public String getSerialized(@NonNull Todo model) {
-      return model.title;
-    }
-  };
+  public final ColumnDef<Todo, String> title;
 
-  public static final ColumnDef<Todo, String> content = new ColumnDef<Todo, String>(INSTANCE, "content", String.class, "TEXT", ColumnDef.NULLABLE) {
-    @Override
-    @Nullable
-    public String get(@NonNull Todo model) {
-      return model.content;
-    }
+  public final ColumnDef<Todo, String> content;
 
-    @Override
-    @Nullable
-    public String getSerialized(@NonNull Todo model) {
-      return model.content;
-    }
-  };
+  public final ColumnDef<Todo, Boolean> done;
 
-  public static final ColumnDef<Todo, Boolean> done = new ColumnDef<Todo, Boolean>(INSTANCE, "done", boolean.class, "BOOLEAN", ColumnDef.INDEXED) {
-    @Override
-    @NonNull
-    public Boolean get(@NonNull Todo model) {
-      return model.done;
-    }
+  public final ColumnDef<Todo, Date> createdTime;
 
-    @Override
-    @NonNull
-    public Boolean getSerialized(@NonNull Todo model) {
-      return model.done;
-    }
-  };
+  public final ColumnDef<Todo, Long> id;
 
-  public static final ColumnDef<Todo, Date> createdTime = new ColumnDef<Todo, Date>(INSTANCE, "createdTime", Date.class, "INTEGER", ColumnDef.INDEXED) {
-    @Override
-    @NonNull
-    public Date get(@NonNull Todo model) {
-      return model.createdTime;
-    }
+  private final String[] $DEFAULT_RESULT_COLUMNS;
 
-    @Override
-    @NonNull
-    public Long getSerialized(@NonNull Todo model) {
-      return BuiltInSerializers.serializeDate(model.createdTime);
-    }
-  };
+  public Todo_Schema() {
+    this(null);
+  }
 
-  public static final ColumnDef<Todo, Long> id = new ColumnDef<Todo, Long>(INSTANCE, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
-    @Override
-    @NonNull
-    public Long get(@NonNull Todo model) {
-      return model.id;
-    }
+  Todo_Schema(@Nullable Aliases.ColumnPath current) {
+    this.alias = current != null ? current.getAlias() : null;
+    this.id = new ColumnDef<Todo, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
+      @Override
+      @NonNull
+      public Long get(@NonNull Todo model) {
+        return model.id;
+      }
 
-    @Override
-    @NonNull
-    public Long getSerialized(@NonNull Todo model) {
-      return model.id;
-    }
-  };
+      @Override
+      @NonNull
+      public Long getSerialized(@NonNull Todo model) {
+        return model.id;
+      }
+    };
+    this.title = new ColumnDef<Todo, String>(this, "title", String.class, "TEXT", ColumnDef.INDEXED) {
+      @Override
+      @NonNull
+      public String get(@NonNull Todo model) {
+        return model.title;
+      }
 
-  public static final List<ColumnDef<Todo, ?>> $COLUMNS = Arrays.<ColumnDef<Todo, ?>>asList(
-    title,
-    content,
-    done,
-    createdTime,
-    id
-  );
+      @Override
+      @NonNull
+      public String getSerialized(@NonNull Todo model) {
+        return model.title;
+      }
+    };
+    this.content = new ColumnDef<Todo, String>(this, "content", String.class, "TEXT", ColumnDef.NULLABLE) {
+      @Override
+      @Nullable
+      public String get(@NonNull Todo model) {
+        return model.content;
+      }
 
-  public static final String[] $DEFAULT_RESULT_COLUMNS = {
-    "`title`",
-    "`content`",
-    "`done`",
-    "`createdTime`",
-    "`id`"
-  };
+      @Override
+      @Nullable
+      public String getSerialized(@NonNull Todo model) {
+        return model.content;
+      }
+    };
+    this.done = new ColumnDef<Todo, Boolean>(this, "done", boolean.class, "BOOLEAN", ColumnDef.INDEXED) {
+      @Override
+      @NonNull
+      public Boolean get(@NonNull Todo model) {
+        return model.done;
+      }
+
+      @Override
+      @NonNull
+      public Boolean getSerialized(@NonNull Todo model) {
+        return model.done;
+      }
+    };
+    this.createdTime = new ColumnDef<Todo, Date>(this, "createdTime", Date.class, "INTEGER", ColumnDef.INDEXED) {
+      @Override
+      @NonNull
+      public Date get(@NonNull Todo model) {
+        return model.createdTime;
+      }
+
+      @Override
+      @NonNull
+      public Long getSerialized(@NonNull Todo model) {
+        return BuiltInSerializers.serializeDate(model.createdTime);
+      }
+    };
+    $DEFAULT_RESULT_COLUMNS = new String[]{
+          title.getQualifiedName(),
+          content.getQualifiedName(),
+          done.getQualifiedName(),
+          createdTime.getQualifiedName(),
+          id.getQualifiedName()
+        };
+  }
 
   @NonNull
   @Override
@@ -121,6 +131,18 @@ public class Todo_Schema implements Schema<Todo> {
     return "`Todo`";
   }
 
+  @Nullable
+  @Override
+  public String getTableAlias() {
+    return alias;
+  }
+
+  @Nullable
+  @Override
+  public String getEscapedTableAlias() {
+    return alias != null ? '`' + alias + '`' : null;
+  }
+
   @NonNull
   @Override
   public String getSelectFromTableClause() {
@@ -136,7 +158,13 @@ public class Todo_Schema implements Schema<Todo> {
   @NonNull
   @Override
   public List<ColumnDef<Todo, ?>> getColumns() {
-    return $COLUMNS;
+    return Arrays.<ColumnDef<Todo, ?>>asList(
+          title,
+          content,
+          done,
+          createdTime,
+          id
+        );
   }
 
   @NonNull
@@ -179,6 +207,7 @@ public class Todo_Schema implements Schema<Todo> {
       case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
       case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
+      default: throw new IllegalArgumentException("Invalid OnConflict algorithm: " + onConflictAlgorithm);
     }
     if (withoutAutoId) {
       s.append(" INTO `Todo` (`title`,`content`,`done`,`createdTime`) VALUES (?,?,?,?)");
@@ -200,7 +229,7 @@ public class Todo_Schema implements Schema<Todo> {
       args[0] = model.title;
     }
     else {
-      throw new NullPointerException("Todo.title" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Todo.title" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (model.content != null) {
       args[1] = model.content;
@@ -210,7 +239,7 @@ public class Todo_Schema implements Schema<Todo> {
       args[3] = BuiltInSerializers.serializeDate(model.createdTime);
     }
     else {
-      throw new NullPointerException("Todo.createdTime" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Todo.createdTime" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (!withoutAutoId) {
       args[4] = model.id;

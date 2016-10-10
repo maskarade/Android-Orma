@@ -4,19 +4,28 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Updater;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
 public class Todo_Updater extends Updater<Todo, Todo_Updater> {
-  public Todo_Updater(OrmaConnection conn, Schema<Todo> schema) {
-    super(conn, schema);
+  final Todo_Schema schema;
+
+  public Todo_Updater(OrmaConnection conn, Todo_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Todo_Updater(Todo_Relation relation) {
     super(relation);
+    this.schema = relation.getSchema();
+  }
+
+  @NonNull
+  @Override
+  public Todo_Schema getSchema() {
+    return schema;
   }
 
   public Todo_Updater title(@NonNull String title) {
@@ -45,19 +54,19 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater titleEq(@NonNull String title) {
-    return where("`title` = ?", title);
+    return where(schema.title, "=", title);
   }
 
   public Todo_Updater titleNotEq(@NonNull String title) {
-    return where("`title` <> ?", title);
+    return where(schema.title, "<>", title);
   }
 
   public Todo_Updater titleIn(@NonNull Collection<String> values) {
-    return in(false, "`title`", values);
+    return in(false, schema.title, values);
   }
 
   public Todo_Updater titleNotIn(@NonNull Collection<String> values) {
-    return in(true, "`title`", values);
+    return in(true, schema.title, values);
   }
 
   public final Todo_Updater titleIn(@NonNull String... values) {
@@ -69,35 +78,35 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater titleLt(@NonNull String title) {
-    return where("`title` < ?", title);
+    return where(schema.title, "<", title);
   }
 
   public Todo_Updater titleLe(@NonNull String title) {
-    return where("`title` <= ?", title);
+    return where(schema.title, "<=", title);
   }
 
   public Todo_Updater titleGt(@NonNull String title) {
-    return where("`title` > ?", title);
+    return where(schema.title, ">", title);
   }
 
   public Todo_Updater titleGe(@NonNull String title) {
-    return where("`title` >= ?", title);
+    return where(schema.title, ">=", title);
   }
 
   public Todo_Updater doneEq(boolean done) {
-    return where("`done` = ?", done);
+    return where(schema.done, "=", done);
   }
 
   public Todo_Updater doneNotEq(boolean done) {
-    return where("`done` <> ?", done);
+    return where(schema.done, "<>", done);
   }
 
   public Todo_Updater doneIn(@NonNull Collection<Boolean> values) {
-    return in(false, "`done`", values);
+    return in(false, schema.done, values);
   }
 
   public Todo_Updater doneNotIn(@NonNull Collection<Boolean> values) {
-    return in(true, "`done`", values);
+    return in(true, schema.done, values);
   }
 
   public final Todo_Updater doneIn(@NonNull Boolean... values) {
@@ -109,35 +118,35 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater doneLt(boolean done) {
-    return where("`done` < ?", done);
+    return where(schema.done, "<", done);
   }
 
   public Todo_Updater doneLe(boolean done) {
-    return where("`done` <= ?", done);
+    return where(schema.done, "<=", done);
   }
 
   public Todo_Updater doneGt(boolean done) {
-    return where("`done` > ?", done);
+    return where(schema.done, ">", done);
   }
 
   public Todo_Updater doneGe(boolean done) {
-    return where("`done` >= ?", done);
+    return where(schema.done, ">=", done);
   }
 
   public Todo_Updater idEq(long id) {
-    return where("`id` = ?", id);
+    return where(schema.id, "=", id);
   }
 
   public Todo_Updater idNotEq(long id) {
-    return where("`id` <> ?", id);
+    return where(schema.id, "<>", id);
   }
 
   public Todo_Updater idIn(@NonNull Collection<Long> values) {
-    return in(false, "`id`", values);
+    return in(false, schema.id, values);
   }
 
   public Todo_Updater idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "`id`", values);
+    return in(true, schema.id, values);
   }
 
   public final Todo_Updater idIn(@NonNull Long... values) {
@@ -149,18 +158,18 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   }
 
   public Todo_Updater idLt(long id) {
-    return where("`id` < ?", id);
+    return where(schema.id, "<", id);
   }
 
   public Todo_Updater idLe(long id) {
-    return where("`id` <= ?", id);
+    return where(schema.id, "<=", id);
   }
 
   public Todo_Updater idGt(long id) {
-    return where("`id` > ?", id);
+    return where(schema.id, ">", id);
   }
 
   public Todo_Updater idGe(long id) {
-    return where("`id` >= ?", id);
+    return where(schema.id, ">=", id);
   }
 }

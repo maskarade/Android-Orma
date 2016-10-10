@@ -4,22 +4,31 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Item_Relation extends Relation<Item, Item_Relation> {
-  public Item_Relation(OrmaConnection conn, Schema<Item> schema) {
-    super(conn, schema);
+  final Item_Schema schema;
+
+  public Item_Relation(OrmaConnection conn, Item_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Item_Relation(Item_Relation relation) {
     super(relation);
+    this.schema = relation.getSchema();
   }
 
   @Override
   public Item_Relation clone() {
     return new Item_Relation(this);
+  }
+
+  @NonNull
+  @Override
+  public Item_Schema getSchema() {
+    return schema;
   }
 
   @NonNull
@@ -47,27 +56,27 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   }
 
   public Item_Relation categoryEq(@NonNull Category category) {
-    return where("`Item`.`category` = ?", category.id /* primary key */);
+    return where(schema.category, "=", category.id /* primary key */);
   }
 
   public Item_Relation categoryEq(long categoryId) {
-    return where("`Item`.`category` = ?", categoryId);
+    return where(schema.category, "=", categoryId);
   }
 
   public Item_Relation nameEq(@NonNull String name) {
-    return where("`Item`.`name` = ?", name);
+    return where(schema.name, "=", name);
   }
 
   public Item_Relation nameNotEq(@NonNull String name) {
-    return where("`Item`.`name` <> ?", name);
+    return where(schema.name, "<>", name);
   }
 
   public Item_Relation nameIn(@NonNull Collection<String> values) {
-    return in(false, "`Item`.`name`", values);
+    return in(false, schema.name, values);
   }
 
   public Item_Relation nameNotIn(@NonNull Collection<String> values) {
-    return in(true, "`Item`.`name`", values);
+    return in(true, schema.name, values);
   }
 
   public final Item_Relation nameIn(@NonNull String... values) {
@@ -79,34 +88,34 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   }
 
   public Item_Relation nameLt(@NonNull String name) {
-    return where("`Item`.`name` < ?", name);
+    return where(schema.name, "<", name);
   }
 
   public Item_Relation nameLe(@NonNull String name) {
-    return where("`Item`.`name` <= ?", name);
+    return where(schema.name, "<=", name);
   }
 
   public Item_Relation nameGt(@NonNull String name) {
-    return where("`Item`.`name` > ?", name);
+    return where(schema.name, ">", name);
   }
 
   public Item_Relation nameGe(@NonNull String name) {
-    return where("`Item`.`name` >= ?", name);
+    return where(schema.name, ">=", name);
   }
 
   public Item_Relation orderByCategoryAsc() {
-    return orderBy(Item_Schema.category.orderInAscending());
+    return orderBy(schema.category.orderInAscending());
   }
 
   public Item_Relation orderByCategoryDesc() {
-    return orderBy(Item_Schema.category.orderInDescending());
+    return orderBy(schema.category.orderInDescending());
   }
 
   public Item_Relation orderByNameAsc() {
-    return orderBy(Item_Schema.name.orderInAscending());
+    return orderBy(schema.name.orderInAscending());
   }
 
   public Item_Relation orderByNameDesc() {
-    return orderBy(Item_Schema.name.orderInDescending());
+    return orderBy(schema.name.orderInDescending());
   }
 }

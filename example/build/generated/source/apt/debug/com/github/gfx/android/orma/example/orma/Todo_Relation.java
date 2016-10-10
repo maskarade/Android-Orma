@@ -4,22 +4,31 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Todo_Relation extends Relation<Todo, Todo_Relation> {
-  public Todo_Relation(OrmaConnection conn, Schema<Todo> schema) {
-    super(conn, schema);
+  final Todo_Schema schema;
+
+  public Todo_Relation(OrmaConnection conn, Todo_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Todo_Relation(Todo_Relation relation) {
     super(relation);
+    this.schema = relation.getSchema();
   }
 
   @Override
   public Todo_Relation clone() {
     return new Todo_Relation(this);
+  }
+
+  @NonNull
+  @Override
+  public Todo_Schema getSchema() {
+    return schema;
   }
 
   @NonNull
@@ -47,19 +56,19 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation titleEq(@NonNull String title) {
-    return where("`title` = ?", title);
+    return where(schema.title, "=", title);
   }
 
   public Todo_Relation titleNotEq(@NonNull String title) {
-    return where("`title` <> ?", title);
+    return where(schema.title, "<>", title);
   }
 
   public Todo_Relation titleIn(@NonNull Collection<String> values) {
-    return in(false, "`title`", values);
+    return in(false, schema.title, values);
   }
 
   public Todo_Relation titleNotIn(@NonNull Collection<String> values) {
-    return in(true, "`title`", values);
+    return in(true, schema.title, values);
   }
 
   public final Todo_Relation titleIn(@NonNull String... values) {
@@ -71,35 +80,35 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation titleLt(@NonNull String title) {
-    return where("`title` < ?", title);
+    return where(schema.title, "<", title);
   }
 
   public Todo_Relation titleLe(@NonNull String title) {
-    return where("`title` <= ?", title);
+    return where(schema.title, "<=", title);
   }
 
   public Todo_Relation titleGt(@NonNull String title) {
-    return where("`title` > ?", title);
+    return where(schema.title, ">", title);
   }
 
   public Todo_Relation titleGe(@NonNull String title) {
-    return where("`title` >= ?", title);
+    return where(schema.title, ">=", title);
   }
 
   public Todo_Relation doneEq(boolean done) {
-    return where("`done` = ?", done);
+    return where(schema.done, "=", done);
   }
 
   public Todo_Relation doneNotEq(boolean done) {
-    return where("`done` <> ?", done);
+    return where(schema.done, "<>", done);
   }
 
   public Todo_Relation doneIn(@NonNull Collection<Boolean> values) {
-    return in(false, "`done`", values);
+    return in(false, schema.done, values);
   }
 
   public Todo_Relation doneNotIn(@NonNull Collection<Boolean> values) {
-    return in(true, "`done`", values);
+    return in(true, schema.done, values);
   }
 
   public final Todo_Relation doneIn(@NonNull Boolean... values) {
@@ -111,35 +120,35 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation doneLt(boolean done) {
-    return where("`done` < ?", done);
+    return where(schema.done, "<", done);
   }
 
   public Todo_Relation doneLe(boolean done) {
-    return where("`done` <= ?", done);
+    return where(schema.done, "<=", done);
   }
 
   public Todo_Relation doneGt(boolean done) {
-    return where("`done` > ?", done);
+    return where(schema.done, ">", done);
   }
 
   public Todo_Relation doneGe(boolean done) {
-    return where("`done` >= ?", done);
+    return where(schema.done, ">=", done);
   }
 
   public Todo_Relation idEq(long id) {
-    return where("`id` = ?", id);
+    return where(schema.id, "=", id);
   }
 
   public Todo_Relation idNotEq(long id) {
-    return where("`id` <> ?", id);
+    return where(schema.id, "<>", id);
   }
 
   public Todo_Relation idIn(@NonNull Collection<Long> values) {
-    return in(false, "`id`", values);
+    return in(false, schema.id, values);
   }
 
   public Todo_Relation idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "`id`", values);
+    return in(true, schema.id, values);
   }
 
   public final Todo_Relation idIn(@NonNull Long... values) {
@@ -151,42 +160,42 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   }
 
   public Todo_Relation idLt(long id) {
-    return where("`id` < ?", id);
+    return where(schema.id, "<", id);
   }
 
   public Todo_Relation idLe(long id) {
-    return where("`id` <= ?", id);
+    return where(schema.id, "<=", id);
   }
 
   public Todo_Relation idGt(long id) {
-    return where("`id` > ?", id);
+    return where(schema.id, ">", id);
   }
 
   public Todo_Relation idGe(long id) {
-    return where("`id` >= ?", id);
+    return where(schema.id, ">=", id);
   }
 
   public Todo_Relation orderByTitleAsc() {
-    return orderBy(Todo_Schema.title.orderInAscending());
+    return orderBy(schema.title.orderInAscending());
   }
 
   public Todo_Relation orderByTitleDesc() {
-    return orderBy(Todo_Schema.title.orderInDescending());
+    return orderBy(schema.title.orderInDescending());
   }
 
   public Todo_Relation orderByDoneAsc() {
-    return orderBy(Todo_Schema.done.orderInAscending());
+    return orderBy(schema.done.orderInAscending());
   }
 
   public Todo_Relation orderByDoneDesc() {
-    return orderBy(Todo_Schema.done.orderInDescending());
+    return orderBy(schema.done.orderInDescending());
   }
 
   public Todo_Relation orderByCreatedTimeAsc() {
-    return orderBy(Todo_Schema.createdTime.orderInAscending());
+    return orderBy(schema.createdTime.orderInAscending());
   }
 
   public Todo_Relation orderByCreatedTimeDesc() {
-    return orderBy(Todo_Schema.createdTime.orderInDescending());
+    return orderBy(schema.createdTime.orderInDescending());
   }
 }

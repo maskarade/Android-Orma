@@ -3,10 +3,13 @@ package com.github.gfx.android.orma.example.orma;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import com.github.gfx.android.orma.AssociationDef;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.util.Arrays;
 import java.util.List;
@@ -14,46 +17,55 @@ import java.util.List;
 public class Item_Schema implements Schema<Item> {
   public static final Item_Schema INSTANCE = Schemas.register(new Item_Schema());
 
-  public static final ColumnDef<Item, Category> category = new ColumnDef<Item, Category>(INSTANCE, "category", Category.class, "INTEGER", ColumnDef.INDEXED) {
-    @Override
-    @NonNull
-    public Category get(@NonNull Item model) {
-      return model.category;
-    }
+  @Nullable
+  public final String alias;
 
-    @Override
-    @NonNull
-    public Long getSerialized(@NonNull Item model) {
-      return model.category.id;
-    }
-  };
+  public final AssociationDef<Item, Category, Category_Schema> category;
 
-  public static final ColumnDef<Item, String> name = new ColumnDef<Item, String>(INSTANCE, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
-    @Override
-    @NonNull
-    public String get(@NonNull Item model) {
-      return model.name;
-    }
+  public final ColumnDef<Item, String> name;
 
-    @Override
-    @NonNull
-    public String getSerialized(@NonNull Item model) {
-      return model.name;
-    }
-  };
+  private final String[] $DEFAULT_RESULT_COLUMNS;
 
-  public static final List<ColumnDef<Item, ?>> $COLUMNS = Arrays.<ColumnDef<Item, ?>>asList(
-    category,
-    name
-  );
+  public Item_Schema() {
+    this(new Aliases().createPath("Item"));
+  }
 
-  public static final String[] $DEFAULT_RESULT_COLUMNS = {
-    "`Item`.`category`",
-      "`Category`.`name`",
-      "`Category`.`id`"
-    ,
-    "`Item`.`name`"
-  };
+  Item_Schema(@Nullable Aliases.ColumnPath current) {
+    this.alias = current != null ? current.getAlias() : null;
+    this.name = new ColumnDef<Item, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
+      @Override
+      @NonNull
+      public String get(@NonNull Item model) {
+        return model.name;
+      }
+
+      @Override
+      @NonNull
+      public String getSerialized(@NonNull Item model) {
+        return model.name;
+      }
+    };
+    this.category = new AssociationDef<Item, Category, Category_Schema>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category", "Category") : null)) {
+      @Override
+      @NonNull
+      public Category get(@NonNull Item model) {
+        return model.category;
+      }
+
+      @Override
+      @NonNull
+      public Long getSerialized(@NonNull Item model) {
+        return model.category.id;
+      }
+    };
+    $DEFAULT_RESULT_COLUMNS = new String[]{
+          category.getQualifiedName(),
+            category.associationSchema.name.getQualifiedName(),
+            category.associationSchema.id.getQualifiedName()
+          ,
+          name.getQualifiedName()
+        };
+  }
 
   @NonNull
   @Override
@@ -73,10 +85,25 @@ public class Item_Schema implements Schema<Item> {
     return "`Item`";
   }
 
+  @Nullable
+  @Override
+  public String getTableAlias() {
+    return alias;
+  }
+
+  @Nullable
+  @Override
+  public String getEscapedTableAlias() {
+    return alias != null ? '`' + alias + '`' : null;
+  }
+
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Item` LEFT OUTER JOIN `Category` ON `Item`.`category` = `Category`.`id`";
+    return "`Item`"+ " AS " + getEscapedTableAlias()
+        + " LEFT OUTER JOIN `Category` AS " + category.associationSchema.getEscapedTableAlias() + " ON " + category.getQualifiedName() + " = " + category.associationSchema.id.getQualifiedName()
+
+        ;
   }
 
   @NonNull
@@ -88,7 +115,10 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public List<ColumnDef<Item, ?>> getColumns() {
-    return $COLUMNS;
+    return Arrays.<ColumnDef<Item, ?>>asList(
+          category,
+          name
+        );
   }
 
   @NonNull
@@ -129,6 +159,7 @@ public class Item_Schema implements Schema<Item> {
       case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
       case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
+      default: throw new IllegalArgumentException("Invalid OnConflict algorithm: " + onConflictAlgorithm);
     }
     s.append(" INTO `Item` (`category`,`name`) VALUES (?,?)");
     return s.toString();
@@ -145,13 +176,13 @@ public class Item_Schema implements Schema<Item> {
       args[0] = model.category.id;
     }
     else {
-      throw new NullPointerException("Item.category" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Item.category" + " must not be null, or use @Nullable to declare it as NULL");
     }
     if (model.name != null) {
       args[1] = model.name;
     }
     else {
-      throw new NullPointerException("Item.name" + " must not be null, or use @Nullable to declare it as NULL");
+      throw new IllegalArgumentException("Item.name" + " must not be null, or use @Nullable to declare it as NULL");
     }
     return args;
   }

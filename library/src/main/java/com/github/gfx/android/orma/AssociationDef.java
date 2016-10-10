@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.test.model;
+package com.github.gfx.android.orma;
 
-import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Table;
+import java.lang.reflect.Type;
 
-@Table
-public class ModelWithDirectAssociation {
+public abstract class AssociationDef<Model, T, S extends Schema<T>> extends ColumnDef<Model, T> {
 
-    @PrimaryKey
-    public String name;
+    public final S associationSchema;
 
-    @Column(indexed = true)
-    public Author author;
-
-    @Column(indexed = true)
-    public Publisher publisher;
-
-    @Column(indexed = true)
-    public String note; // the same name as Author#note
+    public AssociationDef(Schema<Model> schema, String name, Type type, String storageType, int flags, S associationSchema) {
+        super(schema, name, type, storageType, flags);
+        this.associationSchema = associationSchema;
+    }
 }

@@ -20,18 +20,29 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
+/**
+ * Models which have multiple direct associations with.
+ *
+ * @see ModelWithDirectAssociation2_Schema
+ */
 @Table
-public class ModelWithDirectAssociation {
+public class ModelWithDirectAssociation2 {
 
     @PrimaryKey
     public String name;
 
     @Column(indexed = true)
-    public Author author;
+    public Author author1;
 
     @Column(indexed = true)
-    public Publisher publisher;
+    public Author author2;
 
     @Column(indexed = true)
-    public String note; // the same name as Author#note
+    public Publisher publisher1;
+
+    @Column(indexed = true)
+    public Publisher publisher2;
+
+    @Column(indexed = true)
+    public String note; // NOTE: the same name as Author#note
 }

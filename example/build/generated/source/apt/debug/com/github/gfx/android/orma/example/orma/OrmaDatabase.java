@@ -30,11 +30,12 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.
    */
-  public static String SCHEMA_HASH = "ECD5565F5A7D76F02456D2DE0E6FD24E4DDCE9F8D85217315F35388312007ED8";
+  public static String SCHEMA_HASH = "8A1796FDA0A2214ADDCC8F15088AAFAAC5E9B620DE4D55BFB8600989D244EE3A";
 
   public static final List<Schema<?>> SCHEMAS = Arrays.<Schema<?>>asList(
     Category_Schema.INSTANCE,
     Item_Schema.INSTANCE,
+    Item2_Schema.INSTANCE,
     Todo_Schema.INSTANCE
   );
 
@@ -309,6 +310,118 @@ public class OrmaDatabase implements DatabaseHandle {
       @Override
       public void call(SingleSubscriber<? super Inserter<Item>> subscriber) {
         subscriber.onSuccess(new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
+      }
+    });
+  }
+
+  /**
+   * Retrieves a model from a cursor. */
+  @NonNull
+  public Item2 newItem2FromCursor(@NonNull Cursor cursor) {
+    return Item2_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
+  }
+
+  /**
+   * Inserts a model created by {@code ModelFactory<T>}, and retrieves it which is just inserted.
+   *  The return value has the row ID.
+   */
+  @NonNull
+  @WorkerThread
+  public Item2 createItem2(@NonNull ModelFactory<Item2> factory) {
+    return connection.createModel(Item2_Schema.INSTANCE, factory);
+  }
+
+  /**
+   * Creates a relation of {@code Item2}, which is an entry point of all the operations.
+   */
+  @NonNull
+  public Item2_Relation relationOfItem2() {
+    return new Item2_Relation(connection, Item2_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code SELECT * FROM Item2 ...}.
+   */
+  @NonNull
+  public Item2_Selector selectFromItem2() {
+    return new Item2_Selector(connection, Item2_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code UPDATE Item2 ...}.
+   */
+  @WorkerThread
+  @NonNull
+  public Item2_Updater updateItem2() {
+    return new Item2_Updater(connection, Item2_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code DELETE FROM Item2 ...}.
+   */
+  @WorkerThread
+  @NonNull
+  public Item2_Deleter deleteFromItem2() {
+    return new Item2_Deleter(connection, Item2_Schema.INSTANCE);
+  }
+
+  /**
+   * Executes a query: {@code INSERT INTO Item2 ...}.
+   */
+  @WorkerThread
+  public long insertIntoItem2(@NonNull Item2 model) {
+    return prepareInsertIntoItem2().execute(model);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Item2 ...}.
+   */
+  @WorkerThread
+  public Inserter<Item2> prepareInsertIntoItem2() {
+    return prepareInsertIntoItem2(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
+   */
+  @WorkerThread
+  public Inserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItem2(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
+   */
+  @WorkerThread
+  public Inserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
+    return new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Item2 ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable() {
+    return prepareInsertIntoItem2AsObservable(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItem2AsObservable(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.create(new Single.OnSubscribe<Inserter<Item2>>() {
+      @Override
+      public void call(SingleSubscriber<? super Inserter<Item2>> subscriber) {
+        subscriber.onSuccess(new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
       }
     });
   }

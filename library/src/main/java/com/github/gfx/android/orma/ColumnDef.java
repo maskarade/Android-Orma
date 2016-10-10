@@ -55,8 +55,12 @@ public abstract class ColumnDef<Model, T> {
         return '`' + name + '`';
     }
 
-    public String getFullyQualifiedName() {
-        return schema.getEscapedTableName() + '.' + getEscapedName();
+    @NonNull
+    public String getQualifiedName() {
+        String alias = schema.getEscapedTableAlias();
+        return alias != null
+                ? alias + '.' + getEscapedName()
+                : schema.getEscapedTableName() + '.' + getEscapedName();
     }
 
     private boolean checkFlags(int flags) {

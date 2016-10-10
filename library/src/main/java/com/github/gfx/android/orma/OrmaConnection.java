@@ -167,7 +167,7 @@ public class OrmaConnection {
         long id = sth.execute(model);
 
         ColumnDef<T, ?> primaryKey = schema.getPrimaryKey();
-        String whereClause = primaryKey.getFullyQualifiedName() + " = ?";
+        String whereClause = primaryKey.getQualifiedName() + " = ?";
         String primaryKeyValue;
         if (primaryKey.isAutoValue()) {
             primaryKeyValue = Long.toString(id);

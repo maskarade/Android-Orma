@@ -4,22 +4,31 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
-import com.github.gfx.android.orma.Schema;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Category_Relation extends Relation<Category, Category_Relation> {
-  public Category_Relation(OrmaConnection conn, Schema<Category> schema) {
-    super(conn, schema);
+  final Category_Schema schema;
+
+  public Category_Relation(OrmaConnection conn, Category_Schema schema) {
+    super(conn);
+    this.schema = schema;
   }
 
   public Category_Relation(Category_Relation relation) {
     super(relation);
+    this.schema = relation.getSchema();
   }
 
   @Override
   public Category_Relation clone() {
     return new Category_Relation(this);
+  }
+
+  @NonNull
+  @Override
+  public Category_Schema getSchema() {
+    return schema;
   }
 
   @NonNull
@@ -47,19 +56,19 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
   }
 
   public Category_Relation idEq(long id) {
-    return where("`id` = ?", id);
+    return where(schema.id, "=", id);
   }
 
   public Category_Relation idNotEq(long id) {
-    return where("`id` <> ?", id);
+    return where(schema.id, "<>", id);
   }
 
   public Category_Relation idIn(@NonNull Collection<Long> values) {
-    return in(false, "`id`", values);
+    return in(false, schema.id, values);
   }
 
   public Category_Relation idNotIn(@NonNull Collection<Long> values) {
-    return in(true, "`id`", values);
+    return in(true, schema.id, values);
   }
 
   public final Category_Relation idIn(@NonNull Long... values) {
@@ -71,18 +80,18 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
   }
 
   public Category_Relation idLt(long id) {
-    return where("`id` < ?", id);
+    return where(schema.id, "<", id);
   }
 
   public Category_Relation idLe(long id) {
-    return where("`id` <= ?", id);
+    return where(schema.id, "<=", id);
   }
 
   public Category_Relation idGt(long id) {
-    return where("`id` > ?", id);
+    return where(schema.id, ">", id);
   }
 
   public Category_Relation idGe(long id) {
-    return where("`id` >= ?", id);
+    return where(schema.id, ">=", id);
   }
 }

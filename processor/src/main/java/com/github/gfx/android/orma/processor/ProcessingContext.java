@@ -50,17 +50,14 @@ public class ProcessingContext {
 
     public final List<DatabaseDefinition> databases = new ArrayList<>();
 
-    public final Map<TypeName, SchemaDefinition> schemaMap;
+    public final Map<TypeName, SchemaDefinition> schemaMap = new LinkedHashMap<>(); // the order matters
 
-    public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap;
+    public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap = new HashMap<>();
 
-    public final SqlGenerator sqlg;
+    public final SqlGenerator sqlg = new SqlGenerator();
 
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
-        this.schemaMap = new LinkedHashMap<>(); // the order matters
-        this.typeAdapterMap = new HashMap<>();
-        this.sqlg = new SqlGenerator();
         for (TypeAdapterDefinition typeAdapterDefinition : TypeAdapterDefinition.BUILTINS) {
             addTypeAdapterDefinition(typeAdapterDefinition);
         }
@@ -142,7 +139,7 @@ public class ProcessingContext {
         }
     }
 
-    SchemaDefinition getFirstSchema() {
+    public SchemaDefinition getFirstSchema() {
         return schemaMap.values().iterator().next();
     }
 

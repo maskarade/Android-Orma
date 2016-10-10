@@ -59,8 +59,8 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     protected long page = -1;
 
-    public Selector(@NonNull OrmaConnection conn, @NonNull Schema<Model> schema) {
-        super(conn, schema);
+    public Selector(@NonNull OrmaConnection conn) {
+        super(conn);
     }
 
     public Selector(@NonNull OrmaConditionBase<Model, ?> condition) {
@@ -156,7 +156,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @IntRange(from = 0)
     public int count() {
         String sql = SQLiteQueryBuilder.buildQueryString(
-                false, schema.getSelectFromTableClause(), countSelections, getWhereClause(), groupBy, null, null, null);
+                false, getSchema().getSelectFromTableClause(), countSelections, getWhereClause(), groupBy, null, null, null);
         return (int) conn.rawQueryForLong(sql, getBindArgs());
     }
 
@@ -188,14 +188,14 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     public Model value() throws NoValueException {
         Model model = getOrNull(0);
         if (model == null) {
-            throw new NoValueException("Expected single value but nothing for " + schema.getTableName());
+            throw new NoValueException("Expected single value but nothing for " + getSchema().getTableName());
         }
         return model;
     }
 
     @Nullable
     public Model getOrNull(@IntRange(from = 0) long position) {
-        return conn.querySingle(schema, schema.getDefaultResultColumns(),
+        return conn.querySingle(getSchema(), getSchema().getDefaultResultColumns(),
                 getWhereClause(), getBindArgs(), groupBy, having, orderBy, position);
     }
 
@@ -203,7 +203,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     public Model get(@IntRange(from = 0) long position) {
         Model model = getOrNull(position);
         if (model == null) {
-            throw new NoValueException("Expected single value for " + position + " but nothing for " + schema.getTableName());
+            throw new NoValueException("Expected single value for " + position + " but nothing for " + getSchema().getTableName());
         }
         return model;
     }
@@ -225,7 +225,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
      */
     @NonNull
     public String buildQuery() {
-        return buildQueryWithColumns(schema.getDefaultResultColumns());
+        return buildQueryWithColumns(getSchema().getDefaultResultColumns());
     }
 
     /**
@@ -234,7 +234,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @NonNull
     public String buildQueryWithColumns(@NonNull String... columns) {
         return SQLiteQueryBuilder.buildQueryString(
-                false, schema.getSelectFromTableClause(), columns,
+                false, getSchema().getSelectFromTableClause(), columns,
                 getWhereClause(), groupBy, having, orderBy, getLimitClause());
     }
 
@@ -273,7 +273,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @NonNull
     public Model newModelFromCursor(@NonNull Cursor cursor) {
-        return schema.newModelFromCursor(conn, cursor, 0);
+        return getSchema().newModelFromCursor(conn, cursor, 0);
     }
 
     @NonNull

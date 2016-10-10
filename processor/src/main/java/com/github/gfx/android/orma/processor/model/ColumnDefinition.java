@@ -299,7 +299,11 @@ public class ColumnDefinition {
      * @return A representation of {@code ColumnDef<T>}
      */
     public ParameterizedTypeName getColumnDefType() {
-        return Types.getColumnDef(schema.getModelClassName(), getBoxType());
+        if (isDirectAssociation()) {
+            return Types.getAssociationDef(schema.getModelClassName(), getBoxType(), getAssociatedSchema().getSchemaClassName());
+        } else {
+            return Types.getColumnDef(schema.getModelClassName(), getBoxType());
+        }
     }
 
     public CodeBlock buildSetColumnExpr(CodeBlock rhsExpr) {

@@ -91,9 +91,7 @@ public class Types {
 
     public static final ClassName ColumnDef = ClassName.get(ormaPackageName, "ColumnDef");
 
-    public static final TypeName WildcardColumnDef = getColumnDef(WildcardType, WildcardType);
-
-    public static final TypeName ColumnList = ParameterizedTypeName.get(List, WildcardColumnDef);
+    public static final ClassName AssociationDef = ClassName.get(ormaPackageName, "AssociationDef");
 
     public static final ClassName Relation = ClassName.get(ormaPackageName, "Relation");
 
@@ -134,7 +132,11 @@ public class Types {
 
     public static final ClassName Schemas = ClassName.get(ormaPackageName + ".internal", "Schemas");
 
-    public static final ClassName NullPointerException = ClassName.get(NullPointerException.class);
+    public static final ClassName Aliases = ClassName.get(ormaPackageName + ".internal", "Aliases");
+
+    public static final ClassName ColumnPath = ClassName.get(ormaPackageName + ".internal", "Aliases", "ColumnPath");
+
+    public static final ClassName IllegalArgumentException = ClassName.get(IllegalArgumentException.class);
 
     public static final ClassName Completable = ClassName.get("rx", "Completable");
 
@@ -150,6 +152,10 @@ public class Types {
 
     public static ParameterizedTypeName getColumnDef(TypeName modelType, TypeName typeName) {
         return ParameterizedTypeName.get(ColumnDef, modelType, typeName);
+    }
+
+    public static ParameterizedTypeName getAssociationDef(ClassName modelType, TypeName typeName, ClassName schemaType) {
+        return ParameterizedTypeName.get(AssociationDef, modelType, typeName, schemaType);
     }
 
     public static ParameterizedTypeName getColumnDefList(TypeName schemaType) {
