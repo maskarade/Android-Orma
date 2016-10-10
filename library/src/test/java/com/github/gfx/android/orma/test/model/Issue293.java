@@ -16,15 +16,14 @@
 
 package com.github.gfx.android.orma.test.model;
 
-import com.google.gson.annotations.SerializedName;
-
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.Getter;
 import com.github.gfx.android.orma.annotation.Table;
 
 // https://github.com/gfx/Android-Orma/issues/293
 @Table
-public class Model293 {
+public class Issue293 {
+
     private static final String MEMBER_MODEL = "model";
 
     @Column(MEMBER_MODEL)
