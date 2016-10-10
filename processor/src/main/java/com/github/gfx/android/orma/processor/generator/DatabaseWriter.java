@@ -157,7 +157,6 @@ public class DatabaseWriter extends BaseWriter {
         fieldSpecs.add(
                 FieldSpec.builder(Types.getList(Types.WildcardSchema), SCHEMAS, publicStaticFinal)
                         .initializer(buildSchemasInitializer())
-                        .addJavadoc(buildSchemasJavadoc())
                         .build());
 
         fieldSpecs.add(
@@ -165,15 +164,6 @@ public class DatabaseWriter extends BaseWriter {
                         .build());
 
         return fieldSpecs;
-    }
-
-    private String buildSchemasJavadoc() {
-        StringBuilder sb = new StringBuilder();
-
-        context.aliasAllocator.map.keySet().stream()
-                .map((path) -> path.toString() + " " + context.aliasAllocator.map.get(path) + "\n")
-                .forEach(sb::append);
-        return sb.toString();
     }
 
     private String buildSchemaSha256() {

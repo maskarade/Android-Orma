@@ -20,7 +20,6 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
-import com.github.gfx.android.orma.processor.tool.AliasAllocator;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.SqlTypes;
 import com.github.gfx.android.orma.processor.util.Strings;
@@ -254,13 +253,6 @@ public class ColumnDefinition {
         }
         context.sqlg.appendIdentifier(sb, columnName);
         return sb.toString();
-    }
-
-    public String getSafeColumnName(@Nullable AliasAllocator.ColumnPath parent) {
-        AliasAllocator.ColumnPath path = AliasAllocator.ColumnPath.builder(parent)
-                .add(schema.getTableName(), columnName)
-                .build();
-        return context.aliasAllocator.getQualifiedName(path, context.sqlg);
     }
 
     public TypeName getType() {

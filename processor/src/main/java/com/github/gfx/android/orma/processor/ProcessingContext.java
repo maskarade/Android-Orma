@@ -21,7 +21,6 @@ import com.github.gfx.android.orma.processor.generator.SqlGenerator;
 import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
-import com.github.gfx.android.orma.processor.tool.AliasAllocator;
 import com.squareup.javapoet.TypeName;
 
 import java.io.PrintWriter;
@@ -56,8 +55,6 @@ public class ProcessingContext {
     public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap = new HashMap<>();
 
     public final SqlGenerator sqlg = new SqlGenerator();
-
-    public final AliasAllocator aliasAllocator = new AliasAllocator();
 
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -144,14 +141,6 @@ public class ProcessingContext {
 
     public SchemaDefinition getFirstSchema() {
         return schemaMap.values().iterator().next();
-    }
-
-    public String getAliasName(AliasAllocator.ColumnPath path) {
-        return aliasAllocator.getAlias(path);
-    }
-
-    public String getAliasName(String tableName) {
-        return aliasAllocator.getAlias(AliasAllocator.ColumnPath.builder().add(tableName).build());
     }
 
     public void note(String message) {
