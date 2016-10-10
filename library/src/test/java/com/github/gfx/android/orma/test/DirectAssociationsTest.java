@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
+import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Selector;
 import com.github.gfx.android.orma.test.model.ModelWithNestedDirectAssociations;
 import com.github.gfx.android.orma.test.model.ModelWithNullableDirectAssociations;
@@ -154,6 +155,63 @@ public class DirectAssociationsTest {
         assertThat(model.md.publisher.name, is(publisher.name));
         assertThat(model.md.publisher.startedYear, is(publisher.startedYear));
         assertThat(model.md.publisher.startedMonth, is(publisher.startedMonth));
+    }
+
+    @Test
+    public void testCreateDirectAssociation2() throws Exception {
+        ModelWithDirectAssociation2 model = orma.createModelWithDirectAssociation2(
+                new ModelFactory<ModelWithDirectAssociation2>() {
+                    @NonNull
+                    @Override
+                    public ModelWithDirectAssociation2 call() {
+                        ModelWithDirectAssociation2 model = new ModelWithDirectAssociation2();
+
+                        model.name = "model with multiple associations with the same type";
+                        model.note = "blah blah blah";
+
+                        model.author1 = orma.createAuthor(new ModelFactory<Author>() {
+                            @NonNull
+                            @Override
+                            public Author call() {
+                                Author author = new Author();
+                                author.name = "author (1)";
+                                return author;
+                            }
+                        });
+                        model.author2 = orma.createAuthor(new ModelFactory<Author>() {
+                            @NonNull
+                            @Override
+                            public Author call() {
+                                Author author = new Author();
+                                author.name = "author (2)";
+                                return author;
+                            }
+                        });
+
+                        model.publisher1 = orma.createPublisher(new ModelFactory<Publisher>() {
+                            @NonNull
+                            @Override
+                            public Publisher call() {
+                                return Publisher.create("publisher (1)", 2016, 12);
+                            }
+                        });
+
+                        model.publisher2 = orma.createPublisher(new ModelFactory<Publisher>() {
+                            @NonNull
+                            @Override
+                            public Publisher call() {
+                                return Publisher.create("publisher (2)", 2010, 9);
+                            }
+                        });
+
+                        return model;
+                    }
+                });
+
+        assertThat(model.author1.name, is("author (1)"));
+        assertThat(model.author2.name, is("author (2)"));
+        assertThat(model.publisher1.name, is("publisher (1)"));
+        assertThat(model.publisher2.name, is("publisher (2)"));
     }
 
     @Test

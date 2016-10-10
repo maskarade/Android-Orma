@@ -32,13 +32,13 @@ public class ModelWithDirectAssociation2 {
     public String name;
 
     @Column(indexed = true)
-    public Author author;
+    public Author author1;
 
     @Column(indexed = true)
     public Author author2;
 
     @Column(indexed = true)
-    public Publisher publisher;
+    public Publisher publisher1;
 
     @Column(indexed = true)
     public Publisher publisher2;

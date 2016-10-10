@@ -169,7 +169,7 @@ public class SchemaTest {
         assertThat(schema.note.orderInAscending().toString(), is(schema.getEscapedTableAlias() + ".`note` ASC"));
         assertThat(schema.note.orderInDescending().toString(), is(schema.getEscapedTableAlias() + ".`note` DESC"));
 
-        assertThat(schema.author.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`author`"));
+        assertThat(schema.author1.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`author`"));
         assertThat(schema.author2.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`author2`"));
     }
 }
