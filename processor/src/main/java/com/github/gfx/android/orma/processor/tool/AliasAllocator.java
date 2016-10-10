@@ -23,9 +23,8 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Allocates table aliases from column paths and table names.
@@ -49,7 +48,7 @@ import java.util.Map;
  */
 public class AliasAllocator {
 
-    public final Map<ColumnPath, String> map = new HashMap<>();
+    public final TreeMap<ColumnPath, String> map = new TreeMap<>();
 
     public String getAlias(ColumnPath path) {
         return map.computeIfAbsent(path, key -> key.tableName.substring(0, 1).toLowerCase() + (map.size() + 1));
@@ -65,7 +64,7 @@ public class AliasAllocator {
         return sb.toString();
     }
 
-    public static final class ColumnPath {
+    public static final class ColumnPath implements Comparable<ColumnPath> {
 
         public final ColumnPath parent;
 
@@ -137,6 +136,11 @@ public class AliasAllocator {
             // omit the columnName of the last component
 
             return s.toString();
+        }
+
+        @Override
+        public int compareTo(ColumnPath other) {
+            return serialized.compareTo(other.serialized);
         }
 
         @Override

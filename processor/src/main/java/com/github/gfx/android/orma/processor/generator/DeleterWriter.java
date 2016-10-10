@@ -76,7 +76,7 @@ public class DeleterWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(schema.getRelationClassName(), "relation")
                         .addStatement("super(relation)")
-                        .addStatement("this.schema = ($T) relation.getSchema()", schema.getSchemaClassName())
+                        .addStatement("this.schema = relation.getSchema()")
                         .build()
         );
 

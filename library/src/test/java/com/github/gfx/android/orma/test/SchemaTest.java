@@ -110,7 +110,7 @@ public class SchemaTest {
         ModelWithStorageTypes_Schema schema = ModelWithStorageTypes_Schema.INSTANCE;
         assertThat(schema.date.storageType, is("INTEGER"));
         assertThat(schema.timestamp.storageType, is("DATETIME"));
-        assertThat(schema.INSTANCE.getCreateTableStatement(), is(
+        assertThat(schema.getCreateTableStatement(), is(
                 "CREATE TABLE `ModelWithStorageTypes` (`date` INTEGER NOT NULL, `timestamp` DATETIME NOT NULL)"
         ));
     }

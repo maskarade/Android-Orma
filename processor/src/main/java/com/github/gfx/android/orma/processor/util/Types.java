@@ -132,6 +132,10 @@ public class Types {
 
     public static final ClassName Schemas = ClassName.get(ormaPackageName + ".internal", "Schemas");
 
+    public static final ClassName Aliases = ClassName.get(ormaPackageName + ".internal", "Aliases");
+
+    public static final ClassName ColumnPath = ClassName.get(ormaPackageName + ".internal", "Aliases", "ColumnPath");
+
     public static final ClassName IllegalArgumentException = ClassName.get(IllegalArgumentException.class);
 
     public static final ClassName Completable = ClassName.get("rx", "Completable");

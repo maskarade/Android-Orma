@@ -50,7 +50,7 @@ public class Annotations {
     );
 
     private static List<AnnotationSpec> overrideAndNullable = Arrays.asList(
-            Annotations.nonNull(),
+            Annotations.nullable(),
             Annotations.override()
     );
 

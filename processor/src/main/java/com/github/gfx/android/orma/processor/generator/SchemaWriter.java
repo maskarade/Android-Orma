@@ -22,7 +22,6 @@ import com.github.gfx.android.orma.processor.exception.ProcessingException;
 import com.github.gfx.android.orma.processor.model.AssociationDefinition;
 import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
-import com.github.gfx.android.orma.processor.tool.AliasAllocator;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Strings;
 import com.github.gfx.android.orma.processor.util.Types;
@@ -51,28 +50,28 @@ import javax.lang.model.element.VariableElement;
  */
 public class SchemaWriter extends BaseWriter {
 
-    static final String COLUMNS = "$COLUMNS";
+    private static final String DEFAULT_RESULT_COLUMNS = "$DEFAULT_RESULT_COLUMNS";
 
-    static final String DEFAULT_RESULT_COLUMNS = "$DEFAULT_RESULT_COLUMNS";
+    private static final String onConflictAlgorithm = "onConflictAlgorithm";
 
-    static final String onConflictAlgorithm = "onConflictAlgorithm";
+    private static final String withoutAutoId = "withoutAutoId";
 
-    static final String withoutAutoId = "withoutAutoId";
-
-    static final Modifier[] publicStaticFinal = {
+    private static final Modifier[] publicStaticFinal = {
             Modifier.PUBLIC,
             Modifier.STATIC,
             Modifier.FINAL,
     };
 
-    static final Modifier[] publicFinal = {
+    private static final Modifier[] publicFinal = {
             Modifier.PUBLIC,
             Modifier.FINAL,
     };
 
     private final SchemaDefinition schema;
 
-    FieldSpec primaryKeyFieldSpec;
+    private FieldSpecDefinition primaryKeyFieldSpecDef;
+
+    private List<FieldSpecDefinition> columns = new ArrayList<>();
 
     public SchemaWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
@@ -99,103 +98,92 @@ public class SchemaWriter extends BaseWriter {
     public List<FieldSpec> buildFieldSpecs() {
         List<FieldSpec> fieldSpecs = new ArrayList<>();
 
-        String alias = schema.hasDirectAssociations() ? '"' + context.getAliasName(schema.getTableName()) + '"' : "";
         fieldSpecs.add(FieldSpec.builder(schema.getSchemaClassName(), "INSTANCE", publicStaticFinal)
-                .initializer("$T.register(new $T($L))", Types.Schemas, schema.getSchemaClassName(), alias)
+                .initializer("$T.register(new $T())", Types.Schemas, schema.getSchemaClassName())
                 .build());
 
         fieldSpecs.add(FieldSpec.builder(Types.String, "alias", publicFinal)
                 .addAnnotation(Annotations.nullable())
                 .build());
 
-        List<FieldSpec> columns = new ArrayList<>();
-
         schema.getColumns().forEach(columnDef -> {
-            FieldSpec fieldSpec = buildColumnFieldSpec(columnDef);
-            columns.add(fieldSpec);
+            FieldSpecDefinition fieldSpecDef = buildColumnFieldSpec(columnDef);
+            columns.add(fieldSpecDef);
 
             if (columnDef.primaryKey) {
-                primaryKeyFieldSpec = fieldSpec;
+                primaryKeyFieldSpecDef = fieldSpecDef;
             }
         });
 
-        if (primaryKeyFieldSpec == null) {
+        if (primaryKeyFieldSpecDef == null) {
             // Even if primary key is omitted, "_rowid_" is always available.
             // (WITHOUT ROWID is not supported by Orma)
-            primaryKeyFieldSpec = buildPrimaryKeyColumn();
-            fieldSpecs.add(primaryKeyFieldSpec);
+            primaryKeyFieldSpecDef = buildPrimaryKeyColumn();
+            fieldSpecs.add(primaryKeyFieldSpecDef.fieldSpec);
         }
 
-        fieldSpecs.addAll(columns);
-
-        fieldSpecs.add(
-                FieldSpec.builder(Types.getColumnDefList(schema.getModelClassName()), COLUMNS)
-                        .addModifiers(Modifier.FINAL)
-                        .initializer(buildColumnsInitializer(columns))
-                        .build()
-        );
+        for (FieldSpecDefinition column : columns) {
+            fieldSpecs.add(column.fieldSpec);
+        }
 
         fieldSpecs.add(
                 FieldSpec.builder(Types.StringArray, DEFAULT_RESULT_COLUMNS)
-                        .addModifiers(Modifier.FINAL)
+                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                         .build()
         );
 
         return fieldSpecs;
     }
 
-    private String buildSelectFromTableClause() {
-        StringBuilder sb = new StringBuilder();
-        context.sqlg.appendIdentifier(sb, schema.getTableName());
+    private CodeBlock buildSelectFromTableClause() {
+        CodeBlock.Builder code = CodeBlock.builder();
 
-        String[] joins = schema.getColumns().stream()
+        CodeBlock[] joins = schema.getColumns().stream()
                 .filter(ColumnDefinition::isDirectAssociation)
-                .map(column -> {
-                    AliasAllocator.ColumnPath rootPath = AliasAllocator.ColumnPath.builder()
-                            .add(schema.getTableName(), column.columnName)
-                            .build();
-                    return buildJoins(rootPath, column);
-                })
-                .toArray(String[]::new);
+                .map(column -> buildJoins(CodeBlock.builder().build(), column))
+                .toArray(CodeBlock[]::new);
+
+        code.add("$S", schema.getEscapedTableName());
 
         if (joins.length != 0) {
-            sb.append(" AS ");
-            context.sqlg.appendIdentifier(sb, context.getAliasName(schema.getTableName()));
-            for (String join : joins) {
-                sb.append(join);
+            code.add("+ $S + getEscapedTableAlias()\n", " AS ");
+            for (CodeBlock join : joins) {
+                code.add("$L\n", join);
             }
         }
 
-        return sb.toString();
+        return code.build();
     }
 
-    public String buildJoins(AliasAllocator.ColumnPath parent, ColumnDefinition column) {
-        StringBuilder s = new StringBuilder();
+    public CodeBlock buildJoins(CodeBlock prefix, ColumnDefinition column) {
+        CodeBlock.Builder join = CodeBlock.builder();
+
         SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
         associatedSchema.getPrimaryKey().ifPresent(primaryKey -> {
-            s.append("\n LEFT OUTER JOIN ");
-            context.sqlg.appendIdentifier(s, associatedSchema.getTableName());
-            s.append(" AS ");
-            context.sqlg.appendIdentifier(s, context.getAliasName(
-                    parent.withColumnName(column.columnName).add(associatedSchema.getTableName(), primaryKey.columnName)));
-            s.append(" ON ");
-            s.append(column.getSafeColumnName(parent.parent));
-            s.append(" = ");
-            s.append(primaryKey.getSafeColumnName(parent));
+            join.add("+ $S + $L$L.associationSchema.getEscapedTableAlias() + ",
+                    " LEFT OUTER JOIN " + associatedSchema.getEscapedTableName() + " AS ",
+                    prefix,
+                    column.name
+            );
+            join.add("$S + $L$L.getQualifiedName() + $S + $L$L.associationSchema.$L.getQualifiedName()\n",
+                    " ON ",
+                    prefix, column.name,
+                    " = ",
+                    prefix, column.name, primaryKey.name
+            );
 
-            String nested = associatedSchema.getColumns()
+            // handles nested JOINs
+            CodeBlock newPrefix = prefix.toBuilder().add("$L$L.associationSchema.", prefix, column.name).build();
+            associatedSchema.getColumns()
                     .stream()
                     .filter(ColumnDefinition::isDirectAssociation)
-                    .map((columnDefinition) -> buildJoins(parent, columnDefinition))
-                    .collect(Collectors.joining(" "));
-            s.append(nested);
+                    .map(nestedColumn -> buildJoins(newPrefix, nestedColumn))
+                    .forEach(join::add);
         });
-        return s.toString();
+        return join.build();
     }
 
-    public FieldSpec buildColumnFieldSpec(ColumnDefinition c) {
-        AliasAllocator.ColumnPath parent = new AliasAllocator.ColumnPath(null, schema.getTableName(), c.columnName);
-
+    public FieldSpecDefinition buildColumnFieldSpec(ColumnDefinition c) {
         TypeName type = c.getType();
 
         CodeBlock typeInstance;
@@ -211,11 +199,13 @@ public class SchemaWriter extends BaseWriter {
             columnDefType = TypeSpec.anonymousClassBuilder("this, $S, $L, $S, $L",
                     c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c));
         } else {
-            // ColumnDef with new $Schema(alias)
-            String alias = context.getAliasName(parent.add(c.getAssociatedSchema().getTableName()));
-            columnDefType = TypeSpec.anonymousClassBuilder("this, $S, $L, $S, $L, new $T($S)",
+            CodeBlock pathExpr = CodeBlock.builder()
+                    .add("current != null ? current.add($S, $S) : null", c.columnName, c.getAssociatedSchema().getTableName())
+                    .build();
+            columnDefType = TypeSpec.anonymousClassBuilder("this, $S, $L, $S, $L, new $T($L)",
                     c.columnName, typeInstance, c.getStorageType(), buildColumnFlags(c),
-                    c.getAssociatedSchema().getSchemaClassName(), alias);
+                    c.getAssociatedSchema().getSchemaClassName(),
+                    pathExpr);
         }
         columnDefType.superclass(c.getColumnDefType());
 
@@ -251,10 +241,9 @@ public class SchemaWriter extends BaseWriter {
         }
         columnDefType.addMethod(getSerializedBuilder.build());
 
-        return FieldSpec.builder(c.getColumnDefType(), c.name)
-                .addModifiers(publicFinal)
-                .initializer("$L", columnDefType.build())
-                .build();
+        return new FieldSpecDefinition(
+                FieldSpec.builder(c.getColumnDefType(), c.name).addModifiers(publicFinal).build(),
+                columnDefType.build());
     }
 
     public CodeBlock buildColumnFlags(ColumnDefinition c) {
@@ -311,19 +300,18 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    public FieldSpec buildPrimaryKeyColumn() {
+    public FieldSpecDefinition buildPrimaryKeyColumn() {
         return buildColumnFieldSpec(ColumnDefinition.createDefaultPrimaryKey(schema));
     }
 
-
-    public CodeBlock buildColumnsInitializer(List<FieldSpec> columns) {
+    public CodeBlock buildColumnsInitializer() {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         builder.add("$T.<$T>asList(\n", Types.Arrays, Types.getColumnDef(schema.getModelClassName(), Types.WildcardType))
                 .indent();
 
         for (int i = 0; i < columns.size(); i++) {
-            builder.add("$N", columns.get(i));
+            builder.add("$N", columns.get(i).fieldSpec);
             if ((i + 1) != columns.size()) {
                 builder.add(",\n");
             } else {
@@ -374,20 +362,32 @@ public class SchemaWriter extends BaseWriter {
     public List<MethodSpec> buildMethodSpecs() {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
-        methodSpecs.add(
-                MethodSpec.constructorBuilder()
-                        .addParameter(ParameterSpec.builder(Types.String, "alias")
-                                .addAnnotation(Annotations.nullable())
-                                .build())
-                        .addStatement("this.alias = alias")
-                        .addStatement("$L = new String[]{\n$L}",
-                                DEFAULT_RESULT_COLUMNS, buildEscapedColumnNamesInitializer(schema, Collections.emptyList()))
-                        .build()
-        );
+        if (schema.hasDirectAssociations()) {
+            methodSpecs.add(
+                    MethodSpec.constructorBuilder()
+                            .addModifiers(Modifier.PUBLIC)
+                            .addStatement("this(new $T().createPath($S))", Types.Aliases, schema.getTableName())
+                            .build()
+            );
+        } else {
+            methodSpecs.add(
+                    MethodSpec.constructorBuilder()
+                            .addModifiers(Modifier.PUBLIC)
+                            .addStatement("this(null)")
+                            .build()
+            );
+
+        }
 
         methodSpecs.add(
                 MethodSpec.constructorBuilder()
-                        .addStatement("this(null)")
+                        .addParameter(ParameterSpec.builder(Types.ColumnPath, "current")
+                                .addAnnotation(Annotations.nullable())
+                                .build())
+                        .addStatement("this.alias = current != null ? current.getAlias() : null")
+                        .addCode(buildFieldInitializations())
+                        .addStatement("$L = new String[]{\n$L}",
+                                DEFAULT_RESULT_COLUMNS, buildEscapedColumnNamesInitializer(schema, Collections.emptyList()))
                         .build()
         );
 
@@ -441,7 +441,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return $S", buildSelectFromTableClause())
+                        .addStatement("return $L", buildSelectFromTableClause())
                         .build()
         );
 
@@ -450,7 +450,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getColumnDef(schema.getModelClassName(), Types.WildcardType))
-                        .addStatement("return $N", primaryKeyFieldSpec)
+                        .addStatement("return $N", primaryKeyFieldSpecDef.fieldSpec)
                         .build()
         );
 
@@ -459,7 +459,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getColumnDefList(schema.getModelClassName()))
-                        .addStatement("return $L", COLUMNS)
+                        .addStatement("return $L", buildColumnsInitializer())
                         .build()
         );
 
@@ -573,6 +573,18 @@ public class SchemaWriter extends BaseWriter {
         );
 
         return methodSpecs;
+    }
+
+    private CodeBlock buildFieldInitializations() {
+        CodeBlock.Builder code = CodeBlock.builder();
+        code.addStatement("this.$N = $L", primaryKeyFieldSpecDef.fieldSpec, primaryKeyFieldSpecDef.initializer);
+        for (FieldSpecDefinition column : columns) {
+            if (column == primaryKeyFieldSpecDef) {
+                continue;
+            }
+            code.addStatement("this.$N = $L", column.fieldSpec, column.initializer);
+        }
+        return code.build();
     }
 
     private CodeBlock buildConvertToArgs() {
@@ -779,6 +791,18 @@ public class SchemaWriter extends BaseWriter {
         } else {
             // FIXME: not reached?
             return CodeBlock.of("cursor.getString($L)", index);
+        }
+    }
+
+    private static class FieldSpecDefinition {
+
+        FieldSpec fieldSpec;
+
+        TypeSpec initializer;
+
+        FieldSpecDefinition(FieldSpec fieldSpec, TypeSpec initializer) {
+            this.fieldSpec = fieldSpec;
+            this.initializer = initializer;
         }
     }
 }
