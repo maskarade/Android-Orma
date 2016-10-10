@@ -30,7 +30,7 @@ public class Category_Schema implements Schema<Category> {
     this(null);
   }
 
-  Category_Schema(@Nullable Aliases.ColumnPath current) {
+  public Category_Schema(@Nullable Aliases.ColumnPath current) {
     this.alias = current != null ? current.getAlias() : null;
     this.id = new ColumnDef<Category, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
       @Override

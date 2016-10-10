@@ -37,7 +37,7 @@ public class Todo_Schema implements Schema<Todo> {
     this(null);
   }
 
-  Todo_Schema(@Nullable Aliases.ColumnPath current) {
+  public Todo_Schema(@Nullable Aliases.ColumnPath current) {
     this.alias = current != null ? current.getAlias() : null;
     this.id = new ColumnDef<Todo, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
       @Override

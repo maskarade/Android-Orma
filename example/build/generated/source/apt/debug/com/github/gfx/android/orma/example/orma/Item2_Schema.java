@@ -32,7 +32,7 @@ public class Item2_Schema implements Schema<Item2> {
     this(new Aliases().createPath("Item2"));
   }
 
-  Item2_Schema(@Nullable Aliases.ColumnPath current) {
+  public Item2_Schema(@Nullable Aliases.ColumnPath current) {
     this.alias = current != null ? current.getAlias() : null;
     this.name = new ColumnDef<Item2, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
       @Override
