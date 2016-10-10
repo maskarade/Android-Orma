@@ -25,8 +25,8 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
     return new Item_Relation(this);
   }
 
-  @Override
   @NonNull
+  @Override
   public Item_Schema getSchema() {
     return schema;
   }

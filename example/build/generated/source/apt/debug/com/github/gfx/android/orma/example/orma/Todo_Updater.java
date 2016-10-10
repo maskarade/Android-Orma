@@ -22,8 +22,8 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
     this.schema = relation.getSchema();
   }
 
-  @Override
   @NonNull
+  @Override
   public Todo_Schema getSchema() {
     return schema;
   }

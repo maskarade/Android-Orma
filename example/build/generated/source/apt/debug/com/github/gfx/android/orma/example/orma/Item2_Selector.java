@@ -25,8 +25,8 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
     return new Item2_Selector(this);
   }
 
-  @Override
   @NonNull
+  @Override
   public Item2_Schema getSchema() {
     return schema;
   }

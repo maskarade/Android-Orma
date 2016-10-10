@@ -25,8 +25,8 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
     return new Category_Selector(this);
   }
 
-  @Override
   @NonNull
+  @Override
   public Category_Schema getSchema() {
     return schema;
   }

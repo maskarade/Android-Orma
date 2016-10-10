@@ -25,8 +25,8 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     return new Todo_Relation(this);
   }
 
-  @Override
   @NonNull
+  @Override
   public Todo_Schema getSchema() {
     return schema;
   }

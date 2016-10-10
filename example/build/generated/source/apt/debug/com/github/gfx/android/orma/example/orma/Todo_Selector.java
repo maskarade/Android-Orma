@@ -25,8 +25,8 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     return new Todo_Selector(this);
   }
 
-  @Override
   @NonNull
+  @Override
   public Todo_Schema getSchema() {
     return schema;
   }

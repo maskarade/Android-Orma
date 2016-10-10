@@ -25,8 +25,8 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
     return new Category_Relation(this);
   }
 
-  @Override
   @NonNull
+  @Override
   public Category_Schema getSchema() {
     return schema;
   }

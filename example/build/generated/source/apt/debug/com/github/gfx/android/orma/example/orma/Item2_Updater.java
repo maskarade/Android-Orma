@@ -19,8 +19,8 @@ public class Item2_Updater extends Updater<Item2, Item2_Updater> {
     this.schema = relation.getSchema();
   }
 
-  @Override
   @NonNull
+  @Override
   public Item2_Schema getSchema() {
     return schema;
   }

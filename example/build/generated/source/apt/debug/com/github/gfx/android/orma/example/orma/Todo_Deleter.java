@@ -19,8 +19,8 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
     this.schema = relation.getSchema();
   }
 
-  @Override
   @NonNull
+  @Override
   public Todo_Schema getSchema() {
     return schema;
   }

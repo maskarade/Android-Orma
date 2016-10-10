@@ -85,8 +85,8 @@ public class UpdaterWriter extends BaseWriter {
         );
 
         methodSpecs.add(MethodSpec.methodBuilder("getSchema")
-                .addAnnotation(Annotations.override())
                 .addAnnotation(Annotations.nonNull())
+                .addAnnotation(Annotations.override())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSchemaClassName())
                 .addStatement("return schema")
