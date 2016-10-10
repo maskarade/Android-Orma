@@ -23,6 +23,7 @@ import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2_Schema
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithInheritance;
 import com.github.gfx.android.orma.test.model.ModelWithInheritance_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithNestedDirectAssociations_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithPrimaryKeyIsNotFirst;
 import com.github.gfx.android.orma.test.model.ModelWithPrimaryKeyIsNotFirst_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithStorageTypes_Schema;
@@ -169,7 +170,15 @@ public class SchemaTest {
         assertThat(schema.note.orderInAscending().toString(), is(schema.getEscapedTableAlias() + ".`note` ASC"));
         assertThat(schema.note.orderInDescending().toString(), is(schema.getEscapedTableAlias() + ".`note` DESC"));
 
-        assertThat(schema.author1.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`author`"));
+        assertThat(schema.author1.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`author1`"));
         assertThat(schema.author2.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`author2`"));
+    }
+
+    @Test
+    public void nestedDirectAssociations() throws Exception {
+        ModelWithNestedDirectAssociations_Schema schema = ModelWithNestedDirectAssociations_Schema.INSTANCE;
+
+        assertThat(schema.alias, is(notNullValue()));
+        assertThat(schema.md.associationSchema.name.getQualifiedName(), endsWith(".`name`"));
     }
 }

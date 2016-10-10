@@ -19,16 +19,14 @@ package com.github.gfx.android.orma.internal;
 import com.github.gfx.android.orma.Schema;
 
 import android.support.annotation.NonNull;
-
-import java.util.HashMap;
-import java.util.Map;
+import android.support.v4.util.SimpleArrayMap;
 
 /**
  * The set of all the {@link Schema} instances.
  */
 public class Schemas {
 
-    static final Map<Class<?>, Schema<?>> SCHEMAS = new HashMap<>();
+    static final SimpleArrayMap<Class<?>, Schema<?>> SCHEMAS = new SimpleArrayMap<>();
 
     public static <M, T extends Schema<M>> T register(@NonNull T schema) {
         SCHEMAS.put(schema.getModelClass(), schema);
