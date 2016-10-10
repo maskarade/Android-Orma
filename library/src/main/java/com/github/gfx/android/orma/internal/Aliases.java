@@ -37,9 +37,9 @@ import java.util.List;
  *   hasOne B bar;
  * }
  *
- * aliases.getAlias(A) -> a1
- * aliases.getAlias(A.foo:B) -> b1
- * aliases.getAlias(A.bar:B) -> b2
+ * aliases.getAlias(A) -&gt; a1
+ * aliases.getAlias(A.foo:B) -&gt; b1
+ * aliases.getAlias(A.bar:B) -&gt; b2
  * </pre>
  */
 public class Aliases {
