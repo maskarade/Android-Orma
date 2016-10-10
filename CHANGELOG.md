@@ -8,6 +8,16 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v3.0.0-rc2 2016/10/10
+
+https://github.com/gfx/Android-Orma/compare/v3.0.0-rc1...v3.0.0-rc2
+
+The internal `Schema` class has been re-designed from scratch.
+It may include problems even if all the test cases are green.
+Please give this release a try if you are interested in [#189](https://github.com/gfx/Android-Orma/issues/189).
+
+* Fix #189 (by [#291](https://github.com/gfx/Android-Orma/pull/291))
+
 ## v3.0.0-rc1 2016/09/20
 
 https://github.com/gfx/Android-Orma/compare/v2.6.0...v3.0.0-rc1
