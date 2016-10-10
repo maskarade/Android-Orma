@@ -16,7 +16,7 @@ public class Item_Deleter extends Deleter<Item, Item_Deleter> {
 
   public Item_Deleter(Item_Relation relation) {
     super(relation);
-    this.schema = (Item_Schema) relation.getSchema();
+    this.schema = relation.getSchema();
   }
 
   @Override

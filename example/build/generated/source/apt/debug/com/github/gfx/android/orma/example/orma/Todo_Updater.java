@@ -19,7 +19,7 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
 
   public Todo_Updater(Todo_Relation relation) {
     super(relation);
-    this.schema = (Todo_Schema) relation.getSchema();
+    this.schema = relation.getSchema();
   }
 
   @Override

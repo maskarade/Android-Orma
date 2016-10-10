@@ -17,7 +17,7 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
 
   public Todo_Relation(Todo_Relation relation) {
     super(relation);
-    this.schema = (Todo_Schema) relation.getSchema();
+    this.schema = relation.getSchema();
   }
 
   @Override

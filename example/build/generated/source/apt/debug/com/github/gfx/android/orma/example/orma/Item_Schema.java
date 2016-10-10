@@ -9,53 +9,55 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.util.Arrays;
 import java.util.List;
 
 public class Item_Schema implements Schema<Item> {
-  public static final Item_Schema INSTANCE = Schemas.register(new Item_Schema("i1"));
+  public static final Item_Schema INSTANCE = Schemas.register(new Item_Schema());
 
   @Nullable
   public final String alias;
 
-  public final AssociationDef<Item, Category, Category_Schema> category = new AssociationDef<Item, Category, Category_Schema>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c3")) {
-    @Override
-    @NonNull
-    public Category get(@NonNull Item model) {
-      return model.category;
-    }
+  public final AssociationDef<Item, Category, Category_Schema> category;
 
-    @Override
-    @NonNull
-    public Long getSerialized(@NonNull Item model) {
-      return model.category.id;
-    }
-  };
+  public final ColumnDef<Item, String> name;
 
-  public final ColumnDef<Item, String> name = new ColumnDef<Item, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
-    @Override
-    @NonNull
-    public String get(@NonNull Item model) {
-      return model.name;
-    }
+  private final String[] $DEFAULT_RESULT_COLUMNS;
 
-    @Override
-    @NonNull
-    public String getSerialized(@NonNull Item model) {
-      return model.name;
-    }
-  };
+  public Item_Schema() {
+    this(new Aliases().createPath("Item"));
+  }
 
-  final List<ColumnDef<Item, ?>> $COLUMNS = Arrays.<ColumnDef<Item, ?>>asList(
-    category,
-    name
-  );
+  Item_Schema(@Nullable Aliases.ColumnPath current) {
+    this.alias = current != null ? current.getAlias() : null;
+    this.name = new ColumnDef<Item, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
+      @Override
+      @NonNull
+      public String get(@NonNull Item model) {
+        return model.name;
+      }
 
-  final String[] $DEFAULT_RESULT_COLUMNS;
+      @Override
+      @NonNull
+      public String getSerialized(@NonNull Item model) {
+        return model.name;
+      }
+    };
+    this.category = new AssociationDef<Item, Category, Category_Schema>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category", "Category") : null)) {
+      @Override
+      @NonNull
+      public Category get(@NonNull Item model) {
+        return model.category;
+      }
 
-  Item_Schema(@Nullable String alias) {
-    this.alias = alias;
+      @Override
+      @NonNull
+      public Long getSerialized(@NonNull Item model) {
+        return model.category.id;
+      }
+    };
     $DEFAULT_RESULT_COLUMNS = new String[]{
           category.getQualifiedName(),
             category.associationSchema.name.getQualifiedName(),
@@ -63,10 +65,6 @@ public class Item_Schema implements Schema<Item> {
           ,
           name.getQualifiedName()
         };
-  }
-
-  Item_Schema() {
-    this(null);
   }
 
   @NonNull
@@ -87,13 +85,13 @@ public class Item_Schema implements Schema<Item> {
     return "`Item`";
   }
 
-  @NonNull
+  @Nullable
   @Override
   public String getTableAlias() {
     return alias;
   }
 
-  @NonNull
+  @Nullable
   @Override
   public String getEscapedTableAlias() {
     return alias != null ? '`' + alias + '`' : null;
@@ -102,8 +100,10 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Item` AS `i1`\n"
-            + " LEFT OUTER JOIN `Category` AS `c3` ON `i1`.`category` = `c3`.`id`";
+    return "`Item`"+ " AS " + getEscapedTableAlias()
+        + " LEFT OUTER JOIN `Category` AS " + category.associationSchema.getEscapedTableAlias() + " ON " + category.getQualifiedName() + " = " + category.associationSchema.id.getQualifiedName()
+
+        ;
   }
 
   @NonNull
@@ -115,7 +115,10 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public List<ColumnDef<Item, ?>> getColumns() {
-    return $COLUMNS;
+    return Arrays.<ColumnDef<Item, ?>>asList(
+          category,
+          name
+        );
   }
 
   @NonNull

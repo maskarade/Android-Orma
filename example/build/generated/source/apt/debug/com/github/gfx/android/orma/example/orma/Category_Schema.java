@@ -8,6 +8,7 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,51 +20,48 @@ public class Category_Schema implements Schema<Category> {
   @Nullable
   public final String alias;
 
-  public final ColumnDef<Category, String> name = new ColumnDef<Category, String>(this, "name", String.class, "TEXT", ColumnDef.UNIQUE) {
-    @Override
-    @NonNull
-    public String get(@NonNull Category model) {
-      return model.name;
-    }
+  public final ColumnDef<Category, String> name;
 
-    @Override
-    @NonNull
-    public String getSerialized(@NonNull Category model) {
-      return model.name;
-    }
-  };
+  public final ColumnDef<Category, Long> id;
 
-  public final ColumnDef<Category, Long> id = new ColumnDef<Category, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
-    @Override
-    @NonNull
-    public Long get(@NonNull Category model) {
-      return model.id;
-    }
+  private final String[] $DEFAULT_RESULT_COLUMNS;
 
-    @Override
-    @NonNull
-    public Long getSerialized(@NonNull Category model) {
-      return model.id;
-    }
-  };
+  public Category_Schema() {
+    this(null);
+  }
 
-  final List<ColumnDef<Category, ?>> $COLUMNS = Arrays.<ColumnDef<Category, ?>>asList(
-    name,
-    id
-  );
+  Category_Schema(@Nullable Aliases.ColumnPath current) {
+    this.alias = current != null ? current.getAlias() : null;
+    this.id = new ColumnDef<Category, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
+      @Override
+      @NonNull
+      public Long get(@NonNull Category model) {
+        return model.id;
+      }
 
-  final String[] $DEFAULT_RESULT_COLUMNS;
+      @Override
+      @NonNull
+      public Long getSerialized(@NonNull Category model) {
+        return model.id;
+      }
+    };
+    this.name = new ColumnDef<Category, String>(this, "name", String.class, "TEXT", ColumnDef.UNIQUE) {
+      @Override
+      @NonNull
+      public String get(@NonNull Category model) {
+        return model.name;
+      }
 
-  Category_Schema(@Nullable String alias) {
-    this.alias = alias;
+      @Override
+      @NonNull
+      public String getSerialized(@NonNull Category model) {
+        return model.name;
+      }
+    };
     $DEFAULT_RESULT_COLUMNS = new String[]{
           name.getQualifiedName(),
           id.getQualifiedName()
         };
-  }
-
-  Category_Schema() {
-    this(null);
   }
 
   @NonNull
@@ -84,13 +82,13 @@ public class Category_Schema implements Schema<Category> {
     return "`Category`";
   }
 
-  @NonNull
+  @Nullable
   @Override
   public String getTableAlias() {
     return alias;
   }
 
-  @NonNull
+  @Nullable
   @Override
   public String getEscapedTableAlias() {
     return alias != null ? '`' + alias + '`' : null;
@@ -111,7 +109,10 @@ public class Category_Schema implements Schema<Category> {
   @NonNull
   @Override
   public List<ColumnDef<Category, ?>> getColumns() {
-    return $COLUMNS;
+    return Arrays.<ColumnDef<Category, ?>>asList(
+          name,
+          id
+        );
   }
 
   @NonNull

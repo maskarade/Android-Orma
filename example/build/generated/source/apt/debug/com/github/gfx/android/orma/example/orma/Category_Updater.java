@@ -16,7 +16,7 @@ public class Category_Updater extends Updater<Category, Category_Updater> {
 
   public Category_Updater(Category_Relation relation) {
     super(relation);
-    this.schema = (Category_Schema) relation.getSchema();
+    this.schema = relation.getSchema();
   }
 
   @Override

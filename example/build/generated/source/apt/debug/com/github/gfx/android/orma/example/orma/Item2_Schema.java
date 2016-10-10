@@ -9,68 +9,70 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.util.Arrays;
 import java.util.List;
 
 public class Item2_Schema implements Schema<Item2> {
-  public static final Item2_Schema INSTANCE = Schemas.register(new Item2_Schema("i2"));
+  public static final Item2_Schema INSTANCE = Schemas.register(new Item2_Schema());
 
   @Nullable
   public final String alias;
 
-  public final AssociationDef<Item2, Category, Category_Schema> category1 = new AssociationDef<Item2, Category, Category_Schema>(this, "category1", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c4")) {
-    @Override
-    @NonNull
-    public Category get(@NonNull Item2 model) {
-      return model.category1;
-    }
+  public final AssociationDef<Item2, Category, Category_Schema> category1;
 
-    @Override
-    @NonNull
-    public Long getSerialized(@NonNull Item2 model) {
-      return model.category1.id;
-    }
-  };
+  public final AssociationDef<Item2, Category, Category_Schema> category2;
 
-  public final AssociationDef<Item2, Category, Category_Schema> category2 = new AssociationDef<Item2, Category, Category_Schema>(this, "category2", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema("c5")) {
-    @Override
-    @NonNull
-    public Category get(@NonNull Item2 model) {
-      return model.category2;
-    }
+  public final ColumnDef<Item2, String> name;
 
-    @Override
-    @NonNull
-    public Long getSerialized(@NonNull Item2 model) {
-      return model.category2.id;
-    }
-  };
+  private final String[] $DEFAULT_RESULT_COLUMNS;
 
-  public final ColumnDef<Item2, String> name = new ColumnDef<Item2, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
-    @Override
-    @NonNull
-    public String get(@NonNull Item2 model) {
-      return model.name;
-    }
+  public Item2_Schema() {
+    this(new Aliases().createPath("Item2"));
+  }
 
-    @Override
-    @NonNull
-    public String getSerialized(@NonNull Item2 model) {
-      return model.name;
-    }
-  };
+  Item2_Schema(@Nullable Aliases.ColumnPath current) {
+    this.alias = current != null ? current.getAlias() : null;
+    this.name = new ColumnDef<Item2, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
+      @Override
+      @NonNull
+      public String get(@NonNull Item2 model) {
+        return model.name;
+      }
 
-  final List<ColumnDef<Item2, ?>> $COLUMNS = Arrays.<ColumnDef<Item2, ?>>asList(
-    category1,
-    category2,
-    name
-  );
+      @Override
+      @NonNull
+      public String getSerialized(@NonNull Item2 model) {
+        return model.name;
+      }
+    };
+    this.category1 = new AssociationDef<Item2, Category, Category_Schema>(this, "category1", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category1", "Category") : null)) {
+      @Override
+      @NonNull
+      public Category get(@NonNull Item2 model) {
+        return model.category1;
+      }
 
-  final String[] $DEFAULT_RESULT_COLUMNS;
+      @Override
+      @NonNull
+      public Long getSerialized(@NonNull Item2 model) {
+        return model.category1.id;
+      }
+    };
+    this.category2 = new AssociationDef<Item2, Category, Category_Schema>(this, "category2", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category2", "Category") : null)) {
+      @Override
+      @NonNull
+      public Category get(@NonNull Item2 model) {
+        return model.category2;
+      }
 
-  Item2_Schema(@Nullable String alias) {
-    this.alias = alias;
+      @Override
+      @NonNull
+      public Long getSerialized(@NonNull Item2 model) {
+        return model.category2.id;
+      }
+    };
     $DEFAULT_RESULT_COLUMNS = new String[]{
           category1.getQualifiedName(),
             category1.associationSchema.name.getQualifiedName(),
@@ -82,10 +84,6 @@ public class Item2_Schema implements Schema<Item2> {
           ,
           name.getQualifiedName()
         };
-  }
-
-  Item2_Schema() {
-    this(null);
   }
 
   @NonNull
@@ -106,13 +104,13 @@ public class Item2_Schema implements Schema<Item2> {
     return "`Item2`";
   }
 
-  @NonNull
+  @Nullable
   @Override
   public String getTableAlias() {
     return alias;
   }
 
-  @NonNull
+  @Nullable
   @Override
   public String getEscapedTableAlias() {
     return alias != null ? '`' + alias + '`' : null;
@@ -121,9 +119,12 @@ public class Item2_Schema implements Schema<Item2> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Item2` AS `i2`\n"
-            + " LEFT OUTER JOIN `Category` AS `c4` ON `i2`.`category1` = `c4`.`id`\n"
-            + " LEFT OUTER JOIN `Category` AS `c5` ON `i2`.`category2` = `c5`.`id`";
+    return "`Item2`"+ " AS " + getEscapedTableAlias()
+        + " LEFT OUTER JOIN `Category` AS " + category1.associationSchema.getEscapedTableAlias() + " ON " + category1.getQualifiedName() + " = " + category1.associationSchema.id.getQualifiedName()
+
+        + " LEFT OUTER JOIN `Category` AS " + category2.associationSchema.getEscapedTableAlias() + " ON " + category2.getQualifiedName() + " = " + category2.associationSchema.id.getQualifiedName()
+
+        ;
   }
 
   @NonNull
@@ -135,7 +136,11 @@ public class Item2_Schema implements Schema<Item2> {
   @NonNull
   @Override
   public List<ColumnDef<Item2, ?>> getColumns() {
-    return $COLUMNS;
+    return Arrays.<ColumnDef<Item2, ?>>asList(
+          category1,
+          category2,
+          name
+        );
   }
 
   @NonNull

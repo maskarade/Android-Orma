@@ -16,7 +16,7 @@ public class Item_Updater extends Updater<Item, Item_Updater> {
 
   public Item_Updater(Item_Relation relation) {
     super(relation);
-    this.schema = (Item_Schema) relation.getSchema();
+    this.schema = relation.getSchema();
   }
 
   @Override
