@@ -21,6 +21,10 @@ import com.github.gfx.android.orma.annotation.Getter;
 import com.github.gfx.android.orma.annotation.Table;
 
 // https://github.com/gfx/Android-Orma/issues/293
+
+/**
+ * @see Issue293_Schema
+ */
 @Table
 public class Issue293 {
 
