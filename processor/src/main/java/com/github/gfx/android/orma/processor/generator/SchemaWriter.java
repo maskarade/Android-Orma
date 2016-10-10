@@ -381,6 +381,7 @@ public class SchemaWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
                         .addParameter(ParameterSpec.builder(Types.ColumnPath, "current")
                                 .addAnnotation(Annotations.nullable())
                                 .build())
