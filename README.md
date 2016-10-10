@@ -774,27 +774,15 @@ Orma runtime is very lightweight: [Method Count for v2.5.2](http://www.methodsco
 
 ## FAQ
 
-### Lint fails on InvalidPackage.
-
-As of v1.x, Orma uses [antlr4](https://github.com/antlr/antlr4) to parse SQL, and `antlr4-runtime` imports `java.awt.*`, which causes a lint violation on `InvalidPackage`. You can ignore this errors:
-
-```
-android {
-    lintOptions {
-        disable 'InvalidPackage'
-    }
-}
-```
-
 ### Can't build my project.
 
 Check your toolchain. FYI here are my toolchain versions:
 
 * JDK 1.8.0_66
-* Android SDK Tools 24.4.1
-* Android SDK Platform Tools 23.1
-* Android SDK Build Tools 23.0.2
-* Android Gradle Plugin 1.5.0 and 2.1.0-alpha3
+* Android SDK Tools 25 or later
+* Android SDK Platform Tools 24 or later
+* Android SDK Build Tools 24 or later
+* Android Gradle Plugin 2.2.0 or later
 
 ### Is there a real-world example that uses Orma?
 
