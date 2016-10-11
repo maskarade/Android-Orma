@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * To demonstrate multiple associations to the same model.
@@ -37,11 +38,12 @@ public class Item2 {
     @Column(indexed = true)
     public final Category category1;
 
+    @Nullable
     @Column(indexed = true)
     public final Category category2;
 
     @Setter
-    public Item2(@NonNull String name, @NonNull Category category1, @NonNull Category category2) {
+    public Item2(@NonNull String name, @NonNull Category category1, @Nullable Category category2) {
         this.name = name;
         this.category1 = category1;
         this.category2 = category2;
