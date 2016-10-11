@@ -8,6 +8,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v3.0.0-rc4 2016/10/11
+
+* Fix [#301](https://github.com/gfx/Android-Orma/issues/301) nullable direct association was instantiated with null fields
+
 ## v3.0.0-rc3 2016/10/11
 
 * Fix [#292](https://github.com/gfx/Android-Orma/issues/292): `Relation#clone()` didn't copy its order specs.
