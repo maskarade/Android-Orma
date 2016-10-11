@@ -13,7 +13,7 @@ dependencies:
       - echo y | android -s update sdk -u -a -t "extra-android-m2repository"
 test:
   override:
-    - ./gradlew --info check
+    - ./gradlew check
   post:
     - cp -r example/build/outputs/ "$CIRCLE_ARTIFACTS/example"
     - cp -r library/build/outputs/ "$CIRCLE_ARTIFACTS/library"
