@@ -18,11 +18,9 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
-import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
-import com.github.gfx.android.orma.exception.TransactionAbortException;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.Book;
@@ -42,11 +40,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import rx.Single;
-import rx.SingleSubscriber;
 import rx.functions.Action1;
 import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
