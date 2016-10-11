@@ -412,7 +412,7 @@ public class DirectAssociationsTest {
 
     @Test
     public void testNullableDirectAssociations() throws Exception {
-        orma.createModelWithNullableDirectAssociations(new ModelFactory<ModelWithNullableDirectAssociations>() {
+        ModelWithNullableDirectAssociations model = orma.createModelWithNullableDirectAssociations(new ModelFactory<ModelWithNullableDirectAssociations>() {
             @NonNull
             @Override
             public ModelWithNullableDirectAssociations call() {
@@ -420,6 +420,7 @@ public class DirectAssociationsTest {
             }
         });
 
+        assertThat(model.author, is(nullValue()));
         assertThat(orma.selectFromModelWithNullableDirectAssociations().authorIsNull().count(), is(1));
     }
 

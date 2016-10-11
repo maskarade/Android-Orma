@@ -1,9 +1,5 @@
 package com.github.gfx.android.orma.example.orma;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteStatement;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.AssociationDef;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
@@ -11,6 +7,12 @@ import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteStatement;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,15 +62,15 @@ public class Item2_Schema implements Schema<Item2> {
         return model.category1.id;
       }
     };
-    this.category2 = new AssociationDef<Item2, Category, Category_Schema>(this, "category2", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category2", "Category") : null)) {
+    this.category2 = new AssociationDef<Item2, Category, Category_Schema>(this, "category2", Category.class, "INTEGER", ColumnDef.NULLABLE | ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category2", "Category") : null)) {
       @Override
-      @NonNull
+      @Nullable
       public Category get(@NonNull Item2 model) {
         return model.category2;
       }
 
       @Override
-      @NonNull
+      @Nullable
       public Long getSerialized(@NonNull Item2 model) {
         return model.category2.id;
       }
@@ -152,7 +154,7 @@ public class Item2_Schema implements Schema<Item2> {
   @NonNull
   @Override
   public String getCreateTableStatement() {
-    return "CREATE TABLE `Item2` (`category1` INTEGER NOT NULL REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `category2` INTEGER NOT NULL REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `name` TEXT PRIMARY KEY)";
+    return "CREATE TABLE `Item2` (`category1` INTEGER NOT NULL REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `category2` INTEGER REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `name` TEXT PRIMARY KEY)";
   }
 
   @NonNull
@@ -204,9 +206,6 @@ public class Item2_Schema implements Schema<Item2> {
     if (model.category2 != null) {
       args[1] = model.category2.id;
     }
-    else {
-      throw new IllegalArgumentException("Item2.category2" + " must not be null, or use @Nullable to declare it as NULL");
-    }
     if (model.name != null) {
       args[2] = model.name;
     }
@@ -219,7 +218,12 @@ public class Item2_Schema implements Schema<Item2> {
   @Override
   public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Item2 model, boolean withoutAutoId) {
     statement.bindLong(1, model.category1.id);
-    statement.bindLong(2, model.category2.id);
+    if (model.category2 != null) {
+      statement.bindLong(2, model.category2.id);
+    }
+    else {
+      statement.bindNull(2);
+    }
     statement.bindString(3, model.name);
   }
 
@@ -227,7 +231,7 @@ public class Item2_Schema implements Schema<Item2> {
   @Override
   public Item2 newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int offset) {
     Category category1 = Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset + 0 + 1) /* consumes items: 2 */;
-    Category category2 = Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset + 3 + 1) /* consumes items: 2 */;
+    Category category2 = cursor.isNull(offset + 3 + 2) ? null : Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset + 3 + 1) /* consumes items: 2 */;
     String name = cursor.getString(offset + 6);
     return new Item2(name, category1, category2);
   }

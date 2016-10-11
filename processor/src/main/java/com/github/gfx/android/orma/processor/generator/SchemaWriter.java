@@ -708,15 +708,18 @@ public class SchemaWriter extends BaseWriter {
             if (Types.isDirectAssociation(context, type)) {
                 SchemaDefinition associatedSchema = c.getAssociatedSchema();
                 int consumingItemSize = associatedSchema.calculateConsumingColumnSize();
-                CodeBlock createAssociatedModelExpr = CodeBlock.builder()
-                        .add("$L.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
-                                associatedSchema.createSchemaInstanceExpr(), index, consumingItemSize)
-                        .build();
+                CodeBlock.Builder createAssociatedModelExpr = CodeBlock.builder();
 
+                if (c.isNullableInJava()) {
+                    // check the primary key is null or not
+                    createAssociatedModelExpr.add("cursor.isNull($L + $L) ? null : ", index, consumingItemSize);
+                }
+                createAssociatedModelExpr.add("$L.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
+                    associatedSchema.createSchemaInstanceExpr(), index, consumingItemSize);
                 // Given a "Book has-a Publisher" association. The following expression should be created:
                 // book.publisher = Publisher_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset)
                 // NOTE: lhsBaseGen.apply(c) makes, e.g. "model.", ignoring the parameter "c".
-                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(createAssociatedModelExpr));
+                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(createAssociatedModelExpr.build()));
                 offset += consumingItemSize;
             } else if (Types.isSingleAssociation(type)) {
                 AssociationDefinition r = c.getAssociation();

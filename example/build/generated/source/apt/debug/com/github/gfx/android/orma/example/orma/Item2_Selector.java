@@ -39,6 +39,14 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
     return where(schema.category1, "=", category1Id);
   }
 
+  public Item2_Selector category2IsNull() {
+    return where(schema.category2, " IS NULL");
+  }
+
+  public Item2_Selector category2IsNotNull() {
+    return where(schema.category2, " IS NOT NULL");
+  }
+
   public Item2_Selector category2Eq(@NonNull Category category2) {
     return where(schema.category2, "=", category2.id /* primary key */);
   }

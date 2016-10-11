@@ -1,6 +1,7 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Updater;
 import java.util.Arrays;
@@ -30,7 +31,7 @@ public class Item2_Updater extends Updater<Item2, Item2_Updater> {
     return this;
   }
 
-  public Item2_Updater category2(@NonNull Category category2) {
+  public Item2_Updater category2(@Nullable Category category2) {
     contents.put("`category2`", category2.id);
     return this;
   }
@@ -46,6 +47,14 @@ public class Item2_Updater extends Updater<Item2, Item2_Updater> {
 
   public Item2_Updater category1Eq(long category1Id) {
     return where(schema.category1, "=", category1Id);
+  }
+
+  public Item2_Updater category2IsNull() {
+    return where(schema.category2, " IS NULL");
+  }
+
+  public Item2_Updater category2IsNotNull() {
+    return where(schema.category2, " IS NOT NULL");
   }
 
   public Item2_Updater category2Eq(@NonNull Category category2) {

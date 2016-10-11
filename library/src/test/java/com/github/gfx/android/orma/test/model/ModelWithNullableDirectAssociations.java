@@ -22,6 +22,9 @@ import com.github.gfx.android.orma.annotation.Table;
 
 import android.support.annotation.Nullable;
 
+/**
+ * @see ModelWithNullableDirectAssociations_Schema
+ */
 @Table
 public class ModelWithNullableDirectAssociations {
 
