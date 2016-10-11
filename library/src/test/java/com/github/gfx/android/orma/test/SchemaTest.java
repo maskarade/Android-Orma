@@ -140,7 +140,7 @@ public class SchemaTest {
     public void testInheritance() throws Exception {
         List<ColumnDef<ModelWithInheritance, ?>> columns = ModelWithInheritance_Schema.INSTANCE.getColumns();
 
-        assertThat("Base columns first, PrimaryKey las...t",
+        assertThat("Base columns first, PrimaryKey last",
                 columns,
                 Matchers.<ColumnDef<ModelWithInheritance, ?>>contains(
                         ModelWithInheritance_Schema.INSTANCE.baseColumn,
@@ -154,7 +154,7 @@ public class SchemaTest {
     public void testPrimaryKeyPosition() throws Exception {
         List<ColumnDef<ModelWithPrimaryKeyIsNotFirst, ?>> columns = ModelWithPrimaryKeyIsNotFirst_Schema.INSTANCE.getColumns();
 
-        assertThat("Base columns first, PrimaryKey las...t",
+        assertThat("Base columns first, PrimaryKey last",
                 columns,
                 Matchers.<ColumnDef<ModelWithPrimaryKeyIsNotFirst, ?>>contains(
                         ModelWithPrimaryKeyIsNotFirst_Schema.INSTANCE.foo,
