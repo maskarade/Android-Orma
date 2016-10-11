@@ -87,6 +87,9 @@ public class SchemaTest {
     public void testAuthorSchema() throws Exception {
         Author_Schema schema = Author_Schema.INSTANCE;
 
+        assertThat(schema.getTableAlias(), is(nullValue()));
+        assertThat(schema.getEscapedTableAlias(), is(nullValue()));
+
         assertThat(schema.getTableName(), is("Author"));
         assertThat(schema.getPrimaryKey(), is((ColumnDef) schema.name));
     }
@@ -167,7 +170,7 @@ public class SchemaTest {
         assertThat(schema.getTableAlias(), is(notNullValue()));
         assertThat(schema.getEscapedTableAlias(), is(notNullValue()));
 
-        assertThat(schema.note.getQualifiedName(), is("`" + schema.alias + "`.`note`"));
+        assertThat(schema.note.getQualifiedName(), is(schema.getEscapedTableAlias() + ".`note`"));
         assertThat(schema.note.orderInAscending().toString(), is(schema.getEscapedTableAlias() + ".`note` ASC"));
         assertThat(schema.note.orderInDescending().toString(), is(schema.getEscapedTableAlias() + ".`note` DESC"));
 
@@ -179,7 +182,8 @@ public class SchemaTest {
     public void nestedDirectAssociations() throws Exception {
         ModelWithNestedDirectAssociations_Schema schema = ModelWithNestedDirectAssociations_Schema.INSTANCE;
 
-        assertThat(schema.alias, is(notNullValue()));
+        assertThat(schema.getTableAlias(), is(notNullValue()));
+        assertThat(schema.getEscapedTableAlias(), is(notNullValue()));
         assertThat(schema.md.associationSchema.name.getQualifiedName(), endsWith(".`name`"));
     }
 }
