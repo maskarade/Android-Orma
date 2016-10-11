@@ -19,7 +19,7 @@ public class Todo_Schema implements Schema<Todo> {
   public static final Todo_Schema INSTANCE = Schemas.register(new Todo_Schema());
 
   @Nullable
-  public final String alias;
+  private final String $alias;
 
   public final ColumnDef<Todo, String> title;
 
@@ -31,14 +31,14 @@ public class Todo_Schema implements Schema<Todo> {
 
   public final ColumnDef<Todo, Long> id;
 
-  private final String[] $DEFAULT_RESULT_COLUMNS;
+  private final String[] $defaultResultColumns;
 
   public Todo_Schema() {
     this(null);
   }
 
   public Todo_Schema(@Nullable Aliases.ColumnPath current) {
-    this.alias = current != null ? current.getAlias() : null;
+    $alias = current != null ? current.getAlias() : null;
     this.id = new ColumnDef<Todo, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
       @Override
       @NonNull
@@ -104,7 +104,7 @@ public class Todo_Schema implements Schema<Todo> {
         return BuiltInSerializers.serializeDate(model.createdTime);
       }
     };
-    $DEFAULT_RESULT_COLUMNS = new String[]{
+    $defaultResultColumns = new String[]{
           title.getQualifiedName(),
           content.getQualifiedName(),
           done.getQualifiedName(),
@@ -134,13 +134,13 @@ public class Todo_Schema implements Schema<Todo> {
   @Nullable
   @Override
   public String getTableAlias() {
-    return alias;
+    return $alias;
   }
 
   @Nullable
   @Override
   public String getEscapedTableAlias() {
-    return alias != null ? '`' + alias + '`' : null;
+    return $alias != null ? '`' + $alias + '`' : null;
   }
 
   @NonNull
@@ -170,7 +170,7 @@ public class Todo_Schema implements Schema<Todo> {
   @NonNull
   @Override
   public String[] getDefaultResultColumns() {
-    return $DEFAULT_RESULT_COLUMNS;
+    return $defaultResultColumns;
   }
 
   @NonNull

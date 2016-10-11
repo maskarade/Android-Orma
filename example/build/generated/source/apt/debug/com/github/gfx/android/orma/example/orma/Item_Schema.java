@@ -18,20 +18,20 @@ public class Item_Schema implements Schema<Item> {
   public static final Item_Schema INSTANCE = Schemas.register(new Item_Schema());
 
   @Nullable
-  public final String alias;
+  private final String $alias;
 
   public final AssociationDef<Item, Category, Category_Schema> category;
 
   public final ColumnDef<Item, String> name;
 
-  private final String[] $DEFAULT_RESULT_COLUMNS;
+  private final String[] $defaultResultColumns;
 
   public Item_Schema() {
     this(new Aliases().createPath("Item"));
   }
 
   public Item_Schema(@Nullable Aliases.ColumnPath current) {
-    this.alias = current != null ? current.getAlias() : null;
+    $alias = current != null ? current.getAlias() : null;
     this.name = new ColumnDef<Item, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
       @Override
       @NonNull
@@ -58,7 +58,7 @@ public class Item_Schema implements Schema<Item> {
         return model.category.id;
       }
     };
-    $DEFAULT_RESULT_COLUMNS = new String[]{
+    $defaultResultColumns = new String[]{
           category.getQualifiedName(),
             category.associationSchema.name.getQualifiedName(),
             category.associationSchema.id.getQualifiedName()
@@ -88,13 +88,13 @@ public class Item_Schema implements Schema<Item> {
   @Nullable
   @Override
   public String getTableAlias() {
-    return alias;
+    return $alias;
   }
 
   @Nullable
   @Override
   public String getEscapedTableAlias() {
-    return alias != null ? '`' + alias + '`' : null;
+    return $alias != null ? '`' + $alias + '`' : null;
   }
 
   @NonNull
@@ -124,7 +124,7 @@ public class Item_Schema implements Schema<Item> {
   @NonNull
   @Override
   public String[] getDefaultResultColumns() {
-    return $DEFAULT_RESULT_COLUMNS;
+    return $defaultResultColumns;
   }
 
   @NonNull

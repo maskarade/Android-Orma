@@ -50,7 +50,9 @@ import javax.lang.model.element.VariableElement;
  */
 public class SchemaWriter extends BaseWriter {
 
-    private static final String DEFAULT_RESULT_COLUMNS = "$DEFAULT_RESULT_COLUMNS";
+    private static final String $defaultResultColumns = "$defaultResultColumns";
+
+    private static final String $alias = "$alias";
 
     private static final String onConflictAlgorithm = "onConflictAlgorithm";
 
@@ -102,7 +104,7 @@ public class SchemaWriter extends BaseWriter {
                 .initializer("$T.register(new $T())", Types.Schemas, schema.getSchemaClassName())
                 .build());
 
-        fieldSpecs.add(FieldSpec.builder(Types.String, "alias", publicFinal)
+        fieldSpecs.add(FieldSpec.builder(Types.String, $alias, Modifier.PRIVATE, Modifier.FINAL)
                 .addAnnotation(Annotations.nullable())
                 .build());
 
@@ -127,7 +129,7 @@ public class SchemaWriter extends BaseWriter {
         }
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.StringArray, DEFAULT_RESULT_COLUMNS)
+                FieldSpec.builder(Types.StringArray, $defaultResultColumns)
                         .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                         .build()
         );
@@ -385,10 +387,10 @@ public class SchemaWriter extends BaseWriter {
                         .addParameter(ParameterSpec.builder(Types.ColumnPath, "current")
                                 .addAnnotation(Annotations.nullable())
                                 .build())
-                        .addStatement("this.alias = current != null ? current.getAlias() : null")
+                        .addStatement("$L = current != null ? current.getAlias() : null", $alias)
                         .addCode(buildFieldInitializations())
                         .addStatement("$L = new String[]{\n$L}",
-                                DEFAULT_RESULT_COLUMNS, buildEscapedColumnNamesInitializer(schema, Collections.emptyList()))
+                                $defaultResultColumns, buildEscapedColumnNamesInitializer(schema, Collections.emptyList()))
                         .build()
         );
 
@@ -424,7 +426,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNullable())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return alias")
+                        .addStatement("return $L", $alias)
                         .build()
         );
 
@@ -433,7 +435,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNullable())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.String)
-                        .addStatement("return alias != null ? '`' + alias + '`' : null")
+                        .addStatement("return $L != null ? '`' + $L + '`' : null", $alias, $alias)
                         .build()
         );
 
@@ -469,7 +471,7 @@ public class SchemaWriter extends BaseWriter {
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.StringArray)
-                        .addStatement("return $L", DEFAULT_RESULT_COLUMNS)
+                        .addStatement("return $L", $defaultResultColumns)
                         .build()
         );
 

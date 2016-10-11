@@ -18,20 +18,20 @@ public class Category_Schema implements Schema<Category> {
   public static final Category_Schema INSTANCE = Schemas.register(new Category_Schema());
 
   @Nullable
-  public final String alias;
+  private final String $alias;
 
   public final ColumnDef<Category, String> name;
 
   public final ColumnDef<Category, Long> id;
 
-  private final String[] $DEFAULT_RESULT_COLUMNS;
+  private final String[] $defaultResultColumns;
 
   public Category_Schema() {
     this(null);
   }
 
   public Category_Schema(@Nullable Aliases.ColumnPath current) {
-    this.alias = current != null ? current.getAlias() : null;
+    $alias = current != null ? current.getAlias() : null;
     this.id = new ColumnDef<Category, Long>(this, "id", long.class, "INTEGER", ColumnDef.PRIMARY_KEY | ColumnDef.AUTO_VALUE) {
       @Override
       @NonNull
@@ -58,7 +58,7 @@ public class Category_Schema implements Schema<Category> {
         return model.name;
       }
     };
-    $DEFAULT_RESULT_COLUMNS = new String[]{
+    $defaultResultColumns = new String[]{
           name.getQualifiedName(),
           id.getQualifiedName()
         };
@@ -85,13 +85,13 @@ public class Category_Schema implements Schema<Category> {
   @Nullable
   @Override
   public String getTableAlias() {
-    return alias;
+    return $alias;
   }
 
   @Nullable
   @Override
   public String getEscapedTableAlias() {
-    return alias != null ? '`' + alias + '`' : null;
+    return $alias != null ? '`' + $alias + '`' : null;
   }
 
   @NonNull
@@ -118,7 +118,7 @@ public class Category_Schema implements Schema<Category> {
   @NonNull
   @Override
   public String[] getDefaultResultColumns() {
-    return $DEFAULT_RESULT_COLUMNS;
+    return $defaultResultColumns;
   }
 
   @NonNull

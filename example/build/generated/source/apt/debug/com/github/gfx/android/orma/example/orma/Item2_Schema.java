@@ -18,7 +18,7 @@ public class Item2_Schema implements Schema<Item2> {
   public static final Item2_Schema INSTANCE = Schemas.register(new Item2_Schema());
 
   @Nullable
-  public final String alias;
+  private final String $alias;
 
   public final AssociationDef<Item2, Category, Category_Schema> category1;
 
@@ -26,14 +26,14 @@ public class Item2_Schema implements Schema<Item2> {
 
   public final ColumnDef<Item2, String> name;
 
-  private final String[] $DEFAULT_RESULT_COLUMNS;
+  private final String[] $defaultResultColumns;
 
   public Item2_Schema() {
     this(new Aliases().createPath("Item2"));
   }
 
   public Item2_Schema(@Nullable Aliases.ColumnPath current) {
-    this.alias = current != null ? current.getAlias() : null;
+    $alias = current != null ? current.getAlias() : null;
     this.name = new ColumnDef<Item2, String>(this, "name", String.class, "TEXT", ColumnDef.PRIMARY_KEY) {
       @Override
       @NonNull
@@ -73,7 +73,7 @@ public class Item2_Schema implements Schema<Item2> {
         return model.category2.id;
       }
     };
-    $DEFAULT_RESULT_COLUMNS = new String[]{
+    $defaultResultColumns = new String[]{
           category1.getQualifiedName(),
             category1.associationSchema.name.getQualifiedName(),
             category1.associationSchema.id.getQualifiedName()
@@ -107,13 +107,13 @@ public class Item2_Schema implements Schema<Item2> {
   @Nullable
   @Override
   public String getTableAlias() {
-    return alias;
+    return $alias;
   }
 
   @Nullable
   @Override
   public String getEscapedTableAlias() {
-    return alias != null ? '`' + alias + '`' : null;
+    return $alias != null ? '`' + $alias + '`' : null;
   }
 
   @NonNull
@@ -146,7 +146,7 @@ public class Item2_Schema implements Schema<Item2> {
   @NonNull
   @Override
   public String[] getDefaultResultColumns() {
-    return $DEFAULT_RESULT_COLUMNS;
+    return $defaultResultColumns;
   }
 
   @NonNull
