@@ -164,7 +164,8 @@ public class SchemaTest {
     public void multipleDirectAssociations() throws Exception {
         ModelWithDirectAssociation2_Schema schema = ModelWithDirectAssociation2_Schema.INSTANCE;
 
-        assertThat(schema.alias, is(notNullValue()));
+        assertThat(schema.getTableAlias(), is(notNullValue()));
+        assertThat(schema.getEscapedTableAlias(), is(notNullValue()));
 
         assertThat(schema.note.getQualifiedName(), is("`" + schema.alias + "`.`note`"));
         assertThat(schema.note.orderInAscending().toString(), is(schema.getEscapedTableAlias() + ".`note` ASC"));
