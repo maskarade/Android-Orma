@@ -16,7 +16,6 @@
 package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.Inserter;
-import com.github.gfx.android.orma.TransactionTask;
 import com.github.gfx.android.orma.test.model.ModelWithConditionHelpers;
 import com.github.gfx.android.orma.test.model.ModelWithConditionHelpers_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;

@@ -103,20 +103,13 @@ public class Types {
 
     public static final ClassName OrmaConnection = ClassName.get(ormaPackageName, "OrmaConnection");
 
-    public static final ClassName TransactionTask = ClassName.get(ormaPackageName, "TransactionTask");
-
     public static final ClassName Inserter = ClassName.get(ormaPackageName, "Inserter");
 
     public static final ClassName SingleAssociation = ClassName.get(ormaPackageName, "SingleAssociation");
 
     public static final ClassName ModelFactory = ClassName.get(ormaPackageName, "ModelFactory");
 
-    public static final ClassName MigrationEngine = ClassName.get(ormaPackageName + ".migration", "MigrationEngine");
-
     public static final ClassName TypeHolder = ClassName.get(ormaPackageName + ".internal", "TypeHolder");
-
-    public static final ClassName TransactionAbortException = ClassName
-            .get(ormaPackageName + ".exception", "TransactionAbortException");
 
     public static final ClassName OrmaDatabaseBuilderBase = ClassName.get(ormaPackageName, "OrmaDatabaseBuilderBase");
 
