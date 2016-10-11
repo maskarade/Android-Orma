@@ -50,6 +50,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     public Relation(@NonNull Relation<Model, ?> relation) {
         super(relation);
+        orderSpecs.addAll(relation.orderSpecs);
     }
 
     @SuppressWarnings("unchecked")

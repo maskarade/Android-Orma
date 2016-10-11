@@ -329,4 +329,13 @@ public class RelationTest {
         assertThat(reloaded.name, is(model.name));
         assertThat(reloaded.note, is("modified"));
     }
+
+    @Test
+    public void testClone() throws Exception {
+        ModelWithDate_Relation rel = rel().orderByNameDesc().clone();
+
+        assertThat(rel.get(0).name, is("C"));
+        assertThat(rel.get(1).name, is("B"));
+        assertThat(rel.get(2).name, is("A"));
+    }
 }
