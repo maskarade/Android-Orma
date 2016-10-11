@@ -8,6 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v3.0.0-rc3 2016/10/11
+
+* Fix [#292](https://github.com/gfx/Android-Orma/issues/292): `Relation#clone()` didn't copy its order specs.
+* Fix [#293](https://github.com/gfx/Android-Orma/issues/293): The order of accessor methods did matter.
+* Make `Schema` constructors public to compile (degraded in v3.0.0-rc2, reported by @PtiPingouin)
+
 ## v3.0.0-rc2 2016/10/10
 
 https://github.com/gfx/Android-Orma/compare/v3.0.0-rc1...v3.0.0-rc2
