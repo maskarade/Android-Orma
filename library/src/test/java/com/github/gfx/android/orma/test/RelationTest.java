@@ -34,6 +34,7 @@ import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -328,5 +329,16 @@ public class RelationTest {
 
         assertThat(reloaded.name, is(model.name));
         assertThat(reloaded.note, is("modified"));
+    }
+
+    @Test
+    public void testClone() throws Exception {
+        ModelWithDate_Relation rel = rel().orderByNameDesc().clone();
+
+        List<ModelWithDate> list = rel.selector().toList();
+        assertThat(list, hasSize(3));
+        assertThat(list.get(0).name, is("C"));
+        assertThat(list.get(1).name, is("B"));
+        assertThat(list.get(2).name, is("A"));
     }
 }
