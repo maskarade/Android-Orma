@@ -191,8 +191,8 @@ public class SchemaDefinition {
             columns.addAll(collectColumns(superclassElement));
         }
 
-        Map<String, ExecutableElement> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        Map<String, ExecutableElement> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, List<ExecutableElement>> getters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, List<ExecutableElement>> setters = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         List<VariableElement> columnElements = new ArrayList<>();
 
@@ -227,43 +227,54 @@ public class SchemaDefinition {
                 .map((element) -> {
                     ColumnDefinition column = new ColumnDefinition(this, element);
                     column.initGetterAndSetter(
-                            getEither(getters, column.columnName, column.name),
-                            getEither(setters, column.columnName, column.name));
+                            getBestMatched(getters, column.columnName, column.name),
+                            getBestMatched(setters, column.columnName, column.name));
                     return column;
                 })
                 .collect(Collectors.toList()));
         return columns;
     }
 
-    private void extractNameFromGetter(Map<String, ExecutableElement> map, Getter annotation, ExecutableElement accessor) {
-        if (annotation != null && !Strings.isEmpty(annotation.value())) {
-            map.put(annotation.value(), accessor);
-        } else if (accessor.getParameters().isEmpty()) {
-            String name = accessor.getSimpleName().toString();
-            if (isBooleanType(accessor.getReturnType())) {
-                if (name.startsWith("is")) {
-                    map.put(name.substring("is".length()), accessor);
-                }
-            }
-            if (name.startsWith("get")) {
-                map.put(name.substring("get".length()), accessor);
-            }
-            map.put(name, accessor);
-        }
-    }
-
     @SafeVarargs
-    private final <K, V> V getEither(Map<K, V> map, K... keys) {
+    private final <K, V> V getBestMatched(Map<K, List<V>> map, K... keys) {
         for (K key : keys) {
-            V value = map.get(key);
+            List<V> value = map.get(key);
             if (value != null) {
-                return value;
+                return value.get(0);
             }
         }
         return null;
     }
 
-    private void extractNameFromSetter(Map<String, ExecutableElement> map, Setter annotation, ExecutableElement accessor) {
+    private void pushBackAccessorCandidate(Map<String, List<ExecutableElement>> map, String name, ExecutableElement accessor) {
+        List<ExecutableElement> methods = map.computeIfAbsent(name, (_name) -> new ArrayList<>());
+        methods.add(accessor);
+    }
+
+    private void pushFrontAccessorCandidate(Map<String, List<ExecutableElement>> map, String name, ExecutableElement accessor) {
+        List<ExecutableElement> methods = map.computeIfAbsent(name, (_name) -> new ArrayList<>());
+        methods.add(0, accessor);
+    }
+
+    private void extractNameFromGetter(Map<String, List<ExecutableElement>> map, Getter annotation, ExecutableElement accessor) {
+        if (annotation != null && !Strings.isEmpty(annotation.value())) {
+            pushFrontAccessorCandidate(map, annotation.value(), accessor);
+        } else if (accessor.getParameters().isEmpty()) {
+            String name = accessor.getSimpleName().toString();
+            pushBackAccessorCandidate(map, name, accessor);
+
+            if (isBooleanType(accessor.getReturnType())) {
+                if (name.startsWith("is")) {
+                    pushBackAccessorCandidate(map, name.substring("is".length()), accessor);
+                }
+            }
+            if (name.startsWith("get")) {
+                pushBackAccessorCandidate(map, name.substring("get".length()), accessor);
+            }
+        }
+    }
+
+    private void extractNameFromSetter(Map<String, List<ExecutableElement>> map, Setter annotation, ExecutableElement accessor) {
         if (constructorElement != null) {
             if (annotation != null) {
                 context.addError("@Setter annotations are already used for the constructor", accessor);
@@ -272,14 +283,13 @@ public class SchemaDefinition {
         }
 
         if (annotation != null && !Strings.isEmpty(annotation.value())) {
-            map.put(annotation.value(), accessor);
+            pushFrontAccessorCandidate(map, annotation.value(), accessor);
         } else if (accessor.getParameters().size() == 1) {
             String name = accessor.getSimpleName().toString();
+            pushBackAccessorCandidate(map, name, accessor);
             if (name.startsWith("set")) {
-                map.put(name.substring("set".length()), accessor);
+                pushBackAccessorCandidate(map, name.substring("set".length()), accessor);
             }
-            map.put(name, accessor);
-
         }
     }
 
