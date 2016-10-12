@@ -594,7 +594,7 @@ public class LatLngAdapter {
 
     // TargetType deserialize(SerializedType serialized)
     @NonNull
-    public static Location deserialize(@NonNull String serialized) {
+    public static LatLng deserialize(@NonNull String serialized) {
         String[] values = serialized.split(",");
         return new LatLng(
             Double.parseDouble(values[0]),
