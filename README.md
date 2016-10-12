@@ -21,12 +21,12 @@ The answer is that I need ORM that have *all* the following features:
 
 * Fast as hand-written code
 * POJO models
-  * That is, model classes must have no restriction
+  * That is, model classes have no restriction
   * Might implement `Parcelable` and/or extend any classes
   * They should be passed to another thread
-* A Database handle must be an object instance
+* A database handle must be an object instance
   * Not a singleton nor static-method based class
-* Semi-automatic migration
+* Easy migration
   * For what can be detected logically
   * i.e. simple `add column` and `drop column`
   * There is a wheel in Perl: [SQL::Translator::Diff](https://metacpan.org/pod/SQL::Translator::Diff)
@@ -68,8 +68,8 @@ Then, declare dependencies to use Orma.
 
 ```groovy
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:2.5.2'
-    compile 'com.github.gfx.android.orma:orma:2.5.2'
+    apt 'com.github.gfx.android.orma:orma-processor:2.6.0'
+    compile 'com.github.gfx.android.orma:orma:2.6.0'
 }
 ```
 
@@ -459,7 +459,7 @@ Two Orma models can be associated with **association** mechanism.
 
 There are two type of associations: **has-one** and **has-many**.
 
-In addition, there are another two kind of association supports: indirect associations with `SingleAssociation<T>` and direct associations
+In addition, there are another two kind of association supports: indirect associations with `SingleAssociation<T>` and direct associations.
 
 ### Has-One Associations with `SingleAssociation<T>`
 
@@ -512,7 +512,10 @@ class Book {
 
 ### Direct Associations
 
-As of v2.0, direct associations, which use the very Orma model classes, are supported. Given a `has-one` association, `Book has-one Publisher`:
+Direct associations, where an Orma model has another Orma model directly,
+are supported from v2.0.
+
+Given a `has-one` association, `Book has-one Publisher`:
 
 ```java
 @Table
@@ -562,7 +565,6 @@ In Java, `Book#publisher` is a `Publisher` instance, which is retrieved in each
 ### Known Issues in Associations
 
 * There are no methods to query associated models
-* In direct associations, a model can have only one model for each type
 
 These issues will be fixed in a future.
 
@@ -751,12 +753,9 @@ There is `SingleAssociationTypeAdapterFactory` to serialize and deserialize `Sin
 
 There is [an example app](example/) to demonstrate what Orma does.
 
-It also includes a simple benchmark with Realm and hand-written SQLiteDatabase
-operations.
-
 ## Benchmark
 
-There is a simple benchmark with [Realm](https://github.com/realm/realm-java) and hand-written code:
+There is a simple benchmark with [Realm](https://github.com/realm/realm-java) and hand-written SQLiteDatabase code:
 
 [example/BenchmarkActivity](example/src/main/java/com/github/gfx/android/orma/example/activity/BenchmarkActivity.java)
 
@@ -769,7 +768,7 @@ I welcome benchmark in another condition and/or another code.
 
 ## Method Count
 
-Orma runtime is very lightweight: [Method Count for v2.5.2](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:2.5.2)
+Orma runtime is very lightweight: [Method Count for v2.6.0](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:2.6.0)
 
 
 ## FAQ
@@ -812,7 +811,7 @@ You can see [generated files for example models](example/build/generated/source/
 
 ### Does Orma support Kotlin?
 
-Yes. Here is an example to use Orma with Kotlin: https://github.com/gfx/Orma-Kotlin-Example
+Yes, but it's _experimental_. Here is an example to use Orma with Kotlin: https://github.com/gfx/Orma-Kotlin-Example
 
 NOTE: Kotlin APT support, a.k.a. _kapt_, is **not stable**. Don't ask me for kapt problems.
 
