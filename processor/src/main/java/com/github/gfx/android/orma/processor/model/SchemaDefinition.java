@@ -318,7 +318,7 @@ public class SchemaDefinition {
         return tableName;
     }
 
-    public String getEscapedTableName() {
+    public CharSequence getEscapedTableName() {
         return context.sqlg.escapeIdentifier(tableName);
     }
 

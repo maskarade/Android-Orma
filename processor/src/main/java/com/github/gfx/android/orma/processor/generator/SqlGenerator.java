@@ -272,9 +272,9 @@ public class SqlGenerator {
     }
 
 
-    public String escapeIdentifier(String identifier) {
+    public CharSequence escapeIdentifier(String identifier) {
         StringBuilder sb = new StringBuilder();
         appendIdentifier(sb, identifier);
-        return sb.toString();
+        return sb;
     }
 }

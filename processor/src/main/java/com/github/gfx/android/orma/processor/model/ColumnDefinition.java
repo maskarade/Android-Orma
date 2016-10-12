@@ -241,18 +241,8 @@ public class ColumnDefinition {
         }
     }
 
-    public String getEscapedColumnName() {
-        return getEscapedColumnName(schema.hasDirectAssociations());
-    }
-
-    public String getEscapedColumnName(boolean fqn) {
-        StringBuilder sb = new StringBuilder();
-        if (fqn) {
-            context.sqlg.appendIdentifier(sb, schema.getTableName());
-            sb.append('.');
-        }
-        context.sqlg.appendIdentifier(sb, columnName);
-        return sb.toString();
+    public CharSequence getEscapedColumnName() {
+        return context.sqlg.escapeIdentifier(columnName);
     }
 
     public TypeName getType() {

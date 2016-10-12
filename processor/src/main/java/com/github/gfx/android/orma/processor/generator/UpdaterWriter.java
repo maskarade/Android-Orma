@@ -108,11 +108,11 @@ public class UpdaterWriter extends BaseWriter {
 
                 if (column.isNullableInJava()) {
                     methodSpecBuilder.beginControlFlow("if ($L == null)", paramName)
-                            .addStatement("contents.putNull($S)", column.getEscapedColumnName(false))
+                            .addStatement("contents.putNull($S)", column.getEscapedColumnName())
                             .endControlFlow()
                             .beginControlFlow("else");
                 }
-                methodSpecBuilder.addStatement("contents.put($S, $L)", column.getEscapedColumnName(false),
+                methodSpecBuilder.addStatement("contents.put($S, $L)", column.getEscapedColumnName(),
                         column.buildSerializeExpr("conn", paramName));
                 if (column.isNullableInJava()) {
                     methodSpecBuilder.endControlFlow();
@@ -134,7 +134,7 @@ public class UpdaterWriter extends BaseWriter {
                                                     .build()
                                     )
                                     .addStatement("contents.put($S, $L.getId())",
-                                            column.getEscapedColumnName(false), column.name + "Reference")
+                                            column.getEscapedColumnName(), column.name + "Reference")
                                     .addStatement("return this")
                                     .build()
                     );
@@ -162,7 +162,7 @@ public class UpdaterWriter extends BaseWriter {
                                                 .build()
                                 )
                                 .addStatement("contents.put($S, $L)",
-                                        column.getEscapedColumnName(false),
+                                        column.getEscapedColumnName(),
                                         primaryKey.buildGetColumnExpr(column.name))
                                 .addStatement("return this")
                                 .build()
