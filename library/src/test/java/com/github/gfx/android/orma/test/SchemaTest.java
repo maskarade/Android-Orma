@@ -131,6 +131,8 @@ public class SchemaTest {
 
     @Test
     public void testStorageTypeForDirectAssociation() throws Exception {
+        assertThat(ModelWithDirectAssociation_Schema.INSTANCE.publisher.storageType,
+                is(PublisherSchema.INSTANCE.getPrimaryKey().storageType));
         assertThat(ModelWithDirectAssociation_Schema.INSTANCE.author.storageType,
                 is(Author_Schema.INSTANCE.getPrimaryKey().storageType));
     }
