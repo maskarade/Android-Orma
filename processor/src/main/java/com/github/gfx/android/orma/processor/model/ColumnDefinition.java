@@ -79,11 +79,11 @@ public class ColumnDefinition {
 
     public final Column.Collate collate;
 
-    public final String storageType;
-
     public final long helperFlags;
 
     public final TypeAdapterDefinition typeAdapter;
+
+    private String storageType;
 
     public ExecutableElement getter;
 
@@ -103,7 +103,8 @@ public class ColumnDefinition {
 
         type = ClassName.get(element.asType());
         typeAdapter = schema.context.typeAdapterMap.get(type);
-        storageType = storageType(context, element, column, type, typeAdapter);
+
+        storageType = (column != null && !Strings.isEmpty(column.storageType())) ? column.storageType() : null;
 
         if (primaryKeyAnnotation != null) {
             primaryKeyOnConflict = primaryKeyAnnotation.onConflict();
@@ -156,7 +157,7 @@ public class ColumnDefinition {
         collate = Column.Collate.BINARY;
         helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, Column.Helpers.AUTO);
         typeAdapter = schema.context.typeAdapterMap.get(type);
-        storageType = storageType(context, null, null, type, typeAdapter);
+        storageType = null;
     }
 
     public static ColumnDefinition createDefaultPrimaryKey(SchemaDefinition schema) {
@@ -184,28 +185,6 @@ public class ColumnDefinition {
         return element.getSimpleName().toString();
     }
 
-    static String storageType(ProcessingContext context, Element element, Column column, TypeName type,
-            TypeAdapterDefinition typeAdapter) {
-        if (column != null && !Strings.isEmpty(column.storageType())) {
-            return column.storageType();
-        } else {
-            if (typeAdapter != null) {
-                return SqlTypes.getSqliteType(typeAdapter.serializedType);
-            } else if (Types.isSingleAssociation(type)) {
-                return SqlTypes.getSqliteType(TypeName.LONG);
-            } else if (Types.isDirectAssociation(context, type)) {
-                return context.getSchemaDef(type).getPrimaryKey()
-                        .map(primaryKey -> SqlTypes.getSqliteType(primaryKey.getType()))
-                        .orElseGet(() -> {
-                            context.addError("Missing @PrimaryKey", element);
-                            return "UNKNOWN";
-                        });
-            } else {
-                return SqlTypes.getSqliteType(type);
-            }
-        }
-    }
-
     static boolean hasNullableAnnotation(Element element) {
         for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
             // allow anything named "Nullable"
@@ -221,14 +200,31 @@ public class ColumnDefinition {
         if (flags == Column.Helpers.AUTO) {
             if (primaryKey) {
                 return (autoincrement || !autoId) ? Column.Helpers.ALL : Column.Helpers.CONDITIONS;
-            }
-            else if (indexed) {
+            } else if (indexed) {
                 return Column.Helpers.ALL;
             } else {
                 return Column.Helpers.NONE;
             }
         } else {
             return flags;
+        }
+    }
+
+    private static String extractStorageType(ProcessingContext context, TypeName type, Element element,
+            TypeAdapterDefinition typeAdapter) {
+        if (typeAdapter != null) {
+            return SqlTypes.getSqliteType(typeAdapter.serializedType);
+        } else if (Types.isSingleAssociation(type)) {
+            return SqlTypes.getSqliteType(TypeName.LONG);
+        } else if (Types.isDirectAssociation(context, type)) {
+            return context.getSchemaDef(type).getPrimaryKey()
+                    .map(primaryKey -> SqlTypes.getSqliteType(primaryKey.getType()))
+                    .orElseGet(() -> {
+                        context.addError("Missing @PrimaryKey as foreign key", element);
+                        return "UNKNOWN";
+                    });
+        } else {
+            return SqlTypes.getSqliteType(type);
         }
     }
 
@@ -274,6 +270,9 @@ public class ColumnDefinition {
     }
 
     public String getStorageType() {
+        if (storageType == null) {
+            storageType = extractStorageType(context, type, element, typeAdapter);
+        }
         return storageType;
     }
 
@@ -290,7 +289,8 @@ public class ColumnDefinition {
      */
     public ParameterizedTypeName getColumnDefType() {
         if (isDirectAssociation()) {
-            return Types.getAssociationDef(schema.getModelClassName(), getBoxType(), getAssociatedSchema().getSchemaClassName());
+            return Types
+                    .getAssociationDef(schema.getModelClassName(), getBoxType(), getAssociatedSchema().getSchemaClassName());
         } else {
             return Types.getColumnDef(schema.getModelClassName(), getBoxType());
         }
