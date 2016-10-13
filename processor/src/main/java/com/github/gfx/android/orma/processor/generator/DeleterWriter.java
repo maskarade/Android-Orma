@@ -48,6 +48,9 @@ public class DeleterWriter extends BaseWriter {
     @Override
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getDeleterClassName());
+        if (schema.isGeneric()) {
+            classBuilder.addAnnotation(Annotations.suppressWarnings("rawtypes"));
+        }
         classBuilder.addModifiers(Modifier.PUBLIC);
         classBuilder.superclass(Types.getDeleter(schema.getModelClassName(), schema.getDeleterClassName()));
 

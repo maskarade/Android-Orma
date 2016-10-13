@@ -68,6 +68,8 @@ public class SchemaDefinition {
 
     final ColumnDefinition primaryKey;
 
+    final boolean generic;
+
     @Nullable
     final ExecutableElement constructorElement; // null if it has a default constructor
 
@@ -79,6 +81,7 @@ public class SchemaDefinition {
         this.context = context;
         this.typeElement = typeElement;
         this.modelClassName = ClassName.get(typeElement);
+        this.generic = !typeElement.getTypeParameters().isEmpty();
 
         Table table = typeElement.getAnnotation(Table.class);
         this.constraints = table.constraints();
@@ -324,6 +327,10 @@ public class SchemaDefinition {
 
     public ClassName getModelClassName() {
         return modelClassName;
+    }
+
+    public boolean isGeneric() {
+        return generic;
     }
 
     public ClassName getSchemaClassName() {
