@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Types;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -35,6 +36,7 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -300,9 +302,14 @@ public class DatabaseWriter extends BaseWriter {
             String simpleModelName = schema.getModelClassName().simpleName();
             CodeBlock schemaInstance = schema.createSchemaInstanceExpr();
 
+            List<AnnotationSpec> suppressWarningsRawtypes = schema.isGeneric()
+                    ? Collections.singletonList(Annotations.suppressWarnings("rawtypes"))
+                    : Collections.emptyList();
+
             methodSpecs.add(MethodSpec.methodBuilder("new" + simpleModelName + "FromCursor")
                     .addJavadoc("Retrieves a model from a cursor.")
                     .addAnnotation(Annotations.nonNull())
+                    .addAnnotations(suppressWarningsRawtypes)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
                     .addParameter(
@@ -320,6 +327,7 @@ public class DatabaseWriter extends BaseWriter {
                                     + " The return value has the row ID.\n")
                     .addAnnotation(Annotations.nonNull())
                     .addAnnotation(Annotations.workerThread())
+                    .addAnnotations(suppressWarningsRawtypes)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(schema.getModelClassName())
                     .addParameter(
@@ -385,6 +393,7 @@ public class DatabaseWriter extends BaseWriter {
                     MethodSpec.methodBuilder("insertInto" + simpleModelName)
                             .addJavadoc("Executes a query: {@code INSERT INTO $T ...}.\n", schema.getModelClassName())
                             .addAnnotation(Annotations.workerThread())
+                            .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
                             .returns(long.class)
                             .addParameter(
@@ -404,6 +413,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addJavadoc("Create a prepared statement for {@code INSERT INTO $T ...}.\n",
                                     schema.getModelClassName())
                             .addAnnotation(Annotations.workerThread())
+                            .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
                             .returns(Types.getInserter(schema.getModelClassName()))
                             .addStatement("return prepareInsertInto$L($T.NONE, true)",
@@ -417,6 +427,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
                                     schema.getModelClassName())
                             .addAnnotation(Annotations.workerThread())
+                            .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
                                     .addAnnotation(OnConflict.class)
@@ -432,6 +443,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
                                     schema.getModelClassName())
                             .addAnnotation(Annotations.workerThread())
+                            .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
                                     .addAnnotation(OnConflict.class)
@@ -456,6 +468,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addJavadoc("Create a prepared statement for {@code INSERT INTO $T ...}.\n",
                                     schema.getModelClassName())
                             .addAnnotation(Annotations.checkResult())
+                            .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
                             .returns(inserterObservableType)
                             .addStatement("return prepareInsertInto$LAsObservable($T.NONE, true)",
@@ -469,6 +482,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
                                     schema.getModelClassName())
                             .addAnnotation(Annotations.checkResult())
+                            .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
                                     .addAnnotation(OnConflict.class)
@@ -500,6 +514,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
                                     schema.getModelClassName())
                             .addAnnotation(Annotations.checkResult())
+                            .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
                                     .addModifiers(Modifier.FINAL)
