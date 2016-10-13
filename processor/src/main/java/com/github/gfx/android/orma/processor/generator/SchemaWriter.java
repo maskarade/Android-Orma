@@ -232,8 +232,7 @@ public class SchemaWriter extends BaseWriter {
 
         // Define ColumnDef#getSerialized() if it uses type adapters
         MethodSpec.Builder getSerializedBuilder = MethodSpec.methodBuilder("getSerialized")
-                .addAnnotation(Annotations.override())
-                .addAnnotation(c.nullable ? Annotations.nullable() : Annotations.nonNull())
+                .addAnnotations(c.nullable ? Annotations.overrideAndNullable() : Annotations.overrideAndNonNull())
                 .addModifiers(Modifier.PUBLIC)
                 .returns(c.getSerializedBoxType())
                 .addParameter(ParameterSpec.builder(schema.getModelClassName(), "model")
@@ -245,6 +244,21 @@ public class SchemaWriter extends BaseWriter {
             getSerializedBuilder.addStatement("throw new $T($S)", Types.NoValueException, "Missing @PrimaryKey definition");
         }
         columnDefType.addMethod(getSerializedBuilder.build());
+
+        // ColumnDef#getFromCursor(Cursor, int)
+        columnDefType.addMethod(MethodSpec.methodBuilder("getFromCursor")
+                .addAnnotations(c.nullable ? Annotations.overrideAndNullable() : Annotations.overrideAndNonNull())
+                .addModifiers(Modifier.PUBLIC)
+                .returns(c.getBoxType())
+                .addParameter(ParameterSpec.builder(Types.OrmaConnection, "conn")
+                        .addAnnotation(Annotations.nonNull())
+                        .build())
+                .addParameter(ParameterSpec.builder(Types.Cursor, "cursor")
+                        .addAnnotation(Annotations.nonNull())
+                        .build())
+                .addParameter(ParameterSpec.builder(int.class, "index").build())
+                .addStatement("return $L", buildGetValueFromCursor(c, CodeBlock.of("index")))
+                .build());
 
         return new FieldSpecDefinition(
                 FieldSpec.builder(c.getColumnDefType(), c.name).addModifiers(publicFinal).build(),
@@ -697,7 +711,7 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    private CodeBlock buildPopulateValuesIntoCursor(Function<ColumnDefinition, CodeBlock> lhsBaseGen) {
+    private CodeBlock buildPopulateValuesFromCursor(Function<ColumnDefinition, CodeBlock> lhsBaseGen) {
         CodeBlock.Builder builder = CodeBlock.builder();
 
         List<ColumnDefinition> columns = schema.getColumns();
@@ -707,42 +721,52 @@ public class SchemaWriter extends BaseWriter {
             TypeName type = c.getUnboxType();
 
             CodeBlock index = CodeBlock.of("offset + $L", i + offset);
+            builder.addStatement("$L$L", lhsBaseGen.apply(c),  c.buildSetColumnExpr(buildGetValueFromCursor(c, index)));
 
             if (Types.isDirectAssociation(context, type)) {
                 SchemaDefinition associatedSchema = c.getAssociatedSchema();
                 int consumingItemSize = associatedSchema.calculateConsumingColumnSize();
-                CodeBlock.Builder createAssociatedModelExpr = CodeBlock.builder();
-
-                if (c.isNullableInJava()) {
-                    // check the primary key is null or not
-                    createAssociatedModelExpr.add("cursor.isNull($L + $L) ? null : ", index, consumingItemSize);
-                }
-                createAssociatedModelExpr.add("$L.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
-                    associatedSchema.createSchemaInstanceExpr(), index, consumingItemSize);
-                // Given a "Book has-a Publisher" association. The following expression should be created:
-                // book.publisher = Publisher_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset)
-                // NOTE: lhsBaseGen.apply(c) makes, e.g. "model.", ignoring the parameter "c".
-                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(createAssociatedModelExpr.build()));
                 offset += consumingItemSize;
-            } else if (Types.isSingleAssociation(type)) {
-                AssociationDefinition r = c.getAssociation();
-                assert r != null;
-                CodeBlock.Builder getRhsExpr = CodeBlock.builder()
-                        .add("new $T<>(conn, $L, cursor.getLong($L))",
-                                r.getAssociationType(), c.getAssociatedSchema().createSchemaInstanceExpr(), index);
-                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(getRhsExpr.build()));
-            } else {
-                CodeBlock.Builder rhsExprBuilder = CodeBlock.builder();
-                if (c.isNullableInSQL()) {
-                    rhsExprBuilder.add("cursor.isNull($L) ? null : $L", index,
-                            c.buildDeserializeExpr("conn", cursorGetter(c, index)));
-                } else {
-                    rhsExprBuilder.add(c.buildDeserializeExpr("conn", cursorGetter(c, index)));
-                }
-                builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(rhsExprBuilder.build()));
             }
         }
         return builder.build();
+    }
+
+    CodeBlock buildGetValueFromCursor(ColumnDefinition c, CodeBlock index) {
+        TypeName type = c.getUnboxType();
+
+        if (Types.isDirectAssociation(context, type)) {
+            SchemaDefinition associatedSchema = c.getAssociatedSchema();
+            int consumingItemSize = associatedSchema.calculateConsumingColumnSize();
+            CodeBlock.Builder createAssociatedModelExpr = CodeBlock.builder();
+
+            if (c.isNullableInJava()) {
+                // check the primary key is null or not
+                createAssociatedModelExpr.add("cursor.isNull($L + $L) ? null : ", index, consumingItemSize);
+            }
+            createAssociatedModelExpr.add("$L.newModelFromCursor(conn, cursor, $L + 1) /* consumes items: $L */",
+                    associatedSchema.createSchemaInstanceExpr(), index, consumingItemSize);
+            // Given a "Book has-a Publisher" association. The following expression should be created:
+            // book.publisher = Publisher_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset)
+            // NOTE: lhsBaseGen.apply(c) makes, e.g. "model.", ignoring the parameter "c".
+            return createAssociatedModelExpr.build();
+        } else if (Types.isSingleAssociation(type)) {
+            AssociationDefinition r = c.getAssociation();
+            assert r != null;
+            return CodeBlock.builder()
+                    .add("new $T<>(conn, $L, cursor.getLong($L))",
+                            r.getAssociationType(), c.getAssociatedSchema().createSchemaInstanceExpr(), index)
+                    .build();
+        } else {
+            CodeBlock.Builder rhsExprBuilder = CodeBlock.builder();
+            if (c.isNullableInSQL()) {
+                rhsExprBuilder.add("cursor.isNull($L) ? null : $L", index,
+                        c.buildDeserializeExpr(cursorGetter(c, index)));
+            } else {
+                rhsExprBuilder.add(c.buildDeserializeExpr(cursorGetter(c, index)));
+            }
+            return rhsExprBuilder.build();
+        }
     }
 
     private CodeBlock buildNewModelFromCursor() {
@@ -754,7 +778,7 @@ public class SchemaWriter extends BaseWriter {
                         constructorElement);
             }
 
-            block.add(buildPopulateValuesIntoCursor(column -> CodeBlock.of("$T ", column.getType())));
+            block.add(buildPopulateValuesFromCursor(column -> CodeBlock.of("$T ", column.getType())));
 
             block.addStatement("return new $T($L)", schema.getModelClassName(),
                     constructorElement.getParameters()
@@ -767,7 +791,7 @@ public class SchemaWriter extends BaseWriter {
             CodeBlock.Builder block = CodeBlock.builder();
 
             block.addStatement("$T model = new $T()", schema.getModelClassName(), schema.getModelClassName());
-            block.add(buildPopulateValuesIntoCursor(column -> CodeBlock.of("model.")));
+            block.add(buildPopulateValuesFromCursor(column -> CodeBlock.of("model.")));
             block.addStatement("return model");
 
             return block.build();

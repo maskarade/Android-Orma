@@ -362,7 +362,7 @@ public class ColumnDefinition {
         }
     }
 
-    public CodeBlock buildDeserializeExpr(String connectionExpr, CodeBlock valueExpr) {
+    public CodeBlock buildDeserializeExpr(CodeBlock valueExpr) {
         // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
@@ -373,9 +373,7 @@ public class ColumnDefinition {
                     .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr)
                     .build();
         } else {
-            return CodeBlock.builder()
-                    .add("$L", valueExpr)
-                    .build();
+            return valueExpr;
         }
     }
 

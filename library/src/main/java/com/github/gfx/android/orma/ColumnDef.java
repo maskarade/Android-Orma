@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma;
 
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import java.lang.reflect.Type;
@@ -94,6 +95,8 @@ public abstract class ColumnDef<Model, T> {
     public abstract T get(@NonNull Model model);
 
     public abstract Object getSerialized(@NonNull Model model);
+
+    public abstract T getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index);
 
     public OrderSpec<Model> orderInAscending() {
         return new OrderSpec<>(this, OrderSpec.ASC);
