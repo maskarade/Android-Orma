@@ -137,9 +137,35 @@ public class SqlGenerator {
         sb.append('(');
         appendIdentifier(sb, foreignTableSchema.getPrimaryKeyName());
         sb.append(')');
-        sb.append(" ON UPDATE CASCADE");
-        sb.append(" ON DELETE CASCADE");
+        foreignKeyAction(sb, " ON UPDATE ", column.onUpdateAction);
+        foreignKeyAction(sb, " ON DELETE ", column.onDeleteAction);
         return sb.toString();
+    }
+
+    void foreignKeyAction(StringBuilder sb, String clause, Column.ForeignKeyAction action) {
+        switch (action) {
+            case NO_ACTION:
+                // this is the SQLite default (see https://www.sqlite.org/foreignkeys.html)
+                break;
+            case RESTRICT:
+                sb.append(clause);
+                sb.append("RESTRICT");
+                break;
+            case SET_NULL:
+                sb.append(clause);
+                sb.append("SET NULL");
+                break;
+            case SET_DEFAULT:
+                sb.append(clause);
+                sb.append("SET DEFAULT");
+                break;
+            case CASCADE:
+                sb.append(clause);
+                sb.append("CASCADE");
+                break;
+            default:
+                throw new AssertionError("not reached");
+        }
     }
 
     public List<String> buildCreateIndexStatements(SchemaDefinition schema) {

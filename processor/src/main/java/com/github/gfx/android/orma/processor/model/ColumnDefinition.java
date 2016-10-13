@@ -79,6 +79,10 @@ public class ColumnDefinition {
 
     public final Column.Collate collate;
 
+    public final Column.ForeignKeyAction onDeleteAction;
+
+    public final Column.ForeignKeyAction onUpdateAction;
+
     public final long helperFlags;
 
     public final TypeAdapterDefinition typeAdapter;
@@ -123,6 +127,8 @@ public class ColumnDefinition {
             uniqueOnConflict = column.uniqueOnConflict();
             unique = uniqueOnConflict != OnConflict.NONE || column.unique();
             collate = column.collate();
+            onDeleteAction = column.onDelete();
+            onUpdateAction = column.onUpdate();
             defaultExpr = column.defaultExpr();
             helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, column.helpers());
         } else {
@@ -131,6 +137,8 @@ public class ColumnDefinition {
             unique = false;
             defaultExpr = null;
             collate = Column.Collate.BINARY;
+            onDeleteAction = Column.ForeignKeyAction.NO_ACTION;
+            onUpdateAction = Column.ForeignKeyAction.NO_ACTION;
             helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, Column.Helpers.AUTO);
         }
 
@@ -155,6 +163,8 @@ public class ColumnDefinition {
         uniqueOnConflict = OnConflict.NONE;
         defaultExpr = "";
         collate = Column.Collate.BINARY;
+        onDeleteAction = Column.ForeignKeyAction.NO_ACTION;
+        onUpdateAction = Column.ForeignKeyAction.NO_ACTION;
         helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, Column.Helpers.AUTO);
         typeAdapter = schema.context.typeAdapterMap.get(type);
         storageType = null;

@@ -18,7 +18,10 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
+import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Book;
+import com.github.gfx.android.orma.test.model.ModelWithForeignKeyAction;
+import com.github.gfx.android.orma.test.model.ModelWithForeignKeyAction_Schema;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
@@ -27,12 +30,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 
 /**
  * @see DirectAssociationsTest
@@ -201,13 +207,77 @@ public class ForeignKeysTest {
     }
 
     @Test(expected = SQLiteException.class)
-    public void testUpdateOnCascade() throws Exception {
+    public void onUpdateCascade() throws Exception {
         db.updateBook().publisher(SingleAssociation.<Publisher>id(0L)).execute();
     }
 
     @Test
-    public void testDeleteOnCascade() throws Exception {
+    public void onDeleteCascade() throws Exception {
         db.deleteFromPublisher().execute();
         assertThat(db.selectFromBook().count(), is(0));
+    }
+
+    @Test
+    public void onDeleteActions() throws Exception {
+        ModelWithForeignKeyAction model = db.createModelWithForeignKeyAction(new ModelFactory<ModelWithForeignKeyAction>() {
+            @NonNull
+            @Override
+            public ModelWithForeignKeyAction call() {
+                ModelWithForeignKeyAction model = new ModelWithForeignKeyAction();
+                model.author1 = db.createAuthor(new ModelFactory<Author>() {
+                    @NonNull
+                    @Override
+                    public Author call() {
+                        return Author.create("author1");
+                    }
+                });
+                model.author2 = db.createAuthor(new ModelFactory<Author>() {
+                    @NonNull
+                    @Override
+                    public Author call() {
+                        return Author.create("author2");
+                    }
+                });
+                model.author3 = db.createAuthor(new ModelFactory<Author>() {
+                    @NonNull
+                    @Override
+                    public Author call() {
+                        return Author.create("author3");
+                    }
+                });
+                return model;
+            }
+        });
+
+        Cursor cursor;
+
+        // NO ACTION
+        try {
+            assert model.author1 != null;
+            db.deleteFromAuthor().nameEq(model.author1.name).execute();
+            fail();
+        } catch (Exception e) {
+            assertThat(e, is(instanceOf(SQLiteConstraintException.class)));
+        }
+
+        // SET DEFAULT
+        assert model.author2 != null;
+        db.deleteFromAuthor().nameEq(model.author2.name).execute();
+        cursor = db.selectFromModelWithForeignKeyAction().executeWithColumns(
+                ModelWithForeignKeyAction_Schema.INSTANCE.author2.getEscapedName());
+        assertThat(getFirstStringAndClose(cursor), is(nullValue()));
+
+        // CASCADE
+        assert model.author3 != null;
+        db.deleteFromAuthor().nameEq(model.author3.name).execute();
+        assertThat(db.selectFromModelWithForeignKeyAction().count(), is(0));
+    }
+
+    private String getFirstStringAndClose(Cursor cursor) {
+        cursor.moveToFirst();
+        String result = cursor.getString(0);
+        cursor.close();
+        ;
+        return result;
     }
 }
