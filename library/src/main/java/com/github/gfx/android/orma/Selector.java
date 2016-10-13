@@ -203,9 +203,25 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     public Model get(@IntRange(from = 0) long position) {
         Model model = getOrNull(position);
         if (model == null) {
-            throw new NoValueException("Expected single value for " + position + " but nothing for " + getSchema().getTableName());
+            throw new NoValueException(
+                    "Expected single value for " + position + " but nothing for " + getSchema().getTableName());
         }
         return model;
+    }
+
+    @NonNull
+    public <T> List<T> pluck(ColumnDef<Model, T> column) {
+        List<T> result;
+        Cursor cursor = executeWithColumns(column.getEscapedName());
+        try {
+            result = new ArrayList<>(cursor.getCount());
+            for (int pos = 0; cursor.moveToPosition(pos); pos++) {
+                result.add(column.getFromCursor(conn, cursor, 0));
+            }
+        } finally {
+            cursor.close();
+        }
+        return result;
     }
 
     @CheckResult

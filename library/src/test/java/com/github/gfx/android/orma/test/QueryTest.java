@@ -24,6 +24,7 @@ import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.Book;
+import com.github.gfx.android.orma.test.model.Book_Schema;
 import com.github.gfx.android.orma.test.model.Book_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
@@ -204,6 +205,17 @@ public class QueryTest {
         assert book != null;
         assertThat(book.bookId, is(db.selectFromBook().get(0).bookId));
         assertThat(db.selectFromBook().get(10), is(nullValue()));
+    }
+
+    @Test
+    public void pluck() throws Exception {
+        assertThat(db.selectFromBook().orderByTitleAsc().pluck(Book_Schema.INSTANCE.title),
+                is(contains("friday", "today")));
+        assertThat(db.selectFromBook().orderByTitleDesc().pluck(Book_Schema.INSTANCE.title),
+                is(contains("today", "friday")));
+
+        assertThat(db.selectFromBook().orderByTitleDesc().pluck(Book_Schema.INSTANCE.inPrint),
+                is(contains(true, false)));
     }
 
     @Test
