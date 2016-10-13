@@ -51,6 +51,10 @@ public @interface Column {
      */
     @OnConflict int uniqueOnConflict() default OnConflict.NONE;
 
+    ForeignKeyAction onDelete() default ForeignKeyAction.CASCADE;
+
+    ForeignKeyAction onUpdate() default ForeignKeyAction.CASCADE;
+
     /**
      * The {@code DEFAULT} expression for the column. Currently it is only used in migration.
      *
@@ -76,7 +80,7 @@ public @interface Column {
     @Helpers long helpers() default Helpers.AUTO;
 
     /**
-     * Set of {@code COLLATE} algorithms.
+     * SQLite's {@code COLLATE} algorithms.
      *
      * @see <a href="https://www.sqlite.org/datatype3.html#collation">https://www.sqlite.org/datatype3.html#collation</a>
      */
@@ -98,6 +102,19 @@ public @interface Column {
          * characters are ignored.</blockquote>
          */
         RTRIM
+    }
+
+    /**
+     * SQLite's <code>ON DELETE</code> and <code>ON UPDATE</code> actions.
+     *
+     * @see <a href="https://www.sqlite.org/foreignkeys.html">SQLite Foreign Key Support</a>
+     */
+    enum ForeignKeyAction {
+        NO_ACTION,
+        RESTRICT,
+        SET_NULL,
+        SET_DEFAULT,
+        CASCADE,
     }
 
     @Target({ElementType.FIELD, ElementType.LOCAL_VARIABLE, ElementType.PARAMETER, ElementType.METHOD})

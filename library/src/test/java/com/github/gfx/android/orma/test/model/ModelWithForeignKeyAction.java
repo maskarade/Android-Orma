@@ -13,29 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.gfx.android.orma.test.model;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-// A class that has the String primary key
+/**
+ * @see ModelWithForeignKeyAction_Schema
+ */
 @Table
-public class Author {
+public class ModelWithForeignKeyAction {
 
-    @PrimaryKey(auto = false)
-    public String name;
+    @PrimaryKey
+    public long id;
 
-    @Column(indexed = true)
     @Nullable
-    public String note;
+    @Column(indexed = true, onUpdate = Column.ForeignKeyAction.NO_ACTION, onDelete = Column.ForeignKeyAction.NO_ACTION)
+    public Author author1;
 
-    public static Author create(@NonNull String name) {
-        Author author = new Author();
-        author.name = name;
-        return author;
-    }
+    @Nullable
+    @Column(indexed = true, onUpdate = Column.ForeignKeyAction.SET_NULL, onDelete = Column.ForeignKeyAction.SET_DEFAULT)
+    public Author author2;
+
+    @Nullable
+    @Column(indexed = true, onUpdate = Column.ForeignKeyAction.RESTRICT, onDelete = Column.ForeignKeyAction.CASCADE)
+    public Author author3;
 }
