@@ -659,32 +659,6 @@ Each serialized type has a corresponding SQLite storage type:
 | String    | TEXT        |
 | byte[]    | BLOB        |
 
-### Dynamic Type Adapters
-
-**Dynamic Type Adapters were removed in v2.0.**
-
-If you use type adapters, you can add type serializer instances to `OrmaDatabase`.
-
-```java
-class FooAdapter extends AbstractTypeAdapter<Foo> {
-    @Override
-    @NonNull
-    public String serialize(@NonNull Foo source) {
-        return ... serialize ...;
-    }
-
-    @Override
-    @NonNull
-    public Foo deserialize(@NonNull String serialized) {
-        return ... deserialize ...;
-    }
-}
-
-OrmaDatabase orma = OrmaDatabase.builder(context)
-    .addTypeAdapters(new FooAdapter())
-    .build();
-```
-
 ## Built-In Type Adapters
 
 There are built-in type adapters:
