@@ -10,7 +10,34 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 ## v3.0.0 [NOT YET RELEASED]
 
-TBD
+This is a major update of Orma, which includes lots of enhancements and bug fixes.
+
+https://github.com/gfx/Android-Orma/compare/v2.6.0...v3.0.0
+
+### Enhancements
+
+* Add `OrmaDatabase#prepareInsertInto${ModelClass}AsObservable` ([#288](https://github.com/gfx/Android-Orma/pull/288))
+* [Foreign Key Actions](https://www.sqlite.org/foreignkeys.html) are now configuable ([#306](https://github.com/gfx/Android-Orma/issues/306))
+  * Default to `@Column(onDelete = Column.ForeignKeyAction.CASCADE), onUpdate = Column.ForeignKeyAction.CASCADE)`
+* Add `Selector#pluck()` to get the list of the specified column ([#307](https://github.com/gfx/Android-Orma/issues/307))
+* Add `OrmaDatabase#rawQuery()` to execute `SELECT` queries directly ([#308](https://github.com/gfx/Android-Orma/issues/308))
+
+### Bug Fixes
+
+* Fix [#189](https://github.com/gfx/Android-Orma/isseues/189) (by [#291](https://github.com/gfx/Android-Orma/pull/291)): A model can't have multiple direct associations with the same type
+  * This bug fixe includes the refactoring of `Schema` classes with incompatible changes on internal API
+* Fix [#292](https://github.com/gfx/Android-Orma/issues/292): `Relation#clone()` didn't copy its order specs.
+* Fix [#293](https://github.com/gfx/Android-Orma/issues/293): The order of accessor methods did matter.
+* Fix [#295](https://github.com/gfx/Android-Orma/issues/295): foregin key storage types were not always associated table's primary key type, but BLOB
+* Fix [#301](https://github.com/gfx/Android-Orma/issues/301): nullable direct associations were instantiated with null fields
+
+### Incompatible Changes
+
+* Remove deprecated transaction mehods that use `TransactionTask`
+* Upgrade RxJavato 1.2.1, which includes incompatible changes on `@Experimental Completable` (now it gets `@Beta`)
+* Use the original ANTLR4 instead of TunnelVisionLabs' ANTLR4 ([#255](https://github.com/gfx/Android-Orma/pull/255))
+  * Android Gradle Plugin v2.1.x depends on TunnelVisionLabs', which conflicts with the original ANTLR4
+  * Android Gradle Plugin v2.2.x depends on the original ANTLR4, which conflicts with the TunnelVisionLabs'
 
 ## v3.0.0-rc5 2016/10/14
 
@@ -22,14 +49,13 @@ TBD
 
 ### Bug Fixes
 
-* Fix [#295](https://github.com/gfx/Android-Orma/issues/295): foregin key storage type was not always associated table's primary key type, but BLOB
-
+* Fix [#295](https://github.com/gfx/Android-Orma/issues/295): foregin key storage types were not always associated table's primary key type, but BLOB
 
 ## v3.0.0-rc4 2016/10/11
 
 ### Bug Fixes
 
-* Fix [#301](https://github.com/gfx/Android-Orma/issues/301): nullable direct association was instantiated with null fields
+* Fix [#301](https://github.com/gfx/Android-Orma/issues/301): nullable direct associations were instantiated with null fields
 
 ## v3.0.0-rc3 2016/10/11
 
