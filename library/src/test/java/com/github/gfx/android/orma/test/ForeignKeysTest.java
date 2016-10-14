@@ -277,7 +277,6 @@ public class ForeignKeysTest {
         cursor.moveToFirst();
         String result = cursor.getString(0);
         cursor.close();
-        ;
         return result;
     }
 }
