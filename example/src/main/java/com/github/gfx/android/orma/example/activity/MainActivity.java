@@ -64,7 +64,10 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = binding.navView;
         navigationView.setNavigationItemSelectedListener(this);
 
-        replaceFragment(MainFragment.newInstance());
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.content, MainFragment.newInstance())
+                .commit();
     }
 
     @Override
@@ -104,7 +107,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_recycler_view) {
+        if (id == R.id.nav_home) {
+            replaceFragment(MainFragment.newInstance());
+        } else if (id == R.id.nav_recycler_view) {
             replaceFragment(RecyclerViewFragment.newInstance());
         } else if (id == R.id.nav_list_view) {
             replaceFragment(ListViewFragment.newInstance());
@@ -117,6 +122,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void replaceFragment(Fragment fragment) {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content);
+        if (currentFragment.getClass() == fragment.getClass()) {
+            // nothing to do
+            return;
+        }
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(
