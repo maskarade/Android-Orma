@@ -680,6 +680,21 @@ There are built-in type adapters:
 
 More classes? Patches welcome!
 
+## Raw Queries
+
+There is `Cursor OrmaDatabase#rawQuery(String sql, String... bindArgs)` to execute a `SELECT` statement, and fetch rows from `Cursor`.
+
+For example:
+
+```java
+Cursor cursor = db.rawQuery("SELECT max(bookId) as max_id, min(bookId) as min_id FROM Book");
+cursor.moveToFirst();
+// get data from cursor
+cursor.close();
+```
+
+NOTE: Don't use `rawQuery()` for performance because `Selector` and `Relation` is fast enough.
+
 ## Migration
 
 Orma has pluggable migration mechanism via the `MigrationEngine` interface.
