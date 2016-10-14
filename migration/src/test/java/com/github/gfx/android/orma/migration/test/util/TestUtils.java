@@ -16,6 +16,7 @@
 
 package com.github.gfx.android.orma.migration.test.util;
 
+@SuppressWarnings("unused")
 public class TestUtils {
 
     public static boolean runOnAndroid() {

@@ -22,7 +22,6 @@ import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
-import com.github.gfx.android.orma.migration.test.util.TestUtils;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
@@ -35,7 +34,6 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assume.assumeFalse;
 
 @RunWith(AndroidJUnit4.class)
 public class SQLiteParserUtilsTest {
@@ -151,7 +149,7 @@ public class SQLiteParserUtilsTest {
                 "CREATE TABLE foo (id INTEGER PRIMARY KEY, bar INTEGER NOT NULL REFERENCES baz (id))"
         );
 
-        List<CreateTableStatement.ColumnDef> columns =  createTableStatement.getColumns();
+        List<CreateTableStatement.ColumnDef> columns = createTableStatement.getColumns();
         assertThat(columns, hasSize(2));
         assertThat(columns.get(0).getName(), is(new SQLiteComponent.Name("id")));
         assertThat(columns.get(1).getName(), is(new SQLiteComponent.Name("bar")));
@@ -160,8 +158,6 @@ public class SQLiteParserUtilsTest {
 
     @Test
     public void testComplexTable() throws Exception {
-        assumeFalse(TestUtils.runOnAndroid()); // FIXME
-
         CreateTableStatement createTableStatement = SQLiteParserUtils.parseIntoCreateTableStatement(
                 "CREATE TABLE foo (title TEXT DEFAULT (''))"
         );
