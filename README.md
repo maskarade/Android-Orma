@@ -798,11 +798,26 @@ As other annotation processors do, Orma save files to `$modle/build/generated/so
 
 You can see [generated files for example models](example/build/generated/source/apt/debug/com/github/gfx/android/orma/example/orma).
 
-### Does Orma support Kotlin?
+### Does Orma work with Kotlin?
 
-Yes, but it's _experimental_. Here is an example to use Orma with Kotlin: https://github.com/gfx/Orma-Kotlin-Example
+Yes, but it's _experimental_. Here is an example to use Orma with Kotlin:
 
-NOTE: Kotlin APT support, a.k.a. _kapt_, is **not stable**. Don't ask me for kapt problems.
+https://github.com/gfx/OrmaWithKotlin
+
+NOTE: Kotlin APT support, a.k.a. _kapt_, is **really unstable**. Don't ask me how to solve kapt problems.
+
+### Does Orma work with the Jack compiler?
+
+Yes. As of Android Gradle Plugin 2.2.1, Orma works on Jack.
+
+Use `annotationProcessor` configuration in the dependencies block, instead of `apt`:
+
+```
+dependencies {
+    annotationProcessor 'com.github.gfx.android.orma:orma-processor:3.0.0'
+    compile 'com.github.gfx.android.orma:orma:3.0.0'
+}
+```
 
 ### Who uses Orma?
 
