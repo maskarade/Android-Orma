@@ -8,11 +8,32 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v3.0.0 [NOT YET RELEASED]
+
+TBD
+
+## v3.0.0-rc5 2016/10/14
+
+### New Features
+
+* Foreign Key Actions are now configuable ([#306](https://github.com/gfx/Android-Orma/issues/306))
+* Add `Selector#pluck()` to get the list of the specified column ([#307](https://github.com/gfx/Android-Orma/issues/307))
+* Add `OrmaDatabase#rawQuery()` to execute `SELECT` queries directly ([#308](https://github.com/gfx/Android-Orma/issues/308))
+
+### Bug Fixes
+
+* Fix [#295](https://github.com/gfx/Android-Orma/issues/295): foregin key storage type was not always associated table's primary key type, but BLOB
+
+
 ## v3.0.0-rc4 2016/10/11
 
-* Fix [#301](https://github.com/gfx/Android-Orma/issues/301) nullable direct association was instantiated with null fields
+### Bug Fixes
+
+* Fix [#301](https://github.com/gfx/Android-Orma/issues/301): nullable direct association was instantiated with null fields
 
 ## v3.0.0-rc3 2016/10/11
+
+### Bug Fixes
 
 * Fix [#292](https://github.com/gfx/Android-Orma/issues/292): `Relation#clone()` didn't copy its order specs.
 * Fix [#293](https://github.com/gfx/Android-Orma/issues/293): The order of accessor methods did matter.
@@ -26,6 +47,8 @@ The internal `Schema` class has been re-designed from scratch.
 It may include problems even if all the test cases are green.
 Please give this release a try if you are interested in [#189](https://github.com/gfx/Android-Orma/issues/189).
 
+### Bug Fixes
+
 * Fix #189 (by [#291](https://github.com/gfx/Android-Orma/pull/291))
 
 ## v3.0.0-rc1 2016/09/20
@@ -36,7 +59,12 @@ https://github.com/gfx/Android-Orma/compare/v2.6.0...v3.0.0-rc1
 
 You must upgrade Android Gradle Plugin to v2.2.0, and RxJava to v1.2.0.
 
+### New Features
+
 * Add `OrmaDatabase#prepareInsertInto*AsObservable` ([#288](https://github.com/gfx/Android-Orma/pull/288))
+
+### Incompatible Changes
+
 * Remove deprecated transaction methods
 * Depend on RxJava to v1.2.0 to use the beta version of `Completable`
 * Use the original ANTLR4, which conflicts with Android Gradle Plugin v2.1.x
