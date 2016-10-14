@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.example.activity;
+package com.github.gfx.android.orma.example.fragment;
 
-import com.github.gfx.android.orma.example.R;
-import com.github.gfx.android.orma.example.databinding.ActivityListViewBinding;
+import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
+import com.github.gfx.android.orma.example.databinding.FragmentRecyclerViewBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.orma.Todo_Relation;
-import com.github.gfx.android.orma.widget.OrmaListAdapter;
+import com.github.gfx.android.orma.widget.OrmaRecyclerViewAdapter;
 
 import org.threeten.bp.ZonedDateTime;
 
 import android.content.Context;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -42,49 +44,65 @@ import java.util.Date;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class ListViewActivity extends AppCompatActivity {
+public class RecyclerViewFragment extends Fragment {
 
     OrmaDatabase orma;
 
-    ActivityListViewBinding binding;
+    FragmentRecyclerViewBinding binding;
 
     Adapter adapter;
 
     int number = 0;
 
-    public static Intent createIntent(Context context) {
-        return new Intent(context, ListViewActivity.class);
+    public static Fragment newInstance() {
+        return new RecyclerViewFragment();
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_list_view);
+    public RecyclerViewFragment() {
+    }
 
-        orma = OrmaDatabase.builder(this)
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentRecyclerViewBinding.inflate(inflater, container, false);
+
+        orma = OrmaDatabase.builder(getContext())
                 .build();
 
-        adapter = new Adapter(this, orma.relationOfTodo().orderByCreatedTimeAsc());
+        adapter = new Adapter(getContext(), orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
 
         binding.fab.setOnClickListener(v -> adapter.addItemAsObservable(() -> {
             Todo todo = new Todo();
             number++;
-            todo.title = "ListView item #" + number;
+            todo.title = "RecyclerView item #" + number;
             todo.content = ZonedDateTime.now().toString();
             todo.createdTime = new Date();
             return todo;
         })
                 .subscribeOn(Schedulers.io())
                 .subscribe());
+
+        return binding.getRoot();
     }
 
-    static class Adapter extends OrmaListAdapter<Todo> {
+    static class VH extends RecyclerView.ViewHolder {
 
-        public Adapter(@NonNull Context context, @NonNull Todo_Relation relation) {
+        CardTodoBinding binding;
+
+        public VH(LayoutInflater inflater, ViewGroup parent) {
+            super(CardTodoBinding.inflate(inflater, parent, false).getRoot());
+            binding = DataBindingUtil.getBinding(itemView);
+        }
+    }
+
+    static class Adapter extends OrmaRecyclerViewAdapter<Todo, VH> {
+
+        public Adapter(@NonNull Context context, @NonNull Relation<Todo, ?> relation) {
             super(context, relation);
         }
 
+        @SuppressWarnings("unchecked")
         @NonNull
         @Override
         public Todo_Relation getRelation() {
@@ -92,17 +110,17 @@ public class ListViewActivity extends AppCompatActivity {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = CardTodoBinding.inflate(getLayoutInflater(), parent, false).getRoot();
-            }
+        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new VH(getLayoutInflater(), parent);
+        }
 
+        @Override
+        public void onBindViewHolder(final VH holder, int position) {
+            final CardTodoBinding binding = holder.binding;
             final Todo todo = getItem(position);
-            final CardTodoBinding binding = DataBindingUtil.getBinding(convertView);
 
             binding.title.setText(todo.title);
             binding.content.setText(todo.content);
-
             setStrike(binding.title, todo.done);
 
             binding.getRoot().setOnClickListener(v -> {
@@ -127,8 +145,6 @@ public class ListViewActivity extends AppCompatActivity {
                         .subscribe();
                 return true;
             });
-
-            return convertView;
         }
 
         void setStrike(TextView textView, boolean value) {
@@ -139,5 +155,4 @@ public class ListViewActivity extends AppCompatActivity {
             }
         }
     }
-
 }

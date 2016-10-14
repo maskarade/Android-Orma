@@ -3,6 +3,12 @@
 
     <group android:checkableBehavior="single">
         <item
+                android:id="@+id/nav_home"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Migration Demo"
+                />
+
+        <item
                 android:id="@+id/nav_recycler_view"
                 android:icon="@drawable/ic_menu_slideshow"
                 android:title="RecyclerView Example"
@@ -15,7 +21,7 @@
 
         <item
                 android:id="@+id/nav_benchmark"
-                android:icon="@drawable/ic_menu_manage"
+                android:icon="@drawable/ic_menu_gallery"
                 android:title="Benchmark"
                 />
     </group>

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.example.activity;
+
+package com.github.gfx.android.orma.example.fragment;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.Inserter;
-import com.github.gfx.android.orma.example.R;
-import com.github.gfx.android.orma.example.databinding.ActivityBenchmarkBinding;
+import com.github.gfx.android.orma.example.databinding.FragmentBenchmarkBinding;
 import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
 import com.github.gfx.android.orma.example.handwritten.HandWrittenOpenHelper;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
@@ -28,13 +28,13 @@ import com.github.gfx.android.orma.example.realm.RealmTodo;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,9 +55,9 @@ import rx.SingleSubscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class BenchmarkActivity extends AppCompatActivity {
+public class BenchmarkFragment extends Fragment {
 
-    static final String TAG = BenchmarkActivity.class.getSimpleName();
+    static final String TAG = BenchmarkFragment.class.getSimpleName();
 
     static final int N_ITEMS = 10;
 
@@ -76,29 +76,57 @@ public class BenchmarkActivity extends AppCompatActivity {
 
     HandWrittenOpenHelper hw;
 
-    ActivityBenchmarkBinding binding;
+    FragmentBenchmarkBinding binding;
 
     ResultAdapter adapter;
 
-    public static Intent createIntent(Context context) {
-        return new Intent(context, BenchmarkActivity.class);
+    public BenchmarkFragment() {
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_benchmark);
+    public static Fragment newInstance() {
+        return new BenchmarkFragment();
+    }
 
-        adapter = new ResultAdapter(this);
+    static long longForQuery(SQLiteDatabase db, String sql, String[] args) {
+        Cursor cursor = db.rawQuery(sql, args);
+        cursor.moveToFirst();
+        long value = cursor.getLong(0);
+        cursor.close();
+        return value;
+    }
+
+    static long runWithBenchmark(Runnable task) {
+        long t0 = System.nanoTime();
+
+        for (int i = 0; i < N_OPS; i++) {
+            task.run();
+        }
+
+        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentBenchmarkBinding.inflate(inflater, container, false);
+
+        adapter = new ResultAdapter(getContext());
         binding.list.setAdapter(adapter);
 
         binding.run.setOnClickListener(v -> run());
 
-        Realm.init(this);
+        return binding.getRoot();
     }
 
     @Override
-    protected void onResume() {
+    public void onStart() {
+        super.onStart();
+
+        Realm.init(getContext());
+    }
+
+    @Override
+    public void onResume() {
         super.onResume();
 
         RealmConfiguration realmConf = new RealmConfiguration.Builder().build();
@@ -107,8 +135,8 @@ public class BenchmarkActivity extends AppCompatActivity {
 
         realm = Realm.getDefaultInstance();
         Schedulers.io().createWorker().schedule(() -> {
-            deleteDatabase("orma-benchmark.db");
-            orma = OrmaDatabase.builder(BenchmarkActivity.this)
+            getContext().deleteDatabase("orma-benchmark.db");
+            orma = OrmaDatabase.builder(getContext())
                     .name("orma-benchmark.db")
                     .readOnMainThread(AccessThreadConstraint.NONE)
                     .writeOnMainThread(AccessThreadConstraint.NONE)
@@ -117,12 +145,12 @@ public class BenchmarkActivity extends AppCompatActivity {
             orma.migrate();
         });
 
-        deleteDatabase("hand-written.db");
-        hw = new HandWrittenOpenHelper(this, "hand-written.db");
+        getContext().deleteDatabase("hand-written.db");
+        hw = new HandWrittenOpenHelper(getContext(), "hand-written.db");
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
 
         realm.close();
@@ -166,7 +194,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                         result -> adapter.add(result),
                         error -> {
                             Log.wtf(TAG, error);
-                            Toast.makeText(BenchmarkActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_LONG).show();
 
                         });
     }
@@ -361,26 +389,6 @@ public class BenchmarkActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-
-    static long longForQuery(SQLiteDatabase db, String sql, String[] args) {
-        Cursor cursor = db.rawQuery(sql, args);
-        cursor.moveToFirst();
-        long value = cursor.getLong(0);
-        cursor.close();
-        return value;
-    }
-
-    static long runWithBenchmark(Runnable task) {
-        long t0 = System.nanoTime();
-
-        for (int i = 0; i < N_OPS; i++) {
-            task.run();
-        }
-
-        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0);
-    }
-
-
     static class Result {
 
         final String title;
@@ -399,16 +407,19 @@ public class BenchmarkActivity extends AppCompatActivity {
             super(context, 0);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             @SuppressLint("ViewHolder") ItemResultBinding binding = ItemResultBinding
                     .inflate(LayoutInflater.from(getContext()), parent, false);
 
             Result result = getItem(position);
+            assert result != null;
             binding.title.setText(result.title);
             binding.elapsed.setText(result.elapsedMillis + "ms");
 
             return binding.getRoot();
         }
     }
+
 }
