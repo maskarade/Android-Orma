@@ -18,7 +18,7 @@ https://github.com/gfx/Android-Orma/compare/v2.6.0...v3.0.0
 
 * Add `OrmaDatabase#prepareInsertInto${ModelClass}AsObservable` ([#288](https://github.com/gfx/Android-Orma/pull/288))
 * [Foreign Key Actions](https://www.sqlite.org/foreignkeys.html) are now configuable ([#306](https://github.com/gfx/Android-Orma/issues/306))
-  * Default to `@Column(onDelete = Column.ForeignKeyAction.CASCADE), onUpdate = Column.ForeignKeyAction.CASCADE)`
+  * Default to `@Column(onDelete = Column.ForeignKeyAction.CASCADE, onUpdate = Column.ForeignKeyAction.CASCADE)`
 * Add `Selector#pluck()` to get the list of the specified column ([#307](https://github.com/gfx/Android-Orma/issues/307))
 * Add `OrmaDatabase#rawQuery()` to execute `SELECT` queries directly ([#308](https://github.com/gfx/Android-Orma/issues/308))
 
@@ -38,6 +38,8 @@ https://github.com/gfx/Android-Orma/compare/v2.6.0...v3.0.0
 * Use the original ANTLR4 instead of TunnelVisionLabs' ANTLR4 ([#255](https://github.com/gfx/Android-Orma/pull/255))
   * Android Gradle Plugin v2.1.x depends on TunnelVisionLabs', which conflicts with the original ANTLR4
   * Android Gradle Plugin v2.2.x depends on the original ANTLR4, which conflicts with the TunnelVisionLabs'
+* `Schema` classes have no longer static fields for column definitions; instead they are now instance fields (#291)
+  * If you use `Model_Schema.column`, rewrite it to `Model_Schema.INSTANCE.column`
 
 ## v3.0.0-rc5 2016/10/14
 
