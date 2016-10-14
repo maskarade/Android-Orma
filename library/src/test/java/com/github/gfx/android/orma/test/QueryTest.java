@@ -705,13 +705,25 @@ public class QueryTest {
 
     @Test
     public void rawQuery() throws Exception {
-        Cursor cursor = db.getConnection().rawQuery("select count (*) from sqlite_master");
+        Cursor cursor = db.rawQuery("SELECT max(bookId) as max_id, min(bookId) as min_id FROM Book");
+        cursor.moveToFirst();
+
+        assertThat(cursor.getCount(), is(1));
+        assertThat(cursor.getLong(cursor.getColumnIndexOrThrow("max_id")), is(2L));
+        assertThat(cursor.getLong(cursor.getColumnIndexOrThrow("min_id")), is(1L));
+
+        cursor.close();
+    }
+
+    @Test
+    public void connection_rawQuery() throws Exception {
+        Cursor cursor = db.rawQuery("select count (*) from sqlite_master");
         assertThat(cursor.getCount(), greaterThan(0));
         cursor.close();
     }
 
     @Test
-    public void rawQueryForSingleLong() throws Exception {
+    public void connection_rawQueryForSingleLong() throws Exception {
         long count = db.getConnection().rawQueryForLong("select count (*) from sqlite_master");
         assertThat(count, greaterThan(0L));
     }
