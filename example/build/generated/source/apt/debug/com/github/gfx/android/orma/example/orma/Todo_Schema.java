@@ -46,10 +46,16 @@ public class Todo_Schema implements Schema<Todo> {
         return model.id;
       }
 
-      @Override
       @NonNull
+      @Override
       public Long getSerialized(@NonNull Todo model) {
         return model.id;
+      }
+
+      @NonNull
+      @Override
+      public Long getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.getLong(index);
       }
     };
     this.title = new ColumnDef<Todo, String>(this, "title", String.class, "TEXT", ColumnDef.INDEXED) {
@@ -59,10 +65,16 @@ public class Todo_Schema implements Schema<Todo> {
         return model.title;
       }
 
-      @Override
       @NonNull
+      @Override
       public String getSerialized(@NonNull Todo model) {
         return model.title;
+      }
+
+      @NonNull
+      @Override
+      public String getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.getString(index);
       }
     };
     this.content = new ColumnDef<Todo, String>(this, "content", String.class, "TEXT", ColumnDef.NULLABLE) {
@@ -72,10 +84,16 @@ public class Todo_Schema implements Schema<Todo> {
         return model.content;
       }
 
-      @Override
       @Nullable
+      @Override
       public String getSerialized(@NonNull Todo model) {
         return model.content;
+      }
+
+      @Nullable
+      @Override
+      public String getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.isNull(index) ? null : cursor.getString(index);
       }
     };
     this.done = new ColumnDef<Todo, Boolean>(this, "done", boolean.class, "BOOLEAN", ColumnDef.INDEXED) {
@@ -85,10 +103,16 @@ public class Todo_Schema implements Schema<Todo> {
         return model.done;
       }
 
-      @Override
       @NonNull
+      @Override
       public Boolean getSerialized(@NonNull Todo model) {
         return model.done;
+      }
+
+      @NonNull
+      @Override
+      public Boolean getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.getLong(index) != 0;
       }
     };
     this.createdTime = new ColumnDef<Todo, Date>(this, "createdTime", Date.class, "INTEGER", ColumnDef.INDEXED) {
@@ -98,10 +122,16 @@ public class Todo_Schema implements Schema<Todo> {
         return model.createdTime;
       }
 
-      @Override
       @NonNull
+      @Override
       public Long getSerialized(@NonNull Todo model) {
         return BuiltInSerializers.serializeDate(model.createdTime);
+      }
+
+      @NonNull
+      @Override
+      public Date getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return BuiltInSerializers.deserializeDate(cursor.getLong(index));
       }
     };
     $defaultResultColumns = new String[]{

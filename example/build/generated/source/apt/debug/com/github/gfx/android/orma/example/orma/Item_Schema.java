@@ -39,10 +39,16 @@ public class Item_Schema implements Schema<Item> {
         return model.name;
       }
 
-      @Override
       @NonNull
+      @Override
       public String getSerialized(@NonNull Item model) {
         return model.name;
+      }
+
+      @NonNull
+      @Override
+      public String getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.getString(index);
       }
     };
     this.category = new AssociationDef<Item, Category, Category_Schema>(this, "category", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category", "Category") : null)) {
@@ -52,10 +58,16 @@ public class Item_Schema implements Schema<Item> {
         return model.category;
       }
 
-      @Override
       @NonNull
+      @Override
       public Long getSerialized(@NonNull Item model) {
         return model.category.id;
+      }
+
+      @NonNull
+      @Override
+      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, index + 1) /* consumes items: 2 */;
       }
     };
     $defaultResultColumns = new String[]{

@@ -41,10 +41,16 @@ public class Item2_Schema implements Schema<Item2> {
         return model.name;
       }
 
-      @Override
       @NonNull
+      @Override
       public String getSerialized(@NonNull Item2 model) {
         return model.name;
+      }
+
+      @NonNull
+      @Override
+      public String getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.getString(index);
       }
     };
     this.category1 = new AssociationDef<Item2, Category, Category_Schema>(this, "category1", Category.class, "INTEGER", ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category1", "Category") : null)) {
@@ -54,10 +60,16 @@ public class Item2_Schema implements Schema<Item2> {
         return model.category1;
       }
 
-      @Override
       @NonNull
+      @Override
       public Long getSerialized(@NonNull Item2 model) {
         return model.category1.id;
+      }
+
+      @NonNull
+      @Override
+      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, index + 1) /* consumes items: 2 */;
       }
     };
     this.category2 = new AssociationDef<Item2, Category, Category_Schema>(this, "category2", Category.class, "INTEGER", ColumnDef.NULLABLE | ColumnDef.INDEXED, new Category_Schema(current != null ? current.add("category2", "Category") : null)) {
@@ -67,10 +79,16 @@ public class Item2_Schema implements Schema<Item2> {
         return model.category2;
       }
 
-      @Override
       @Nullable
+      @Override
       public Long getSerialized(@NonNull Item2 model) {
         return model.category2.id;
+      }
+
+      @Nullable
+      @Override
+      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.isNull(index + 2) ? null : Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, index + 1) /* consumes items: 2 */;
       }
     };
     $defaultResultColumns = new String[]{

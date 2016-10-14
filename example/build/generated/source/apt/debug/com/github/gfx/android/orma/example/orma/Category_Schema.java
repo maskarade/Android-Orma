@@ -39,10 +39,16 @@ public class Category_Schema implements Schema<Category> {
         return model.id;
       }
 
-      @Override
       @NonNull
+      @Override
       public Long getSerialized(@NonNull Category model) {
         return model.id;
+      }
+
+      @NonNull
+      @Override
+      public Long getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.getLong(index);
       }
     };
     this.name = new ColumnDef<Category, String>(this, "name", String.class, "TEXT", ColumnDef.UNIQUE) {
@@ -52,10 +58,16 @@ public class Category_Schema implements Schema<Category> {
         return model.name;
       }
 
-      @Override
       @NonNull
+      @Override
       public String getSerialized(@NonNull Category model) {
         return model.name;
+      }
+
+      @NonNull
+      @Override
+      public String getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+        return cursor.getString(index);
       }
     };
     $defaultResultColumns = new String[]{
