@@ -68,11 +68,6 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
         return delegate.getRelation();
     }
 
-    @Deprecated
-    public void runOnUiThreadSync(@NonNull Runnable task) {
-        delegate.runOnUiThread(task);
-    }
-
     public void runOnUiThread(@NonNull Runnable task) {
         delegate.runOnUiThread(task);
     }

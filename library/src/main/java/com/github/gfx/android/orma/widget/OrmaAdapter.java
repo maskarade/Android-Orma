@@ -29,7 +29,6 @@ import android.view.LayoutInflater;
 
 import rx.Observable;
 import rx.Single;
-import rx.functions.Action1;
 
 /**
  * A helper class to provide adapter class implementations.
@@ -43,8 +42,6 @@ public class OrmaAdapter<Model> {
     final Relation<Model, ?> relation;
 
     final Handler handler = new Handler(Looper.getMainLooper());
-
-    int count = -1;
 
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
@@ -61,11 +58,8 @@ public class OrmaAdapter<Model> {
         return LayoutInflater.from(context);
     }
 
-    public synchronized int getItemCount() {
-        if (count == -1) {
-            count = relation.count();
-        }
-        return count;
+    public int getItemCount() {
+        return relation.count();
     }
 
     @NonNull
@@ -94,36 +88,18 @@ public class OrmaAdapter<Model> {
     @CheckResult
     @NonNull
     public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
-        return relation.insertAsObservable(factory)
-                .doOnSuccess(new Action1<Long>() {
-                    @Override
-                    public void call(Long rowId) {
-                        count = -1;
-                    }
-                });
+        return relation.insertAsObservable(factory);
     }
 
     @CheckResult
     @NonNull
     public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
-        return relation.deleteAsObservable(item)
-                .doOnNext(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer position) {
-                        count = -1;
-                    }
-                });
+        return relation.deleteAsObservable(item);
     }
 
     @CheckResult
     @NonNull
     public Single<Integer> clearAsObservable() {
-        return relation.deleter().executeAsObservable()
-                .doOnSuccess(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer deletedRows) {
-                        count = -1;
-                    }
-                });
+        return relation.deleter().executeAsObservable();
     }
 }
