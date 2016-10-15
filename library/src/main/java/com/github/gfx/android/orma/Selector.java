@@ -212,7 +212,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @NonNull
     public <T> List<T> pluck(ColumnDef<Model, T> column) {
         List<T> result;
-        Cursor cursor = executeWithColumns(column.getEscapedName());
+        Cursor cursor = executeWithColumns(column.getQualifiedName());
         try {
             result = new ArrayList<>(cursor.getCount());
             for (int pos = 0; cursor.moveToPosition(pos); pos++) {

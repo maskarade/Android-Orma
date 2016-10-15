@@ -264,7 +264,7 @@ public class ForeignKeysTest {
         assert model.author2 != null;
         db.deleteFromAuthor().nameEq(model.author2.name).execute();
         cursor = db.selectFromModelWithForeignKeyAction().executeWithColumns(
-                ModelWithForeignKeyAction_Schema.INSTANCE.author2.getEscapedName());
+                ModelWithForeignKeyAction_Schema.INSTANCE.author2.getQualifiedName());
         assertThat(getFirstStringAndClose(cursor), is(nullValue()));
 
         // CASCADE
