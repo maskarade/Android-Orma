@@ -250,20 +250,6 @@ public class DatabaseWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("rawQuery")
-                        .addAnnotation(Annotations.nonNull())
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.Cursor)
-                        .addParameter(ParameterSpec.builder(Types.String, "sql")
-                                .addAnnotation(Annotations.nonNull())
-                                .build())
-                        .addParameter(ParameterSpec.builder(Types.StringArray, "bindArgs").build())
-                        .varargs()
-                        .addStatement("return $L.rawQuery(sql, bindArgs)", connection)
-                        .build()
-        );
-
-        methodSpecs.add(
                 MethodSpec.methodBuilder("transactionSync")
                         .addAnnotation(Annotations.workerThread())
                         .addModifiers(Modifier.PUBLIC)
