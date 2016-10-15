@@ -71,11 +71,6 @@ public class OrmaDatabase implements DatabaseHandle {
     return connection;
   }
 
-  @NonNull
-  public Cursor rawQuery(@NonNull String sql, String... bindArgs) {
-    return connection.rawQuery(sql, bindArgs);
-  }
-
   @WorkerThread
   public void transactionSync(@NonNull Runnable task) {
     connection.transactionSync(task);
