@@ -46,7 +46,7 @@ https://github.com/gfx/Android-Orma/compare/v2.6.0...v3.0.0
 
 * Foreign Key Actions are now configuable ([#306](https://github.com/gfx/Android-Orma/issues/306))
 * Add `Selector#pluck()` to get the list of the specified column ([#307](https://github.com/gfx/Android-Orma/issues/307))
-* Add `OrmaDatabase#rawQuery()` to execute `SELECT` queries directly ([#308](https://github.com/gfx/Android-Orma/issues/308))
+* <del>Add `OrmaDatabase#rawQuery()` to execute `SELECT` queries directly ([#308](https://github.com/gfx/Android-Orma/issues/308))</del> (<ins>removed in v3.0.0)
 
 ### Bug Fixes
 
