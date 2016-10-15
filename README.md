@@ -68,8 +68,8 @@ Then, declare dependencies to use Orma.
 
 ```groovy
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:2.6.0'
-    compile 'com.github.gfx.android.orma:orma:2.6.0'
+    apt 'com.github.gfx.android.orma:orma-processor:3.0.0'
+    compile 'com.github.gfx.android.orma:orma:3.0.0'
 }
 ```
 
@@ -509,8 +509,7 @@ class Book {
 
 ### Direct Associations
 
-Direct associations, where an Orma model has another Orma model directly,
-are supported from v2.0.
+There are _direct associations_, where an Orma model has another Orma model directly.
 
 Given a `has-one` association, `Book has-one Publisher`:
 
@@ -738,16 +737,20 @@ There is `SingleAssociationTypeAdapterFactory` to serialize and deserialize `Sin
 
 ## Example
 
-There is [an example app](example/) to demonstrate what Orma does.
+There is [an example app](example/) to demonstrate:
+
+* Migration
+* Orma with `RecyclerView` / `ListView`
+* Benchmark (see below)
 
 ## Benchmark
 
 There is a simple benchmark with [Realm](https://github.com/realm/realm-java) and hand-written SQLiteDatabase code:
 
-[example/BenchmarkActivity](example/src/main/java/com/github/gfx/android/orma/example/activity/BenchmarkActivity.java)
+[example/BenchmarkFragment](example/src/main/java/com/github/gfx/android/orma/example/fragment/BenchmarkFragment.java)
 
 Here is a result performed on Android 6.0.0 / Xperia Z4
-as of Orma v2.5.2 and Realm 1.1.0, processing 10 items x 100 times:
+as of Orma v3.0.0 and Realm 2.0.2, processing 10 items x 100 times:
 
 <img src="benchmark_v2.5.png" alt="" width="420"/>
 
@@ -755,7 +758,7 @@ I welcome benchmark in another condition and/or another code.
 
 ## Method Count
 
-Orma runtime is very lightweight: [Method Count for v2.6.0](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:2.6.0)
+Orma runtime is very lightweight: [Method Count for v3.0.0](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:3.0.0)
 
 
 ## FAQ
