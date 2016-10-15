@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
 
 public class OrmaIterator<Model> implements Iterator<Model> {
 
-    static final int batchSize = 2000;
+    static final int batchSize = 1000;
 
     final Selector<Model, ?> selector;
 
