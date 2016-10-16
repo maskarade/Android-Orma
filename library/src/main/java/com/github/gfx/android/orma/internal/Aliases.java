@@ -23,6 +23,7 @@ import android.support.v4.util.SimpleArrayMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Manages table aliases from column paths / table names.
@@ -75,7 +76,7 @@ public class Aliases {
         public synchronized String getAlias() {
             String alias = map.get(this);
             if (alias == null) {
-                alias = tableName.substring(0, 1).toLowerCase() + (map.size() + 1);
+                alias = tableName.substring(0, 1).toLowerCase(Locale.getDefault()) + (map.size() + 1);
                 map.put(this, alias);
             }
             return alias;

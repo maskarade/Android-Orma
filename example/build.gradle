@@ -46,17 +46,24 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    productFlavors {
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
     lintOptions {
+        textReport true
+        textOutput 'stdout'
         disable 'SetTextI18n'
+        disable 'UnusedResources'
+        disable 'HardcodedText'
+        disable 'RtlSymmetry'
+        disable 'RtlHardcoded'
+        disable 'IconLocation'
     }
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
-    }
-    productFlavors {
     }
 }
 
