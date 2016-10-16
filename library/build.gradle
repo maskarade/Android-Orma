@@ -22,11 +22,15 @@ android {
         release {
         }
     }
+    productFlavors {
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-    productFlavors {
+    lintOptions {
+        textReport true
+        textOutput 'stdout'
     }
 }
 

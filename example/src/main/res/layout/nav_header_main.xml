@@ -17,6 +17,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:contentDescription="Orma"
             android:src="@drawable/orma"
             />
 
