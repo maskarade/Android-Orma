@@ -566,21 +566,16 @@ These issues will be fixed in a future.
 
 ## Type Adapters
 
-Orma models are able to have embedded objects with **type adapters**.
+Orma models are able to have embedded objects with **type adapters**, a.k.a. static type adapters,
+by defining classes with `@StaticTypeAdapter` annotation.
 
-### Static Type Adapters
-
-Static type adapters are used to adapt a class to an SQLite storage type, which
-are resolved in compile time.
-
-They are defined by `@StaticTypeAdapter` with `targetType` and `serializedType` options.
-
-For example, here is a static type adapter for [LatLng](https://developers.google.com/android/reference/com/google/android/gms/maps/model/LatLng):
+For example, if you want to embed [LatLng](https://developers.google.com/android/reference/com/google/android/gms/maps/model/LatLng)
+in your Orma model, you can define a type adapter like this:
 
 ```java
 @StaticTypeAdapter(
-    targetType = LatLng.class,
-    serializedType = String.class
+    targetType = LatLng.class, // required
+    serializedType = String.class // required
 )
 public class LatLngAdapter {
 
@@ -601,7 +596,27 @@ public class LatLngAdapter {
 }
 ```
 
-In addition, you can define multiple type serializers to single class with `@StaticTypeAdapters` annotation containers:
+`@StaticTypeAdapter` requires `targetType` and `serializedType` options and two static methods `SerializedType serialize(TargetType)` and `TargetType deserialize(SerializedType)`.
+
+### How Serialized Types Used
+
+A `@StaticTypeAdapter#serializedType` is bound to an SQLite storage type.
+Thus it must be one of the "Java Type" listed the table below, where each "Java Type" has a corresponding "SQLite Type":
+
+| Java Type | SQLite Type |
+|:---------:|:-----------:|
+| int       | INTEGER     |
+| short     | INTEGER     |
+| long      | INTEGER     |
+| boolean   | INTEGER     |
+| float     | REAL        |
+| double    | REAL        |
+| String    | TEXT        |
+| byte[]    | BLOB        |
+
+### `@StaticTypeAdapters` for Multiple Serializers at Once
+
+You can also define multiple type serializers to single class with `@StaticTypeAdapters` annotation containers:
 
 ```java
 @StaticTypeAdapters({
@@ -640,24 +655,9 @@ public class TypeAdapters {
 }
 ```
 
-Note that `serializedType` must be integers, floating point numbers, `boolean`, `String`, or `byte[]`.
+### Built-In Type Adapters
 
-Each serialized type has a corresponding SQLite storage type:
-
-| Java Type | SQLite Type |
-|:---------:|:-----------:|
-| int       | INTEGER     |
-| short     | INTEGER     |
-| long      | INTEGER     |
-| boolean   | INTEGER     |
-| float     | REAL        |
-| double    | REAL        |
-| String    | TEXT        |
-| byte[]    | BLOB        |
-
-## Built-In Type Adapters
-
-There are built-in type adapters:
+There are built-in type adapters for typically used value objects and collections:
 
 * `java.math.BigDecimal`
 * `java.math.BigInteger`
@@ -673,8 +673,6 @@ There are built-in type adapters:
 * `java.util.Set<String>`
 * `java.util.HashSet<String>`
 * `android.net.Uri`
-
-More classes? Patches welcome!
 
 ## Raw Queries
 
