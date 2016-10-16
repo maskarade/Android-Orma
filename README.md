@@ -45,7 +45,7 @@ Now they are just what Orma has.
 
 ## Getting Started
 
-First, you need `android-apt` to use annotation processors in android projects.
+First, you need [android-apt](https://bitbucket.org/hvisser/android-apt) to use annotation processors in android projects.
 
 ```groovy
 buildscript {
@@ -68,8 +68,8 @@ Then, declare dependencies to use Orma.
 
 ```groovy
 dependencies {
-    apt 'com.github.gfx.android.orma:orma-processor:3.0.0'
     compile 'com.github.gfx.android.orma:orma:3.0.0'
+    apt 'com.github.gfx.android.orma:orma-processor:3.0.0'
 }
 ```
 
@@ -815,8 +815,8 @@ Use `annotationProcessor` configuration in the dependencies block, instead of `a
 
 ```
 dependencies {
-    annotationProcessor 'com.github.gfx.android.orma:orma-processor:3.0.0'
     compile 'com.github.gfx.android.orma:orma:3.0.0'
+    annotationProcessor 'com.github.gfx.android.orma:orma-processor:3.0.0'
 }
 ```
 
