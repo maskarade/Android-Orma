@@ -1,10 +1,8 @@
 # Orma Migration Module
 
-`orma-migration` is a library which provides migration mechanism
-for `SQLiteDatabase`.
+`orma-migration` is a library which provides migration mechanism for `SQLiteDatabase`.
 
-This is independent from `orma` module and available for
-any Android `SQLiteDatabase` tools.
+This is independent from `orma` module and should be available for any `SQLiteDatabase` tools.
 
 ## MigrationEngine
 
@@ -18,7 +16,7 @@ The last one, `OrmaMigration`, is just a composite of the other two.
 
 ## SchemaDiffMigration
 
-`SchemaDiffMigration` can make SQL statements from two different schemas. In other words, you don't need to write the migration code.
+`SchemaDiffMigration`, the default migration engine for `OrmaDatabase`, can make SQL statements from two different sets of DDLs, parsing SQLite statements with [sqlite-parser](https://github.com/bkiers/sqlite-parser). With this engine, you don't need to write the migration code.
 
 For example, given there is a table:
 
@@ -46,7 +44,7 @@ is limited, `SchemaDiffMigration` always re-creates tables if two tables differs
 
 ### Schema Version Control
 
-`SchemaDiffMigration` uses a string key, or `schemaHash`, to invoke migrations.
+`SchemaDiffMigration` uses a string key, or `schemaHash`, to invoke migration.
 
 The typical key is `OrmaDatabase.SCHEMA_HASH`.
 
@@ -121,17 +119,17 @@ You can also have a look at databases in devices with [Stetho](https://github.co
 
 ## FAQ
 
-### Does Orma migration engine use `SQLiteOpenHelper` migration mechanism?
+### Do Orma migration engines use `SQLiteOpenHelper` migration mechanism?
 
 No. As of Orma v2.1.0, `SQLiteOpenHelper` is no longer used, whereas old versions of Orma use `SQLiteOpenHelper` to trigger migrations.
 
-In other words, Orma no longer use [PRAGMA user_version](https://www.sqlite.org/pragma.html#pragma_schema_version).
+That is, Orma does not depend [PRAGMA user_version](https://www.sqlite.org/pragma.html#pragma_schema_version). It saves data to its own tables.
 
 ### Why does `SchemaDiffMigration` crash when I add a column?
 
 If the column is not annotated by `@Nullable`, it is declared as `NOT NULL`.
 
-You have to add `@Nullable` to it or set `DEFAULT` to it with `@Column(defaultExpr = "...")`.
+You have to add `@Nullable` to it or set default expressions with `@Column(defaultExpr = "...")`.
 
 ### When should I set `OrmaDatabase.Builder#versionForManualStepMigration()`?
 
@@ -141,6 +139,6 @@ The default value, application's `BuildConfig.VERSION_CODE` is good for almost a
 
 ## See Also
 
-* `SQLite.g4` is originated from [bkiers/sqlite-parser](https://github.com/bkiers/sqlite-parser)
+* [bkiers/sqlite-parser](https://github.com/bkiers/sqlite-parser)
 * [CREATE TABLE - SQLite](https://www.sqlite.org/lang_createtable.html)
 * [SQL::Translator::Diff in Perl](https://metacpan.org/pod/SQL::Translator::Diff)
