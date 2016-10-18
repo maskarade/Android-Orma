@@ -9,6 +9,11 @@ dependencies:
     - "/usr/local/android-sdk-linux/build-tools"
     - "/usr/local/android-sdk-linux/platforms"
   pre:
+    - sudo service postgresql stop
+    - sudo service mongodb stop
+    - sudo service memcached stop
+    - sudo service mysql stop
+    - sudo service couchdb stop
     - echo y | android -s update sdk -u -a -t "tools"
     - echo y | android -s update sdk -u -a -t "platform-tools"
     - echo y | android -s update sdk -u -a -t "extra-android-m2repository"

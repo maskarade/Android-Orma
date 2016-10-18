@@ -30,6 +30,9 @@ android {
         textReport true
         textOutput 'stdout'
     }
+    dexOptions {
+        preDexLibraries = !System.getenv("CI")
+    }
 }
 
 final PACKAGE = 'com.github.gfx.android.orma.migration.sqliteparser.g'

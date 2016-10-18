@@ -32,6 +32,9 @@ android {
         textReport true
         textOutput 'stdout'
     }
+    dexOptions {
+        preDexLibraries = !System.getenv("CI")
+    }
 }
 
 dependencies {
