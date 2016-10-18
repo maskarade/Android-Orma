@@ -65,6 +65,9 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
     }
+    dexOptions {
+        preDexLibraries = !System.getenv("CI")
+    }
 }
 
 dependencies {
