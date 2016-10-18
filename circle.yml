@@ -20,6 +20,6 @@ test:
   override:
     - ./gradlew check
   post:
-    - cp -r processor/build/reports/ "$CIRCLE_TEST_REPORTS/migration"
+    - cp -r processor/build/reports/ "$CIRCLE_TEST_REPORTS/processor"
     - cp -r library/build/reports/ "$CIRCLE_TEST_REPORTS/library"
     - cp -r migration/build/reports/ "$CIRCLE_TEST_REPORTS/migration"
