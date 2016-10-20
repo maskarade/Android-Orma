@@ -68,10 +68,11 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         if (condition instanceof Relation) {
             @SuppressWarnings("unchecked")
             Relation<Model, ?> relation = (Relation<Model, ?>) condition;
-            CharSequence orderByTerm = relation.buildOrderingTerms();
-            if (orderByTerm != null) {
-                orderBy(orderByTerm);
-            }
+            orderBy = relation.buildOrderingTerms();
+        } else if (condition instanceof Selector) {
+            @SuppressWarnings("unchecked")
+            Selector<Model, ?> selector = (Selector<Model, ?>) condition;
+            orderBy = selector.orderBy;
         }
     }
 
