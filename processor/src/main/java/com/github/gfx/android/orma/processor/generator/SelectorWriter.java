@@ -80,9 +80,16 @@ public class SelectorWriter extends BaseWriter {
 
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(Types.getOrmaConditionBase(schema.getModelClassName()), "condition")
-                .addStatement("super(condition)")
-                .addStatement("this.schema = ($T) condition.getSchema()", schema.getSchemaClassName())
+                .addParameter(schema.getSelectorClassName(), "selector")
+                .addStatement("super(selector)")
+                .addStatement("this.schema = selector.getSchema()", schema.getSchemaClassName())
+                .build());
+
+        methodSpecs.add(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(schema.getRelationClassName(), "relation")
+                .addStatement("super(relation)")
+                .addStatement("this.schema = relation.getSchema()", schema.getSchemaClassName())
                 .build());
 
         methodSpecs.add(MethodSpec.methodBuilder("clone")
