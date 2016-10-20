@@ -71,7 +71,12 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     public Selector(@NonNull Selector<Model, ?> selector) {
         super(selector);
+        groupBy = selector.groupBy;
+        having = selector.having;
         orderBy = selector.orderBy;
+        limit = selector.limit;
+        offset = selector.offset;
+        page = selector.page;
     }
 
     @Override
