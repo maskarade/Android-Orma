@@ -68,8 +68,8 @@ Then, declare dependencies to use Orma.
 
 ```groovy
 dependencies {
-    compile 'com.github.gfx.android.orma:orma:3.0.0'
-    apt 'com.github.gfx.android.orma:orma-processor:3.0.0'
+    compile 'com.github.gfx.android.orma:orma:3.0.1'
+    apt 'com.github.gfx.android.orma:orma-processor:3.0.1'
 }
 ```
 
@@ -761,7 +761,7 @@ I welcome benchmark in another condition and/or another code.
 
 ## Method Count
 
-Orma runtime is very lightweight: [Method Count for v3.0.0](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:3.0.0)
+Orma runtime is very lightweight: [Method Count for v3.0.1](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:3.0.1)
 
 
 ## FAQ
@@ -818,8 +818,8 @@ Use `annotationProcessor` configuration in the dependencies block, instead of `a
 
 ```
 dependencies {
-    compile 'com.github.gfx.android.orma:orma:3.0.0'
-    annotationProcessor 'com.github.gfx.android.orma:orma-processor:3.0.0'
+    compile 'com.github.gfx.android.orma:orma:3.0.1'
+    annotationProcessor 'com.github.gfx.android.orma:orma-processor:3.0.1'
 }
 ```
 

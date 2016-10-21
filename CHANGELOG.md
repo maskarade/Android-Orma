@@ -8,6 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v3.0.1 2016/10/21
+
+### Bug Fixes
+
+* [#315](https://github.com/gfx/Android-Orma/pull/315): `OrmaIterator`, created by `Selector#iterator()`, ignored `ORDER BY` terms (reported by @sys1yagi)
+
 ## v3.0.0 2016/10/15
 
 This is a major update of Orma, which includes lots of enhancements and bug fixes.
