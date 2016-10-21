@@ -3,7 +3,7 @@ machine:
     version: oraclejdk8
   environment:
     TERM: dumb
-    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
+    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
 dependencies:
   pre:
     - sudo service postgresql stop
