@@ -63,16 +63,20 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         super(conn);
     }
 
-    public Selector(@NonNull OrmaConditionBase<Model, ?> condition) {
-        super(condition);
-        if (condition instanceof Relation) {
-            @SuppressWarnings("unchecked")
-            Relation<Model, ?> relation = (Relation<Model, ?>) condition;
-            CharSequence orderByTerm = relation.buildOrderingTerms();
-            if (orderByTerm != null) {
-                orderBy(orderByTerm);
-            }
-        }
+    public Selector(@NonNull Relation<Model, ?> relation) {
+        super(relation);
+        orderBy = relation.buildOrderingTerms();
+    }
+
+
+    public Selector(@NonNull Selector<Model, ?> selector) {
+        super(selector);
+        groupBy = selector.groupBy;
+        having = selector.having;
+        orderBy = selector.orderBy;
+        limit = selector.limit;
+        offset = selector.offset;
+        page = selector.page;
     }
 
     @Override

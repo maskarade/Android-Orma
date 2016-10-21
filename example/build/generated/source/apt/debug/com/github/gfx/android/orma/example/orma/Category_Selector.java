@@ -3,7 +3,6 @@ package com.github.gfx.android.orma.example.orma;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Selector;
-import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -15,9 +14,14 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
     this.schema = schema;
   }
 
-  public Category_Selector(OrmaConditionBase<Category, ?> condition) {
-    super(condition);
-    this.schema = (Category_Schema) condition.getSchema();
+  public Category_Selector(Category_Selector selector) {
+    super(selector);
+    this.schema = selector.getSchema();
+  }
+
+  public Category_Selector(Category_Relation relation) {
+    super(relation);
+    this.schema = relation.getSchema();
   }
 
   @Override
