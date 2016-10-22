@@ -21,11 +21,26 @@ import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 
 import android.support.test.InstrumentationRegistry;
 
+import java.io.File;
+import java.io.IOException;
+
 public class OrmaFactory {
+
+    static OrmaDatabase db;
+
+    static String createTempfileName() {
+        try {
+            File file = File.createTempFile("test", ".db", InstrumentationRegistry.getTargetContext().getCacheDir());
+            file.deleteOnExit();
+            return file.getName();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
 
     public static OrmaDatabase.Builder builder() {
         return OrmaDatabase.builder(InstrumentationRegistry.getTargetContext())
-                .name(null)
+                .name(createTempfileName())
                 .trace(true);
     }
 
@@ -36,7 +51,7 @@ public class OrmaFactory {
     public static OrmaDatabaseToAvoidTryParsing create2() {
         return OrmaDatabaseToAvoidTryParsing.builder(InstrumentationRegistry.getTargetContext())
                 .tryParsingSql(false)
-                .name(null)
+                .name(createTempfileName())
                 .trace(true)
                 .build();
     }
