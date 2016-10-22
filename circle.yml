@@ -11,6 +11,8 @@ dependencies:
     - sudo service memcached stop
     - sudo service mysql stop
     - sudo service couchdb stop
+    - sudo service rabbitmq-server stop
+    - sudo service zookeeper stop
     - echo y | android -s update sdk -u -a -t "tools"
     - echo y | android -s update sdk -u -a -t "platform-tools"
     - echo y | android -s update sdk -u -a -t "extra-android-m2repository"
