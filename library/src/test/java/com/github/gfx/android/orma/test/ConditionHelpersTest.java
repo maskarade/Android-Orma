@@ -182,6 +182,17 @@ public class ConditionHelpersTest {
     }
 
     @Test
+    public void testBetween() throws Exception {
+        assertThat(selector().byteValueBetween((byte) 3 ,(byte)5).count(), is(3));
+        assertThat(selector().shortValueBetween((short) 3, (short)5).count(), is(3));
+        assertThat(selector().intValueBetween(3, 5).count(), is(3));
+        assertThat(selector().longValueBetween((long) 3, (long) 5).count(), is(3));
+        assertThat(selector().floatValueBetween((float) 3, (float)5).count(), is(3));
+        assertThat(selector().doubleValueBetween((double) 3, (double)5).count(), is(3));
+        assertThat(selector().dateValueBetween(new Date(3), new Date(5)).count(), is(3));
+    }
+
+    @Test
     public void testUpdater() throws Exception {
         db.updateModelWithConditionHelpers()
                 .intValueEq(5)

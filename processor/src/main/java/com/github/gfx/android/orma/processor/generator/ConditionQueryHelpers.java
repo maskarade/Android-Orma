@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.processor.model.AssociationDefinition;
 import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
+import com.github.gfx.android.orma.processor.util.SqlTypes;
 import com.github.gfx.android.orma.processor.util.Strings;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.AnnotationSpec;
@@ -74,6 +75,27 @@ public class ConditionQueryHelpers {
         return methodSpecs;
     }
 
+    CodeBlock serializedFieldExpr(ColumnDefinition column, ParameterSpec paramSpec) {
+        AssociationDefinition r = column.getAssociation();
+
+        boolean isAssociation = r != null;
+        TypeName type = isAssociation ? r.getModelType() : column.getType();
+        CodeBlock serializedFieldExpr;
+        if (isAssociation) {
+            SchemaDefinition associatedSchema = context.getSchemaDef(type);
+            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey()
+                    .orElseThrow(() -> new ProcessingException(
+                            "Missing @PrimaryKey for " + associatedSchema.getModelClassName().simpleName(),
+                            associatedSchema.getElement()));
+            return CodeBlock.builder()
+                    .add("$L /* primary key */", primaryKey.buildGetColumnExpr(paramSpec.name))
+                    .build();
+        } else {
+            return column.buildSerializeExpr("conn", paramSpec.name);
+        }
+
+    }
+
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
         AssociationDefinition r = column.getAssociation();
 
@@ -82,28 +104,19 @@ public class ConditionQueryHelpers {
 
         TypeName collectionType = Types.getCollection(type.box());
 
+        List<AnnotationSpec> paramAnnotations = column.type.isPrimitive()
+                ? Collections.emptyList()
+                : Collections.singletonList(Annotations.nonNull());
+
         ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
-                .addAnnotations(
-                        column.type.isPrimitive() ? Collections.emptyList() : Collections.singletonList(Annotations.nonNull()))
+                .addAnnotations(paramAnnotations)
                 .build();
 
         List<AnnotationSpec> safeVarargsIfNeeded = Annotations.safeVarargsIfNeeded(column.getType());
 
         String columnExpr = "schema." + column.name;
 
-        CodeBlock serializedFieldExpr;
-        if (isAssociation) {
-            SchemaDefinition associatedSchema = context.getSchemaDef(type);
-            ColumnDefinition primaryKey = associatedSchema.getPrimaryKey()
-                    .orElseThrow(() -> new ProcessingException(
-                            "Missing @PrimaryKey for " + associatedSchema.getModelClassName().simpleName(),
-                            associatedSchema.getElement()));
-            serializedFieldExpr = CodeBlock.builder()
-                    .add("$L /* primary key */", primaryKey.buildGetColumnExpr(paramSpec.name))
-                    .build();
-        } else {
-            serializedFieldExpr = column.buildSerializeExpr("conn", paramSpec.name);
-        }
+        CodeBlock serializedFieldExpr = serializedFieldExpr(column, paramSpec);
 
         if (column.nullable && column.hasHelper(Column.Helpers.CONDITION_IS_NULL)) {
             methodSpecs.add(MethodSpec.methodBuilder(column.name + "IsNull")
@@ -307,6 +320,30 @@ public class ConditionQueryHelpers {
                     .addStatement("return where($L, $S, $L)",
                             columnExpr, ">=",
                             serializedFieldExpr)
+                    .build()
+            );
+        }
+        if (column.hasHelper(Column.Helpers.CONDITION_BETWEEN)
+                && SqlTypes.isComparable(column.getStorageType())) {
+            ParameterSpec paramSpecA = ParameterSpec.builder(type, column.name + "A")
+                    .addAnnotations(paramAnnotations)
+                    .build();
+
+            ParameterSpec paramSpecB = ParameterSpec.builder(type, column.name + "B")
+                    .addAnnotations(paramAnnotations)
+                    .build();
+
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Between")
+                    .addJavadoc("To build a condition <code>$L BETWEEN a AND b</code>, which is equivalent to <code>a <= $L AND $L <= b</code>.\n",
+                            column.name, column.name, column.name)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(paramSpecA)
+                    .addParameter(paramSpecB)
+                    .returns(targetClassName)
+                    .addStatement("return whereBetween($L, $L, $L)",
+                            columnExpr,
+                            serializedFieldExpr(column, paramSpecA),
+                            serializedFieldExpr(column, paramSpecB))
                     .build()
             );
         }
