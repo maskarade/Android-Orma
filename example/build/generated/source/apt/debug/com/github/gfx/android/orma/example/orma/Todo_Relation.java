@@ -175,6 +175,13 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     return where(schema.id, ">=", id);
   }
 
+  /**
+   * To build a condition <code>id BETWEEN a AND b</code>, which is equivalent to <code>a <= id AND id <= b</code>.
+   */
+  public Todo_Relation idBetween(long idA, long idB) {
+    return whereBetween(schema.id, idA, idB);
+  }
+
   public Todo_Relation orderByTitleAsc() {
     return orderBy(schema.title.orderInAscending());
   }

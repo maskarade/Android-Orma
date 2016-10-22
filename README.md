@@ -281,37 +281,46 @@ This is a query builder for `DELETE FROM *` statements.
 
 ## Query Helpers
 
-There are Query Helpers which are generated to query conditions and orders in a type-safe way.
+There are **Query Helpers** which are generated to query conditions and orders in a type-safe way.
 
 For example, `titleEq()` shown in the synopsis section, are generated to help make `WHERE` and `ORDER BY` clauses,
 for `Relation`, `Selecotr`, `Deleter`, and `Updater`.
 
-They are generated for columns with `indexed = true` or the `@PrimaryKey` column.
+Most of them are generated for columns with `indexed = true`, and some are for `@PrimaryKey` columns.
 
-Here is a list of Query Helpers that are generated for all the `indexed` columns:
+Here is a list of Query Helpers that are generated for **all** the `indexed` columns, where `*` is a column name pladeholder:
 
-* `*Eq(value)` to make `WHERE * = ?`, which is also generated for `@PrimaryKey`
-* `*NotEq(values)` to make `WHERE * <> ?`
-* `*In(values)` to make `WHERE * IN (?, ?, ?, ...)`
-* `*NotIn(values)` to make `WHERE * NOT IN (?, ?, ?, ...)`
+| Method           | SQL                 |
+|:----------------:|:-------------------:|
+| `*Eq(value)`     | `* = value`         |
+| `*NotEq(value)`  | `* <> value`        |
+| `*In(values)`    | `* IN (values)`     |
+| `*NotIn(values)` | `* NOT IN (values)` |
 
 The following are generated for `@Nullable` columns.
 
-* `*IsNull()` to make `WHERE * IS NULL`
-* `*IsNotNull()` to make `WHERE * IS NOT NULL`
+| Method         | SQL             |
+|:--------------:|:---------------:|
+| `*IsNull()`    | `* IS NULL`     |
+| `*IsNotNull()` | `* IS NOT NULL` |
 
 The following are generated for numeric columns
  (i.e. `byte`, `short`, `int`, `long`, `float`, `double`, and their corresponding box types)
 
-* `*Lt(value)` to make `WHERE * < ?`
-* `*Le(value)` to make `WHERE * <= ?`
-* `*Gt(value)` to make `WHERE * > ?`
-* `*Ge(value)` to make `WHERE * >= ?`
+| Method           | SQL                 |
+|:----------------:|:-------------------:|
+| `*Lt(value)`     | `* < value`         |
+| `*Le(values)`    | `* <= value`        |
+| `*Gt(value)`     | `* > value`         |
+| `*Ge(value)`     | `* >= value`        |
+| `*Between(a, b)` | `* BETWEEN a AND b` |
 
 And `ORDER BY` helpers:
 
-* `orderBy*Asc()` to make `ORDER BY * ASC`
-* `orderBy*Desc()` to make `ORDER BY * DESC`
+| Method           | SQL               |
+|:----------------:|:-----------------:|
+| `orderBy*Asc()`  | `ORDER BY * ASC`  |
+| `orderBy*Desc()` | `ORDER BY * DESC` |
 
 ### How to Control Generation of Query Helpers
 

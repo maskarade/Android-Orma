@@ -155,6 +155,13 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     return where(schema.id, ">=", id);
   }
 
+  /**
+   * To build a condition <code>id BETWEEN a AND b</code>, which is equivalent to <code>a <= id AND id <= b</code>.
+   */
+  public Todo_Selector idBetween(long idA, long idB) {
+    return whereBetween(schema.id, idA, idB);
+  }
+
   public Todo_Selector orderByTitleAsc() {
     return orderBy(schema.title.orderInAscending());
   }

@@ -172,4 +172,11 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
   public Todo_Updater idGe(long id) {
     return where(schema.id, ">=", id);
   }
+
+  /**
+   * To build a condition <code>id BETWEEN a AND b</code>, which is equivalent to <code>a <= id AND id <= b</code>.
+   */
+  public Todo_Updater idBetween(long idA, long idB) {
+    return whereBetween(schema.id, idA, idB);
+  }
 }
