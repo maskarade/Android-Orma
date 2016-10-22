@@ -228,6 +228,28 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return result;
     }
 
+    public <T> Observable<T> pluckAsObservable(final ColumnDef<Model, T> column) {
+        return Observable.create(new Observable.OnSubscribe<T>() {
+            @Override
+            public void call(Subscriber<? super T> subscriber) {
+                Cursor cursor = executeWithColumns(column.getQualifiedName());
+                try {
+                    for (int pos = 0; cursor.moveToPosition(pos); pos++) {
+                        if (subscriber.isUnsubscribed()) {
+                            return;
+                        }
+                        subscriber.onNext(column.getFromCursor(conn, cursor, 0));
+                    }
+                } finally {
+                    cursor.close();
+                }
+                if (!subscriber.isUnsubscribed()) {
+                    subscriber.onCompleted();
+                }
+            }
+        });
+    }
+
     @CheckResult
     @NonNull
     public Cursor execute() {

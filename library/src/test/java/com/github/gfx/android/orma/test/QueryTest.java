@@ -231,6 +231,17 @@ public class QueryTest {
     }
 
     @Test
+    public void pluckAsObservable() throws Exception {
+        assertThat(db.selectFromBook().orderByTitleAsc().pluckAsObservable(Book_Schema.INSTANCE.title).toList().toBlocking().first(),
+                is(contains("friday", "today")));
+        assertThat(db.selectFromBook().orderByTitleDesc().pluckAsObservable(Book_Schema.INSTANCE.title).toList().toBlocking().first(),
+                is(contains("today", "friday")));
+
+        assertThat(db.selectFromBook().orderByTitleDesc().pluckAsObservable(Book_Schema.INSTANCE.inPrint).toList().toBlocking().first(),
+                is(contains(true, false)));
+    }
+
+    @Test
     public void execute() throws Exception {
         Cursor cursor = db.selectFromBook().execute();
         cursor.moveToFirst();
