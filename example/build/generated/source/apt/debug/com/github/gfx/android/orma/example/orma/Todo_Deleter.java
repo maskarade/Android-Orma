@@ -144,4 +144,11 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   public Todo_Deleter idGe(long id) {
     return where(schema.id, ">=", id);
   }
+
+  /**
+   * To build a condition <code>id BETWEEN a AND b</code>, which is equivalent to <code>a <= id AND id <= b</code>.
+   */
+  public Todo_Deleter idBetween(long idA, long idB) {
+    return whereBetween(schema.id, idA, idB);
+  }
 }

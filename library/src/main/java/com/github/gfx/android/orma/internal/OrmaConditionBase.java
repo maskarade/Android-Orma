@@ -108,6 +108,12 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     }
 
     @SuppressWarnings("unchecked")
+    protected C whereBetween(@NonNull ColumnDef<Model, ?> column, Object a, Object b) {
+        String columnName = (this instanceof Selector) ? column.getQualifiedName() : column.getEscapedName();
+        return where(columnName + " BETWEEN ? AND ?", a, b);
+    }
+
+    @SuppressWarnings("unchecked")
     public C where(@NonNull CharSequence conditions, @NonNull Collection<?> args) {
         return where(conditions, args.toArray());
     }

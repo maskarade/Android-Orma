@@ -74,4 +74,11 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
   public Category_Selector idGe(long id) {
     return where(schema.id, ">=", id);
   }
+
+  /**
+   * To build a condition <code>id BETWEEN a AND b</code>, which is equivalent to <code>a <= id AND id <= b</code>.
+   */
+  public Category_Selector idBetween(long idA, long idB) {
+    return whereBetween(schema.id, idA, idB);
+  }
 }

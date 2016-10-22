@@ -94,4 +94,11 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
   public Category_Relation idGe(long id) {
     return where(schema.id, ">=", id);
   }
+
+  /**
+   * To build a condition <code>id BETWEEN a AND b</code>, which is equivalent to <code>a <= id AND id <= b</code>.
+   */
+  public Category_Relation idBetween(long idA, long idB) {
+    return whereBetween(schema.id, idA, idB);
+  }
 }

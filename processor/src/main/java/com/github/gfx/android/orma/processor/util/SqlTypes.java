@@ -54,5 +54,17 @@ public class SqlTypes {
         String t = javaToSqlite.get(Types.asUnboxType(type));
         return t != null ? t : "BLOB";
     }
+
+    public static boolean isComparable(String sqlType) {
+        switch (sqlType.toUpperCase()) {
+            case "INTEGER":
+            case "REAL":
+            case "NUMERIC":
+            case "DATETIME":
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
