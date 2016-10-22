@@ -333,6 +333,21 @@ public class OrmaConnection {
         });
     }
 
+
+    /**
+     * Deletes all the columns in all the tables provided for testing.
+     */
+    public void deleteAll() {
+        transactionSync(new Runnable() {
+            @Override
+            public void run() {
+                for (Schema<?> schema : schemas) {
+                    delete(schema, null, null);
+                }
+            }
+        });
+    }
+
     public void execSQL(@NonNull String sql, @NonNull Object... bindArgs) {
         trace(sql, bindArgs);
         SQLiteDatabase db = getWritableDatabase();
