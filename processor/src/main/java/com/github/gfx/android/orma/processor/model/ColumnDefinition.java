@@ -209,11 +209,13 @@ public class ColumnDefinition {
     static long normalizeHelperFlags(boolean primaryKey, boolean indexed, boolean autoincrement, boolean autoId, long flags) {
         if (flags == Column.Helpers.AUTO) {
             if (primaryKey) {
-                return (autoincrement || !autoId) ? Column.Helpers.ALL : Column.Helpers.CONDITIONS;
+                return (autoincrement || !autoId)
+                        ? Column.Helpers.CONDITIONS | Column.Helpers.ORDERS
+                        : Column.Helpers.CONDITIONS;
             } else if (indexed) {
-                return Column.Helpers.ALL;
+                return Column.Helpers.CONDITIONS | Column.Helpers.ORDERS | Column.Helpers.AGGREGATORS;
             } else {
-                return Column.Helpers.NONE;
+                return Column.Helpers.AGGREGATORS;
             }
         } else {
             return flags;
@@ -425,9 +427,12 @@ public class ColumnDefinition {
         return (helperFlags & Column.Helpers.ORDERS) != 0;
     }
 
+    public boolean hasAggregationHelpers() {
+        return (helperFlags & Column.Helpers.AGGREGATORS) != 0;
+    }
+
     public boolean hasHelper(@Column.Helpers long f) {
         assert f != Column.Helpers.NONE && f != Column.Helpers.AUTO;
         return (helperFlags & f) == f;
     }
-
 }

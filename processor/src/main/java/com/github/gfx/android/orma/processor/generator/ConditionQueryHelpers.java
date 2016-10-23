@@ -37,6 +37,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.lang.model.element.Modifier;
 
@@ -59,6 +60,10 @@ public class ConditionQueryHelpers {
     }
 
     public List<MethodSpec> buildConditionHelpers(boolean orderByHelpers) {
+        return buildConditionHelpers(orderByHelpers, false);
+    }
+
+    public List<MethodSpec> buildConditionHelpers(boolean orderByHelpers, boolean aggregatorHelpers) {
         List<MethodSpec> methodSpecs = new ArrayList<>();
         schema.getColumns()
                 .stream()
@@ -72,6 +77,13 @@ public class ConditionQueryHelpers {
                     .forEach(column -> buildOrderByHelpers(methodSpecs, column));
         }
 
+        if (aggregatorHelpers) {
+            schema.getColumnsWithoutAutoId()
+                    .stream()
+                    .filter(ColumnDefinition::hasAggregationHelpers)
+                    .forEach(column -> buildAggregationHelpers(methodSpecs, column));
+        }
+
         return methodSpecs;
     }
 
@@ -80,7 +92,6 @@ public class ConditionQueryHelpers {
 
         boolean isAssociation = r != null;
         TypeName type = isAssociation ? r.getModelType() : column.getType();
-        CodeBlock serializedFieldExpr;
         if (isAssociation) {
             SchemaDefinition associatedSchema = context.getSchemaDef(type);
             ColumnDefinition primaryKey = associatedSchema.getPrimaryKey()
@@ -334,7 +345,8 @@ public class ConditionQueryHelpers {
                     .build();
 
             methodSpecs.add(MethodSpec.methodBuilder(column.name + "Between")
-                    .addJavadoc("To build a condition <code>$L BETWEEN a AND b</code>, which is equivalent to <code>a <= $L AND $L <= b</code>.\n",
+                    .addJavadoc(
+                            "To build a condition <code>$L BETWEEN a AND b</code>, which is equivalent to <code>a <= $L AND $L <= b</code>.\n",
                             column.name, column.name, column.name)
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(paramSpecA)
@@ -367,4 +379,60 @@ public class ConditionQueryHelpers {
         }
     }
 
+    void buildAggregationHelpers(List<MethodSpec> methodSpecs, ColumnDefinition column) {
+        if (column.hasHelper(Column.Helpers.MIN) && Types.isNumeric(column.type)) {
+            methodSpecs.add(MethodSpec.methodBuilder("minBy" + Strings.toUpperFirst(column.name))
+                    .addAnnotation(Annotations.nullable())
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(column.getBoxType())
+                    .addCode(buildAggregatorBody(column, "MIN",
+                            () -> CodeBlock.of("schema.$L.getFromCursor(conn, cursor, 0)", column.name)))
+                    .build()
+            );
+        }
+        if (column.hasHelper(Column.Helpers.MAX) && Types.isNumeric(column.type)) {
+            methodSpecs.add(MethodSpec.methodBuilder("maxBy" + Strings.toUpperFirst(column.name))
+                    .addAnnotation(Annotations.nullable())
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(column.getBoxType())
+                    .addCode(buildAggregatorBody(column, "MAX",
+                            () -> CodeBlock.of("schema.$L.getFromCursor(conn, cursor, 0)", column.name)))
+                    .build()
+            );
+        }
+        if (column.hasHelper(Column.Helpers.SUM) && Types.isNumeric(column.type)) {
+            boolean isInteger = Types.looksLikeIntegerType(column.type);
+            methodSpecs.add(MethodSpec.methodBuilder("sumBy" + Strings.toUpperFirst(column.name))
+                    .addAnnotation(Annotations.nullable())
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(isInteger ? TypeName.LONG.box() : TypeName.DOUBLE.box())
+                    .addCode(buildAggregatorBody(column, "SUM",
+                            () -> isInteger ? CodeBlock.of("cursor.getLong(0)") : CodeBlock.of("cursor.getDouble(0)")))
+                    .build()
+            );
+        }
+        if (column.hasHelper(Column.Helpers.AVG) && Types.isNumeric(column.type)) {
+            methodSpecs.add(MethodSpec.methodBuilder("avgBy" + Strings.toUpperFirst(column.name))
+                    .addAnnotation(Annotations.nullable())
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(TypeName.DOUBLE.box())
+                    .addCode(buildAggregatorBody(column, "AVG", () -> CodeBlock.of("cursor.getDouble(0)")))
+                    .build()
+            );
+        }
+    }
+
+    CodeBlock buildAggregatorBody(ColumnDefinition column, String funcName, Supplier<CodeBlock> gen) {
+        return CodeBlock.builder()
+                .addStatement("$T cursor = executeWithColumns(schema.$L.buildCallExpr($S))",
+                        Types.Cursor, column.name, funcName)
+                .beginControlFlow("try")
+                .addStatement("cursor.moveToFirst()")
+                .addStatement("return cursor.isNull(0) ? null : $L", gen.get())
+                .endControlFlow()
+                .beginControlFlow("finally")
+                .addStatement("cursor.close()")
+                .endControlFlow()
+                .build();
+    }
 }

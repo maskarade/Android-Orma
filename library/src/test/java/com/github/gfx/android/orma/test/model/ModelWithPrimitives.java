@@ -45,4 +45,17 @@ public class ModelWithPrimitives {
 
     @Column
     public double doubleValue;
+
+    public static ModelWithPrimitives create(boolean booleanValue, byte byteValue, short shortValue, int intValue,
+            long longValue, float floatValue, double doubleValue) {
+        ModelWithPrimitives model = new ModelWithPrimitives();
+        model.booleanValue = booleanValue;
+        model.byteValue = byteValue;
+        model.shortValue = shortValue;
+        model.intValue = intValue;
+        model.longValue = longValue;
+        model.floatValue = floatValue;
+        model.doubleValue = doubleValue;
+        return model;
+    }
 }

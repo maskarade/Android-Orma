@@ -106,6 +106,16 @@ public abstract class ColumnDef<Model, T> {
         return new OrderSpec<>(this, OrderSpec.DESC);
     }
 
+    /**
+     * Builds an SQL expression that applies a function to the column.
+     *
+     * @param funcName A function name to apply, e.g. {@code SUM}.
+     * @return An SQL expression to apply {@code funcName} to the column, e.g.  {@code "SUM(payment)"}.
+     */
+    public String buildCallExpr(String funcName) {
+        return funcName + "(" + getQualifiedName() + ")";
+    }
+
     @NonNull
     @Override
     public String toString() {
