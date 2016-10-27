@@ -24,7 +24,7 @@ test:
     - TERM=dumb ./gradlew processor:test
     - TERM=dumb ./gradlew migration:testDebugUnitTest
     - TERM=dumb ./gradlew library:testDebugUnitTest
-    - TERM=dumb ./gradlew example:assemble
+    - TERM=dumb ./gradlew example:assembleDebug
   post:
     - cp -r processor/build/test-results/ "$CIRCLE_TEST_REPORTS/processor"
     - cp -r library/build/test-results/ "$CIRCLE_TEST_REPORTS/library"
