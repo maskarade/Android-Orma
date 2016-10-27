@@ -2,8 +2,8 @@ machine:
   java:
     version: oraclejdk8
   environment:
-    TERM: dumb
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx1560m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
+    JAVA_OPTS: '-Xmx1560m -XX:+HeapDumpOnOutOfMemoryError'
 dependencies:
   pre:
     - sudo service postgresql stop
@@ -20,11 +20,11 @@ dependencies:
     - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME"/licenses/android-sdk-license
 test:
   override:
-    - ./gradlew lint
-    - ./gradlew processor:test
-    - ./gradlew migration:testDebugUnitTest
-    - ./gradlew library:testDebugUnitTest
-    - ./gradlew example:assemble
+    - TERM=dumb ./gradlew lint
+    - TERM=dumb ./gradlew processor:test
+    - TERM=dumb ./gradlew migration:testDebugUnitTest
+    - TERM=dumb ./gradlew library:testDebugUnitTest
+    - TERM=dumb ./gradlew example:assemble
   post:
     - cp -r processor/build/test-results/ "$CIRCLE_TEST_REPORTS/processor"
     - cp -r library/build/test-results/ "$CIRCLE_TEST_REPORTS/library"

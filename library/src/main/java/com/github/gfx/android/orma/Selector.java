@@ -214,7 +214,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @NonNull
-    public <T> List<T> pluck(ColumnDef<Model, T> column) {
+    public <T> Iterable<T> pluck(ColumnDef<Model, T> column) {
         List<T> result;
         Cursor cursor = executeWithColumns(column.getQualifiedName());
         try {
