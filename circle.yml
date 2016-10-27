@@ -20,7 +20,11 @@ dependencies:
     - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME"/licenses/android-sdk-license
 test:
   override:
-    - TERM=dumb ./gradlew check
+    - TERM=dumb ./gradlew lint
+    - TERM=dumb ./gradlew processor:test
+    - TERM=dumb ./gradlew migration:testDebugUnitTest
+    - TERM=dumb ./gradlew library:testDebugUnitTest
+    - TERM=dumb ./gradlew example:assemble
   post:
     - cp -r processor/build/test-results/ "$CIRCLE_TEST_REPORTS/processor"
     - cp -r library/build/test-results/ "$CIRCLE_TEST_REPORTS/library"

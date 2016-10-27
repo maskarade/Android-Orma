@@ -105,9 +105,9 @@ public class SelectorWriter extends BaseWriter {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(schema.getSchemaClassName())
                 .addStatement("return schema")
-        .build());
+                .build());
 
-        methodSpecs.addAll(queryHelpers.buildConditionHelpers(true));
+        methodSpecs.addAll(queryHelpers.buildConditionHelpers(true, true));
 
         return methodSpecs;
     }

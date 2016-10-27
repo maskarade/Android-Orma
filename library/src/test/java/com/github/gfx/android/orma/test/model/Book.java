@@ -38,6 +38,9 @@ public class Book {
     @Column
     public boolean inPrint;
 
+    @Column
+    public long price = 100;
+
     @Column(indexed = true)
     public SingleAssociation<Publisher> publisher;
 }

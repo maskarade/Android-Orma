@@ -242,6 +242,18 @@ public class QueryTest {
     }
 
     @Test
+    public void aggregators() throws Exception {
+        assertThat(db.selectFromBook().orderByTitleAsc().pluck(Book_Schema.INSTANCE.title),
+                is(contains("friday", "today")));
+        assertThat(db.selectFromBook().orderByTitleDesc().pluck(Book_Schema.INSTANCE.title),
+                is(contains("today", "friday")));
+
+        assertThat(db.selectFromBook().orderByTitleDesc().pluck(Book_Schema.INSTANCE.inPrint),
+                is(contains(true, false)));
+    }
+
+
+    @Test
     public void execute() throws Exception {
         Cursor cursor = db.selectFromBook().execute();
         cursor.moveToFirst();

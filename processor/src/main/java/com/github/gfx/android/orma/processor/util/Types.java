@@ -30,6 +30,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class Types {
 
@@ -133,6 +136,28 @@ public class Types {
 
     public static final ClassName Completable = ClassName.get("rx", "Completable");
 
+    private static final Set<TypeName> integerTypes = new HashSet<>(java.util.Arrays.asList(
+            TypeName.BYTE,
+            TypeName.BYTE.box(),
+            TypeName.SHORT,
+            TypeName.SHORT.box(),
+            TypeName.INT,
+            TypeName.INT.box(),
+            TypeName.LONG,
+            TypeName.LONG.box()
+    ));
+
+    private static final Set<TypeName> floatTypes = new HashSet<>(java.util.Arrays.asList(
+            TypeName.FLOAT,
+            TypeName.FLOAT.box(),
+            TypeName.DOUBLE,
+            TypeName.DOUBLE.box()
+    ));
+
+
+    private static final Set<TypeName> numericTypes = Stream.concat(integerTypes.stream(), floatTypes.stream()).collect(
+            Collectors.toSet());
+
     // helper methods
 
     public static ParameterizedTypeName getCollection(TypeName type) {
@@ -229,15 +254,11 @@ public class Types {
     }
 
     public static boolean looksLikeIntegerType(TypeName type) {
-        return type.equals(TypeName.INT)
-                || type.equals(TypeName.LONG)
-                || type.equals(TypeName.SHORT)
-                || type.equals(TypeName.BYTE);
+        return integerTypes.contains(type);
     }
 
     public static boolean looksLikeFloatType(TypeName type) {
-        return type.equals(TypeName.FLOAT)
-                || type.equals(TypeName.DOUBLE);
+        return floatTypes.contains(type);
     }
 
     public static boolean isSingleAssociation(TypeName type) {
@@ -264,5 +285,9 @@ public class Types {
         } else {
             return type;
         }
+    }
+
+    public static boolean isNumeric(TypeName type) {
+        return numericTypes.contains(type);
     }
 }

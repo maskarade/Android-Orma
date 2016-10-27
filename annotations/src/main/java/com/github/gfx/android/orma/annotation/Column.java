@@ -127,10 +127,10 @@ public @interface Column {
     })
     @interface Helpers {
 
-        long AUTO = -1;
         long NONE = 0;
+        long AUTO = 1;
 
-        long CONDITION_EQ = 0b01;
+        long CONDITION_EQ = AUTO << 1;
         long CONDITION_NOT_EQ = CONDITION_EQ << 1;
         long CONDITION_IS_NULL = CONDITION_NOT_EQ << 1;
         long CONDITION_IS_NOT_NULL = CONDITION_IS_NULL << 1;
@@ -152,6 +152,15 @@ public @interface Column {
 
         long ORDERS = ORDER_IN_ASC | ORDER_IN_DESC;
 
-        long ALL = CONDITIONS | ORDERS;
+        long PLUCK = ORDER_IN_DESC << 1;
+
+        long MIN = PLUCK << 1;
+        long MAX = MIN << 1;
+        long SUM = MAX << 1;
+        long AVG = SUM << 1;
+
+        long AGGREGATORS = MIN | MAX | SUM | AVG;
+
+        long ALL = CONDITIONS | ORDERS | PLUCK | AGGREGATORS;
     }
 }
