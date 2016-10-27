@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'io.realm:realm-gradle-plugin:2.0.2'
+        classpath 'io.realm:realm-gradle-plugin:2.1.0'
         classpath 'me.tatarka:gradle-retrolambda:3.3.1'
         classpath 'net.orfjackal.retrolambda:retrolambda:2.3.0'
     }
@@ -24,7 +24,6 @@ android {
         targetSdkVersion 25
         versionCode 10
         versionName rootProject.ext.metadata.version
-        multiDexEnabled true
     }
     signingConfigs {
         debug {
@@ -42,7 +41,8 @@ android {
             signingConfig signingConfigs.debug
         }
         debug {
-            minifyEnabled false
+            minifyEnabled true
+            useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
         }
@@ -74,7 +74,6 @@ android {
 dependencies {
     apt project(':processor')
     compile project(':library')
-    compile 'com.android.support:multidex:1.0.1'
     compile "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
     compile "com.android.support:cardview-v7:${SUPPORT_LIBRARY_VERSION}"
     compile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"

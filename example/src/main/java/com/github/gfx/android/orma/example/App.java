@@ -18,9 +18,9 @@ package com.github.gfx.android.orma.example;
 import com.facebook.stetho.Stetho;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
-import android.support.multidex.MultiDexApplication;
+import android.app.Application;
 
-public class App extends MultiDexApplication {
+public class App extends Application {
 
     @Override
     public void onCreate() {
