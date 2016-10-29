@@ -20,16 +20,14 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
-import android.support.annotation.Nullable;
-
 @Table
-public class ModelWithNestedDirectAssociations {
+public class ModelWithMoreNestedDirectAssociations {
 
     @PrimaryKey
     public long id;
 
     @Column
-    public ModelWithDirectAssociation md;
+    public ModelWithNestedDirectAssociations mnd;
 
     @Column
     public String note;

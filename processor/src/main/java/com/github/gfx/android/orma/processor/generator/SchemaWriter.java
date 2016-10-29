@@ -143,9 +143,10 @@ public class SchemaWriter extends BaseWriter {
     private CodeBlock buildSelectFromTableClause() {
         CodeBlock.Builder code = CodeBlock.builder();
 
+        CodeBlock prefix = CodeBlock.builder().build();
         CodeBlock[] joins = schema.getColumns().stream()
                 .filter(ColumnDefinition::isDirectAssociation)
-                .map(column -> buildJoins(CodeBlock.builder().build(), column))
+                .map(column -> buildJoins(prefix, column))
                 .toArray(CodeBlock[]::new);
 
         code.add("$S", schema.getEscapedTableName());
@@ -161,16 +162,16 @@ public class SchemaWriter extends BaseWriter {
     }
 
     public CodeBlock buildJoins(CodeBlock prefix, ColumnDefinition column) {
-        CodeBlock.Builder join = CodeBlock.builder();
+        CodeBlock.Builder joins = CodeBlock.builder();
 
         SchemaDefinition associatedSchema = context.getSchemaDef(column.getType());
         associatedSchema.getPrimaryKey().ifPresent(primaryKey -> {
-            join.add("+ $S + $L$L.associationSchema.getEscapedTableAlias() + ",
+            joins.add("+ $S + $L$L.associationSchema.getEscapedTableAlias() + ",
                     " LEFT OUTER JOIN " + associatedSchema.getEscapedTableName() + " AS ",
                     prefix,
                     column.name
             );
-            join.add("$S + $L$L.getQualifiedName() + $S + $L$L.associationSchema.$L.getQualifiedName()\n",
+            joins.add("$S + $L$L.getQualifiedName() + $S + $L$L.associationSchema.$L.getQualifiedName()\n",
                     " ON ",
                     prefix, column.name,
                     " = ",
@@ -178,14 +179,14 @@ public class SchemaWriter extends BaseWriter {
             );
 
             // handles nested JOINs
-            CodeBlock newPrefix = prefix.toBuilder().add("$L$L.associationSchema.", prefix, column.name).build();
+            CodeBlock newPrefix = prefix.toBuilder().add("$L.associationSchema.", column.name).build();
             associatedSchema.getColumns()
                     .stream()
                     .filter(ColumnDefinition::isDirectAssociation)
                     .map(nestedColumn -> buildJoins(newPrefix, nestedColumn))
-                    .forEach(join::add);
+                    .forEach(joins::add);
         });
-        return join.build();
+        return joins.build();
     }
 
     public FieldSpecDefinition buildColumnFieldSpec(ColumnDefinition c) {

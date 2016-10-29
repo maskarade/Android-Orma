@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Selector;
+import com.github.gfx.android.orma.test.model.ModelWithMoreNestedDirectAssociations;
 import com.github.gfx.android.orma.test.model.ModelWithNestedDirectAssociations;
 import com.github.gfx.android.orma.test.model.ModelWithNullableDirectAssociations;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -155,6 +156,55 @@ public class DirectAssociationsTest {
         assertThat(model.md.publisher.name, is(publisher.name));
         assertThat(model.md.publisher.startedYear, is(publisher.startedYear));
         assertThat(model.md.publisher.startedMonth, is(publisher.startedMonth));
+    }
+
+    @Test
+    public void testCreateMoreNested() throws Exception {
+        ModelWithMoreNestedDirectAssociations model = orma.createModelWithMoreNestedDirectAssociations(
+                new ModelFactory<ModelWithMoreNestedDirectAssociations>() {
+                    @NonNull
+                    @Override
+                    public ModelWithMoreNestedDirectAssociations call() {
+                        ModelWithMoreNestedDirectAssociations model = new ModelWithMoreNestedDirectAssociations();
+                        model.note = "This is a more nested model";
+                        model.mnd = orma.createModelWithNestedDirectAssociations(
+                                new ModelFactory<ModelWithNestedDirectAssociations>() {
+                                    @NonNull
+                                    @Override
+                                    public ModelWithNestedDirectAssociations call() {
+                                        ModelWithNestedDirectAssociations model = new ModelWithNestedDirectAssociations();
+                                        model.note = "This is a nested model";
+                                        model.md = orma.createModelWithDirectAssociation(
+                                                new ModelFactory<ModelWithDirectAssociation>() {
+                                                    @NonNull
+                                                    @Override
+                                                    public ModelWithDirectAssociation call() {
+                                                        ModelWithDirectAssociation md = new ModelWithDirectAssociation();
+                                                        md.name = "foo";
+                                                        md.author = author1;
+                                                        md.publisher = publisher;
+                                                        md.note = "SQLite rocks";
+                                                        return md;
+                                                    }
+                                                });
+                                        return model;
+                                    }
+                                });
+                        return model;
+                    }
+                });
+
+        assertThat(model.note, is("This is a more nested model"));
+        assertThat(model.mnd.note, is("This is a nested model"));
+        assertThat(model.mnd.md.name, is("foo"));
+        assertThat(model.mnd.md.author, is(notNullValue()));
+        assertThat(model.mnd.md.author.name, is(author1.name));
+        assertThat(model.mnd.md.author.note, is(author1.note));
+        assertThat(model.mnd.md.publisher, is(notNullValue()));
+        assertThat(model.mnd.md.publisher.id, is(publisher.id));
+        assertThat(model.mnd.md.publisher.name, is(publisher.name));
+        assertThat(model.mnd.md.publisher.startedYear, is(publisher.startedYear));
+        assertThat(model.mnd.md.publisher.startedMonth, is(publisher.startedMonth));
     }
 
     @Test
@@ -412,13 +462,14 @@ public class DirectAssociationsTest {
 
     @Test
     public void testNullableDirectAssociations() throws Exception {
-        ModelWithNullableDirectAssociations model = orma.createModelWithNullableDirectAssociations(new ModelFactory<ModelWithNullableDirectAssociations>() {
-            @NonNull
-            @Override
-            public ModelWithNullableDirectAssociations call() {
-                return new ModelWithNullableDirectAssociations();
-            }
-        });
+        ModelWithNullableDirectAssociations model = orma
+                .createModelWithNullableDirectAssociations(new ModelFactory<ModelWithNullableDirectAssociations>() {
+                    @NonNull
+                    @Override
+                    public ModelWithNullableDirectAssociations call() {
+                        return new ModelWithNullableDirectAssociations();
+                    }
+                });
 
         assertThat(model.author, is(nullValue()));
         assertThat(orma.selectFromModelWithNullableDirectAssociations().authorIsNull().count(), is(1));
