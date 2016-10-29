@@ -1,4 +1,4 @@
-The revision history of [Android-Orma](https://github.com/gfx/Android-Orma).
+# The revision history of [Android-Orma](https://github.com/gfx/Android-Orma).
 
 The versioning follows [Semantic Versioning](http://semver.org/):
 
@@ -7,6 +7,25 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MAJOR version when you make incompatible API changes,
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
+
+## v3.1.0
+
+https://github.com/gfx/Android-Orma/compare/v3.0.1...v3.1.0
+
+### Bug Fixes
+
+* [#325](https://github.com/gfx/Android-Orma/pull/325) Fix an issue that deeply nested models were not handled correctly (reported as #322)
+
+### New Features
+
+* [#318](https://github.com/gfx/Android-Orma/pull/318): Add `*Between(a, b)` helpers
+* [#320](https://github.com/gfx/Android-Orma/pull/320): Add `Selector#pluckAsObservable<T>` (experimental)
+* [#323](https://github.com/gfx/Android-Orma/pull/323): Add aggregate function helpers (sync version only for now)
+
+### Others
+
+* [#317](https://github.com/gfx/Android-Orma/pull/317): Build on API level 25
+* [#321](https://github.com/gfx/Android-Orma/pull/321): Make `pluck()` return `Iterable<T>`, not `List<T>`
 
 ## v3.0.1 2016/10/21
 
@@ -25,7 +44,7 @@ https://github.com/gfx/Android-Orma/compare/v2.6.0...v3.0.0
 * Add `OrmaDatabase#prepareInsertInto${ModelClass}AsObservable` ([#288](https://github.com/gfx/Android-Orma/pull/288))
 * [Foreign Key Actions](https://www.sqlite.org/foreignkeys.html) are now configuable ([#306](https://github.com/gfx/Android-Orma/issues/306))
   * Default to `@Column(onDelete = Column.ForeignKeyAction.CASCADE, onUpdate = Column.ForeignKeyAction.CASCADE)`
-* Add `Selector#pluck()` to get the list of the specified column ([#307](https://github.com/gfx/Android-Orma/issues/307))
+* Experimentally add `Selector#pluck()` to get the list of the specified column ([#307](https://github.com/gfx/Android-Orma/issues/307))
 
 ### Bug Fixes
 
