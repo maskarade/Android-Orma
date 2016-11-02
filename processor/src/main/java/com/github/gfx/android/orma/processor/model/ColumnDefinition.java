@@ -43,6 +43,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.VariableElement;
 
+import static com.squareup.javapoet.CodeBlock.of;
+
 public class ColumnDefinition {
 
     public static final String kDefaultPrimaryKeyName = "_rowid_";
@@ -310,14 +312,14 @@ public class ColumnDefinition {
 
     public CodeBlock buildSetColumnExpr(CodeBlock rhsExpr) {
         if (setter != null) {
-            return CodeBlock.of("$L($L)", setter.getSimpleName(), rhsExpr);
+            return of("$L($L)", setter.getSimpleName(), rhsExpr);
         } else {
-            return CodeBlock.of("$L = $L", name, rhsExpr);
+            return of("$L = $L", name, rhsExpr);
         }
     }
 
     public CodeBlock buildGetColumnExpr(String modelExpr) {
-        return buildGetColumnExpr(CodeBlock.of("$L", modelExpr));
+        return buildGetColumnExpr(of("$L", modelExpr));
     }
 
     public CodeBlock buildGetColumnExpr(CodeBlock modelExpr) {
@@ -330,11 +332,11 @@ public class ColumnDefinition {
         CodeBlock getColumnExpr = buildGetColumnExpr(modelExpr);
 
         if (isSingleAssociation()) {
-            return CodeBlock.of("$L.getId()", getColumnExpr);
+            return of("$L.getId()", getColumnExpr);
         } else if (isDirectAssociation()) {
             return getAssociatedSchema().getPrimaryKey()
                     .map(primaryKey -> primaryKey.buildGetColumnExpr(getColumnExpr))
-                    .orElseGet(() -> CodeBlock.of("null /* missing @PrimaryKey */"));
+                    .orElseGet(() -> of("null /* missing @PrimaryKey */"));
         } else if (needsTypeAdapter()) {
             return CodeBlock.builder()
                     .add(buildSerializeExpr(connectionExpr, getColumnExpr))
@@ -345,7 +347,7 @@ public class ColumnDefinition {
     }
 
     public CodeBlock buildSerializeExpr(String connectionExpr, String valueExpr) {
-        return buildSerializeExpr(connectionExpr, CodeBlock.of("$L", valueExpr));
+        return buildSerializeExpr(connectionExpr, of("$L", valueExpr));
     }
 
     public CodeBlock buildSerializeExpr(String connectionExpr, CodeBlock valueExpr) {
@@ -371,9 +373,15 @@ public class ColumnDefinition {
                 throw new ProcessingException("Missing @StaticTypeAdapter to deserialize " + type, element);
             }
 
-            return CodeBlock.builder()
-                    .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr)
-                    .build();
+            if (typeAdapter.deserializerMethod == null || typeAdapter.deserializerMethod.getParameters().size() == 1) {
+                return CodeBlock.of("$T.$L($L)",
+                        typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr);
+            } else {
+                // inject Class<T> if the deserializer takes more than one
+                return CodeBlock.of("$T.$L($T.class, $L)",
+                        typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), type, valueExpr);
+            }
+
         } else {
             return valueExpr;
         }

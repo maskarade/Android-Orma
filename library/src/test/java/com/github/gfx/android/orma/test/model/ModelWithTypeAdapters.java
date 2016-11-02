@@ -18,6 +18,8 @@ package com.github.gfx.android.orma.test.model;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
+import com.github.gfx.android.orma.test.toolbox.EnumA;
+import com.github.gfx.android.orma.test.toolbox.EnumB;
 import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 import com.github.gfx.android.orma.test.toolbox.MutableInt;
 import com.github.gfx.android.orma.test.toolbox.MutableLong;
@@ -116,4 +118,10 @@ public class ModelWithTypeAdapters {
     @Column(indexed = true)
     @Nullable
     public ByteBuffer nullableByteBuffer;
+
+    @Column(indexed = true)
+    public EnumA enumA;
+
+    @Column(indexed = true)
+    public EnumB enumB;
 }
