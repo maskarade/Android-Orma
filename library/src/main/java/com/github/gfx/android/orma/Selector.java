@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
@@ -337,6 +339,27 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
             }
         });
     }
+
+    @NonNull
+    public io.reactivex.Observable<Model> executeAsObservable2() {
+        return io.reactivex.Observable.create(new ObservableOnSubscribe<Model>() {
+            @Override
+            public void subscribe(ObservableEmitter<Model> e) throws Exception {
+                final Cursor cursor = execute();
+                try {
+                    for (int pos = 0; !e.isDisposed() && cursor.moveToPosition(pos); pos++) {
+                        e.onNext(newModelFromCursor(cursor));
+                    }
+                    if (!e.isDisposed()) {
+                        e.onComplete();
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+        });
+    }
+
 
     // implements Iterable<Model>
 

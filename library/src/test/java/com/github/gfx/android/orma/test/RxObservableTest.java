@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.reactivex.observers.TestObserver;
 import rx.Single;
 import rx.functions.Func1;
 import rx.observers.TestSubscriber;
@@ -117,6 +118,20 @@ public class RxObservableTest {
         testSubscriber.assertCompleted();
 
         List<Book> list = testSubscriber.getOnNextEvents();
+        assertThat(list.size(), is(1));
+        assertThat(list.get(0).title, is("today"));
+    }
+
+    @Test
+    public void selectorObservable2() throws Exception {
+        TestObserver<Book> tester = db.selectFromBook()
+                .titleEq("today")
+                .executeAsObservable2()
+                .test();
+
+        tester.assertComplete();
+
+        List<Book> list = tester.values();
         assertThat(list.size(), is(1));
         assertThat(list.get(0).title, is("today"));
     }
