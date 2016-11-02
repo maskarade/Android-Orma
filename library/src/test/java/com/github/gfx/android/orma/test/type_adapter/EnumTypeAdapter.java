@@ -17,9 +17,6 @@
 package com.github.gfx.android.orma.test.type_adapter;
 
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
-import com.github.gfx.android.orma.annotation.StaticTypeAdapters;
-import com.github.gfx.android.orma.test.toolbox.EnumA;
-import com.github.gfx.android.orma.test.toolbox.EnumB;
 import com.github.gfx.android.orma.test.toolbox.EnumDescription;
 
 import android.support.annotation.NonNull;
