@@ -21,7 +21,11 @@ import com.github.gfx.android.orma.processor.generator.SqlGenerator;
 import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
+import com.github.gfx.android.orma.processor.util.SqlTypes;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+
+import android.support.annotation.Nullable;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -40,11 +44,14 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor8;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 public class ProcessingContext {
 
     public final ProcessingEnvironment processingEnv;
+
+    public final Types typeUtils;
 
     public final List<ProcessingException> errors = new ArrayList<>();
 
@@ -52,12 +59,13 @@ public class ProcessingContext {
 
     public final Map<TypeName, SchemaDefinition> schemaMap = new LinkedHashMap<>(); // the order matters
 
-    public final Map<TypeName, TypeAdapterDefinition> typeAdapterMap = new HashMap<>();
-
     public final SqlGenerator sqlg = new SqlGenerator();
+
+    private final Map<TypeName, TypeAdapterDefinition> typeAdapterMap = new HashMap<>();
 
     public ProcessingContext(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
+        typeUtils = processingEnv.getTypeUtils();
         for (TypeAdapterDefinition typeAdapterDefinition : TypeAdapterDefinition.BUILTINS) {
             addTypeAdapterDefinition(typeAdapterDefinition);
         }
@@ -119,7 +127,7 @@ public class ProcessingContext {
         return typeMirror.accept(new SimpleTypeVisitor8<TypeElement, TypeMirror>() {
             @Override
             public TypeElement visitDeclared(DeclaredType declaredType, TypeMirror typeMirror) {
-                return (TypeElement)declaredType.asElement();
+                return (TypeElement) declaredType.asElement();
             }
         }, typeMirror);
     }
@@ -128,8 +136,69 @@ public class ProcessingContext {
         return getTypeElement(name.getTypeName());
     }
 
+    public TypeAdapterDefinition getTypeAdapter(TypeName typeName) {
+        return typeAdapterMap.get(typeName);
+    }
+
+    @Nullable
+    public TypeAdapterDefinition findTypeAdapter(TypeMirror typeMirror) {
+        if (typeMirror.getKind().isPrimitive()) {
+            return null;
+        }
+
+        TypeName typeName = TypeName.get(typeMirror);
+        if (SqlTypes.canHandle(typeName)) {
+            return null;
+        }
+
+        TypeAdapterDefinition typeAdapter = typeAdapterMap.get(typeName);
+        if (typeAdapter != null) {
+            return typeAdapter;
+        }
+
+        // find the best matched one
+        Map<TypeName, Integer> classHierarchyMap = buildClassHierarchyMap(typeMirror);
+        if (classHierarchyMap == null) {
+            return null; // no corresponding type element, e.g. byte[]
+        }
+        return typeAdapterMap.keySet()
+                .stream()
+                .filter(classHierarchyMap::containsKey)
+                .sorted((a, b) -> classHierarchyMap.get(b) - classHierarchyMap.get(a))
+                .findFirst()
+                .map(typeAdapterMap::get)
+                .orElse(null);
+    }
+
+    private Map<TypeName, Integer> buildClassHierarchyMap(TypeMirror typeMirror) {
+        TypeElement element = (TypeElement) typeUtils.asElement(typeMirror);
+        if (element == null) {
+            return null;
+        }
+        Map<TypeName, Integer> map = new HashMap<>();
+        int distance = 0;
+        while (!element.toString().equals(Object.class.getName())) {
+            map.put(ClassName.get(element), distance);
+            collectInterfaces(map, element, ++distance);
+
+            element = (TypeElement) typeUtils.asElement(element.getSuperclass());
+        }
+        return map;
+    }
+
+    private void collectInterfaces(Map<TypeName, Integer> map, TypeElement element, int distance) {
+        element.getInterfaces().forEach((interfaceMirror) -> {
+            TypeElement interfaceElement = (TypeElement) typeUtils.asElement(interfaceMirror);
+            map.put(ClassName.get(interfaceElement), distance);
+
+            collectInterfaces(map, interfaceElement, distance + 1);
+        });
+
+    }
+
+
     public boolean isSameType(TypeMirror t1, TypeMirror t2) {
-        return processingEnv.getTypeUtils().isSameType(t1, t2);
+        return typeUtils.isSameType(t1, t2);
     }
 
     public void setupDefaultDatabaseIfNeeded() {

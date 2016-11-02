@@ -27,16 +27,10 @@ import android.support.annotation.NonNull;
 /**
  * An example for generic type adapters; its {@code deserialize ()} methods takes a {@code Class<T> type} parameter.
  */
-@StaticTypeAdapters({
-        @StaticTypeAdapter(
-                targetType = EnumA.class,
-                serializedType = String.class
-        ),
-        @StaticTypeAdapter(
-                targetType = EnumB.class,
-                serializedType = String.class
-        ),
-})
+@StaticTypeAdapter(
+        targetType = EnumDescription.class,
+        serializedType = String.class
+)
 public class EnumTypeAdapter {
 
     public static <T extends Enum<T> & EnumDescription> String serialize(@NonNull T value) {

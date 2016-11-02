@@ -50,6 +50,10 @@ public class SqlTypes {
         // TODO: date and time types?
     }
 
+    public static boolean canHandle(TypeName type) {
+        return javaToSqlite.containsKey(type);
+    }
+
     public static String getSqliteType(TypeName type) {
         String t = javaToSqlite.get(Types.asUnboxType(type));
         return t != null ? t : "BLOB";

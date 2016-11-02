@@ -107,7 +107,7 @@ public class ColumnDefinition {
         columnName = columnName(column, element);
 
         type = ClassName.get(element.asType());
-        typeAdapter = schema.context.typeAdapterMap.get(type);
+        typeAdapter = schema.context.findTypeAdapter(element.asType());
 
         storageType = (column != null && !Strings.isEmpty(column.storageType())) ? column.storageType() : null;
 
@@ -167,7 +167,7 @@ public class ColumnDefinition {
         onDeleteAction = Column.ForeignKeyAction.NO_ACTION;
         onUpdateAction = Column.ForeignKeyAction.NO_ACTION;
         helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, Column.Helpers.AUTO);
-        typeAdapter = schema.context.typeAdapterMap.get(type);
+        typeAdapter = schema.context.getTypeAdapter(type);
         storageType = null;
     }
 
@@ -370,8 +370,8 @@ public class ColumnDefinition {
             } else {
                 // inject Class<T> if the deserializer takes more than one
                 TypeName rawType = (type instanceof ParameterizedTypeName ? ((ParameterizedTypeName) type).rawType : type);
-                return CodeBlock.of("$T.$L($L, $T.class)",
-                        typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr, rawType);
+                return CodeBlock.of("$T.<$T>$L($L, $T.class)",
+                        typeAdapter.typeAdapterImpl, type, typeAdapter.getDeserializerName(), valueExpr, rawType);
             }
 
         } else {

@@ -177,13 +177,14 @@ public class BuiltInSerializers {
      * @param <C>             A concrete collection class, e.g. {@code ArrayList<String>}.
      * @return A collection instance retrieved from {@code serialized}.
      */
+    @SuppressWarnings("unchecked")
     @NonNull
     public static <C extends Collection<String>> C deserializeStringCollection(@NonNull String serialized,
-            @NonNull Class<C> collectionClass) {
+            @NonNull Class<?> collectionClass) {
         C collection;
 
         try {
-            collection = collectionClass.newInstance();
+            collection = (C)collectionClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new AssertionError(e);
         }
@@ -217,7 +218,7 @@ public class BuiltInSerializers {
     @SuppressWarnings("unchecked")
     @NonNull
     public static List<String> deserializeStringList(@NonNull String serialized) {
-        return deserializeStringCollection(serialized, ArrayList.class);
+        return BuiltInSerializers.deserializeStringCollection(serialized, ArrayList.class);
     }
 
     @NonNull
