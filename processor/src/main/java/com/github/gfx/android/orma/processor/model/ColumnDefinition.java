@@ -367,19 +367,19 @@ public class ColumnDefinition {
     }
 
     public CodeBlock buildDeserializeExpr(CodeBlock valueExpr) {
-        // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
                 throw new ProcessingException("Missing @StaticTypeAdapter to deserialize " + type, element);
             }
 
-            if (typeAdapter.deserializerMethod == null || typeAdapter.deserializerMethod.getParameters().size() == 1) {
+            if (!typeAdapter.generic) {
                 return CodeBlock.of("$T.$L($L)",
                         typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr);
             } else {
                 // inject Class<T> if the deserializer takes more than one
-                return CodeBlock.of("$T.$L($T.class, $L)",
-                        typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), type, valueExpr);
+                TypeName rawType = (type instanceof ParameterizedTypeName ? ((ParameterizedTypeName) type).rawType : type);
+                return CodeBlock.of("$T.$L($L, $T.class)",
+                        typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr, rawType);
             }
 
         } else {

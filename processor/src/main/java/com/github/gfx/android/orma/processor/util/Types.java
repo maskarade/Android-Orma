@@ -28,11 +28,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class Types {
 
@@ -289,5 +290,13 @@ public class Types {
 
     public static boolean isNumeric(TypeName type) {
         return numericTypes.contains(type);
+    }
+
+    public static ParameterizedTypeName getLinkedList(TypeName type) {
+        return ParameterizedTypeName.get(ClassName.get(LinkedList.class), type);
+    }
+
+    public static ParameterizedTypeName getLinkedHashSet(TypeName type) {
+        return ParameterizedTypeName.get(ClassName.get(LinkedHashSet.class), type);
     }
 }

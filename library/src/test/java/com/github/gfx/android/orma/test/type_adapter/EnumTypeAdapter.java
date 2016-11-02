@@ -24,6 +24,9 @@ import com.github.gfx.android.orma.test.toolbox.EnumDescription;
 
 import android.support.annotation.NonNull;
 
+/**
+ * An example for generic type adapters; its {@code deserialize ()} methods takes a {@code Class<T> type} parameter.
+ */
 @StaticTypeAdapters({
         @StaticTypeAdapter(
                 targetType = EnumA.class,
@@ -42,7 +45,7 @@ public class EnumTypeAdapter {
 
     @SuppressWarnings("unchecked")
     @NonNull
-    public static <T extends Enum<T> & EnumDescription> T deserialize(@NonNull Class<T> type, @NonNull String serialized) {
+    public static <T extends Enum<T> & EnumDescription> T deserialize(@NonNull String serialized, @NonNull Class<T> type) {
         return Enum.valueOf(type, serialized);
     }
 }

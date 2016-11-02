@@ -56,10 +56,14 @@ public class TypeAdapterDefinition {
             make(java.sql.Timestamp.class, String.class, "SqlTimestamp"),
             make(Types.getList(Types.String), String.class, "StringList"),
             make(Types.getSet(Types.String), String.class, "StringSet"),
-            make(Types.getArrayList(Types.String), String.class, "StringArrayList"),
-            make(Types.getHashSet(Types.String), String.class, "StringHashSet"),
             make(ClassName.get("android.net", "Uri"), String.class),
             make(UUID.class, String.class),
+
+            // use generic serializers
+            make(Types.getArrayList(Types.String), String.class, "StringCollection", true),
+            make(Types.getHashSet(Types.String), String.class, "StringCollection", true),
+            make(Types.getLinkedList(Types.String), String.class, "StringCollection", true),
+            make(Types.getLinkedHashSet(Types.String), String.class, "StringCollection", true),
     };
 
     @Nullable
@@ -81,6 +85,8 @@ public class TypeAdapterDefinition {
     @Nullable
     public final ExecutableElement deserializerMethod;
 
+    public final boolean generic;
+
     public TypeAdapterDefinition(ProcessingContext context, Element element,
             AnnotationHandle<StaticTypeAdapter> staticTypeAdapter) {
         this.element = (TypeElement) element;
@@ -96,10 +102,12 @@ public class TypeAdapterDefinition {
 
         serializerMethod = getBestFitSerializer(context, element, serializer, methods.get(serializer));
         deserializerMethod = getBestFitDeserializer(context, element, deserializer, methods.get(deserializer));
+
+        generic = deserializerMethod != null && deserializerMethod.getParameters().size() != 1;
     }
 
     public TypeAdapterDefinition(ClassName typeAdapter, TypeName targetType, TypeName serializedType,
-            String serializer, String deserializer) {
+            String serializer, String deserializer, boolean generic) {
         this.element = null;
         this.typeAdapterImpl = typeAdapter;
         this.targetType = targetType;
@@ -108,6 +116,7 @@ public class TypeAdapterDefinition {
         this.deserializer = deserializer;
         this.serializerMethod = null;
         this.deserializerMethod = null;
+        this.generic = generic;
     }
 
     public static TypeAdapterDefinition make(Class<?> targetType, Class<?> serializedType) {
@@ -128,7 +137,13 @@ public class TypeAdapterDefinition {
 
     public static TypeAdapterDefinition make(TypeName targetType, TypeName serializedType, String typeId) {
         return new TypeAdapterDefinition(Types.BuiltInSerializers, targetType, serializedType,
-                "serialize" + typeId, "deserialize" + typeId);
+                "serialize" + typeId, "deserialize" + typeId, false);
+    }
+
+    public static TypeAdapterDefinition make(TypeName targetType, Class<?> serializedType, String typeId,
+            boolean generic) {
+        return new TypeAdapterDefinition(Types.BuiltInSerializers, targetType, TypeName.get(serializedType),
+                "serialize" + typeId, "deserialize" + typeId, generic);
     }
 
     private static Map<String, List<ExecutableElement>> collectMethods(TypeElement element) {

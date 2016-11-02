@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -102,6 +104,14 @@ public class ModelWithTypeAdapters {
     @Nullable
     @Column(indexed = true)
     public Set<String> nullableSet;
+
+    @Nullable
+    @Column(indexed = true)
+    public LinkedList<String> nullableLinkedList;
+
+    @Nullable
+    @Column(indexed = true)
+    public LinkedHashSet<String> nullableLinkedHashSet;
 
     @Nullable
     @Column(indexed = true)

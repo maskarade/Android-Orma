@@ -722,7 +722,7 @@ public class SchemaWriter extends BaseWriter {
             TypeName type = c.getUnboxType();
 
             CodeBlock index = CodeBlock.of("offset + $L", i + offset);
-            builder.addStatement("$L$L", lhsBaseGen.apply(c),  c.buildSetColumnExpr(buildGetValueFromCursor(c, index)));
+            builder.addStatement("$L$L", lhsBaseGen.apply(c), c.buildSetColumnExpr(buildGetValueFromCursor(c, index)));
 
             if (Types.isDirectAssociation(context, type)) {
                 SchemaDefinition associatedSchema = c.getAssociatedSchema();
