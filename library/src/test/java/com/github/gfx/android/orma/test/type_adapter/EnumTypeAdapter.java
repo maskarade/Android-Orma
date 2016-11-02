@@ -39,7 +39,7 @@ import android.support.annotation.NonNull;
 })
 public class EnumTypeAdapter {
 
-    public static <T extends Enum & EnumDescription> String serialize(@NonNull T value) {
+    public static <T extends Enum<T> & EnumDescription> String serialize(@NonNull T value) {
         return value.name();
     }
 
