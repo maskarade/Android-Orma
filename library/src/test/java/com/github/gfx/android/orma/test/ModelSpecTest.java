@@ -27,6 +27,8 @@ import com.github.gfx.android.orma.test.model.ModelWithPrimitives;
 import com.github.gfx.android.orma.test.model.ModelWithTypeAdapters;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
+import com.github.gfx.android.orma.test.toolbox.EnumA;
+import com.github.gfx.android.orma.test.toolbox.EnumB;
 import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 import com.github.gfx.android.orma.test.toolbox.MutableInt;
 import com.github.gfx.android.orma.test.toolbox.MutableLong;
@@ -168,6 +170,8 @@ public class ModelSpecTest {
                 model.mutableInt = new MutableInt(42);
                 model.mutableLong = new MutableLong(43);
                 model.byteBuffer = ByteBuffer.wrap(new byte[]{0, 1, 2, 3});
+                model.enumA = EnumA.FOO;
+                model.enumB = EnumB.BAR;
                 return model;
             }
         });
@@ -189,6 +193,8 @@ public class ModelSpecTest {
         assertThat(model.mutableInt.value, is(42));
         assertThat(model.mutableLong.value, is(43L));
         assertThat(model.byteBuffer, is(ByteBuffer.wrap(new byte[]{0, 1, 2, 3})));
+        assertThat(model.enumA, is(EnumA.FOO));
+        assertThat(model.enumB, is(EnumB.BAR));
 
         // nullable
         assertThat(model.nullableUri, is(nullValue())); // TEXT
@@ -226,6 +232,8 @@ public class ModelSpecTest {
                 model.mutableInt = new MutableInt(42);
                 model.mutableLong = new MutableLong(43);
                 model.byteBuffer = ByteBuffer.wrap(new byte[]{0, 1, 2, 3});
+                model.enumA = EnumA.FOO;
+                model.enumB = EnumB.BAR;
                 return model;
             }
         });

@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -146,6 +145,13 @@ public class BuiltInSerializers {
 
     // collections
 
+    /**
+     * A generic serializer for string collections.
+     *
+     * @param collection Collection to serialize
+     * @param <C>        A concrete collection class, e.g. {@code ArrayList<String>}.
+     * @return JSON representation of the string collection.
+     */
     @NonNull
     public static <C extends Collection<String>> String serializeStringCollection(@NonNull C collection) {
         StringWriter writer = new StringWriter();
@@ -163,8 +169,28 @@ public class BuiltInSerializers {
         return writer.toString();
     }
 
+    @SuppressWarnings("unchecked")
+    private static <C extends Collection<String>> C createCollection(Class<?> collectionClass) {
+        try {
+            return (C)collectionClass.newInstance();
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /**
+     * A generic deserializer for string collections.
+     *
+     * @param serialized      JSON representation of a string collection.
+     * @param collectionClass Concrete, instantiatable collection class, e.g. {@code ArrayList.class}.
+     * @param <C>             A concrete collection class, e.g. {@code ArrayList<String>}.
+     * @return A collection instance retrieved from {@code serialized}.
+     */
     @NonNull
-    public static <C extends Collection<String>> C deserializeStringCollection(@NonNull String serialized, @NonNull C collection) {
+    public static <C extends Collection<String>> C deserializeStringCollection(@NonNull String serialized,
+            @NonNull Class<?> collectionClass) {
+        C collection = createCollection(collectionClass);
+
         StringReader reader = new StringReader(serialized);
         JsonReader jsonReader = new JsonReader(reader);
 
@@ -191,19 +217,10 @@ public class BuiltInSerializers {
         return serializeStringCollection(source);
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
     public static List<String> deserializeStringList(@NonNull String serialized) {
-        return deserializeStringCollection(serialized, new ArrayList<String>());
-    }
-
-    @NonNull
-    public static String serializeStringArrayList(@NonNull ArrayList<String> source) {
-        return serializeStringCollection(source);
-    }
-
-    @NonNull
-    public static ArrayList<String> deserializeStringArrayList(@NonNull String serialized) {
-        return deserializeStringCollection(serialized, new ArrayList<String>());
+        return deserializeStringCollection(serialized, ArrayList.class);
     }
 
     @NonNull
@@ -211,18 +228,9 @@ public class BuiltInSerializers {
         return serializeStringCollection(source);
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
     public static Set<String> deserializeStringSet(@NonNull String serialized) {
-        return deserializeStringCollection(serialized, new LinkedHashSet<String>());
-    }
-
-    @NonNull
-    public static String serializeStringHashSet(@NonNull HashSet<String> source) {
-        return serializeStringCollection(source);
-    }
-
-    @NonNull
-    public static HashSet<String> deserializeStringHashSet(@NonNull String serialized) {
-        return deserializeStringCollection(serialized, new HashSet<String>());
+        return deserializeStringCollection(serialized, HashSet.class);
     }
 }

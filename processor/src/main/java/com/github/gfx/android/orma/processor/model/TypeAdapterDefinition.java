@@ -29,9 +29,12 @@ import android.support.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,10 +56,14 @@ public class TypeAdapterDefinition {
             make(java.sql.Timestamp.class, String.class, "SqlTimestamp"),
             make(Types.getList(Types.String), String.class, "StringList"),
             make(Types.getSet(Types.String), String.class, "StringSet"),
-            make(Types.getArrayList(Types.String), String.class, "StringArrayList"),
-            make(Types.getHashSet(Types.String), String.class, "StringHashSet"),
             make(ClassName.get("android.net", "Uri"), String.class),
             make(UUID.class, String.class),
+
+            // use generic serializers
+            make(Types.getArrayList(Types.String), String.class, "StringCollection", true),
+            make(Types.getHashSet(Types.String), String.class, "StringCollection", true),
+            make(Types.getLinkedList(Types.String), String.class, "StringCollection", true),
+            make(Types.getLinkedHashSet(Types.String), String.class, "StringCollection", true),
     };
 
     @Nullable
@@ -72,6 +79,14 @@ public class TypeAdapterDefinition {
 
     public final String deserializer;
 
+    @Nullable
+    public final ExecutableElement serializerMethod;
+
+    @Nullable
+    public final ExecutableElement deserializerMethod;
+
+    public final boolean generic;
+
     public TypeAdapterDefinition(ProcessingContext context, Element element,
             AnnotationHandle<StaticTypeAdapter> staticTypeAdapter) {
         this.element = (TypeElement) element;
@@ -83,17 +98,25 @@ public class TypeAdapterDefinition {
         serializer = staticTypeAdapter.getOrDefault("serializer", String.class);
         deserializer = staticTypeAdapter.getOrDefault("deserializer", String.class);
 
-        validate(context);
+        Map<String, List<ExecutableElement>> methods = collectMethods(this.element);
+
+        serializerMethod = getBestFitSerializer(context, element, serializer, methods.get(serializer));
+        deserializerMethod = getBestFitDeserializer(context, element, deserializer, methods.get(deserializer));
+
+        generic = deserializerMethod != null && deserializerMethod.getParameters().size() != 1;
     }
 
     public TypeAdapterDefinition(ClassName typeAdapter, TypeName targetType, TypeName serializedType,
-            String serializer, String deserializer) {
+            String serializer, String deserializer, boolean generic) {
         this.element = null;
         this.typeAdapterImpl = typeAdapter;
         this.targetType = targetType;
         this.serializedType = serializedType;
         this.serializer = serializer;
         this.deserializer = deserializer;
+        this.serializerMethod = null;
+        this.deserializerMethod = null;
+        this.generic = generic;
     }
 
     public static TypeAdapterDefinition make(Class<?> targetType, Class<?> serializedType) {
@@ -114,30 +137,65 @@ public class TypeAdapterDefinition {
 
     public static TypeAdapterDefinition make(TypeName targetType, TypeName serializedType, String typeId) {
         return new TypeAdapterDefinition(Types.BuiltInSerializers, targetType, serializedType,
-                "serialize" + typeId, "deserialize" + typeId);
+                "serialize" + typeId, "deserialize" + typeId, false);
     }
 
-    private void validate(ProcessingContext context) {
-        assert element != null;
-        List<String> methods = element.getEnclosedElements()
+    public static TypeAdapterDefinition make(TypeName targetType, Class<?> serializedType, String typeId,
+            boolean generic) {
+        return new TypeAdapterDefinition(Types.BuiltInSerializers, targetType, TypeName.get(serializedType),
+                "serialize" + typeId, "deserialize" + typeId, generic);
+    }
+
+    private static Map<String, List<ExecutableElement>> collectMethods(TypeElement element) {
+        return element.getEnclosedElements()
                 .stream()
                 .filter(x -> x instanceof ExecutableElement)
                 .map(x -> (ExecutableElement) x)
                 .filter(x -> x.getModifiers().containsAll(Arrays.asList(Modifier.PUBLIC, Modifier.STATIC)))
-                .map(x -> x.getSimpleName().toString())
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(
+                        (method) -> method.getSimpleName().toString(),
+                        Collections::singletonList,
+                        (a, b) -> {
+                            ArrayList<ExecutableElement> list = new ArrayList<>();
+                            list.addAll(a);
+                            list.addAll(b);
+                            return list;
+                        }
 
-        if (!methods.contains(serializer)) {
-            context.addError(new ProcessingException(
-                    "Missing serializer: public static SerializedType "
-                            + serializer + "(TargetType target)", element));
-        }
-        if (!methods.contains(deserializer)) {
-            context.addError(new ProcessingException(
-                    "Missing deserializer: public static TargetType "
-                            + deserializer + "(SerializedType serialized)", element));
-        }
+                ));
     }
+
+    private static ExecutableElement getBestFitDeserializer(ProcessingContext context, Element element, String name,
+            List<ExecutableElement> candidates) {
+        if (candidates == null) {
+            context.addError(new ProcessingException(
+                    "Missing serializer: @NonNull public static SerializedType "
+                            + name + "(@NonNull TargetType target)", element));
+            return null;
+        }
+        if (candidates.size() > 1) {
+            context.addError(new ProcessingException("Too many serializer methods " + name, element));
+            return null;
+        }
+        return candidates.get(0);
+    }
+
+    private static ExecutableElement getBestFitSerializer(ProcessingContext context, Element element, String name,
+            List<ExecutableElement> candidates) {
+        if (candidates == null) {
+            context.addError(new ProcessingException(
+                    "Missing deserializer: @NonNull public static TargetType "
+                            + name + "(@NonNull SerializedType serialized)", element));
+            return null;
+        }
+        if (candidates.size() > 1) {
+            context.addError(new ProcessingException("Too many serializer methods " + name, element));
+            return null;
+        }
+
+        return candidates.get(0);
+    }
+
 
     public String getSerializerName() {
         return serializer;
