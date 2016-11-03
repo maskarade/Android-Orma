@@ -169,6 +169,15 @@ public class BuiltInSerializers {
         return writer.toString();
     }
 
+    @SuppressWarnings("unchecked")
+    private static <C extends Collection<String>> C createCollection(Class<?> collectionClass) {
+        try {
+            return (C)collectionClass.newInstance();
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
+
     /**
      * A generic deserializer for string collections.
      *
@@ -177,17 +186,10 @@ public class BuiltInSerializers {
      * @param <C>             A concrete collection class, e.g. {@code ArrayList<String>}.
      * @return A collection instance retrieved from {@code serialized}.
      */
-    @SuppressWarnings("unchecked")
     @NonNull
     public static <C extends Collection<String>> C deserializeStringCollection(@NonNull String serialized,
             @NonNull Class<?> collectionClass) {
-        C collection;
-
-        try {
-            collection = (C)collectionClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new AssertionError(e);
-        }
+        C collection = createCollection(collectionClass);
 
         StringReader reader = new StringReader(serialized);
         JsonReader jsonReader = new JsonReader(reader);
@@ -218,7 +220,7 @@ public class BuiltInSerializers {
     @SuppressWarnings("unchecked")
     @NonNull
     public static List<String> deserializeStringList(@NonNull String serialized) {
-        return BuiltInSerializers.deserializeStringCollection(serialized, ArrayList.class);
+        return deserializeStringCollection(serialized, ArrayList.class);
     }
 
     @NonNull
