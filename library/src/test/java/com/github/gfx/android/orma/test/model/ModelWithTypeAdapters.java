@@ -18,6 +18,8 @@ package com.github.gfx.android.orma.test.model;
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
+import com.github.gfx.android.orma.test.toolbox.EnumA;
+import com.github.gfx.android.orma.test.toolbox.EnumB;
 import com.github.gfx.android.orma.test.toolbox.IntTuple2;
 import com.github.gfx.android.orma.test.toolbox.MutableInt;
 import com.github.gfx.android.orma.test.toolbox.MutableLong;
@@ -32,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -103,6 +107,14 @@ public class ModelWithTypeAdapters {
 
     @Nullable
     @Column(indexed = true)
+    public LinkedList<String> nullableLinkedList;
+
+    @Nullable
+    @Column(indexed = true)
+    public LinkedHashSet<String> nullableLinkedHashSet;
+
+    @Nullable
+    @Column(indexed = true)
     public Uri nullableUri;
 
     @Nullable
@@ -116,4 +128,10 @@ public class ModelWithTypeAdapters {
     @Column(indexed = true)
     @Nullable
     public ByteBuffer nullableByteBuffer;
+
+    @Column(indexed = true)
+    public EnumA enumA;
+
+    @Column(indexed = true)
+    public EnumB enumB;
 }

@@ -43,6 +43,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.VariableElement;
 
+
 public class ColumnDefinition {
 
     public static final String kDefaultPrimaryKeyName = "_rowid_";
@@ -106,7 +107,7 @@ public class ColumnDefinition {
         columnName = columnName(column, element);
 
         type = ClassName.get(element.asType());
-        typeAdapter = schema.context.typeAdapterMap.get(type);
+        typeAdapter = schema.context.findTypeAdapter(element.asType());
 
         storageType = (column != null && !Strings.isEmpty(column.storageType())) ? column.storageType() : null;
 
@@ -166,7 +167,7 @@ public class ColumnDefinition {
         onDeleteAction = Column.ForeignKeyAction.NO_ACTION;
         onUpdateAction = Column.ForeignKeyAction.NO_ACTION;
         helperFlags = normalizeHelperFlags(primaryKey, indexed, autoincrement, autoId, Column.Helpers.AUTO);
-        typeAdapter = schema.context.typeAdapterMap.get(type);
+        typeAdapter = schema.context.getTypeAdapter(type);
         storageType = null;
     }
 
@@ -321,9 +322,7 @@ public class ColumnDefinition {
     }
 
     public CodeBlock buildGetColumnExpr(CodeBlock modelExpr) {
-        return CodeBlock.builder()
-                .add("$L.$L", modelExpr, getter != null ? getter.getSimpleName() + "()" : name)
-                .build();
+        return CodeBlock.of("$L.$L", modelExpr, getter != null ? getter.getSimpleName() + "()" : name);
     }
 
     public CodeBlock buildSerializedColumnExpr(String connectionExpr, String modelExpr) {
@@ -336,9 +335,7 @@ public class ColumnDefinition {
                     .map(primaryKey -> primaryKey.buildGetColumnExpr(getColumnExpr))
                     .orElseGet(() -> CodeBlock.of("null /* missing @PrimaryKey */"));
         } else if (needsTypeAdapter()) {
-            return CodeBlock.builder()
-                    .add(buildSerializeExpr(connectionExpr, getColumnExpr))
-                    .build();
+            return buildSerializeExpr(connectionExpr, getColumnExpr);
         } else {
             return getColumnExpr;
         }
@@ -352,28 +349,31 @@ public class ColumnDefinition {
         // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
-                new Throwable().printStackTrace(); // FIXME: remove this
                 throw new ProcessingException("Missing @StaticTypeAdapter to serialize " + type, element);
             }
 
-            return CodeBlock.builder()
-                    .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getSerializerName(), valueExpr)
-                    .build();
+            return CodeBlock.of("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getSerializerName(), valueExpr);
         } else {
             return valueExpr;
         }
     }
 
     public CodeBlock buildDeserializeExpr(CodeBlock valueExpr) {
-        // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
                 throw new ProcessingException("Missing @StaticTypeAdapter to deserialize " + type, element);
             }
 
-            return CodeBlock.builder()
-                    .add("$T.$L($L)", typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr)
-                    .build();
+            if (!typeAdapter.generic) {
+                return CodeBlock.of("$T.$L($L)",
+                        typeAdapter.typeAdapterImpl, typeAdapter.getDeserializerName(), valueExpr);
+            } else {
+                // inject Class<T> if the deserializer takes more than one
+                TypeName rawType = (type instanceof ParameterizedTypeName ? ((ParameterizedTypeName) type).rawType : type);
+                return CodeBlock.of("$T.<$T>$L($L, $T.class)",
+                        typeAdapter.typeAdapterImpl, type, typeAdapter.getDeserializerName(), valueExpr, rawType);
+            }
+
         } else {
             return valueExpr;
         }
