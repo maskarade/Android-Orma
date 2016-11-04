@@ -8,6 +8,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v3.2.0 2016/11/04
+
+### New Features
+
+* [#328](https://github.com/gfx/Android-Orma/pull/328): Generic type adapters, in which deserializers take `Class<T>` as the second argument
+
 ## v3.1.1 2016/10/29
 
 https://github.com/gfx/Android-Orma/compare/v3.0.1...v3.1.1
