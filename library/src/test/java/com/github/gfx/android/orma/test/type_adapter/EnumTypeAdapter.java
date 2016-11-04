@@ -34,7 +34,6 @@ public class EnumTypeAdapter {
         return value.getValue();
     }
 
-    @SuppressWarnings("unchecked")
     @NonNull
     public static <T extends Enum<T> & EnumDescription> T deserialize(long serialized, @NonNull Class<T> type) {
 
