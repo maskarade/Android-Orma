@@ -45,8 +45,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import java.util.Date;
 import java.util.Locale;
+
+import rx.Single;
 
 public class MainFragment extends Fragment {
 
@@ -125,10 +126,17 @@ public class MainFragment extends Fragment {
 
         AsyncTask.SERIAL_EXECUTOR.execute(() -> {
             try {
+                Thread.sleep(1000);
+
                 orma.migrate(); // may throws SQLiteConstraintException
 
-                simpleCRUD();
+                Log.d(TAG, "CRUD:start ------------------------");
+                simpleCrud();
+                Log.d(TAG, "rxCRUD:start ------------------------");
+                rxCrud();
+                Log.d(TAG, "CRUD:start ------------------------");
                 associations();
+                Log.d(TAG, "------------------------");
             } catch (final Exception e) {
                 binding.getRoot().post(() -> {
                     LargeLog.e(TAG, e);
@@ -141,16 +149,12 @@ public class MainFragment extends Fragment {
     /**
      * Demonstrates simple CRUD operations, which makes no sense though.
      */
-    void simpleCRUD() {
+    void simpleCrud() {
         // create
-        Todo todo = new Todo();
-        todo.title = "buy";
-        todo.content = "milk banana apple";
-        todo.createdTime = new Date();
-        orma.insertIntoTodo(todo);
+        orma.insertIntoTodo(Todo.create("buy", "milk banana apple"));
 
         // read
-        todo = orma.selectFromTodo()
+        Todo todo = orma.selectFromTodo()
                 .titleEq("buy")
                 .value();
         Log.d(TAG, "selectFromTodo: " + todo.id);
@@ -165,6 +169,33 @@ public class MainFragment extends Fragment {
         orma.deleteFromTodo()
                 .doneEq(true)
                 .execute();
+    }
+
+    void rxCrud() {
+        // create
+        orma.prepareInsertIntoTodoAsObservable()
+                .flatMapObservable(todoInserter -> Single.concat(
+                        todoInserter.executeAsObservable(Todo.create("today", "coffee")),
+                        todoInserter.executeAsObservable(Todo.create("tomorrow", "tea"))
+                ))
+                .subscribe();
+
+        orma.selectFromTodo()
+                .executeAsObservable()
+                .subscribe((item) -> {
+                    Log.d(TAG, "rx select: " + item.title);
+                });
+
+        orma.updateTodo()
+                .titleEq("today")
+                .done(true)
+                .executeAsObservable()
+                .subscribe();
+
+        orma.deleteFromTodo()
+                .doneEq(true)
+                .executeAsObservable()
+                .subscribe();
     }
 
     void associations() {

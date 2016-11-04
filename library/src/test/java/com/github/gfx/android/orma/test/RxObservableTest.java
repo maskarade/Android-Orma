@@ -123,20 +123,6 @@ public class RxObservableTest {
     }
 
     @Test
-    public void selectorObservable2() throws Exception {
-        TestObserver<Book> tester = db.selectFromBook()
-                .titleEq("today")
-                .executeAsObservable2()
-                .test();
-
-        tester.assertComplete();
-
-        List<Book> list = tester.values();
-        assertThat(list.size(), is(1));
-        assertThat(list.get(0).title, is("today"));
-    }
-
-    @Test
     public void inserterObservable() throws Exception {
         long rowid = db.prepareInsertIntoBookAsObservable()
                 .flatMap(new Func1<Inserter<Book>, Single<Long>>() {

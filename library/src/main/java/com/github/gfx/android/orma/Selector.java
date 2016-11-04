@@ -252,6 +252,25 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         });
     }
 
+    public <T> io.reactivex.Observable<T> pluckAsObservable2(final ColumnDef<Model, T> column) {
+        return io.reactivex.Observable.create(new ObservableOnSubscribe<T>() {
+            @Override
+            public void subscribe(ObservableEmitter< T> emitter) throws Exception {
+                Cursor cursor = executeWithColumns(column.getQualifiedName());
+                try {
+                    for (int pos = 0; !emitter.isDisposed() && cursor.moveToPosition(pos); pos++) {
+                        emitter.onNext(column.getFromCursor(conn, cursor, 0));
+                    }
+                } finally {
+                    cursor.close();
+                }
+                if (!emitter.isDisposed()) {
+                    emitter.onComplete();
+                }
+            }
+        });
+    }
+
     @CheckResult
     @NonNull
     public Cursor execute() {
