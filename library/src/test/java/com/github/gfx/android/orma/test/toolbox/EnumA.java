@@ -17,5 +17,16 @@
 package com.github.gfx.android.orma.test.toolbox;
 
 public enum EnumA implements EnumDescription {
-    FOO
+    FOO(1000L), BAR(2000L);
+
+    private final long id;
+
+    EnumA(long id) {
+        this.id = id;
+    }
+
+    @Override
+    public long getValue() {
+        return id;
+    }
 }
