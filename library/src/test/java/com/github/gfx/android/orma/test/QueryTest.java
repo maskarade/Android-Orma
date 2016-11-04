@@ -231,17 +231,6 @@ public class QueryTest {
     }
 
     @Test
-    public void pluckAsObservable() throws Exception {
-        assertThat(db.selectFromBook().orderByTitleAsc().pluckAsObservable(Book_Schema.INSTANCE.title).toList().toBlocking().first(),
-                is(contains("friday", "today")));
-        assertThat(db.selectFromBook().orderByTitleDesc().pluckAsObservable(Book_Schema.INSTANCE.title).toList().toBlocking().first(),
-                is(contains("today", "friday")));
-
-        assertThat(db.selectFromBook().orderByTitleDesc().pluckAsObservable(Book_Schema.INSTANCE.inPrint).toList().toBlocking().first(),
-                is(contains(true, false)));
-    }
-
-    @Test
     public void aggregators() throws Exception {
         assertThat(db.selectFromBook().orderByTitleAsc().pluck(Book_Schema.INSTANCE.title),
                 is(contains("friday", "today")));

@@ -31,6 +31,7 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -177,6 +178,28 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
             @Override
             public void call(SingleSubscriber<? super Integer> singleSubscriber) {
                 singleSubscriber.onSuccess(count());
+            }
+        });
+    }
+
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Integer> countAsSingle2() {
+        return io.reactivex.Single.fromCallable(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return count();
+            }
+        });
+    }
+
+    @CheckResult
+    @NonNull
+    public io.reactivex.Observable<Integer> countAsObservable2() {
+        return io.reactivex.Observable.fromCallable(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return count();
             }
         });
     }

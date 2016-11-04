@@ -19,6 +19,8 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.test.model.Book;
+import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.Book_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
@@ -30,12 +32,7 @@ import org.junit.runner.RunWith;
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
-import java.util.List;
-
-import io.reactivex.observers.TestObserver;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import io.reactivex.functions.Function;
 
 @RunWith(AndroidJUnit4.class)
 public class RxJava2Test {
@@ -101,18 +98,55 @@ public class RxJava2Test {
         });
     }
 
-    @Test
-    public void selectorObservable2() throws Exception {
-        TestObserver<Book> tester = db.selectFromBook()
-                .titleEq("today")
-                .executeAsObservable2()
-                .test();
-
-        tester.assertComplete();
-
-        List<Book> list = tester.values();
-        assertThat(list.size(), is(1));
-        assertThat(list.get(0).title, is("today"));
+    Book_Selector selector() {
+        return db.selectFromBook().titleNotEq("tomorrow");
     }
 
+    @Test
+    public void countAsSingle2() throws Exception {
+        selector().countAsSingle2().test().assertResult(2);
+    }
+
+    @Test
+    public void countAsObservable2() throws Exception {
+        selector().countAsObservable2().test().assertResult(2);
+    }
+
+    @Test
+    public void selectorObservable2() throws Exception {
+        selector().titleEq("today")
+                .executeAsObservable2()
+                .map(new Function<Book, String>() {
+                    @Override
+                    public String apply(Book book) throws Exception {
+                        return book.title;
+                    }
+                })
+                .test()
+                .assertResult("today");
+    }
+
+    @Test
+    public void pluckAsObservable2() throws Exception {
+        selector().orderByTitleAsc()
+                .pluckAsObservable2(Book_Schema.INSTANCE.title)
+                .test()
+                .assertResult("friday", "today");
+
+        selector().orderByTitleDesc()
+                .pluckAsObservable2(Book_Schema.INSTANCE.title)
+                .test()
+                .assertResult("today", "friday");
+
+        selector().orderByTitleAsc()
+                .pluckAsObservable2(Book_Schema.INSTANCE.inPrint)
+                .test()
+                .assertResult(false, true);
+
+        selector().orderByTitleDesc()
+                .pluckAsObservable2(Book_Schema.INSTANCE.inPrint)
+                .test()
+                .assertResult(true, false);
+
+    }
 }

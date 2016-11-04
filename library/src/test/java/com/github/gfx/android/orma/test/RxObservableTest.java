@@ -19,6 +19,8 @@ import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.test.model.Book;
+import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.Book_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
@@ -34,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.reactivex.observers.TestObserver;
 import rx.Single;
 import rx.functions.Func1;
 import rx.observers.TestSubscriber;
@@ -106,6 +107,10 @@ public class RxObservableTest {
         });
     }
 
+    Book_Selector selector() {
+        return db.selectFromBook().titleNotEq("tomorrow");
+    }
+
     @Test
     public void selectorObservable() throws Exception {
         TestSubscriber<Book> testSubscriber = TestSubscriber.create();
@@ -120,6 +125,16 @@ public class RxObservableTest {
         List<Book> list = testSubscriber.getOnNextEvents();
         assertThat(list.size(), is(1));
         assertThat(list.get(0).title, is("today"));
+    }
+
+    @Test
+    public void pluckAsObservable() throws Exception {
+        assertThat(selector().orderByTitleAsc().pluckAsObservable(Book_Schema.INSTANCE.title).toList().toBlocking().first(),
+                is(contains("friday", "today")));
+        assertThat(selector().orderByTitleDesc().pluckAsObservable(Book_Schema.INSTANCE.title).toList().toBlocking().first(),
+                is(contains("today", "friday")));
+        assertThat(selector().orderByTitleDesc().pluckAsObservable(Book_Schema.INSTANCE.inPrint).toList().toBlocking().first(),
+                is(contains(true, false)));
     }
 
     @Test
