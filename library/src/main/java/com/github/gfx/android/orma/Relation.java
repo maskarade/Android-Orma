@@ -190,7 +190,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @CheckResult
     @NonNull
-    public io.reactivex.Maybe<Integer> deleteAsObservable2(@NonNull final Model item) {
+    public Maybe<Integer> deleteAsMaybe2(@NonNull final Model item) {
         return Maybe.create(new MaybeOnSubscribe<Integer>() {
             @Override
             public void subscribe(MaybeEmitter<Integer> emitter) throws Exception {
