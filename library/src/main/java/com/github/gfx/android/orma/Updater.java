@@ -21,6 +21,8 @@ import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
+import java.util.concurrent.Callable;
+
 import rx.Single;
 import rx.SingleSubscriber;
 
@@ -55,6 +57,17 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
             @Override
             public void call(SingleSubscriber<? super Integer> subscriber) {
                 subscriber.onSuccess(execute());
+            }
+        });
+    }
+
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Integer> executeAsSingle2() {
+        return io.reactivex.Single.fromCallable(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return execute();
             }
         });
     }

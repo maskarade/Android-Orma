@@ -287,9 +287,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
                 } finally {
                     cursor.close();
                 }
-                if (!emitter.isDisposed()) {
-                    emitter.onComplete();
-                }
+                emitter.onComplete();
             }
         });
     }
@@ -392,9 +390,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
                     for (int pos = 0; !e.isDisposed() && cursor.moveToPosition(pos); pos++) {
                         e.onNext(newModelFromCursor(cursor));
                     }
-                    if (!e.isDisposed()) {
-                        e.onComplete();
-                    }
+                    e.onComplete();
                 } finally {
                     cursor.close();
                 }

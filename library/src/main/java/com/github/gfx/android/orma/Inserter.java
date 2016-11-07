@@ -16,12 +16,17 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.exception.InsertionFailureException;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
+import java.util.concurrent.Callable;
+
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
@@ -74,8 +79,12 @@ public class Inserter<Model> {
      * @param modelFactory A mode factory to create a model object to insert
      * @return The last inserted row id
      */
-    public long execute(@NonNull ModelFactory<Model> modelFactory) {
-        return execute(modelFactory.call());
+    public long execute(@NonNull Callable<Model> modelFactory) {
+        try {
+            return execute(modelFactory.call());
+        } catch (Exception e) {
+            throw new InsertionFailureException(e);
+        }
     }
 
     public void executeAll(@NonNull Iterable<Model> models) {
@@ -103,6 +112,23 @@ public class Inserter<Model> {
     }
 
     /**
+     * {@link io.reactivex.Single} wrapper to {@code execute(Model)}
+     *
+     * @param model A model object to insert
+     * @return An {@link io.reactivex.Single} for the last inserted row id
+     */
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Long> executeAsSingle2(@NonNull final Model model) {
+        return io.reactivex.Single.fromCallable(new Callable<Long>() {
+            @Override
+            public Long call() throws Exception {
+                return execute(model);
+            }
+        });
+    }
+
+    /**
      * {@link Single} wrapper to {@code execute(ModelFactory<Model>)}.
      * {@link ModelFactory#call()} is called in {@link Single.OnSubscribe#call(Object)}.
      *
@@ -117,6 +143,24 @@ public class Inserter<Model> {
             public void call(SingleSubscriber<? super Long> subscriber) {
                 long rowId = execute(modelFactory);
                 subscriber.onSuccess(rowId);
+            }
+        });
+    }
+
+    /**
+     * {@link Single} wrapper to {@code execute(ModelFactory<Model>)}.
+     * {@link ModelFactory#call()} is called in {@link Single.OnSubscribe#call(Object)}.
+     *
+     * @param modelFactory A model factory
+     * @return An {@link Observable} for the last inserted row id
+     */
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Long> executeAsSingle2(@NonNull final Callable<Model> modelFactory) {
+        return io.reactivex.Single.fromCallable(new Callable<Long>() {
+            @Override
+            public Long call() throws Exception {
+                return execute(modelFactory);
             }
         });
     }
@@ -142,4 +186,23 @@ public class Inserter<Model> {
         });
     }
 
+    /**
+     * {@link io.reactivex.Observable} wrapper to {@code execute(Iterable<Model>)}
+     *
+     * @param models model objects to insert
+     * @return An {@link io.reactivex.Observable} for the last inserted row ids
+     */
+    @CheckResult
+    @NonNull
+    public io.reactivex.Observable<Long> executeAllAsObservable2(@NonNull final Iterable<Model> models) {
+        return io.reactivex.Observable.create(new ObservableOnSubscribe<Long>() {
+            @Override
+            public void subscribe(ObservableEmitter<Long> emitter) throws Exception {
+                for (Model model : models) {
+                    emitter.onNext(execute(model));
+                }
+                emitter.onComplete();
+            }
+        });
+    }
 }

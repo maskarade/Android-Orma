@@ -26,8 +26,12 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.reactivex.Maybe;
+import io.reactivex.MaybeEmitter;
+import io.reactivex.MaybeOnSubscribe;
 import rx.Observable;
 import rx.Single;
 import rx.SingleSubscriber;
@@ -99,12 +103,24 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         }
     }
 
+    @CheckResult
     @NonNull
     public Single<Model> getAsObservable(@IntRange(from = 0) final int position) {
         return Single.create(new Single.OnSubscribe<Model>() {
             @Override
             public void call(final SingleSubscriber<? super Model> subscriber) {
                 subscriber.onSuccess(get(position));
+            }
+        });
+    }
+
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Model> getAsSingle2(@IntRange(from = 0) final int position) {
+        return io.reactivex.Single.fromCallable(new Callable<Model>() {
+            @Override
+            public Model call() throws Exception {
+                return get(position);
             }
         });
     }
@@ -166,6 +182,44 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
+     * Deletes a specified model and yields where it was. Suitable to implement {@link android.widget.Adapter}.
+     * Operations are executed in a transaction.
+     *
+     * @param item A model to delete.
+     * @return An {@link Maybe} that yields the position of the deleted item if the item is deleted.
+     */
+    @CheckResult
+    @NonNull
+    public io.reactivex.Maybe<Integer> deleteAsObservable2(@NonNull final Model item) {
+        return Maybe.create(new MaybeOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(MaybeEmitter<Integer> emitter) throws Exception {
+                final AtomicInteger positionRef = new AtomicInteger(-1);
+                conn.transactionSync(new Runnable() {
+                    @Override
+                    public void run() {
+                        int position = indexOf(item);
+                        ColumnDef<Model, ?> pk = getSchema().getPrimaryKey();
+                        int deletedRows = deleter()
+                                .where(pk, "=", pk.getSerialized(item))
+                                .execute();
+
+                        if (deletedRows > 0) {
+                            positionRef.set(position);
+                        }
+                    }
+                });
+                // emit the position *after* the transaction finished
+                if (positionRef.get() >= 0) {
+                    emitter.onSuccess(positionRef.get());
+                } else {
+                    emitter.onComplete();
+                }
+            }
+        });
+    }
+
+    /**
      * Truncates the table to the specified size.
      *
      * @param size Size to truncate the table
@@ -188,6 +242,27 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
+     * Truncates the table to the specified size.
+     *
+     * @param size Size to truncate the table
+     * @return A {@link Single} that yields the number of rows deleted.
+     */
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Integer> truncateAsSingle2(@IntRange(from = 0) final int size) {
+        return io.reactivex.Single.fromCallable(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                String pk = getSchema().getPrimaryKey().getEscapedName();
+                Selector<Model, ?> subquery = selector();
+                subquery.limit(Integer.MAX_VALUE);
+                subquery.offset(size);
+                return conn.delete(getSchema(), pk + " IN (" + subquery.buildQueryWithColumns(pk) + ")", getBindArgs());
+            }
+        });
+    }
+
+    /**
      * Inserts an item.
      *
      * @param factory A model to insert.
@@ -201,6 +276,23 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
             public void call(final SingleSubscriber<? super Long> subscriber) {
                 long rowId = inserter().execute(factory);
                 subscriber.onSuccess(rowId);
+            }
+        });
+    }
+
+    /**
+     * Inserts an item.
+     *
+     * @param factory A model to insert.
+     * @return An {@link io.reactivex.Single} that yields the newly inserted row id.
+     */
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Long> insertAsObservable2(@NonNull final Callable<Model> factory) {
+        return io.reactivex.Single.fromCallable(new Callable<Long>() {
+            @Override
+            public Long call() throws Exception {
+                return inserter().execute(factory);
             }
         });
     }
