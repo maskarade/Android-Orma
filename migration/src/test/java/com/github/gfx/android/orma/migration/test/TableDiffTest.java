@@ -71,12 +71,29 @@ public class TableDiffTest {
     }
 
     @Test
+    public void sameButRemoveBrackets() throws Exception {
+        String a = "CREATE TABLE [todo] ([title] TEXT, [content] TEXT)";
+        String b = "CREATE TABLE todo (title TEXT, content TEXT)";
+        List<String> statements = migration.tableDiff(a, b);
+        assertThat(statements, is(empty()));
+    }
+
+    @Test
+    public void sameButAddBrackets() throws Exception {
+        String a = "CREATE TABLE todo (title TEXT, content TEXT)";
+        String b = "CREATE TABLE [todo] ([title] TEXT, [content] TEXT)";
+        List<String> statements = migration.tableDiff(a, b);
+        assertThat(statements, is(empty()));
+    }
+
+    @Test
     public void sameButRemoveQuotes() throws Exception {
         String a = "CREATE TABLE `todo` (`title` TEXT, `content` TEXT)";
         String b = "CREATE TABLE todo (title TEXT, content TEXT)";
         List<String> statements = migration.tableDiff(a, b);
         assertThat(statements, is(empty()));
     }
+
 
     @Test
     public void reorder() throws Exception {

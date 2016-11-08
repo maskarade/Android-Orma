@@ -34,9 +34,9 @@ public class SqliteDdlBuilder {
 
     @NonNull
     public static String ensureNotEscaped(@NonNull String maybeEscaped) {
-        if (maybeEscaped.startsWith("\"") || maybeEscaped.endsWith("\n")) {
-            return maybeEscaped.substring(1, maybeEscaped.length() - 1);
-        } else if (maybeEscaped.startsWith("`") || maybeEscaped.endsWith("`")) {
+        if ((maybeEscaped.startsWith("\"") && maybeEscaped.endsWith("\""))
+                || (maybeEscaped.startsWith("`") && maybeEscaped.endsWith("`"))
+                || (maybeEscaped.startsWith("[") && maybeEscaped.endsWith("]"))) {
             return maybeEscaped.substring(1, maybeEscaped.length() - 1);
         } else {
             return maybeEscaped;
@@ -44,7 +44,8 @@ public class SqliteDdlBuilder {
     }
 
     @NonNull
-    public String buildCreateTable(@NonNull SQLiteComponent.Name table, @NonNull List<CreateTableStatement.ColumnDef> columns) {
+    public String buildCreateTable(@NonNull SQLiteComponent.Name table,
+            @NonNull List<CreateTableStatement.ColumnDef> columns) {
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE ");
         sb.append(table);
