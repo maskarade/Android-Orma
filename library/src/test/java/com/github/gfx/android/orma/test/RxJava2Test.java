@@ -16,6 +16,7 @@
 
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.test.model.Book;
@@ -32,7 +33,18 @@ import org.junit.runner.RunWith;
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import io.reactivex.ObservableSource;
+import io.reactivex.SingleSource;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
 public class RxJava2Test {
@@ -104,12 +116,16 @@ public class RxJava2Test {
 
     @Test
     public void countAsSingle2() throws Exception {
-        selector().countAsSingle2().test().assertResult(2);
+        selector().countAsSingle2()
+                .test()
+                .assertResult(2);
     }
 
     @Test
     public void countAsObservable2() throws Exception {
-        selector().countAsObservable2().test().assertResult(2);
+        selector().countAsObservable2()
+                .test()
+                .assertResult(2);
     }
 
     @Test
@@ -148,5 +164,113 @@ public class RxJava2Test {
                 .test()
                 .assertResult(true, false);
 
+    }
+
+    @Test
+    public void inserterSingle2() throws Exception {
+        db.prepareInsertIntoBookAsSingle2()
+                .flatMap(new Function<Inserter<Book>, SingleSource<Long>>() {
+                    @Override
+                    public SingleSource<Long> apply(Inserter<Book> bookInserter) throws Exception {
+                        return bookInserter.executeAsSingle2(new Callable<Book>() {
+                            @NonNull
+                            @Override
+                            public Book call() {
+                                Book book = new Book();
+                                book.title = "observable days";
+                                book.content = "reactive";
+                                book.inPrint = false;
+                                book.publisher = SingleAssociation.id(publisher.id);
+                                return book;
+                            }
+                        });
+                    }
+                })
+                .test()
+                .assertValue(new Predicate<Long>() {
+                    @Override
+                    public boolean test(Long rowId) throws Exception {
+                        return rowId != 0L;
+                    }
+                });
+
+        assertThat(db.selectFromBook().count(), is(4));
+    }
+
+    @Test
+    public void inserterInsertAllAsSingle2() throws Exception {
+        db.prepareInsertIntoBookAsSingle2()
+                .flatMapObservable(new Function<Inserter<Book>, ObservableSource<Long>>() {
+                    @Override
+                    public ObservableSource<Long> apply(Inserter<Book> bookInserter) throws Exception {
+                        Book book = new Book();
+                        book.title = "observable days";
+                        book.content = "reactive";
+                        book.inPrint = false;
+                        book.publisher = SingleAssociation.id(publisher.id);
+                        return bookInserter.executeAllAsObservable2(Collections.singleton(book));
+                    }
+                })
+                .test()
+                .assertValue(new Predicate<Long>() {
+                    @Override
+                    public boolean test(Long rowId) throws Exception {
+                        return rowId != 0L;
+                    }
+                });
+
+        assertThat(db.selectFromBook().count(), is(4));
+    }
+
+    @Test
+    public void updateSingle2() throws Exception {
+        db.updateBook()
+                .titleEq("today")
+                .content("modified")
+                .executeAsSingle2()
+                .test()
+                .assertResult(1);
+
+        assertThat(db.selectFromBook().titleEq("today").value().content, is("modified"));
+    }
+
+    @Test
+    public void deleteSingle2() throws Exception {
+        db.deleteFromBook()
+                .titleEq("today")
+                .executeAsSingle2()
+                .test()
+                .assertResult(1);
+
+        assertThat(db.selectFromBook().titleEq("today").valueOrNull(), is(nullValue()));
+    }
+
+    @Test
+    public void exceptionInObservable2() throws Exception {
+        @SuppressWarnings("serial")
+        class AbortInMapException extends RuntimeException {
+
+        }
+
+        final List<String> mapped = new ArrayList<>();
+
+        db.selectFromBook()
+                .executeAsObservable2()
+                .map(new Function<Book, String>() {
+                    @Override
+                    public String apply(Book book) throws Exception {
+                        mapped.add(book.title);
+                        if ("friday".equals(book.title)) {
+                            throw new AbortInMapException();
+                        }
+                        return book.title;
+                    }
+                })
+                .test()
+                .assertValues("today")
+                .assertNotComplete()
+                .assertError(AbortInMapException.class);
+
+        assertThat(mapped, contains("today", "friday"));
     }
 }
