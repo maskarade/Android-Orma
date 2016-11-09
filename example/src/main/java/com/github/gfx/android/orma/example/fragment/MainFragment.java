@@ -48,7 +48,7 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
-import rx.Single;
+import io.reactivex.Single;
 
 public class MainFragment extends Fragment {
 
@@ -178,29 +178,38 @@ public class MainFragment extends Fragment {
 
     void rxCrud() {
         // create
-        orma.prepareInsertIntoTodoAsObservable()
+        orma.prepareInsertIntoTodoAsSingle2()
                 .flatMapObservable(todoInserter -> Single.concat(
-                        todoInserter.executeAsObservable(Todo.create("today", "coffee")),
-                        todoInserter.executeAsObservable(Todo.create("tomorrow", "tea"))
-                ))
-                .subscribe();
+                        todoInserter.executeAsSingle2(Todo.create("today", "coffee")),
+                        todoInserter.executeAsSingle2(Todo.create("tomorrow", "tea"))
+                ).toObservable())
+                .subscribe((rowId) -> {
+                    Log.d(TAG, "inserted: " + rowId);
+                });
 
+        // read
         orma.selectFromTodo()
-                .executeAsObservable()
+                .executeAsObservable2()
                 .subscribe((item) -> {
                     Log.d(TAG, "rx select: " + item.title);
                 });
 
+        // update
         orma.updateTodo()
                 .titleEq("today")
                 .done(true)
-                .executeAsObservable()
-                .subscribe();
+                .executeAsSingle2()
+                .subscribe((count) -> {
+                    Log.d(TAG, "updated count: " + count);
+                });
 
+        // delete
         orma.deleteFromTodo()
                 .doneEq(true)
-                .executeAsObservable()
-                .subscribe();
+                .executeAsSingle2()
+                .subscribe((count) -> {
+                    Log.d(TAG, "deleted count: " + count);
+                });
     }
 
     void associations() {
