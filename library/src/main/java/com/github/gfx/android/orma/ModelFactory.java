@@ -19,6 +19,8 @@ import android.support.annotation.NonNull;
 
 import java.util.concurrent.Callable;
 
+import static android.os.Build.VERSION_CODES.M;
+
 /**
  * A helper method to make a scope or task.
  *

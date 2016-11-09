@@ -39,8 +39,8 @@ import android.widget.TextView;
 
 import java.util.Date;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class ListViewFragment extends Fragment {
 
@@ -52,13 +52,12 @@ public class ListViewFragment extends Fragment {
 
     int number = 0;
 
-    public static ListViewFragment newInstance() {
-        return new ListViewFragment();
-    }
-
     public ListViewFragment() {
     }
 
+    public static ListViewFragment newInstance() {
+        return new ListViewFragment();
+    }
 
     @Nullable
     @Override
@@ -71,7 +70,7 @@ public class ListViewFragment extends Fragment {
         adapter = new Adapter(getContext(), orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
 
-        binding.fab.setOnClickListener(v -> adapter.addItemAsObservable(() -> {
+        binding.fab.setOnClickListener(v -> adapter.addItemAsSingle2(() -> {
             Todo todo = new Todo();
             number++;
             todo.title = "ListView item #" + number;
@@ -119,7 +118,7 @@ public class ListViewFragment extends Fragment {
                         .updater()
                         .idEq(todo.id)
                         .done(done)
-                        .executeAsObservable()
+                        .executeAsSingle2()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(integer -> {
@@ -128,7 +127,7 @@ public class ListViewFragment extends Fragment {
             });
 
             binding.getRoot().setOnLongClickListener(v -> {
-                removeItemAsObservable(todo)
+                removeItemAsMaybe2(todo)
                         .subscribeOn(Schedulers.io())
                         .subscribe();
                 return true;

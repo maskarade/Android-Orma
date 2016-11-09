@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.widget;
 
-import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 
 import android.content.Context;
@@ -25,6 +24,10 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.widget.BaseAdapter;
 
+import java.util.concurrent.Callable;
+
+import io.reactivex.Maybe;
+import io.reactivex.functions.Consumer;
 import rx.Observable;
 import rx.Single;
 import rx.functions.Action1;
@@ -87,7 +90,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
      * @return A hot {@link Observable} that yields the new position of the item.
      */
     @NonNull
-    public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
+    public Single<Long> addItemAsObservable(final Callable<Model> factory) {
         return delegate.addItemAsObservable(factory)
                 .doOnSuccess(new Action1<Long>() {
                     @Override
@@ -105,18 +108,45 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     /**
      * Inserts a model into the table and invokes {@link BaseAdapter#notifyDataSetChanged()}.
      *
+     * @param factory A model factory invoked in a background thread.
+     * @return A hot {@link Observable} that yields the new position of the item.
+     */
+    @NonNull
+    public io.reactivex.Single<Long> addItemAsSingle2(final Callable<Model> factory) {
+        return delegate.addItemAsSingle2(factory)
+                .doOnSuccess(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long rowId) throws Exception {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyDataSetChanged();
+                            }
+                        });
+                    }
+                });
+    }
+
+    /**
+     * Inserts a model into the table and invokes {@link BaseAdapter#notifyDataSetChanged()}.
+     *
      * @param item A model factory invoked in a background thread.
      * @return A hot {@link Observable} that yields the new position of the item.
      */
     @CheckResult
-    public Single<Long> addItemAsObservable(final Model item) {
-        return addItemAsObservable(new ModelFactory<Model>() {
-            @NonNull
-            @Override
-            public Model call() {
-                return item;
-            }
-        });
+    public Single<Long> addItemAsObservable(Model item) {
+        return addItemAsObservable(delegate.createFactory(item));
+    }
+
+    /**
+     * Inserts a model into the table and invokes {@link BaseAdapter#notifyDataSetChanged()}.
+     *
+     * @param item A model factory invoked in a background thread.
+     * @return A hot {@link Observable} that yields the new position of the item.
+     */
+    @CheckResult
+    public io.reactivex.Single<Long> addItemAsSingle2(Model item) {
+        return addItemAsSingle2(delegate.createFactory(item));
     }
 
     /**
@@ -143,9 +173,32 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     }
 
     /**
+     * Removes an item from the table and invokes {@link BaseAdapter#notifyDataSetChanged()}.
+     *
+     * @param item A model to remove.
+     * @return A cold {@link Maybe} that yields the position at which the item was. {@code onSuccess()} is only called if the
+     * item existed.
+     */
+    @CheckResult
+    public Maybe<Integer> removeItemAsMaybe2(@NonNull final Model item) {
+        return delegate.removeItemAsMaybe2(item)
+                .doOnSuccess(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer position) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyDataSetChanged();
+                            }
+                        });
+                    }
+                });
+    }
+
+    /**
      * Deletes all the rows in the table and invokes {@link BaseAdapter#notifyDataSetChanged()}.
      *
-     * @return A hot {@link Observable} that yields the new {@code totalCount()} (i.e. always {@code 0}).
+     * @return A cold {@link Observable} that yields the new {@code totalCount()} (i.e. always {@code 0}).
      */
     @CheckResult
     public Single<Integer> clearAsObservable() {
@@ -153,6 +206,27 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
                 .doOnSuccess(new Action1<Integer>() {
                     @Override
                     public void call(Integer deletedItems) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyDataSetChanged();
+                            }
+                        });
+                    }
+                });
+    }
+
+    /**
+     * Deletes all the rows in the table and invokes {@link BaseAdapter#notifyDataSetChanged()}.
+     *
+     * @return A cold {@link Observable} that yields the number of rows deleted.
+     */
+    @CheckResult
+    public io.reactivex.Single<Integer> clearAsSingle2() {
+        return delegate.clearAsSingle2()
+                .doOnSuccess(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer deletedItems) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

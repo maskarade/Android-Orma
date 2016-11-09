@@ -41,8 +41,8 @@ import android.widget.TextView;
 
 import java.util.Date;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class RecyclerViewFragment extends Fragment {
 
@@ -72,7 +72,7 @@ public class RecyclerViewFragment extends Fragment {
         adapter = new Adapter(getContext(), orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
 
-        binding.fab.setOnClickListener(v -> adapter.addItemAsObservable(() -> {
+        binding.fab.setOnClickListener(v -> adapter.addItemAsSingle2(() -> {
             Todo todo = new Todo();
             number++;
             todo.title = "RecyclerView item #" + number;
@@ -131,7 +131,7 @@ public class RecyclerViewFragment extends Fragment {
                         .updater()
                         .idEq(todo.id)
                         .done(done)
-                        .executeAsObservable()
+                        .executeAsSingle2()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(integer -> {
@@ -140,7 +140,7 @@ public class RecyclerViewFragment extends Fragment {
             });
 
             binding.getRoot().setOnLongClickListener(v -> {
-                removeItemAsObservable(todo)
+                removeItemAsMaybe2(todo)
                         .subscribeOn(Schedulers.io())
                         .subscribe();
                 return true;

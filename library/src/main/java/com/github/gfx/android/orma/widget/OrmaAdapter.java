@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.widget;
 
-import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.exception.NoValueException;
 
@@ -27,11 +26,13 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 
+import java.util.concurrent.Callable;
+
 import rx.Observable;
 import rx.Single;
 
 /**
- * A helper class to provide adapter class implementations.
+ * A helper class that provides adapter class details.
  *
  * @param <Model> An Orma model class
  */
@@ -71,6 +72,15 @@ public class OrmaAdapter<Model> {
         handler.postDelayed(task, 1000 / 30);
     }
 
+    public Callable<Model> createFactory(final @NonNull Model model) {
+        return new Callable<Model>() {
+            @Override
+            public Model call() throws Exception {
+                return model;
+            }
+        };
+    }
+
     @NonNull
     public Model getItem(int position) {
         if (position >= getItemCount()) {
@@ -80,6 +90,7 @@ public class OrmaAdapter<Model> {
         return relation.get(position);
     }
 
+    @CheckResult
     @NonNull
     public Single<Model> getItemAsObservable(int position) {
         return relation.getAsObservable(position);
@@ -87,8 +98,20 @@ public class OrmaAdapter<Model> {
 
     @CheckResult
     @NonNull
-    public Single<Long> addItemAsObservable(final ModelFactory<Model> factory) {
+    public io.reactivex.Single<Model> getItemAsSingle2(int position) {
+        return relation.getAsSingle2(position);
+    }
+
+    @CheckResult
+    @NonNull
+    public Single<Long> addItemAsObservable(Callable<Model> factory) {
         return relation.insertAsObservable(factory);
+    }
+
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Long> addItemAsSingle2(Callable<Model> factory) {
+        return relation.insertAsSingle2(factory);
     }
 
     @CheckResult
@@ -99,7 +122,19 @@ public class OrmaAdapter<Model> {
 
     @CheckResult
     @NonNull
+    public io.reactivex.Maybe<Integer> removeItemAsMaybe2(@NonNull final Model item) {
+        return relation.deleteAsMaybe2(item);
+    }
+
+    @CheckResult
+    @NonNull
     public Single<Integer> clearAsObservable() {
         return relation.deleter().executeAsObservable();
+    }
+
+    @CheckResult
+    @NonNull
+    public io.reactivex.Single<Integer> clearAsSingle2() {
+        return relation.deleter().executeAsSingle2();
     }
 }

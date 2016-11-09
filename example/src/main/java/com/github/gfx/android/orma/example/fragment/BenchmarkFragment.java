@@ -46,14 +46,13 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class BenchmarkFragment extends Fragment {
 
@@ -71,8 +70,6 @@ public class BenchmarkFragment extends Fragment {
             + " ";
 
     OrmaDatabase orma;
-
-    Realm realm;
 
     HandWrittenOpenHelper hw;
 
@@ -133,7 +130,6 @@ public class BenchmarkFragment extends Fragment {
         Realm.setDefaultConfiguration(realmConf);
         Realm.deleteRealm(realmConf);
 
-        realm = Realm.getDefaultInstance();
         Schedulers.io().createWorker().schedule(() -> {
             getContext().deleteDatabase("orma-benchmark.db");
             orma = OrmaDatabase.builder(getContext())
@@ -152,8 +148,6 @@ public class BenchmarkFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-
-        realm.close();
     }
 
     void run() {
@@ -161,12 +155,14 @@ public class BenchmarkFragment extends Fragment {
 
         adapter.clear();
 
-        realm.executeTransaction(realm -> realm.delete(RealmTodo.class));
+        Realm realm = Realm.getDefaultInstance();
+        realm.executeTransaction(r -> r.delete(RealmTodo.class));
+        realm.close();
 
         hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
         orma.deleteFromTodo()
-                .executeAsObservable()
+                .executeAsSingle2()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(integer -> startInsertWithOrma())
@@ -200,190 +196,178 @@ public class BenchmarkFragment extends Fragment {
     }
 
     Single<Result> startInsertWithOrma() {
-        return Single.create(new Single.OnSubscribe<Result>() {
-            @Override
-            public void call(SingleSubscriber<? super Result> subscriber) {
-                long result = runWithBenchmark(() -> {
-                    orma.transactionSync(() -> {
-                        long now = System.currentTimeMillis();
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                orma.transactionSync(() -> {
+                    long now = System.currentTimeMillis();
 
-                        Inserter<Todo> statement = orma.prepareInsertIntoTodo();
+                    Inserter<Todo> statement = orma.prepareInsertIntoTodo();
 
-                        for (int i = 0; i < N_ITEMS; i++) {
-                            Todo todo = new Todo();
+                    for (int i = 0; i < N_ITEMS; i++) {
+                        Todo todo = new Todo();
 
-                            todo.title = titlePrefix + i;
-                            todo.content = contentPrefix + i;
-                            todo.createdTime = new Date(now);
+                        todo.title = titlePrefix + i;
+                        todo.content = contentPrefix + i;
+                        todo.createdTime = new Date(now);
 
-                            statement.execute(todo);
-                        }
-                    });
+                        statement.execute(todo);
+                    }
                 });
-                subscriber.onSuccess(new Result("Orma/insert", result));
-            }
+            });
+            return new Result("Orma/insert", result);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     Single<Result> startInsertWithRealm() {
-        return Single.create(new Single.OnSubscribe<Result>() {
-            @Override
-            public void call(SingleSubscriber<? super Result> subscriber) {
-                long result = runWithBenchmark(() -> {
-                    realm.executeTransaction(realm1 -> {
-                        long now = System.currentTimeMillis();
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                Realm realm = Realm.getDefaultInstance();
+                realm.executeTransaction(r -> {
+                    long now = System.currentTimeMillis();
 
-                        for (int i = 0; i < N_ITEMS; i++) {
-                            RealmTodo todo = realm1.createObject(RealmTodo.class);
+                    for (int i = 0; i < N_ITEMS; i++) {
+                        RealmTodo todo = r.createObject(RealmTodo.class);
 
-                            todo.setTitle(titlePrefix + i);
-                            todo.setContent(contentPrefix + i);
-                            todo.setCreatedTime(new Date(now));
-                        }
-                    });
+                        todo.setTitle(titlePrefix + i);
+                        todo.setContent(contentPrefix + i);
+                        todo.setCreatedTime(new Date(now));
+                    }
                 });
-                subscriber.onSuccess(new Result("Realm/insert", result));
-            }
-        });
+                realm.close();
+            });
+            return new Result("Realm/insert", result);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     Single<Result> startInsertWithHandWritten() {
-        return Single.create(new Single.OnSubscribe<Result>() {
-            @Override
-            public void call(SingleSubscriber<? super Result> subscriber) {
-                long result = runWithBenchmark(() -> {
-                    SQLiteDatabase db = hw.getWritableDatabase();
-                    db.beginTransaction();
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                SQLiteDatabase db = hw.getWritableDatabase();
+                db.beginTransaction();
 
-                    SQLiteStatement inserter = db.compileStatement(
-                            "INSERT INTO todo (title, content, done, createdTime) VALUES (?, ?, ?, ?)");
+                SQLiteStatement inserter = db.compileStatement(
+                        "INSERT INTO todo (title, content, done, createdTime) VALUES (?, ?, ?, ?)");
 
-                    long now = System.currentTimeMillis();
+                long now = System.currentTimeMillis();
 
-                    for (int i = 1; i <= N_ITEMS; i++) {
-                        inserter.bindAllArgsAsStrings(new String[]{
-                                titlePrefix + i, // title
-                                contentPrefix + i, // content
-                                "0", // done
-                                String.valueOf(now), // createdTime
-                        });
-                        inserter.executeInsert();
-                    }
+                for (int i = 1; i <= N_ITEMS; i++) {
+                    inserter.bindAllArgsAsStrings(new String[]{
+                            titlePrefix + i, // title
+                            contentPrefix + i, // content
+                            "0", // done
+                            String.valueOf(now), // createdTime
+                    });
+                    inserter.executeInsert();
+                }
 
-                    db.setTransactionSuccessful();
-                    db.endTransaction();
-                });
-                subscriber.onSuccess(new Result("HandWritten/insert", result));
-            }
+                db.setTransactionSuccessful();
+                db.endTransaction();
+            });
+            return new Result("HandWritten/insert", result);
+
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     Single<Result> startSelectAllWithOrma() {
-        return Single.create(new Single.OnSubscribe<Result>() {
-            @Override
-            public void call(SingleSubscriber<? super Result> subscriber) {
-                long result = runWithBenchmark(() -> {
-                    final AtomicInteger count = new AtomicInteger();
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                final AtomicInteger count = new AtomicInteger();
 
-                    Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeAsc();
+                Todo_Selector todos = orma.selectFromTodo().orderByCreatedTimeAsc();
 
-                    for (Todo todo : todos) {
-                        @SuppressWarnings("unused")
-                        String title = todo.title;
-                        @SuppressWarnings("unused")
-                        String content = todo.content;
-                        @SuppressWarnings("unused")
-                        Date createdTime = todo.createdTime;
+                for (Todo todo : todos) {
+                    @SuppressWarnings("unused")
+                    String title = todo.title;
+                    @SuppressWarnings("unused")
+                    String content = todo.content;
+                    @SuppressWarnings("unused")
+                    Date createdTime = todo.createdTime;
 
-                        count.incrementAndGet();
-                    }
+                    count.incrementAndGet();
+                }
 
-                    if (todos.count() != count.get()) {
-                        throw new AssertionError("unexpected value: " + count.get());
-                    }
-                    Log.d(TAG, "Orma/forEachAll count: " + count);
-                });
-                subscriber.onSuccess(new Result("Orma/forEachAll", result));
-            }
+                if (todos.count() != count.get()) {
+                    throw new AssertionError("unexpected value: " + count.get());
+                }
+                Log.d(TAG, "Orma/forEachAll count: " + count);
+            });
+            return new Result("Orma/forEachAll", result);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     Single<Result> startSelectAllWithRealm() {
-        return Single.create(new Single.OnSubscribe<Result>() {
-            @Override
-            public void call(SingleSubscriber<? super Result> subscriber) {
-                long result = runWithBenchmark(() -> {
-                    AtomicInteger count = new AtomicInteger();
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                AtomicInteger count = new AtomicInteger();
+                Realm realm = Realm.getDefaultInstance();
+                RealmResults<RealmTodo> results = realm.where(RealmTodo.class)
+                        .findAllSorted("createdTime", Sort.ASCENDING);
+                for (RealmTodo todo : results) {
+                    @SuppressWarnings("unused")
+                    String title = todo.getTitle();
+                    @SuppressWarnings("unused")
+                    String content = todo.getContent();
+                    @SuppressWarnings("unused")
+                    Date createdTime = todo.getCreatedTime();
 
-                    RealmResults<RealmTodo> results = realm.where(RealmTodo.class)
-                            .findAllSorted("createdTime", Sort.ASCENDING);
-                    for (RealmTodo todo : results) {
-                        @SuppressWarnings("unused")
-                        String title = todo.getTitle();
-                        @SuppressWarnings("unused")
-                        String content = todo.getContent();
-                        @SuppressWarnings("unused")
-                        Date createdTime = todo.getCreatedTime();
+                    count.incrementAndGet();
+                }
+                if (results.size() != count.get()) {
+                    throw new AssertionError("unexpected value: " + count.get());
+                }
+                realm.close();
 
-                        count.incrementAndGet();
-                    }
-                    if (results.size() != count.get()) {
-                        throw new AssertionError("unexpected value: " + count.get());
-                    }
-
-                    Log.d(TAG, "Realm/forEachAll count: " + count);
-                });
-                subscriber.onSuccess(new Result("Realm/forEachAll", result));
-            }
+                Log.d(TAG, "Realm/forEachAll count: " + count);
+            });
+            return new Result("Realm/forEachAll", result);
         });
     }
 
     Single<Result> startSelectAllWithHandWritten() {
-        return Single.create(new Single.OnSubscribe<Result>() {
-            @Override
-            public void call(SingleSubscriber<? super Result> subscriber) {
-                long result = runWithBenchmark(() -> {
-                    AtomicInteger count = new AtomicInteger();
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                AtomicInteger count = new AtomicInteger();
 
-                    SQLiteDatabase db = hw.getReadableDatabase();
-                    Cursor cursor = db.query(
-                            "todo",
-                            new String[]{"id, title, content, done, createdTime"},
-                            null, null, null, null, "createdTime ASC" // whereClause, whereArgs, groupBy, having, orderBy
-                    );
+                SQLiteDatabase db = hw.getReadableDatabase();
+                Cursor cursor = db.query(
+                        "todo",
+                        new String[]{"id, title, content, done, createdTime"},
+                        null, null, null, null, "createdTime ASC" // whereClause, whereArgs, groupBy, having, orderBy
+                );
 
-                    if (cursor.moveToFirst()) {
-                        int titleIndex = cursor.getColumnIndexOrThrow("title");
-                        int contentIndex = cursor.getColumnIndexOrThrow("content");
-                        int createdTimeIndex = cursor.getColumnIndexOrThrow("createdTime");
-                        do {
-                            @SuppressWarnings("unused")
-                            String title = cursor.getString(titleIndex);
-                            @SuppressWarnings("unused")
-                            String content = cursor.getString(contentIndex);
-                            @SuppressWarnings("unused")
-                            Date createdTime = new Date(cursor.getLong(createdTimeIndex));
+                if (cursor.moveToFirst()) {
+                    int titleIndex = cursor.getColumnIndexOrThrow("title");
+                    int contentIndex = cursor.getColumnIndexOrThrow("content");
+                    int createdTimeIndex = cursor.getColumnIndexOrThrow("createdTime");
+                    do {
+                        @SuppressWarnings("unused")
+                        String title = cursor.getString(titleIndex);
+                        @SuppressWarnings("unused")
+                        String content = cursor.getString(contentIndex);
+                        @SuppressWarnings("unused")
+                        Date createdTime = new Date(cursor.getLong(createdTimeIndex));
 
-                            count.incrementAndGet();
-                        } while (cursor.moveToNext());
-                    }
-                    cursor.close();
+                        count.incrementAndGet();
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
 
-                    long dbCount = longForQuery(db, "SELECT COUNT(*) FROM todo", null);
-                    if (dbCount != count.get()) {
-                        throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
-                    }
+                long dbCount = longForQuery(db, "SELECT COUNT(*) FROM todo", null);
+                if (dbCount != count.get()) {
+                    throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
+                }
 
-                    Log.d(TAG, "HandWritten/forEachAll count: " + count);
-                });
-                subscriber.onSuccess(new Result("HandWritten/forEachAll", result));
-            }
+                Log.d(TAG, "HandWritten/forEachAll count: " + count);
+            });
+            return new Result("HandWritten/forEachAll", result);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

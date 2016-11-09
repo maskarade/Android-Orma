@@ -101,7 +101,7 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
 
     /**
      * Replaces the migration engine with your own. {@link SchemaDiffMigration} is the default.
-     * If you just need version-to-version migration steps, use {@link #migrationStep(int, ManualStepMigration.Step)}
+     * If you createFactory need version-to-version migration steps, use {@link #migrationStep(int, ManualStepMigration.Step)}
      * instead.
      *
      * @param migrationEngine A migration engine to replace the default.

@@ -40,25 +40,33 @@ android {
 dependencies {
     compile project(':migration')
     compile project(':annotations')
-    compile 'io.reactivex:rxjava:1.2.1'
-    compile 'io.reactivex.rxjava2:rxjava:2.0.0'
 
     compile "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
+
+    provided 'io.reactivex:rxjava:1.2.2'
+    provided 'io.reactivex.rxjava2:rxjava:2.0.0'
+
     provided("com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}") {
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'support-annotations'
     }
     provided 'com.google.code.gson:gson:2.7'
+
     testApt project(':processor')
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.1.2-1'
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
     testCompile 'com.google.code.gson:gson:2.7'
+    testCompile 'io.reactivex:rxjava:1.2.2'
+    testCompile 'io.reactivex.rxjava2:rxjava:2.0.0'
+
     androidTestApt project(':processor')
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
     androidTestCompile 'com.google.code.gson:gson:2.7'
+    androidTestCompile 'io.reactivex:rxjava:1.2.2'
+    androidTestCompile 'io.reactivex.rxjava2:rxjava:2.0.0'
 }
 
 publish {

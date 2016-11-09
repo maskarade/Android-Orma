@@ -270,7 +270,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @CheckResult
     @NonNull
-    public Single<Long> insertAsObservable(@NonNull final ModelFactory<Model> factory) {
+    public Single<Long> insertAsObservable(@NonNull final Callable<Model> factory) {
         return Single.create(new Single.OnSubscribe<Long>() {
             @Override
             public void call(final SingleSubscriber<? super Long> subscriber) {
@@ -288,7 +288,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @CheckResult
     @NonNull
-    public io.reactivex.Single<Long> insertAsObservable2(@NonNull final Callable<Model> factory) {
+    public io.reactivex.Single<Long> insertAsSingle2(@NonNull final Callable<Model> factory) {
         return io.reactivex.Single.fromCallable(new Callable<Long>() {
             @Override
             public Long call() throws Exception {
