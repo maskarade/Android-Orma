@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.Book;
@@ -43,7 +44,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import rx.functions.Action1;
 import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 
@@ -131,9 +131,9 @@ public class QueryTest {
     public void forEach() throws Exception {
         final List<Book> books = new ArrayList<>();
 
-        db.selectFromBook().forEach(new Action1<Book>() {
+        db.selectFromBook().forEach(new Consumer1<Book>() {
             @Override
-            public void call(Book book) {
+            public void accept(Book book) {
                 books.add(book);
             }
         });

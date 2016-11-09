@@ -25,6 +25,7 @@ import com.github.gfx.android.orma.example.orma.Item;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.tool.LargeLog;
+import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.TraceListener;
 
@@ -154,10 +155,14 @@ public class MainFragment extends Fragment {
         orma.insertIntoTodo(Todo.create("buy", "milk banana apple"));
 
         // read
-        Todo todo = orma.selectFromTodo()
+        orma.selectFromTodo()
                 .titleEq("buy")
-                .value();
-        Log.d(TAG, "selectFromTodo: " + todo.id);
+                .forEach(new Consumer1<Todo>() {
+                    @Override
+                    public void accept(Todo todo) {
+                        Log.d(TAG, "selectFromTodo: " + todo.id);
+                    }
+                });
 
         // update
         orma.updateTodo()

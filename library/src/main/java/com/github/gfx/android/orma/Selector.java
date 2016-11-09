@@ -18,6 +18,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import com.github.gfx.android.orma.internal.OrmaIterator;
 
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -330,13 +332,28 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @NonNull
     public List<Model> toList() {
         final ArrayList<Model> list = new ArrayList<>();
-        forEach(new Action1<Model>() {
+        forEach(new Consumer1<Model>() {
             @Override
-            public void call(Model item) {
-                list.add(item);
+            public void accept(Model model) {
+                list.add(model);
             }
         });
         return list;
+    }
+
+    /**
+     * Deprecated because it depends on RxJava 1.x's {@link Action1}. Use {@link #forEach(Consumer1)} instead.
+     *
+     * @param action An action called for each model in the iteration.
+     */
+    @Deprecated
+    public void forEach(@NonNull final Action1<Model> action) {
+        forEach(new Consumer1<Model>() {
+            @Override
+            public void accept(Model model) {
+                action.call(model);
+            }
+        });
     }
 
     /**
@@ -344,11 +361,11 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
      *
      * @param action An action called for each model in the iteration.
      */
-    public void forEach(@NonNull Action1<Model> action) {
+    public void forEach(@NonNull Consumer1<Model> action) {
         Cursor cursor = execute();
         try {
             for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-                action.call(newModelFromCursor(cursor));
+                action.accept(newModelFromCursor(cursor));
             }
         } finally {
             cursor.close();
