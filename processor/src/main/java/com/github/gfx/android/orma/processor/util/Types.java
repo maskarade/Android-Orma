@@ -78,6 +78,8 @@ public class Types {
 
     public static final ClassName Runnable = ClassName.get(java.lang.Runnable.class);
 
+    public static final ClassName Callable = ClassName.get(java.util.concurrent.Callable.class);
+
     // RxJava 1.x
 
     public static final ClassName Single = ClassName.get("rx", "Single");
@@ -245,6 +247,11 @@ public class Types {
 
     public static ParameterizedTypeName getSingle(TypeName typeName) {
         return ParameterizedTypeName.get(Single, typeName);
+    }
+
+
+    public static ParameterizedTypeName getSingle2(TypeName typeName) {
+        return ParameterizedTypeName.get(Single2, typeName);
     }
 
     public static ParameterizedTypeName getSingleOnSubscribe(TypeName typeName) {

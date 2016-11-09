@@ -272,7 +272,7 @@ public class DatabaseWriter extends BaseWriter {
                                         .addAnnotation(Annotations.nonNull())
                                         .addModifiers(Modifier.FINAL)
                                         .build())
-                        .addStatement("return $T.fromAction($L)", Types.Completable, action0WithCode("transactionSync(task)"))
+                        .addStatement("return $T.fromAction($L)", Types.Completable, rxAction0WithCode("transactionSync(task)"))
                         .build()
         );
 
@@ -313,7 +313,7 @@ public class DatabaseWriter extends BaseWriter {
                                         .addAnnotation(Annotations.nonNull())
                                         .addModifiers(Modifier.FINAL)
                                         .build())
-                        .addStatement("return $T.fromAction($L)", Types.Completable, action0WithCode("transactionNonExclusiveSync(task)"))
+                        .addStatement("return $T.fromAction($L)", Types.Completable, rxAction0WithCode("transactionNonExclusiveSync(task)"))
                         .build()
         );
 
@@ -492,9 +492,11 @@ public class DatabaseWriter extends BaseWriter {
                             )
                             .build());
 
-            // For prepared statements as observables
+            // For prepared statements RxJava observables
 
             TypeName inserterType = Types.getInserter(schema.getModelClassName());
+
+            // RxJava 1.x
             TypeName inserterObservableType = Types.getSingle(inserterType);
 
             methodSpecs.add(
@@ -526,23 +528,6 @@ public class DatabaseWriter extends BaseWriter {
                                     simpleModelName
                             )
                             .build());
-
-            MethodSpec onSubscribeCall = MethodSpec.methodBuilder("call")
-                    .addAnnotation(Annotations.override())
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(Types.getSingleSubscriber(inserterType), "subscriber")
-                    .addStatement("subscriber.onSuccess(new $T($L, $L, onConflictAlgorithm, withoutAutoId))",
-                            inserterType,
-                            connection,
-                            schemaInstance
-                    )
-                    .build();
-
-            TypeSpec onSubscribe = TypeSpec.anonymousClassBuilder("")
-                    .superclass(Types.getSingleOnSubscribe(inserterType))
-                    .addMethod(onSubscribeCall)
-                    .build();
-
             methodSpecs.add(
                     MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsObservable")
                             .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
@@ -558,8 +543,63 @@ public class DatabaseWriter extends BaseWriter {
                                     .addModifiers(Modifier.FINAL)
                                     .build())
                             .returns(inserterObservableType)
-                            .addStatement("return $T.create($L)", Types.Single, onSubscribe)
+                            .addStatement("return $T.fromCallable($L)", Types.Single,
+                                    callableWithCode(inserterType, "return new $T($L, $L, onConflictAlgorithm, withoutAutoId)",
+                                            inserterType, connection, schemaInstance))
                             .build());
+
+            // RxJava 2.x
+            TypeName inserterSingle2Type = Types.getSingle2(inserterType);
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle2")
+                            .addJavadoc("Create a prepared statement for {@code INSERT INTO $T ...}.\n",
+                                    schema.getModelClassName())
+                            .addAnnotation(Annotations.checkResult())
+                            .addAnnotations(suppressWarningsRawtypes)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(inserterSingle2Type)
+                            .addStatement("return prepareInsertInto$LAsSingle2($T.NONE, true)",
+                                    simpleModelName,
+                                    OnConflict.class
+                            )
+                            .build());
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle2")
+                            .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
+                                    schema.getModelClassName())
+                            .addAnnotation(Annotations.checkResult())
+                            .addAnnotations(suppressWarningsRawtypes)
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                    .addAnnotation(OnConflict.class)
+                                    .build())
+                            .returns(inserterSingle2Type)
+                            .addStatement("return prepareInsertInto$LAsSingle2(onConflictAlgorithm, true)",
+                                    simpleModelName
+                            )
+                            .build());
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle2")
+                            .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
+                                    schema.getModelClassName())
+                            .addAnnotation(Annotations.checkResult())
+                            .addAnnotations(suppressWarningsRawtypes)
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                    .addModifiers(Modifier.FINAL)
+                                    .addAnnotation(OnConflict.class)
+                                    .build())
+                            .addParameter(ParameterSpec.builder(boolean.class, "withoutAutoId")
+                                    .addModifiers(Modifier.FINAL)
+                                    .build())
+                            .returns(inserterSingle2Type)
+                            .addStatement("return $T.fromCallable($L)", Types.Single2,
+                                    callableWithCode(inserterType, "return new $T($L, $L, onConflictAlgorithm, withoutAutoId)",
+                                            inserterType, connection, schemaInstance))
+                            .build());
+
         });
 
         return methodSpecs;
@@ -576,13 +616,25 @@ public class DatabaseWriter extends BaseWriter {
                 .build();
     }
 
-    // for RxJava 1.x
-    TypeSpec action0WithCode(String statement, Object... args) {
+    TypeSpec rxAction0WithCode(String statement, Object... args) {
         return TypeSpec.anonymousClassBuilder("")
                 .superclass(Types.Action0)
                 .addMethod(MethodSpec.methodBuilder("call")
                         .addAnnotation(Annotations.override())
                         .addModifiers(Modifier.PUBLIC)
+                        .addStatement(statement, args)
+                        .build())
+                .build();
+    }
+
+    TypeSpec callableWithCode(TypeName returnType, String statement, Object... args) {
+        return TypeSpec.anonymousClassBuilder("")
+                .superclass(Types.Callable)
+                .addMethod(MethodSpec.methodBuilder("call")
+                        .addAnnotation(Annotations.override())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(returnType)
+                        .addException(Exception.class)
                         .addStatement(statement, args)
                         .build())
                 .build();
