@@ -254,7 +254,7 @@ public class DatabaseWriter extends BaseWriter {
                         .addAnnotation(Annotations.workerThread())
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
-                                ParameterSpec.builder(Runnable.class, "task")
+                                ParameterSpec.builder(Types.Runnable, "task")
                                         .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionSync(task)", connection)
@@ -263,14 +263,31 @@ public class DatabaseWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("transactionAsync")
+                        .addJavadoc("RxJava 1.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}\n")
                         .addAnnotation(Annotations.checkResult())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.Completable)
                         .addParameter(
-                                ParameterSpec.builder(Runnable.class, "task")
+                                ParameterSpec.builder(Types.Runnable, "task")
                                         .addAnnotation(Annotations.nonNull())
+                                        .addModifiers(Modifier.FINAL)
                                         .build())
-                        .addStatement("return $L.transactionAsync(task)", connection)
+                        .addStatement("return $T.fromAction($L)", Types.Completable, action0WithCode("transactionSync(task)"))
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("transactionAsCompletable2")
+                        .addJavadoc("RxJava 2.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}\n")
+                        .addAnnotation(Annotations.checkResult())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.Completable2)
+                        .addParameter(
+                                ParameterSpec.builder(Types.Runnable, "task")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .addModifiers(Modifier.FINAL)
+                                        .build())
+                        .addStatement("return $T.fromRunnable($L)", Types.Completable2, runnableWithCode("transactionSync(task)"))
                         .build()
         );
 
@@ -278,7 +295,7 @@ public class DatabaseWriter extends BaseWriter {
                 MethodSpec.methodBuilder("transactionNonExclusiveSync")
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
-                                ParameterSpec.builder(Runnable.class, "task")
+                                ParameterSpec.builder(Types.Runnable, "task")
                                         .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addStatement("$L.transactionNonExclusiveSync(task)", connection)
@@ -287,14 +304,31 @@ public class DatabaseWriter extends BaseWriter {
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("transactionNonExclusiveAsync")
+                        .addJavadoc("RxJava 1.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}\n")
                         .addAnnotation(Annotations.checkResult())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.Completable)
                         .addParameter(
-                                ParameterSpec.builder(Runnable.class, "task")
+                                ParameterSpec.builder(Types.Runnable, "task")
                                         .addAnnotation(Annotations.nonNull())
+                                        .addModifiers(Modifier.FINAL)
                                         .build())
-                        .addStatement("return $L.transactionNonExclusiveAsync(task)", connection)
+                        .addStatement("return $T.fromAction($L)", Types.Completable, action0WithCode("transactionNonExclusiveSync(task)"))
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("transactionNonExclusiveAsCompletable2")
+                        .addJavadoc("RxJava 2.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}\n")
+                        .addAnnotation(Annotations.checkResult())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.Completable2)
+                        .addParameter(
+                                ParameterSpec.builder(Types.Runnable, "task")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .addModifiers(Modifier.FINAL)
+                                        .build())
+                        .addStatement("return $T.fromRunnable($L)", Types.Completable2, runnableWithCode("transactionNonExclusiveSync(task)"))
                         .build()
         );
 
@@ -529,6 +563,29 @@ public class DatabaseWriter extends BaseWriter {
         });
 
         return methodSpecs;
+    }
+
+    TypeSpec runnableWithCode(String statement, Object... args) {
+        return TypeSpec.anonymousClassBuilder("")
+                .superclass(Types.Runnable)
+                .addMethod(MethodSpec.methodBuilder("run")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Annotations.override())
+                        .addStatement(statement, args)
+                        .build())
+                .build();
+    }
+
+    // for RxJava 1.x
+    TypeSpec action0WithCode(String statement, Object... args) {
+        return TypeSpec.anonymousClassBuilder("")
+                .superclass(Types.Action0)
+                .addMethod(MethodSpec.methodBuilder("call")
+                        .addAnnotation(Annotations.override())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement(statement, args)
+                        .build())
+                .build();
     }
 
     public List<MethodSpec> buildConstructorSpecs() {

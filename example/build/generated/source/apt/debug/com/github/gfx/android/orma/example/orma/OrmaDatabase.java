@@ -18,6 +18,7 @@ import java.util.List;
 import rx.Completable;
 import rx.Single;
 import rx.SingleSubscriber;
+import rx.functions.Action0;
 
 /**
  * <p>The Orma database handle class.</p>
@@ -76,18 +77,60 @@ public class OrmaDatabase implements DatabaseHandle {
     connection.transactionSync(task);
   }
 
+  /**
+   * RxJava 1.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}
+   */
   @CheckResult
-  public Completable transactionAsync(@NonNull Runnable task) {
-    return connection.transactionAsync(task);
+  public Completable transactionAsync(@NonNull final Runnable task) {
+    return Completable.fromAction(new Action0() {
+      @Override
+      public void call() {
+        transactionSync(task);
+      }
+    });
+  }
+
+  /**
+   * RxJava 2.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}
+   */
+  @CheckResult
+  public io.reactivex.Completable transactionAsCompletable2(@NonNull final Runnable task) {
+    return io.reactivex.Completable.fromRunnable(new Runnable() {
+      @Override
+      public void run() {
+        transactionSync(task);
+      }
+    });
   }
 
   public void transactionNonExclusiveSync(@NonNull Runnable task) {
     connection.transactionNonExclusiveSync(task);
   }
 
+  /**
+   * RxJava 1.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}
+   */
   @CheckResult
-  public Completable transactionNonExclusiveAsync(@NonNull Runnable task) {
-    return connection.transactionNonExclusiveAsync(task);
+  public Completable transactionNonExclusiveAsync(@NonNull final Runnable task) {
+    return Completable.fromAction(new Action0() {
+      @Override
+      public void call() {
+        transactionNonExclusiveSync(task);
+      }
+    });
+  }
+
+  /**
+   * RxJava 2.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}
+   */
+  @CheckResult
+  public io.reactivex.Completable transactionNonExclusiveAsCompletable2(@NonNull final Runnable task) {
+    return io.reactivex.Completable.fromRunnable(new Runnable() {
+      @Override
+      public void run() {
+        transactionNonExclusiveSync(task);
+      }
+    });
   }
 
   /**

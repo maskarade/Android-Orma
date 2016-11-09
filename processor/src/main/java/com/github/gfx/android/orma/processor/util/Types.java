@@ -76,6 +76,10 @@ public class Types {
 
     public static final ClassName CheckResult = ClassName.get("android.support.annotation", "CheckResult");
 
+    public static final ClassName Runnable = ClassName.get(java.lang.Runnable.class);
+
+    // RxJava 1.x
+
     public static final ClassName Single = ClassName.get("rx", "Single");
 
     public static final ClassName SingleOnSubscribe = ClassName.get("rx", "Single", "OnSubscribe");
@@ -85,6 +89,25 @@ public class Types {
     public static final ClassName Observable = ClassName.get("rx", "Observable");
 
     public static final ClassName Func1 = ClassName.get("rx.functions", "Func1");
+
+    public static final ClassName Action0 = ClassName.get("rx.functions", "Action0");
+
+    public static final ClassName Completable = ClassName.get("rx", "Completable");
+
+    // RxJava 2.x
+
+    public static final ClassName Single2 = ClassName.get(io.reactivex.Single.class);
+
+    public static final ClassName SingleOnSubscribe2 = ClassName.get(io.reactivex.SingleOnSubscribe.class);
+
+    public static final ClassName SingleEmitter2 = ClassName.get(io.reactivex.SingleEmitter.class);
+
+    public static final ClassName Observable2 = ClassName.get(io.reactivex.Observable.class);
+
+    public static final ClassName Function2 = ClassName.get(io.reactivex.functions.Function.class);
+
+    public static final ClassName Completable2 = ClassName.get(io.reactivex.Completable.class);
+
 
     public static final TypeVariableName T = TypeVariableName.get("T");
 
@@ -134,8 +157,6 @@ public class Types {
     public static final ClassName ColumnPath = ClassName.get(ormaPackageName + ".internal", "Aliases", "ColumnPath");
 
     public static final ClassName IllegalArgumentException = ClassName.get(IllegalArgumentException.class);
-
-    public static final ClassName Completable = ClassName.get("rx", "Completable");
 
     private static final Set<TypeName> integerTypes = new HashSet<>(java.util.Arrays.asList(
             TypeName.BYTE,

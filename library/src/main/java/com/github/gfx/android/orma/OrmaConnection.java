@@ -288,6 +288,7 @@ public class OrmaConnection {
         }
     }
 
+    @Deprecated
     @NonNull
     public Completable transactionNonExclusiveAsync(@NonNull final Runnable task) {
         return Completable.create(new Completable.OnSubscribe() {
@@ -308,7 +309,6 @@ public class OrmaConnection {
         SQLiteDatabase db = getWritableDatabase();
         trace("begin transaction", null);
         db.beginTransaction();
-
         try {
             task.run();
             db.setTransactionSuccessful();
@@ -318,6 +318,7 @@ public class OrmaConnection {
         }
     }
 
+    @Deprecated
     @NonNull
     public Completable transactionAsync(@NonNull final Runnable task) {
         return Completable.create(new Completable.OnSubscribe() {
@@ -332,7 +333,6 @@ public class OrmaConnection {
             }
         });
     }
-
 
     /**
      * Deletes all the columns in all the tables provided for testing.
