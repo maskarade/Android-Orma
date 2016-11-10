@@ -151,7 +151,7 @@ class TimingsListener implements TaskExecutionListener, BuildListener {
         def timingsOverThreshold = timings.grep { timing -> timing[0] > 1000 }
         if (!timingsOverThreshold.empty) {
             println "Task timings:"
-            for (timing in timingsOverThreshold) {
+            for (timing in timingsOverThreshold.toSorted { a, b -> b[0] <=> a[0] }) {
                 printf "%7sms  %s\n", timing
             }
         }
