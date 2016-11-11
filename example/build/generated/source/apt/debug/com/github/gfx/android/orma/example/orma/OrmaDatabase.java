@@ -90,6 +90,10 @@ public class OrmaDatabase implements DatabaseHandle {
     return connection.transactionNonExclusiveAsync(task);
   }
 
+  public void deleteAll() {
+    connection.deleteAll();
+  }
+
   /**
    * Retrieves a model from a cursor. */
   @NonNull
