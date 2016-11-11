@@ -90,6 +90,7 @@ public class OrmaMigration extends AbstractMigrationEngine {
      * @param version A target version for the step
      * @param step    A migration step task for {@code version}
      */
+    @Deprecated
     public void addStep(int version, @NonNull ManualStepMigration.Step step) {
         manualStepMigration.addStep(version, step);
     }
