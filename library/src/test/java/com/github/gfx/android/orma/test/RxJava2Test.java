@@ -116,14 +116,14 @@ public class RxJava2Test {
 
     @Test
     public void countAsSingle2() throws Exception {
-        selector().countAsSingle2()
+        selector().countAsSingle()
                 .test()
                 .assertResult(2);
     }
 
     @Test
     public void countAsObservable2() throws Exception {
-        selector().countAsObservable2()
+        selector().countAsObservable()
                 .test()
                 .assertResult(2);
     }
@@ -131,7 +131,7 @@ public class RxJava2Test {
     @Test
     public void selectorObservable2() throws Exception {
         selector().titleEq("today")
-                .executeAsObservable2()
+                .executeAsObservable()
                 .map(new Function<Book, String>() {
                     @Override
                     public String apply(Book book) throws Exception {
@@ -145,22 +145,22 @@ public class RxJava2Test {
     @Test
     public void pluckAsObservable2() throws Exception {
         selector().orderByTitleAsc()
-                .pluckAsObservable2(Book_Schema.INSTANCE.title)
+                .pluckAsObservable(Book_Schema.INSTANCE.title)
                 .test()
                 .assertResult("friday", "today");
 
         selector().orderByTitleDesc()
-                .pluckAsObservable2(Book_Schema.INSTANCE.title)
+                .pluckAsObservable(Book_Schema.INSTANCE.title)
                 .test()
                 .assertResult("today", "friday");
 
         selector().orderByTitleAsc()
-                .pluckAsObservable2(Book_Schema.INSTANCE.inPrint)
+                .pluckAsObservable(Book_Schema.INSTANCE.inPrint)
                 .test()
                 .assertResult(false, true);
 
         selector().orderByTitleDesc()
-                .pluckAsObservable2(Book_Schema.INSTANCE.inPrint)
+                .pluckAsObservable(Book_Schema.INSTANCE.inPrint)
                 .test()
                 .assertResult(true, false);
 
@@ -168,16 +168,16 @@ public class RxJava2Test {
 
     @Test
     public void inserterSingle2() throws Exception {
-        db.prepareInsertIntoBookAsSingle2()
+        db.prepareInsertIntoBookAsSingle()
                 .flatMap(new Function<Inserter<Book>, SingleSource<Long>>() {
                     @Override
                     public SingleSource<Long> apply(Inserter<Book> bookInserter) throws Exception {
-                        return bookInserter.executeAsSingle2(new Callable<Book>() {
+                        return bookInserter.executeAsSingle(new Callable<Book>() {
                             @NonNull
                             @Override
                             public Book call() {
                                 Book book = new Book();
-                                book.title = "observable days";
+                                book.title = "single days";
                                 book.content = "reactive";
                                 book.inPrint = false;
                                 book.publisher = SingleAssociation.id(publisher.id);
@@ -199,16 +199,16 @@ public class RxJava2Test {
 
     @Test
     public void inserterInsertAllAsSingle2() throws Exception {
-        db.prepareInsertIntoBookAsSingle2()
+        db.prepareInsertIntoBookAsSingle()
                 .flatMapObservable(new Function<Inserter<Book>, ObservableSource<Long>>() {
                     @Override
                     public ObservableSource<Long> apply(Inserter<Book> bookInserter) throws Exception {
                         Book book = new Book();
-                        book.title = "observable days";
+                        book.title = "single days";
                         book.content = "reactive";
                         book.inPrint = false;
                         book.publisher = SingleAssociation.id(publisher.id);
-                        return bookInserter.executeAllAsObservable2(Collections.singleton(book));
+                        return bookInserter.executeAllAsObservable(Collections.singleton(book));
                     }
                 })
                 .test()
@@ -227,7 +227,7 @@ public class RxJava2Test {
         db.updateBook()
                 .titleEq("today")
                 .content("modified")
-                .executeAsSingle2()
+                .executeAsSingle()
                 .test()
                 .assertResult(1);
 
@@ -238,7 +238,7 @@ public class RxJava2Test {
     public void deleteSingle2() throws Exception {
         db.deleteFromBook()
                 .titleEq("today")
-                .executeAsSingle2()
+                .executeAsSingle()
                 .test()
                 .assertResult(1);
 
@@ -255,7 +255,7 @@ public class RxJava2Test {
         final List<String> mapped = new ArrayList<>();
 
         db.selectFromBook()
-                .executeAsObservable2()
+                .executeAsObservable()
                 .map(new Function<Book, String>() {
                     @Override
                     public String apply(Book book) throws Exception {

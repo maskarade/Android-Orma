@@ -27,10 +27,8 @@ import android.view.LayoutInflater;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Maybe;
+import io.reactivex.Single;
 import io.reactivex.functions.Consumer;
-import rx.Observable;
-import rx.Single;
-import rx.functions.Action1;
 
 
 /**
@@ -88,31 +86,8 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      */
     @CheckResult
     @NonNull
-    public Single<Long> addItemAsObservable(@NonNull Callable<Model> factory) {
-        return delegate.addItemAsObservable(factory)
-                .doOnSuccess(new Action1<Long>() {
-                    @Override
-                    public void call(Long rowId) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyItemInserted(getItemCount());
-                            }
-                        });
-                    }
-                });
-    }
-
-    /**
-     * Inserts a model into the table and invokes {@link RecyclerView.Adapter#notifyItemInserted(int)}
-     *
-     * @param factory A model factory invoked in a background thread.
-     * @return A {@link Single} that yields the newly inserted row id.
-     */
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Long> addItemAsSingle2(@NonNull final Callable<Model> factory) {
-        return delegate.addItemAsSingle2(factory)
+    public Single<Long> addItemAsSingle(@NonNull final Callable<Model> factory) {
+        return delegate.addItemAsSingle(factory)
                 .doOnSuccess(new Consumer<Long>() {
                     @Override
                     public void accept(Long rowId) {
@@ -130,61 +105,25 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      * Inserts a model into the table and invokes {@link RecyclerView.Adapter#notifyItemInserted(int)}
      *
      * @param item A model factory invoked in a background thread.
-     * @return A hot {@link Observable} that yields the newly inserted row id.
+     * @return It yields the inserted row id.
      */
     @CheckResult
     @NonNull
-    public Single<Long> addItemAsObservable(@NonNull Model item) {
-        return addItemAsObservable(delegate.createFactory(item));
-    }
-
-    /**
-     * Inserts a model into the table and invokes {@link RecyclerView.Adapter#notifyItemInserted(int)}
-     *
-     * @param item A model factory invoked in a background thread.
-     * @return A hot {@link Observable} that yields the newly inserted row id.
-     */
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Long> addItemAsSingle2(@NonNull Model item) {
-        return addItemAsSingle2(delegate.createFactory(item));
+    public Single<Long> addItemAsSingle(@NonNull Model item) {
+        return addItemAsSingle(delegate.createFactory(item));
     }
 
     /**
      * Removes an item from the table and invokes {@link RecyclerView.Adapter#notifyItemRemoved(int)}.
      *
      * @param item A model to remove.
-     * @return An {@link Observable} that yields the position at which the item was. {@code onNext()} is only called if the
+     * @return It yields the position at which the item was. {@code onNext()} is only called if the
      * item existed.
      */
     @CheckResult
     @NonNull
-    public Observable<Integer> removeItemAsObservable(@NonNull Model item) {
-        return delegate.removeItemAsObservable(item)
-                .doOnNext(new Action1<Integer>() {
-                    @Override
-                    public void call(final Integer position) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyItemRemoved(position);
-                            }
-                        });
-                    }
-                });
-    }
-
-    /**
-     * Removes an item from the table and invokes {@link RecyclerView.Adapter#notifyItemRemoved(int)}.
-     *
-     * @param item A model to remove.
-     * @return An {@link Observable} that yields the position at which the item was. {@code onNext()} is only called if the
-     * item existed.
-     */
-    @CheckResult
-    @NonNull
-    public Maybe<Integer> removeItemAsMaybe2(@NonNull Model item) {
-        return delegate.removeItemAsMaybe2(item)
+    public Maybe<Integer> removeItemAsMaybe(@NonNull Model item) {
+        return delegate.removeItemAsMaybe(item)
                 .doOnSuccess(new Consumer<Integer>() {
                     @Override
                     public void accept(final Integer position) {
@@ -201,34 +140,12 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
     /**
      * Deletes all the rows in the table and invokes {@link RecyclerView.Adapter#notifyDataSetChanged()}.
      *
-     * @return A {@link Single} that yields the number of deleted items.
+     * @return It yields the number of deleted items.
      */
     @CheckResult
     @NonNull
-    public Single<Integer> clearAsObservable() {
-        return delegate.clearAsObservable()
-                .doOnSuccess(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer deletedItems) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyDataSetChanged();
-                            }
-                        });
-                    }
-                });
-    }
-
-    /**
-     * Deletes all the rows in the table and invokes {@link RecyclerView.Adapter#notifyDataSetChanged()}.
-     *
-     * @return A {@link Single} that yields the number of deleted items.
-     */
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Integer> clearAsSingle2() {
-        return delegate.clearAsSingle2()
+    public Single<Integer> clearAsSingle() {
+        return delegate.clearAsSingle()
                 .doOnSuccess(new Consumer<Integer>() {
                     @Override
                     public void accept(Integer deletedItems) {

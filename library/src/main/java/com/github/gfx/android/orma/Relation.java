@@ -32,10 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeEmitter;
 import io.reactivex.MaybeOnSubscribe;
-import rx.Observable;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.Subscriber;
+import io.reactivex.Single;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -105,19 +102,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     @CheckResult
     @NonNull
-    public Single<Model> getAsObservable(@IntRange(from = 0) final int position) {
-        return Single.create(new Single.OnSubscribe<Model>() {
-            @Override
-            public void call(final SingleSubscriber<? super Model> subscriber) {
-                subscriber.onSuccess(get(position));
-            }
-        });
-    }
-
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Model> getAsSingle2(@IntRange(from = 0) final int position) {
-        return io.reactivex.Single.fromCallable(new Callable<Model>() {
+    public Single<Model> getAsSingle(@IntRange(from = 0) final int position) {
+        return Single.fromCallable(new Callable<Model>() {
             @Override
             public Model call() throws Exception {
                 return get(position);
@@ -150,47 +136,11 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * Operations are executed in a transaction.
      *
      * @param item A model to delete.
-     * @return An {@link Observable} that yields the position of the deleted item if the item is deleted.
-     */
-    @CheckResult
-    @NonNull
-    public Observable<Integer> deleteAsObservable(@NonNull final Model item) {
-        return Observable.create(new Observable.OnSubscribe<Integer>() {
-            @Override
-            public void call(final Subscriber<? super Integer> subscriber) {
-                final AtomicInteger positionRef = new AtomicInteger(-1);
-                conn.transactionSync(new Runnable() {
-                    @Override
-                    public void run() {
-                        int position = indexOf(item);
-                        ColumnDef<Model, ?> pk = getSchema().getPrimaryKey();
-                        int deletedRows = deleter()
-                                .where(pk, "=", pk.getSerialized(item))
-                                .execute();
-
-                        if (deletedRows > 0) {
-                            positionRef.set(position);
-                        }
-                    }
-                });
-                if (positionRef.get() >= 0) {
-                    subscriber.onNext(positionRef.get());
-                }
-                subscriber.onCompleted();
-            }
-        });
-    }
-
-    /**
-     * Deletes a specified model and yields where it was. Suitable to implement {@link android.widget.Adapter}.
-     * Operations are executed in a transaction.
-     *
-     * @param item A model to delete.
      * @return An {@link Maybe} that yields the position of the deleted item if the item is deleted.
      */
     @CheckResult
     @NonNull
-    public Maybe<Integer> deleteAsMaybe2(@NonNull final Model item) {
+    public Maybe<Integer> deleteAsMaybe(@NonNull final Model item) {
         return Maybe.create(new MaybeOnSubscribe<Integer>() {
             @Override
             public void subscribe(MaybeEmitter<Integer> emitter) throws Exception {
@@ -227,30 +177,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @CheckResult
     @NonNull
-    public Single<Integer> truncateAsObservable(@IntRange(from = 0) final int size) {
-        return Single.create(new Single.OnSubscribe<Integer>() {
-            @Override
-            public void call(SingleSubscriber<? super Integer> subscriber) {
-                String pk = getSchema().getPrimaryKey().getEscapedName();
-                Selector<Model, ?> subquery = selector();
-                subquery.limit(Integer.MAX_VALUE);
-                subquery.offset(size);
-                int deletedRows = conn.delete(getSchema(), pk + " IN (" + subquery.buildQueryWithColumns(pk) + ")", getBindArgs());
-                subscriber.onSuccess(deletedRows);
-            }
-        });
-    }
-
-    /**
-     * Truncates the table to the specified size.
-     *
-     * @param size Size to truncate the table
-     * @return A {@link Single} that yields the number of rows deleted.
-     */
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Integer> truncateAsSingle2(@IntRange(from = 0) final int size) {
-        return io.reactivex.Single.fromCallable(new Callable<Integer>() {
+    public Single<Integer> truncateAsSingle(@IntRange(from = 0) final int size) {
+        return Single.fromCallable(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 String pk = getSchema().getPrimaryKey().getEscapedName();
@@ -270,26 +198,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @CheckResult
     @NonNull
-    public Single<Long> insertAsObservable(@NonNull final Callable<Model> factory) {
-        return Single.create(new Single.OnSubscribe<Long>() {
-            @Override
-            public void call(final SingleSubscriber<? super Long> subscriber) {
-                long rowId = inserter().execute(factory);
-                subscriber.onSuccess(rowId);
-            }
-        });
-    }
-
-    /**
-     * Inserts an item.
-     *
-     * @param factory A model to insert.
-     * @return An {@link io.reactivex.Single} that yields the newly inserted row id.
-     */
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Long> insertAsSingle2(@NonNull final Callable<Model> factory) {
-        return io.reactivex.Single.fromCallable(new Callable<Long>() {
+    public Single<Long> insertAsSingle(@NonNull final Callable<Model> factory) {
+        return Single.fromCallable(new Callable<Long>() {
             @Override
             public Long call() throws Exception {
                 return inserter().execute(factory);

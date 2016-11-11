@@ -28,8 +28,8 @@ import android.view.LayoutInflater;
 
 import java.util.concurrent.Callable;
 
-import rx.Observable;
-import rx.Single;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
 
 /**
  * A helper class that provides adapter class details.
@@ -92,49 +92,25 @@ public class OrmaAdapter<Model> {
 
     @CheckResult
     @NonNull
-    public Single<Model> getItemAsObservable(int position) {
-        return relation.getAsObservable(position);
+    public Single<Model> getItemAsSingle(int position) {
+        return relation.getAsSingle(position);
     }
 
     @CheckResult
     @NonNull
-    public io.reactivex.Single<Model> getItemAsSingle2(int position) {
-        return relation.getAsSingle2(position);
+    public Single<Long> addItemAsSingle(Callable<Model> factory) {
+        return relation.insertAsSingle(factory);
     }
 
     @CheckResult
     @NonNull
-    public Single<Long> addItemAsObservable(Callable<Model> factory) {
-        return relation.insertAsObservable(factory);
+    public Maybe<Integer> removeItemAsMaybe(@NonNull final Model item) {
+        return relation.deleteAsMaybe(item);
     }
 
     @CheckResult
     @NonNull
-    public io.reactivex.Single<Long> addItemAsSingle2(Callable<Model> factory) {
-        return relation.insertAsSingle2(factory);
-    }
-
-    @CheckResult
-    @NonNull
-    public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
-        return relation.deleteAsObservable(item);
-    }
-
-    @CheckResult
-    @NonNull
-    public io.reactivex.Maybe<Integer> removeItemAsMaybe2(@NonNull final Model item) {
-        return relation.deleteAsMaybe2(item);
-    }
-
-    @CheckResult
-    @NonNull
-    public Single<Integer> clearAsObservable() {
-        return relation.deleter().executeAsObservable();
-    }
-
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Integer> clearAsSingle2() {
-        return relation.deleter().executeAsSingle2();
+    public Single<Integer> clearAsSingle() {
+        return relation.deleter().executeAsSingle();
     }
 }

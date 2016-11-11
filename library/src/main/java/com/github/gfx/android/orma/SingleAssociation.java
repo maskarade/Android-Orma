@@ -26,8 +26,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import rx.Single;
-import rx.SingleSubscriber;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
 
 /**
  * Represents a has-one relation with lazy loading.
@@ -53,18 +56,18 @@ public class SingleAssociation<Model> implements Parcelable {
 
     public SingleAssociation(@NonNull final OrmaConnection conn, @NonNull final Schema<Model> schema, final long id) {
         this.id = id;
-        single = Single.create(new Single.OnSubscribe<Model>() {
+        single = Single.create(new SingleOnSubscribe<Model>() {
             @Override
-            public void call(SingleSubscriber<? super Model> subscriber) {
+            public void subscribe(SingleEmitter<Model> emitter) throws Exception {
                 ColumnDef<Model, ?> primaryKey = schema.getPrimaryKey();
                 String whereClause = primaryKey.getEscapedName() + " = ?";
                 String[] whereArgs = {String.valueOf(id)};
                 Model model = conn.querySingle(schema, schema.getDefaultResultColumns(),
                         whereClause, whereArgs, null, null, null, 0);
                 if (model != null) {
-                    subscriber.onSuccess(model);
+                    emitter.onSuccess(model);
                 } else {
-                    subscriber.onError(new NoValueException("No value found for "
+                    emitter.onError(new NoValueException("No get found for "
                             + schema.getTableName() + "." + primaryKey.name + " = " + id));
                 }
             }
@@ -86,10 +89,10 @@ public class SingleAssociation<Model> implements Parcelable {
     }
 
     public static <T> SingleAssociation<T> id(final long id) {
-        return new SingleAssociation<>(id, Single.create(new Single.OnSubscribe<T>() {
+        return new SingleAssociation<>(id, Single.<T>error(new Callable<Throwable>() {
             @Override
-            public void call(SingleSubscriber<? super T> singleSubscriber) {
-                singleSubscriber.onError(new NoValueException("No value set for id=" + id));
+            public Throwable call() throws Exception {
+                return new NoValueException("No get set for id=" + id);
             }
         }));
     }
@@ -99,18 +102,24 @@ public class SingleAssociation<Model> implements Parcelable {
     }
 
     @NonNull
-    public Single<Model> observable() {
+    public Single<Model> single() {
         return single;
     }
 
     /**
-     * A shortcut of {@code singleAssociation.observable().toBlocking().value()}.
+     * A shortcut of {@code singleAssociation.single().toBlocking().get()}.
      *
-     * @return A model value the {@code SingleAssociation<T>} refers to.
+     * @return A model get the {@code SingleAssociation<T>} refers to.
      */
     @NonNull
+    public Model get() throws NoValueException {
+        return single.blockingGet();
+    }
+
+    @Deprecated
+    @NonNull
     public Model value() throws NoValueException {
-        return single.toBlocking().value();
+        return single.blockingGet();
     }
 
     @Override
@@ -148,7 +157,7 @@ public class SingleAssociation<Model> implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        Model model = single.toBlocking().value();
+        Model model = single.blockingGet();
         if (!(model instanceof Parcelable)) {
             throw new InvalidModelException("Orma model " + model.getClass() + " is not a Parcelable");
         }

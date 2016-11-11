@@ -173,11 +173,10 @@ public class RelationTest {
     @Test
     public void truncateAsc() throws Exception {
         Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
-        int deletedRows = rel.truncateAsObservable(2)
-                .toBlocking()
-                .value();
+        rel.truncateAsSingle(2)
+                .test()
+                .assertResult(1);
 
-        assertThat(deletedRows, is(1));
         assertThat(rel.count(), is(2));
         assertThat(rel.get(0).name, is("A"));
         assertThat(rel.get(1).name, is("B"));
@@ -186,11 +185,10 @@ public class RelationTest {
     @Test
     public void truncateAscOverflow() throws Exception {
         Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
-        int deletedRows = rel.truncateAsObservable(10)
-                .toBlocking()
-                .value();
+        rel.truncateAsSingle(10)
+                .test()
+                .assertResult(0);
 
-        assertThat(deletedRows, is(0));
         assertThat(rel.count(), is(3));
         assertThat(rel.get(0).name, is("A"));
         assertThat(rel.get(1).name, is("B"));
@@ -200,11 +198,10 @@ public class RelationTest {
     @Test
     public void truncateDesc() throws Exception {
         Relation<ModelWithDate, ?> rel = rel().orderByNameDesc();
-        int deletedRows = rel.truncateAsObservable(10)
-                .toBlocking()
-                .value();
+        rel.truncateAsSingle(10)
+                .test()
+                .assertResult(0);
 
-        assertThat(deletedRows, is(0));
         assertThat(rel.count(), is(3));
         assertThat(rel.get(0).name, is("C"));
         assertThat(rel.get(1).name, is("B"));
@@ -215,8 +212,9 @@ public class RelationTest {
     public void deleteAsObservableAsc() throws Exception {
         Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
 
-        int position = rel.deleteAsObservable(rel.get(2)).toBlocking().first();
-        assertThat(position, is(2));
+        rel.deleteAsMaybe(rel.get(2))
+                .test()
+                .assertResult(2);
 
         assertThat(rel.count(), is(2));
         assertThat(rel.get(0).name, is("A"));
@@ -227,8 +225,9 @@ public class RelationTest {
     public void deleteAsObservableDesc() throws Exception {
         Relation<ModelWithDate, ?> rel = rel().orderByNameDesc();
 
-        int position = rel.deleteAsObservable(rel.get(2)).toBlocking().first();
-        assertThat(position, is(2));
+        rel.deleteAsMaybe(rel.get(2))
+                .test()
+                .assertResult(2);
 
         assertThat(rel.count(), is(2));
         assertThat(rel.get(0).name, is("C"));

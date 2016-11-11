@@ -178,10 +178,10 @@ public class MainFragment extends Fragment {
 
     void rxCrud() {
         // create
-        orma.prepareInsertIntoTodoAsSingle2()
+        orma.prepareInsertIntoTodoAsSingle()
                 .flatMapObservable(todoInserter -> Single.concat(
-                        todoInserter.executeAsSingle2(Todo.create("today", "coffee")),
-                        todoInserter.executeAsSingle2(Todo.create("tomorrow", "tea"))
+                        todoInserter.executeAsSingle(Todo.create("today", "coffee")),
+                        todoInserter.executeAsSingle(Todo.create("tomorrow", "tea"))
                 ).toObservable())
                 .subscribe((rowId) -> {
                     Log.d(TAG, "inserted: " + rowId);
@@ -189,7 +189,7 @@ public class MainFragment extends Fragment {
 
         // read
         orma.selectFromTodo()
-                .executeAsObservable2()
+                .executeAsObservable()
                 .subscribe((item) -> {
                     Log.d(TAG, "rx select: " + item.title);
                 });
@@ -198,7 +198,7 @@ public class MainFragment extends Fragment {
         orma.updateTodo()
                 .titleEq("today")
                 .done(true)
-                .executeAsSingle2()
+                .executeAsSingle()
                 .subscribe((count) -> {
                     Log.d(TAG, "updated count: " + count);
                 });
@@ -206,7 +206,7 @@ public class MainFragment extends Fragment {
         // delete
         orma.deleteFromTodo()
                 .doneEq(true)
-                .executeAsSingle2()
+                .executeAsSingle()
                 .subscribe((count) -> {
                     Log.d(TAG, "deleted count: " + count);
                 });

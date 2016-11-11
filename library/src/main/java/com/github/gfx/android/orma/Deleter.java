@@ -22,8 +22,7 @@ import android.support.annotation.NonNull;
 
 import java.util.concurrent.Callable;
 
-import rx.Single;
-import rx.SingleSubscriber;
+import io.reactivex.Single;
 
 public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaConditionBase<Model, D> {
 
@@ -44,19 +43,8 @@ public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaCo
 
     @CheckResult
     @NonNull
-    public Single<Integer> executeAsObservable() {
-        return Single.create(new Single.OnSubscribe<Integer>() {
-            @Override
-            public void call(SingleSubscriber<? super Integer> subscriber) {
-                subscriber.onSuccess(execute());
-            }
-        });
-    }
-
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Integer> executeAsSingle2() {
-        return io.reactivex.Single.fromCallable(new Callable<Integer>() {
+    public Single<Integer> executeAsSingle() {
+        return Single.fromCallable(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 return execute();

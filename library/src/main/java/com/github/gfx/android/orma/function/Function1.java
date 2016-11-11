@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.exception;
+package com.github.gfx.android.orma.function;
 
-@SuppressWarnings("serial")
-public class InsertionFailureException extends OrmaException {
-
-    public InsertionFailureException(Throwable throwable) {
-        super(throwable);
-    }
+@FunctionalInterface
+public interface Function1<T, R> {
+    R apply(T t);
 }

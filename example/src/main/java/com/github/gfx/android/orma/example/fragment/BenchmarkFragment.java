@@ -162,7 +162,7 @@ public class BenchmarkFragment extends Fragment {
         hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
         orma.deleteFromTodo()
-                .executeAsSingle2()
+                .executeAsSingle()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(integer -> startInsertWithOrma())
@@ -293,7 +293,7 @@ public class BenchmarkFragment extends Fragment {
                 }
 
                 if (todos.count() != count.get()) {
-                    throw new AssertionError("unexpected value: " + count.get());
+                    throw new AssertionError("unexpected get: " + count.get());
                 }
                 Log.d(TAG, "Orma/forEachAll count: " + count);
             });
@@ -321,7 +321,7 @@ public class BenchmarkFragment extends Fragment {
                     count.incrementAndGet();
                 }
                 if (results.size() != count.get()) {
-                    throw new AssertionError("unexpected value: " + count.get());
+                    throw new AssertionError("unexpected get: " + count.get());
                 }
                 realm.close();
 
@@ -362,7 +362,7 @@ public class BenchmarkFragment extends Fragment {
 
                 long dbCount = longForQuery(db, "SELECT COUNT(*) FROM todo", null);
                 if (dbCount != count.get()) {
-                    throw new AssertionError("unexpected value: " + count.get() + " != " + dbCount);
+                    throw new AssertionError("unexpected get: " + count.get() + " != " + dbCount);
                 }
 
                 Log.d(TAG, "HandWritten/forEachAll count: " + count);

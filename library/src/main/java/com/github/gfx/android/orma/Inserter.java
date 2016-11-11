@@ -25,12 +25,10 @@ import android.support.annotation.NonNull;
 
 import java.util.concurrent.Callable;
 
+import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import rx.Observable;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.Subscriber;
+import io.reactivex.Single;
 
 /**
  * Represents a prepared statement to insert models in batch.
@@ -97,30 +95,12 @@ public class Inserter<Model> {
      * {@link Single} wrapper to {@code execute(Model)}
      *
      * @param model A model object to insert
-     * @return An {@link Observable} for the last inserted row id
+     * @return An {@link Single} for the last inserted row id
      */
     @CheckResult
     @NonNull
-    public Single<Long> executeAsObservable(@NonNull final Model model) {
-        return Single.create(new Single.OnSubscribe<Long>() {
-            @Override
-            public void call(SingleSubscriber<? super Long> subscriber) {
-                long rowId = execute(model);
-                subscriber.onSuccess(rowId);
-            }
-        });
-    }
-
-    /**
-     * {@link io.reactivex.Single} wrapper to {@code execute(Model)}
-     *
-     * @param model A model object to insert
-     * @return An {@link io.reactivex.Single} for the last inserted row id
-     */
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Long> executeAsSingle2(@NonNull final Model model) {
-        return io.reactivex.Single.fromCallable(new Callable<Long>() {
+    public Single<Long> executeAsSingle(@NonNull final Model model) {
+        return Single.fromCallable(new Callable<Long>() {
             @Override
             public Long call() throws Exception {
                 return execute(model);
@@ -130,34 +110,14 @@ public class Inserter<Model> {
 
     /**
      * {@link Single} wrapper to {@code execute(ModelFactory<Model>)}.
-     * {@link ModelFactory#call()} is called in {@link Single.OnSubscribe#call(Object)}.
      *
      * @param modelFactory A model factory
-     * @return An {@link Observable} for the last inserted row id
+     * @return It yields the inserted row id
      */
     @CheckResult
     @NonNull
-    public Single<Long> executeAsObservable(@NonNull final ModelFactory<Model> modelFactory) {
-        return Single.create(new Single.OnSubscribe<Long>() {
-            @Override
-            public void call(SingleSubscriber<? super Long> subscriber) {
-                long rowId = execute(modelFactory);
-                subscriber.onSuccess(rowId);
-            }
-        });
-    }
-
-    /**
-     * {@link Single} wrapper to {@code execute(ModelFactory<Model>)}.
-     * {@link ModelFactory#call()} is called in {@link Single.OnSubscribe#call(Object)}.
-     *
-     * @param modelFactory A model factory
-     * @return An {@link Observable} for the last inserted row id
-     */
-    @CheckResult
-    @NonNull
-    public io.reactivex.Single<Long> executeAsSingle2(@NonNull final Callable<Model> modelFactory) {
-        return io.reactivex.Single.fromCallable(new Callable<Long>() {
+    public Single<Long> executeAsSingle(@NonNull final Callable<Model> modelFactory) {
+        return Single.fromCallable(new Callable<Long>() {
             @Override
             public Long call() throws Exception {
                 return execute(modelFactory);
@@ -166,36 +126,15 @@ public class Inserter<Model> {
     }
 
     /**
-     * {@link Single} wrapper to {@code execute(Model)}
+     * {@link Observable} wrapper to {@code execute(Iterable<Model>)}
      *
      * @param models model objects to insert
-     * @return An {@link Observable} for the last inserted row ids
+     * @return It yields the inserted row ids
      */
     @CheckResult
     @NonNull
     public Observable<Long> executeAllAsObservable(@NonNull final Iterable<Model> models) {
-        return Observable.create(new Observable.OnSubscribe<Long>() {
-            @Override
-            public void call(Subscriber<? super Long> subscriber) {
-                for (Model model : models) {
-                    long rowId = execute(model);
-                    subscriber.onNext(rowId);
-                }
-                subscriber.onCompleted();
-            }
-        });
-    }
-
-    /**
-     * {@link io.reactivex.Observable} wrapper to {@code execute(Iterable<Model>)}
-     *
-     * @param models model objects to insert
-     * @return An {@link io.reactivex.Observable} for the last inserted row ids
-     */
-    @CheckResult
-    @NonNull
-    public io.reactivex.Observable<Long> executeAllAsObservable2(@NonNull final Iterable<Model> models) {
-        return io.reactivex.Observable.create(new ObservableOnSubscribe<Long>() {
+        return Observable.create(new ObservableOnSubscribe<Long>() {
             @Override
             public void subscribe(ObservableEmitter<Long> emitter) throws Exception {
                 for (Model model : models) {

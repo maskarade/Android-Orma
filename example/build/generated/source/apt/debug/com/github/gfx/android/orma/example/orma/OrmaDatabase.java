@@ -13,12 +13,11 @@ import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.OrmaDatabaseBuilderBase;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
-import rx.Completable;
-import rx.Single;
-import rx.functions.Action0;
 
 /**
  * <p>The Orma database handle class.</p>
@@ -78,24 +77,11 @@ public class OrmaDatabase implements DatabaseHandle {
   }
 
   /**
-   * RxJava 1.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}
-   */
-  @CheckResult
-  public Completable transactionAsync(@NonNull final Runnable task) {
-    return Completable.fromAction(new Action0() {
-      @Override
-      public void call() {
-        transactionSync(task);
-      }
-    });
-  }
-
-  /**
    * RxJava 2.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}
    */
   @CheckResult
-  public io.reactivex.Completable transactionAsCompletable2(@NonNull final Runnable task) {
-    return io.reactivex.Completable.fromRunnable(new Runnable() {
+  public Completable transactionAsCompletable(@NonNull final Runnable task) {
+    return Completable.fromRunnable(new Runnable() {
       @Override
       public void run() {
         transactionSync(task);
@@ -108,24 +94,11 @@ public class OrmaDatabase implements DatabaseHandle {
   }
 
   /**
-   * RxJava 1.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}
-   */
-  @CheckResult
-  public Completable transactionNonExclusiveAsync(@NonNull final Runnable task) {
-    return Completable.fromAction(new Action0() {
-      @Override
-      public void call() {
-        transactionNonExclusiveSync(task);
-      }
-    });
-  }
-
-  /**
    * RxJava 2.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}
    */
   @CheckResult
-  public io.reactivex.Completable transactionNonExclusiveAsCompletable2(@NonNull final Runnable task) {
-    return io.reactivex.Completable.fromRunnable(new Runnable() {
+  public Completable transactionNonExclusiveAsCompletable(@NonNull final Runnable task) {
+    return Completable.fromRunnable(new Runnable() {
       @Override
       public void run() {
         transactionNonExclusiveSync(task);
@@ -224,53 +197,24 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable() {
-    return prepareInsertIntoCategoryAsObservable(OnConflict.NONE, true);
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle() {
+    return prepareInsertIntoCategoryAsSingle(OnConflict.NONE, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoCategoryAsObservable(onConflictAlgorithm, true);
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoCategoryAsSingle(onConflictAlgorithm, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable() {
-      @Override
-      public Inserter<Category> call() throws Exception {
-        return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
-      }
-    });
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT INTO Category ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle2() {
-    return prepareInsertIntoCategoryAsSingle2(OnConflict.NONE, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle2(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoCategoryAsSingle2(onConflictAlgorithm, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle2(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return io.reactivex.Single.fromCallable(new Callable() {
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Category>>() {
       @Override
       public Inserter<Category> call() throws Exception {
         return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
@@ -365,53 +309,24 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable() {
-    return prepareInsertIntoItemAsObservable(OnConflict.NONE, true);
+  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle() {
+    return prepareInsertIntoItemAsSingle(OnConflict.NONE, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoItemAsObservable(onConflictAlgorithm, true);
+  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItemAsSingle(onConflictAlgorithm, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable() {
-      @Override
-      public Inserter<Item> call() throws Exception {
-        return new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
-      }
-    });
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT INTO Item ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Item>> prepareInsertIntoItemAsSingle2() {
-    return prepareInsertIntoItemAsSingle2(OnConflict.NONE, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Item>> prepareInsertIntoItemAsSingle2(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoItemAsSingle2(onConflictAlgorithm, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Item>> prepareInsertIntoItemAsSingle2(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return io.reactivex.Single.fromCallable(new Callable() {
+  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Item>>() {
       @Override
       public Inserter<Item> call() throws Exception {
         return new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
@@ -506,53 +421,24 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable() {
-    return prepareInsertIntoItem2AsObservable(OnConflict.NONE, true);
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle() {
+    return prepareInsertIntoItem2AsSingle(OnConflict.NONE, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoItem2AsObservable(onConflictAlgorithm, true);
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItem2AsSingle(onConflictAlgorithm, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable() {
-      @Override
-      public Inserter<Item2> call() throws Exception {
-        return new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
-      }
-    });
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT INTO Item2 ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle2() {
-    return prepareInsertIntoItem2AsSingle2(OnConflict.NONE, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle2(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoItem2AsSingle2(onConflictAlgorithm, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle2(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return io.reactivex.Single.fromCallable(new Callable() {
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Item2>>() {
       @Override
       public Inserter<Item2> call() throws Exception {
         return new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
@@ -647,53 +533,24 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable() {
-    return prepareInsertIntoTodoAsObservable(OnConflict.NONE, true);
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle() {
+    return prepareInsertIntoTodoAsSingle(OnConflict.NONE, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoTodoAsObservable(onConflictAlgorithm, true);
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoTodoAsSingle(onConflictAlgorithm, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable() {
-      @Override
-      public Inserter<Todo> call() throws Exception {
-        return new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
-      }
-    });
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT INTO Todo ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle2() {
-    return prepareInsertIntoTodoAsSingle2(OnConflict.NONE, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle2(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoTodoAsSingle2(onConflictAlgorithm, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
-   */
-  @CheckResult
-  public io.reactivex.Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle2(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return io.reactivex.Single.fromCallable(new Callable() {
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Todo>>() {
       @Override
       public Inserter<Todo> call() throws Exception {
         return new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);

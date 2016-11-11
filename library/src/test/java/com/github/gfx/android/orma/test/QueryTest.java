@@ -42,10 +42,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import rx.observers.TestSubscriber;
-import rx.schedulers.Schedulers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -113,7 +109,7 @@ public class QueryTest {
 
     @Test
     public void countAsObservable() throws Exception {
-        assertThat(db.selectFromBook().countAsObservable().toBlocking().value(), is(2));
+        assertThat(db.selectFromBook().countAsObservable().blockingSingle(), is(2));
     }
 
     @Test
@@ -546,42 +542,30 @@ public class QueryTest {
     }
 
     @Test
-    public void transactionAsync2Success() throws Exception {
-        TestSubscriber<?> subscriber = TestSubscriber.create();
-
-        final Thread thread = Thread.currentThread();
-
-        db.transactionAsync(new Runnable() {
+    public void transactionAsCompleableWithSuccess() throws Exception {
+        db.transactionAsCompletable(new Runnable() {
             @Override
             public void run() {
-                assertThat(Thread.currentThread(), is(not(thread)));
-
                 db.prepareInsertIntoBook().executeAll(someBooks());
             }
         })
-                .subscribeOn(Schedulers.io())
-                .subscribe(subscriber);
-
-        subscriber.awaitTerminalEvent(1, TimeUnit.SECONDS);
-        subscriber.assertCompleted();
+                .test()
+                .assertComplete();
 
         assertThat(db.selectFromBook().count(), is(7));
     }
 
     @Test
-    public void transactionAsync2Abort() throws Exception {
-        TestSubscriber<?> subscriber = TestSubscriber.create();
-
-        db.transactionAsync(new Runnable() {
+    public void transactionAsCompletableWithFailure() throws Exception {
+        db.transactionAsCompletable(new Runnable() {
             @Override
             public void run() {
                 db.prepareInsertIntoBook().executeAll(someBooks());
                 throw new RuntimeException("abort!");
             }
-        }).subscribe(subscriber);
-
-        subscriber.awaitTerminalEvent(1, TimeUnit.SECONDS);
-        subscriber.assertError(RuntimeException.class);
+        })
+                .test()
+                .assertError(RuntimeException.class);
 
         assertThat(db.selectFromBook().count(), is(2));
     }

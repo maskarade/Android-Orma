@@ -72,7 +72,7 @@ public class RecyclerViewFragment extends Fragment {
         adapter = new Adapter(getContext(), orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
 
-        binding.fab.setOnClickListener(v -> adapter.addItemAsSingle2(() -> {
+        binding.fab.setOnClickListener(v -> adapter.addItemAsSingle(() -> {
             Todo todo = new Todo();
             number++;
             todo.title = "RecyclerView item #" + number;
@@ -131,7 +131,7 @@ public class RecyclerViewFragment extends Fragment {
                         .updater()
                         .idEq(todo.id)
                         .done(done)
-                        .executeAsSingle2()
+                        .executeAsSingle()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(integer -> {
@@ -140,7 +140,7 @@ public class RecyclerViewFragment extends Fragment {
             });
 
             binding.getRoot().setOnLongClickListener(v -> {
-                removeItemAsMaybe2(todo)
+                removeItemAsMaybe(todo)
                         .subscribeOn(Schedulers.io())
                         .subscribe();
                 return true;

@@ -76,6 +76,6 @@ public class ParcelableTest {
         SingleAssociation<ModelParcelable> ref = reload(SingleAssociation.just(model));
 
         assertThat(ref.getId(), is(model.id));
-        assertThat(ref.value().text, is(model.text));
+        assertThat(ref.get().text, is(model.text));
     }
 }

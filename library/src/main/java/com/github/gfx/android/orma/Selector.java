@@ -33,16 +33,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
+import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import rx.Observable;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.Subscriber;
-import rx.functions.Action1;
-import rx.functions.FuncN;
+import io.reactivex.Single;
 
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
@@ -169,25 +164,10 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return (int) conn.rawQueryForLong(sql, getBindArgs());
     }
 
-    /**
-     * Provided for {@link Observable#combineLatest(List, FuncN)}.
-     *
-     * @return An observable that yields {@link #count()}.
-     */
-    @NonNull
-    public Single<Integer> countAsObservable() {
-        return Single.create(new Single.OnSubscribe<Integer>() {
-            @Override
-            public void call(SingleSubscriber<? super Integer> singleSubscriber) {
-                singleSubscriber.onSuccess(count());
-            }
-        });
-    }
-
     @CheckResult
     @NonNull
-    public io.reactivex.Single<Integer> countAsSingle2() {
-        return io.reactivex.Single.fromCallable(new Callable<Integer>() {
+    public Single<Integer> countAsSingle() {
+        return Single.fromCallable(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 return count();
@@ -197,8 +177,8 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @CheckResult
     @NonNull
-    public io.reactivex.Observable<Integer> countAsObservable2() {
-        return io.reactivex.Observable.fromCallable(new Callable<Integer>() {
+    public Observable<Integer> countAsObservable() {
+        return Observable.fromCallable(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 return count();
@@ -219,7 +199,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     public Model value() throws NoValueException {
         Model model = getOrNull(0);
         if (model == null) {
-            throw new NoValueException("Expected single value but nothing for " + getSchema().getTableName());
+            throw new NoValueException("Expected single get but nothing for " + getSchema().getTableName());
         }
         return model;
     }
@@ -235,7 +215,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         Model model = getOrNull(position);
         if (model == null) {
             throw new NoValueException(
-                    "Expected single value for " + position + " but nothing for " + getSchema().getTableName());
+                    "Expected single get for " + position + " but nothing for " + getSchema().getTableName());
         }
         return model;
     }
@@ -256,29 +236,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     public <T> Observable<T> pluckAsObservable(final ColumnDef<Model, T> column) {
-        return Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(Subscriber<? super T> subscriber) {
-                Cursor cursor = executeWithColumns(column.getQualifiedName());
-                try {
-                    for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-                        if (subscriber.isUnsubscribed()) {
-                            return;
-                        }
-                        subscriber.onNext(column.getFromCursor(conn, cursor, 0));
-                    }
-                } finally {
-                    cursor.close();
-                }
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onCompleted();
-                }
-            }
-        });
-    }
-
-    public <T> io.reactivex.Observable<T> pluckAsObservable2(final ColumnDef<Model, T> column) {
-        return io.reactivex.Observable.create(new ObservableOnSubscribe<T>() {
+        return Observable.create(new ObservableOnSubscribe<T>() {
             @Override
             public void subscribe(ObservableEmitter< T> emitter) throws Exception {
                 Cursor cursor = executeWithColumns(column.getQualifiedName());
@@ -342,21 +300,6 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     /**
-     * Deprecated because it depends on RxJava 1.x's {@link Action1}. Use {@link #forEach(Consumer1)} instead.
-     *
-     * @param action An action called for each model in the iteration.
-     */
-    @Deprecated
-    public void forEach(@NonNull final Action1<Model> action) {
-        forEach(new Consumer1<Model>() {
-            @Override
-            public void accept(Model model) {
-                action.call(model);
-            }
-        });
-    }
-
-    /**
      * Executes a query and calls {@code Action1<Model>#call} for each model}.
      *
      * @param action An action called for each model in the iteration.
@@ -379,38 +322,18 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @NonNull
     public Observable<Model> executeAsObservable() {
-        return Observable.create(new Observable.OnSubscribe<Model>() {
+        return Observable.create(new ObservableOnSubscribe<Model>() {
             @Override
-            public void call(final Subscriber<? super Model> subscriber) {
+            public void subscribe(ObservableEmitter<Model> emitter) throws Exception {
                 final Cursor cursor = execute();
                 try {
-                    for (int pos = 0; !subscriber.isUnsubscribed() && cursor.moveToPosition(pos); pos++) {
-                        subscriber.onNext(newModelFromCursor(cursor));
-                    }
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onCompleted();
+                    for (int pos = 0; !emitter.isDisposed() && cursor.moveToPosition(pos); pos++) {
+                        emitter.onNext(newModelFromCursor(cursor));
                     }
                 } finally {
                     cursor.close();
                 }
-            }
-        });
-    }
-
-    @NonNull
-    public io.reactivex.Observable<Model> executeAsObservable2() {
-        return io.reactivex.Observable.create(new ObservableOnSubscribe<Model>() {
-            @Override
-            public void subscribe(ObservableEmitter<Model> e) throws Exception {
-                final Cursor cursor = execute();
-                try {
-                    for (int pos = 0; !e.isDisposed() && cursor.moveToPosition(pos); pos++) {
-                        e.onNext(newModelFromCursor(cursor));
-                    }
-                    e.onComplete();
-                } finally {
-                    cursor.close();
-                }
+                emitter.onComplete();
             }
         });
     }

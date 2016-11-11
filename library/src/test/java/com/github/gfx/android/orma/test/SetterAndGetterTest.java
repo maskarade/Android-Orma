@@ -51,14 +51,14 @@ public class SetterAndGetterTest {
             public ModelWithAccessors call() {
                 ModelWithAccessors model = new ModelWithAccessors();
                 model.setKey("key");
-                model.setValue("value");
+                model.setValue("get");
                 return model;
             }
         });
 
         assertThat(model.getId(), is(not(0L)));
         assertThat(model.getKey(), is("key"));
-        assertThat(model.getValue(), is("value"));
+        assertThat(model.getValue(), is("get"));
         assertThat(model.isDone(), is(nullValue()));
     }
 
@@ -68,13 +68,13 @@ public class SetterAndGetterTest {
             @NonNull
             @Override
             public ModelWithSetterConstructor call() {
-                return new ModelWithSetterConstructor(0, "key", "value");
+                return new ModelWithSetterConstructor(0, "key", "get");
             }
         });
 
         assertThat(model.id, is(not(0L)));
         assertThat(model.key, is("key"));
-        assertThat(model.value, is("value"));
+        assertThat(model.value, is("get"));
     }
 
     @Test
@@ -84,13 +84,13 @@ public class SetterAndGetterTest {
                     @NonNull
                     @Override
                     public ModelWithNamedSetterConstructor call() {
-                        return new ModelWithNamedSetterConstructor(0, "key", "value");
+                        return new ModelWithNamedSetterConstructor(0, "key", "get");
                     }
                 });
 
         assertThat(model.id, is(not(0L)));
         assertThat(model.key, is("key"));
-        assertThat(model.value, is("value"));
+        assertThat(model.value, is("get"));
     }
 
     @Test
@@ -100,13 +100,13 @@ public class SetterAndGetterTest {
                     @NonNull
                     @Override
                     public ModelWithSetterConstructorAndNullable call() {
-                        return new ModelWithSetterConstructorAndNullable(0, "key", "value");
+                        return new ModelWithSetterConstructorAndNullable(0, "key", "get");
                     }
                 });
 
         assertThat(model.id, is(not(0L)));
         assertThat(model.key, is("key"));
-        assertThat(model.value, is("value"));
+        assertThat(model.value, is("get"));
     }
 
     @Test

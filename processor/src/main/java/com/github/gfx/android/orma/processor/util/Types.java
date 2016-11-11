@@ -80,35 +80,11 @@ public class Types {
 
     public static final ClassName Callable = ClassName.get(java.util.concurrent.Callable.class);
 
-    // RxJava 1.x
+    // RxJava
 
-    public static final ClassName Single = ClassName.get("rx", "Single");
+    public static final ClassName Single = ClassName.get(io.reactivex.Single.class);
 
-    public static final ClassName SingleOnSubscribe = ClassName.get("rx", "Single", "OnSubscribe");
-
-    public static final ClassName SingleSubscriber = ClassName.get("rx", "SingleSubscriber");
-
-    public static final ClassName Observable = ClassName.get("rx", "Observable");
-
-    public static final ClassName Func1 = ClassName.get("rx.functions", "Func1");
-
-    public static final ClassName Action0 = ClassName.get("rx.functions", "Action0");
-
-    public static final ClassName Completable = ClassName.get("rx", "Completable");
-
-    // RxJava 2.x
-
-    public static final ClassName Single2 = ClassName.get(io.reactivex.Single.class);
-
-    public static final ClassName SingleOnSubscribe2 = ClassName.get(io.reactivex.SingleOnSubscribe.class);
-
-    public static final ClassName SingleEmitter2 = ClassName.get(io.reactivex.SingleEmitter.class);
-
-    public static final ClassName Observable2 = ClassName.get(io.reactivex.Observable.class);
-
-    public static final ClassName Function2 = ClassName.get(io.reactivex.functions.Function.class);
-
-    public static final ClassName Completable2 = ClassName.get(io.reactivex.Completable.class);
+    public static final ClassName Completable = ClassName.get(io.reactivex.Completable.class);
 
 
     public static final TypeVariableName T = TypeVariableName.get("T");
@@ -157,6 +133,8 @@ public class Types {
     public static final ClassName Aliases = ClassName.get(ormaPackageName + ".internal", "Aliases");
 
     public static final ClassName ColumnPath = ClassName.get(ormaPackageName + ".internal", "Aliases", "ColumnPath");
+
+    public static final ClassName Function1 = ClassName.get(ormaPackageName + ".function", "Function1");
 
     public static final ClassName IllegalArgumentException = ClassName.get(IllegalArgumentException.class);
 
@@ -249,29 +227,8 @@ public class Types {
         return ParameterizedTypeName.get(Single, typeName);
     }
 
-
-    public static ParameterizedTypeName getSingle2(TypeName typeName) {
-        return ParameterizedTypeName.get(Single2, typeName);
-    }
-
-    public static ParameterizedTypeName getSingleOnSubscribe(TypeName typeName) {
-        return ParameterizedTypeName.get(SingleOnSubscribe, typeName);
-    }
-
-    /**
-     * @param typeName A type to be yielded by the subscriber
-     * @return the type of <code>SingleSubscriber&lt;? super typeName&gt;</typeName></code>
-     */
-    public static ParameterizedTypeName getSingleSubscriber(TypeName typeName) {
-        return ParameterizedTypeName.get(Types.SingleSubscriber, WildcardTypeName.supertypeOf(typeName));
-    }
-
-    public static ParameterizedTypeName getObservable(TypeName typeName) {
-        return ParameterizedTypeName.get(Observable, typeName);
-    }
-
-    public static ParameterizedTypeName getFunc1(TypeName argType, TypeName returnType) {
-        return ParameterizedTypeName.get(Func1, argType, returnType);
+    public static TypeName getFunction1(TypeName argType, TypeName returnType) {
+        return ParameterizedTypeName.get(Function1, argType, returnType);
     }
 
     public static ParameterizedTypeName getModelFactory(TypeName typeName) {
