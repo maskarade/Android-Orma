@@ -51,8 +51,11 @@ public class OrmaMigration extends AbstractMigrationEngine {
      *
      * @param manualStepMigration Used to control manual-step migration
      * @param schemaDiffMigration Used to control automatic migration
+     * @param traceListener       Called to handle migration logs
      */
-    protected OrmaMigration(ManualStepMigration manualStepMigration, SchemaDiffMigration schemaDiffMigration,
+    protected OrmaMigration(
+            ManualStepMigration manualStepMigration,
+            SchemaDiffMigration schemaDiffMigration,
             TraceListener traceListener) {
         super(traceListener);
         this.manualStepMigration = manualStepMigration;
