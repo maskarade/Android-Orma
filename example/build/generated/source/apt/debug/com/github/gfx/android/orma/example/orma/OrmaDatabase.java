@@ -133,6 +133,10 @@ public class OrmaDatabase implements DatabaseHandle {
     });
   }
 
+  public void deleteAll() {
+    connection.deleteAll();
+  }
+
   /**
    * Retrieves a model from a cursor. */
   @NonNull

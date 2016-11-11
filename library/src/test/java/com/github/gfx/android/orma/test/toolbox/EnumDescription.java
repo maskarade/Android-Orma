@@ -18,4 +18,5 @@ package com.github.gfx.android.orma.test.toolbox;
 
 public interface EnumDescription {
 
+    long getValue();
 }

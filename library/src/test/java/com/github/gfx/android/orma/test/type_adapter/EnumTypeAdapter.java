@@ -26,17 +26,23 @@ import android.support.annotation.NonNull;
  */
 @StaticTypeAdapter(
         targetType = EnumDescription.class,
-        serializedType = String.class
+        serializedType = long.class
 )
 public class EnumTypeAdapter {
 
-    public static <T extends Enum<T> & EnumDescription> String serialize(@NonNull T value) {
-        return value.name();
+    public static <T extends Enum<T> & EnumDescription> long serialize(@NonNull T value) {
+        return value.getValue();
     }
 
-    @SuppressWarnings("unchecked")
     @NonNull
-    public static <T extends Enum<T> & EnumDescription> T deserialize(@NonNull String serialized, @NonNull Class<T> type) {
-        return Enum.valueOf(type, serialized);
+    public static <T extends Enum<T> & EnumDescription> T deserialize(long serialized, @NonNull Class<T> type) {
+
+        for (T enumValue : type.getEnumConstants()) {
+            if (enumValue.getValue() == serialized) {
+                return enumValue;
+            }
+        }
+
+        throw new RuntimeException("Unknown id: " + serialized + " for " + type);
     }
 }
