@@ -25,29 +25,32 @@ import java.util.List;
 
 public class SchemaData implements MigrationSchema {
 
-    final String tableName;
+    @NonNull final String tableName;
 
-    final String createTableStatement;
+    @NonNull final String createTableStatement;
 
-    final List<String> createIndexStatements;
+    @NonNull final List<String> createIndexStatements;
 
-    public SchemaData(String tableName, String createTableStatement, @NonNull String... createIndexStatements) {
+    public SchemaData(@NonNull String tableName, @NonNull String createTableStatement, @NonNull String... createIndexStatements) {
         this.tableName = tableName;
         this.createTableStatement = createTableStatement;
         this.createIndexStatements = new ArrayList<>(createIndexStatements.length);
         Collections.addAll(this.createIndexStatements, createIndexStatements);
     }
 
+    @NonNull
     @Override
     public String getTableName() {
         return tableName;
     }
 
+    @NonNull
     @Override
     public String getCreateTableStatement() {
         return createTableStatement;
     }
 
+    @NonNull
     @Override
     public List<String> getCreateIndexStatements() {
         return createIndexStatements;
@@ -62,5 +65,34 @@ public class SchemaData implements MigrationSchema {
         statements.add(createTableStatement);
         statements.addAll(createIndexStatements);
         return statements;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        SchemaData that = (SchemaData) o;
+
+        if (!tableName.equals(that.tableName)) {
+            return false;
+        }
+        if (!createTableStatement.equals(that.createTableStatement)) {
+            return false;
+        }
+        return createIndexStatements.equals(that.createIndexStatements);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = tableName.hashCode();
+        result = 31 * result + createTableStatement.hashCode();
+        result = 31 * result + createIndexStatements.hashCode();
+        return result;
     }
 }

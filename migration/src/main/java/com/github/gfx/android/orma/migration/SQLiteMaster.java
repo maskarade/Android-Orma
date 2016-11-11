@@ -54,7 +54,6 @@ public class SQLiteMaster implements MigrationSchema {
         this.sql = sql;
     }
 
-    @NonNull
     public static boolean checkIfTableNameExists(@NonNull SQLiteDatabase db, @NonNull String tableName) {
         return DatabaseUtils.queryNumEntries(db, "sqlite_master", "tbl_name = ?", new String[]{tableName}) != 0;
     }

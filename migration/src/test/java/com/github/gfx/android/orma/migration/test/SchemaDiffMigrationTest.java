@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.migration.test;
 
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
+import com.github.gfx.android.orma.migration.test.util.OpenHelper;
 import com.github.gfx.android.orma.migration.test.util.SchemaData;
 
 import org.junit.After;
@@ -26,7 +27,6 @@ import org.junit.runner.RunWith;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -77,7 +77,7 @@ public class SchemaDiffMigrationTest {
                 "INSERT INTO bar (field10, field10) VALUES ('value10', 'value10')"
         );
 
-        openHelper = new OpenHelper(getContext());
+        openHelper = new OpenHelper(getContext(), schemas, initialData);
         db = openHelper.getWritableDatabase();
         migration = new SchemaDiffMigration(getContext(), SCHEMA_HASH);
         metadata = SchemaDiffMigration.loadMetadata(db, schemas);
@@ -197,31 +197,5 @@ public class SchemaDiffMigrationTest {
         assertThat(SQLiteMaster.checkIfTableNameExists(db, SchemaDiffMigration.MIGRATION_STEPS_TABLE), is(true));
 
         assertThat(migration.isSchemaChanged(db), is(false));
-    }
-
-
-    class OpenHelper extends SQLiteOpenHelper {
-
-        public OpenHelper(Context context) {
-            super(context, null, null, 1);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            for (SchemaData ddl : schemas) {
-                db.execSQL(ddl.getCreateTableStatement());
-                for (String sql : ddl.getCreateIndexStatements()) {
-                    db.execSQL(sql);
-                }
-            }
-            for (String sql : initialData) {
-                db.execSQL(sql);
-            }
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        }
     }
 }
