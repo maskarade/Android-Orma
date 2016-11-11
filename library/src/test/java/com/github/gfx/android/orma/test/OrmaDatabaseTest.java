@@ -72,7 +72,7 @@ public class OrmaDatabaseTest {
     }
 
     @Test
-    public void testResetDatabase() throws Exception {
+    public void testDeleteAll() throws Exception {
         OrmaDatabase db = OrmaDatabase.builder(getContext())
                 .name(NAME)
                 .trace(true)
@@ -91,12 +91,7 @@ public class OrmaDatabaseTest {
 
         assertThat(db.selectFromAuthor().count(), is(1));
 
-        getContext().deleteDatabase(NAME);
-        db = OrmaDatabase.builder(getContext())
-                .name(NAME)
-                .trace(true)
-                .tryParsingSql(false)
-                .build();
+        db.deleteAll();
 
         assertThat(db.selectFromAuthor().count(), is(0));
     }

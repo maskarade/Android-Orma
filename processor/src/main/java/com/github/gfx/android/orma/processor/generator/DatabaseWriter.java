@@ -298,6 +298,13 @@ public class DatabaseWriter extends BaseWriter {
                         .build()
         );
 
+        methodSpecs.add(
+                MethodSpec.methodBuilder("deleteAll")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("$L.deleteAll()", connection)
+                        .build()
+        );
+
         database.getSchemas().forEach(schema -> {
             String simpleModelName = schema.getModelClassName().simpleName();
             CodeBlock schemaInstance = schema.createSchemaInstanceExpr();
