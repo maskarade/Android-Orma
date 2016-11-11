@@ -26,8 +26,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import java.util.concurrent.Callable;
-
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
@@ -67,7 +65,7 @@ public class SingleAssociation<Model> implements Parcelable {
                 if (model != null) {
                     emitter.onSuccess(model);
                 } else {
-                    emitter.onError(new NoValueException("No get found for "
+                    emitter.onError(new NoValueException("No value found for "
                             + schema.getTableName() + "." + primaryKey.name + " = " + id));
                 }
             }
@@ -89,12 +87,7 @@ public class SingleAssociation<Model> implements Parcelable {
     }
 
     public static <T> SingleAssociation<T> id(final long id) {
-        return new SingleAssociation<>(id, Single.<T>error(new Callable<Throwable>() {
-            @Override
-            public Throwable call() throws Exception {
-                return new NoValueException("No get set for id=" + id);
-            }
-        }));
+        return new SingleAssociation<>(id, Single.<T>error(new NoValueException("No value set for id=" + id)));
     }
 
     public long getId() {
@@ -107,9 +100,9 @@ public class SingleAssociation<Model> implements Parcelable {
     }
 
     /**
-     * A shortcut of {@code singleAssociation.single().toBlocking().get()}.
+     * A shortcut of {@code singleAssociation.single().blockingGet()}.
      *
-     * @return A model get the {@code SingleAssociation<T>} refers to.
+     * @return A model that the instance refers to.
      */
     @NonNull
     public Model get() throws NoValueException {
