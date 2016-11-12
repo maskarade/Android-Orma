@@ -45,33 +45,16 @@ And now they are what Orma has.
 
 ## Getting Started
 
-First, you need [android-apt](https://bitbucket.org/hvisser/android-apt) to use annotation processors in android projects.
+Declare dependencies to use Orma and its annotation processor.
 
-```groovy
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-    }
-}
-
-apply plugin: 'com.neenbedankt.android-apt'
-
-repositories {
-    jcenter()
-}
-```
-
-Then, declare dependencies to use Orma.
-
-```groovy
+```gradle:build.gradle
 dependencies {
+    annotationProcessor 'com.github.gfx.android.orma:orma-processor:3.2.1'
     compile 'com.github.gfx.android.orma:orma:3.2.1'
-    apt 'com.github.gfx.android.orma:orma-processor:3.2.1'
 }
 ```
+
+NOTE: if you use Android Gradle Plugin before 2.2.0, you must use [android-apt](https://bitbucket.org/hvisser/android-apt) plugin instead of `annotationProcessor` configuration.
 
 ## Synopsis
 
@@ -821,16 +804,16 @@ NOTE: Kotlin APT support, a.k.a. _kapt_, is **really unstable**. Don't ask me ho
 
 ### Does Orma work with the Jack compiler?
 
-Yes. As of Android Gradle Plugin 2.2.1, Orma works on Jack.
+Yes. As of Android Gradle Plugin 2.2.2, Orma should work with Jack.
 
-Use `annotationProcessor` configuration in the dependencies block, instead of `apt`:
-
-```
+```gradle:build.gradle
 dependencies {
-    compile 'com.github.gfx.android.orma:orma:3.2.1'
     annotationProcessor 'com.github.gfx.android.orma:orma-processor:3.2.1'
+    compile 'com.github.gfx.android.orma:orma:3.2.1'
 }
 ```
+
+See https://github.com/gfx/OrmaWithJack for a working example.
 
 ### When the database handle is opened and closed?
 
