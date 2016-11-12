@@ -13,22 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma;
 
-import android.support.annotation.NonNull;
+package com.github.gfx.android.orma.function;
 
-import java.util.concurrent.Callable;
-
-import static android.os.Build.VERSION_CODES.M;
-
-/**
- * A helper method to make a scope or task.
- *
- * @param <T> Type of a model to create
- */
-public interface ModelFactory<T> extends Callable<T> {
-
-    @Override
-    @NonNull
-    T call();
+@FunctionalInterface
+public interface Consumer1<T> {
+    void accept(T t);
 }

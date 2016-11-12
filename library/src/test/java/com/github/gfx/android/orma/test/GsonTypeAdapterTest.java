@@ -89,6 +89,6 @@ public class GsonTypeAdapterTest {
         assertThat(book.bookId, is(originalBook.bookId));
         assertThat(book.title, is(originalBook.title));
         assertThat(book.publisher.getId(), is(publisher.id));
-        assertThat(book.publisher.value().name, is(publisher.name));
+        assertThat(book.publisher.get().name, is(publisher.name));
     }
 }

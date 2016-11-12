@@ -34,6 +34,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.LayoutInflater;
 
+import io.reactivex.functions.Predicate;
+
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -127,14 +129,14 @@ public class OrmaAdapterTest {
 
     @Test
     public void testGetItemAsObservable() throws Exception {
-        assertThat(adapter.getItemAsObservable(0).toBlocking().value().name, is("A"));
-        assertThat(adapter.getItemAsObservable(1).toBlocking().value().name, is("B"));
-        assertThat(adapter.getItemAsObservable(2).toBlocking().value().name, is("C"));
+        assertThat(adapter.getItemAsSingle(0).blockingGet().name, is("A"));
+        assertThat(adapter.getItemAsSingle(1).blockingGet().name, is("B"));
+        assertThat(adapter.getItemAsSingle(2).blockingGet().name, is("C"));
     }
 
     @Test
     public void testAddItemAsObservable() throws Exception {
-        long id = adapter.addItemAsObservable(new ModelFactory<Author>() {
+        adapter.addItemAsSingle(new ModelFactory<Author>() {
             @NonNull
             @Override
             public Author call() {
@@ -143,23 +145,31 @@ public class OrmaAdapterTest {
                 author.note = "new";
                 return author;
             }
-        }).toBlocking().value();
-        assertThat(id, is(not(-1L)));
+        })
+                .test()
+                .assertValue(new Predicate<Long>() {
+                    @Override
+                    public boolean test(Long rowId) throws Exception {
+                        return rowId > 0;
+                    }
+                })
+                .assertComplete();
         assertThat(adapter.getItem(3).name, is("D"));
     }
 
     @Test
     public void testRemoveItemAsObservable() throws Exception {
-        int deletedPosition = adapter.removeItemAsObservable(adapter.getItem(0))
-                .toBlocking().single();
-        assertThat(deletedPosition, is(0));
+        adapter.removeItemAsMaybe(adapter.getItem(0))
+                .test()
+                .assertResult(0);
         assertThat(adapter.getItemCount(), is(2));
     }
 
     @Test
     public void testClearAsObservable() throws Exception {
-        int deletedCount = adapter.clearAsObservable().toBlocking().value();
-        assertThat(deletedCount, is(3));
+        adapter.clearAsSingle()
+                .test()
+                .assertResult(3);
         assertThat(adapter.getItemCount(), is(0));
     }
 }

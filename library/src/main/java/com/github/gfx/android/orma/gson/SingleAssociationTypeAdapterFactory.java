@@ -54,7 +54,7 @@ public class SingleAssociationTypeAdapterFactory implements TypeAdapterFactory {
             @Override
             public void write(JsonWriter out, T value) throws IOException {
                 SingleAssociation<?> association = (SingleAssociation<?>) value;
-                gson.toJson(association.value(), modelType, out);
+                gson.toJson(association.get(), modelType, out);
             }
 
             @Override

@@ -26,12 +26,13 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import rx.Observable;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.Subscriber;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeEmitter;
+import io.reactivex.MaybeOnSubscribe;
+import io.reactivex.Single;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -99,12 +100,13 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         }
     }
 
+    @CheckResult
     @NonNull
-    public Single<Model> getAsObservable(@IntRange(from = 0) final int position) {
-        return Single.create(new Single.OnSubscribe<Model>() {
+    public Single<Model> getAsSingle(@IntRange(from = 0) final int position) {
+        return Single.fromCallable(new Callable<Model>() {
             @Override
-            public void call(final SingleSubscriber<? super Model> subscriber) {
-                subscriber.onSuccess(get(position));
+            public Model call() throws Exception {
+                return get(position);
             }
         });
     }
@@ -134,14 +136,14 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      * Operations are executed in a transaction.
      *
      * @param item A model to delete.
-     * @return An {@link Observable} that yields the position of the deleted item if the item is deleted.
+     * @return An {@link Maybe} that yields the position of the deleted item if the item is deleted.
      */
     @CheckResult
     @NonNull
-    public Observable<Integer> deleteAsObservable(@NonNull final Model item) {
-        return Observable.create(new Observable.OnSubscribe<Integer>() {
+    public Maybe<Integer> deleteAsMaybe(@NonNull final Model item) {
+        return Maybe.create(new MaybeOnSubscribe<Integer>() {
             @Override
-            public void call(final Subscriber<? super Integer> subscriber) {
+            public void subscribe(MaybeEmitter<Integer> emitter) throws Exception {
                 final AtomicInteger positionRef = new AtomicInteger(-1);
                 conn.transactionSync(new Runnable() {
                     @Override
@@ -157,10 +159,12 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                         }
                     }
                 });
+                // emit the position *after* the transaction finished
                 if (positionRef.get() >= 0) {
-                    subscriber.onNext(positionRef.get());
+                    emitter.onSuccess(positionRef.get());
+                } else {
+                    emitter.onComplete();
                 }
-                subscriber.onCompleted();
             }
         });
     }
@@ -173,16 +177,15 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @CheckResult
     @NonNull
-    public Single<Integer> truncateAsObservable(@IntRange(from = 0) final int size) {
-        return Single.create(new Single.OnSubscribe<Integer>() {
+    public Single<Integer> truncateAsSingle(@IntRange(from = 0) final int size) {
+        return Single.fromCallable(new Callable<Integer>() {
             @Override
-            public void call(SingleSubscriber<? super Integer> subscriber) {
+            public Integer call() throws Exception {
                 String pk = getSchema().getPrimaryKey().getEscapedName();
                 Selector<Model, ?> subquery = selector();
                 subquery.limit(Integer.MAX_VALUE);
                 subquery.offset(size);
-                int deletedRows = conn.delete(getSchema(), pk + " IN (" + subquery.buildQueryWithColumns(pk) + ")", getBindArgs());
-                subscriber.onSuccess(deletedRows);
+                return conn.delete(getSchema(), pk + " IN (" + subquery.buildQueryWithColumns(pk) + ")", getBindArgs());
             }
         });
     }
@@ -195,12 +198,11 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @CheckResult
     @NonNull
-    public Single<Long> insertAsObservable(@NonNull final ModelFactory<Model> factory) {
-        return Single.create(new Single.OnSubscribe<Long>() {
+    public Single<Long> insertAsSingle(@NonNull final Callable<Model> factory) {
+        return Single.fromCallable(new Callable<Long>() {
             @Override
-            public void call(final SingleSubscriber<? super Long> subscriber) {
-                long rowId = inserter().execute(factory);
-                subscriber.onSuccess(rowId);
+            public Long call() throws Exception {
+                return inserter().execute(factory);
             }
         });
     }

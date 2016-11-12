@@ -194,8 +194,8 @@ public class ConditionQueryHelpers {
 
         if (column.needsTypeAdapter()) {
             TypeSpec serializerFunction = TypeSpec.anonymousClassBuilder("")
-                    .superclass(Types.getFunc1(type.box(), column.getSerializedBoxType()))
-                    .addMethod(MethodSpec.methodBuilder("call")
+                    .superclass(Types.getFunction1(type.box(), column.getSerializedBoxType()))
+                    .addMethod(MethodSpec.methodBuilder("apply")
                             .addAnnotation(Annotations.override())
                             .addModifiers(Modifier.PUBLIC)
                             .returns(column.getSerializedBoxType())

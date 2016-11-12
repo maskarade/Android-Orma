@@ -13,11 +13,11 @@ import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.OrmaDatabaseBuilderBase;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import java.util.Arrays;
 import java.util.List;
-import rx.Completable;
-import rx.Single;
-import rx.SingleSubscriber;
+import java.util.concurrent.Callable;
 
 /**
  * <p>The Orma database handle class.</p>
@@ -76,18 +76,34 @@ public class OrmaDatabase implements DatabaseHandle {
     connection.transactionSync(task);
   }
 
+  /**
+   * RxJava 2.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}
+   */
   @CheckResult
-  public Completable transactionAsync(@NonNull Runnable task) {
-    return connection.transactionAsync(task);
+  public Completable transactionAsCompletable(@NonNull final Runnable task) {
+    return Completable.fromRunnable(new Runnable() {
+      @Override
+      public void run() {
+        transactionSync(task);
+      }
+    });
   }
 
   public void transactionNonExclusiveSync(@NonNull Runnable task) {
     connection.transactionNonExclusiveSync(task);
   }
 
+  /**
+   * RxJava 2.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}
+   */
   @CheckResult
-  public Completable transactionNonExclusiveAsync(@NonNull Runnable task) {
-    return connection.transactionNonExclusiveAsync(task);
+  public Completable transactionNonExclusiveAsCompletable(@NonNull final Runnable task) {
+    return Completable.fromRunnable(new Runnable() {
+      @Override
+      public void run() {
+        transactionNonExclusiveSync(task);
+      }
+    });
   }
 
   public void deleteAll() {
@@ -181,27 +197,27 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable() {
-    return prepareInsertIntoCategoryAsObservable(OnConflict.NONE, true);
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle() {
+    return prepareInsertIntoCategoryAsSingle(OnConflict.NONE, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoCategoryAsObservable(onConflictAlgorithm, true);
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoCategoryAsSingle(onConflictAlgorithm, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return Single.create(new Single.OnSubscribe<Inserter<Category>>() {
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Category>>() {
       @Override
-      public void call(SingleSubscriber<? super Inserter<Category>> subscriber) {
-        subscriber.onSuccess(new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
+      public Inserter<Category> call() throws Exception {
+        return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -293,27 +309,27 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable() {
-    return prepareInsertIntoItemAsObservable(OnConflict.NONE, true);
+  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle() {
+    return prepareInsertIntoItemAsSingle(OnConflict.NONE, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoItemAsObservable(onConflictAlgorithm, true);
+  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItemAsSingle(onConflictAlgorithm, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return Single.create(new Single.OnSubscribe<Inserter<Item>>() {
+  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Item>>() {
       @Override
-      public void call(SingleSubscriber<? super Inserter<Item>> subscriber) {
-        subscriber.onSuccess(new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
+      public Inserter<Item> call() throws Exception {
+        return new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -405,27 +421,27 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable() {
-    return prepareInsertIntoItem2AsObservable(OnConflict.NONE, true);
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle() {
+    return prepareInsertIntoItem2AsSingle(OnConflict.NONE, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoItem2AsObservable(onConflictAlgorithm, true);
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItem2AsSingle(onConflictAlgorithm, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return Single.create(new Single.OnSubscribe<Inserter<Item2>>() {
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Item2>>() {
       @Override
-      public void call(SingleSubscriber<? super Inserter<Item2>> subscriber) {
-        subscriber.onSuccess(new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
+      public Inserter<Item2> call() throws Exception {
+        return new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -517,27 +533,27 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable() {
-    return prepareInsertIntoTodoAsObservable(OnConflict.NONE, true);
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle() {
+    return prepareInsertIntoTodoAsSingle(OnConflict.NONE, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoTodoAsObservable(onConflictAlgorithm, true);
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoTodoAsSingle(onConflictAlgorithm, true);
   }
 
   /**
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsObservable(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
-    return Single.create(new Single.OnSubscribe<Inserter<Todo>>() {
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Todo>>() {
       @Override
-      public void call(SingleSubscriber<? super Inserter<Todo>> subscriber) {
-        subscriber.onSuccess(new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId));
+      public Inserter<Todo> call() throws Exception {
+        return new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }

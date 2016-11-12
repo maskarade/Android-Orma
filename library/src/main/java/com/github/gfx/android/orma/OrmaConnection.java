@@ -40,9 +40,6 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.List;
 
-import rx.Completable;
-import rx.CompletableSubscriber;
-
 /**
  * Low-level interface to Orma database connection.
  */
@@ -288,27 +285,11 @@ public class OrmaConnection {
         }
     }
 
-    @NonNull
-    public Completable transactionNonExclusiveAsync(@NonNull final Runnable task) {
-        return Completable.create(new Completable.OnSubscribe() {
-            @Override
-            public void call(CompletableSubscriber subscriber) {
-                try {
-                    transactionNonExclusiveSync(task);
-                    subscriber.onCompleted();
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                }
-            }
-        });
-    }
-
     @WorkerThread
     public void transactionSync(@NonNull Runnable task) {
         SQLiteDatabase db = getWritableDatabase();
         trace("begin transaction", null);
         db.beginTransaction();
-
         try {
             task.run();
             db.setTransactionSuccessful();
@@ -317,22 +298,6 @@ public class OrmaConnection {
             trace("end transaction", null);
         }
     }
-
-    @NonNull
-    public Completable transactionAsync(@NonNull final Runnable task) {
-        return Completable.create(new Completable.OnSubscribe() {
-            @Override
-            public void call(CompletableSubscriber subscriber) {
-                try {
-                    transactionSync(task);
-                    subscriber.onCompleted();
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                }
-            }
-        });
-    }
-
 
     /**
      * Deletes all the columns in all the tables provided for testing.

@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma;
 
-import android.support.annotation.NonNull;
+package com.github.gfx.android.orma.exception;
 
-import java.util.concurrent.Callable;
+@SuppressWarnings("serial")
+public class InsertionFailureException extends OrmaException {
 
-import static android.os.Build.VERSION_CODES.M;
-
-/**
- * A helper method to make a scope or task.
- *
- * @param <T> Type of a model to create
- */
-public interface ModelFactory<T> extends Callable<T> {
-
-    @Override
-    @NonNull
-    T call();
+    public InsertionFailureException(Throwable throwable) {
+        super(throwable);
+    }
 }

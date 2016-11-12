@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.Book;
@@ -41,11 +42,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import rx.functions.Action1;
-import rx.observers.TestSubscriber;
-import rx.schedulers.Schedulers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -113,7 +109,7 @@ public class QueryTest {
 
     @Test
     public void countAsObservable() throws Exception {
-        assertThat(db.selectFromBook().countAsObservable().toBlocking().value(), is(2));
+        assertThat(db.selectFromBook().countAsObservable().blockingSingle(), is(2));
     }
 
     @Test
@@ -131,9 +127,9 @@ public class QueryTest {
     public void forEach() throws Exception {
         final List<Book> books = new ArrayList<>();
 
-        db.selectFromBook().forEach(new Action1<Book>() {
+        db.selectFromBook().forEach(new Consumer1<Book>() {
             @Override
-            public void call(Book book) {
+            public void accept(Book book) {
                 books.add(book);
             }
         });
@@ -227,17 +223,6 @@ public class QueryTest {
                 is(contains("today", "friday")));
 
         assertThat(db.selectFromBook().orderByTitleDesc().pluck(Book_Schema.INSTANCE.inPrint),
-                is(contains(true, false)));
-    }
-
-    @Test
-    public void pluckAsObservable() throws Exception {
-        assertThat(db.selectFromBook().orderByTitleAsc().pluckAsObservable(Book_Schema.INSTANCE.title).toList().toBlocking().first(),
-                is(contains("friday", "today")));
-        assertThat(db.selectFromBook().orderByTitleDesc().pluckAsObservable(Book_Schema.INSTANCE.title).toList().toBlocking().first(),
-                is(contains("today", "friday")));
-
-        assertThat(db.selectFromBook().orderByTitleDesc().pluckAsObservable(Book_Schema.INSTANCE.inPrint).toList().toBlocking().first(),
                 is(contains(true, false)));
     }
 
@@ -557,42 +542,30 @@ public class QueryTest {
     }
 
     @Test
-    public void transactionAsync2Success() throws Exception {
-        TestSubscriber<?> subscriber = TestSubscriber.create();
-
-        final Thread thread = Thread.currentThread();
-
-        db.transactionAsync(new Runnable() {
+    public void transactionAsCompleableWithSuccess() throws Exception {
+        db.transactionAsCompletable(new Runnable() {
             @Override
             public void run() {
-                assertThat(Thread.currentThread(), is(not(thread)));
-
                 db.prepareInsertIntoBook().executeAll(someBooks());
             }
         })
-                .subscribeOn(Schedulers.io())
-                .subscribe(subscriber);
-
-        subscriber.awaitTerminalEvent(1, TimeUnit.SECONDS);
-        subscriber.assertCompleted();
+                .test()
+                .assertComplete();
 
         assertThat(db.selectFromBook().count(), is(7));
     }
 
     @Test
-    public void transactionAsync2Abort() throws Exception {
-        TestSubscriber<?> subscriber = TestSubscriber.create();
-
-        db.transactionAsync(new Runnable() {
+    public void transactionAsCompletableWithFailure() throws Exception {
+        db.transactionAsCompletable(new Runnable() {
             @Override
             public void run() {
                 db.prepareInsertIntoBook().executeAll(someBooks());
                 throw new RuntimeException("abort!");
             }
-        }).subscribe(subscriber);
-
-        subscriber.awaitTerminalEvent(1, TimeUnit.SECONDS);
-        subscriber.assertError(RuntimeException.class);
+        })
+                .test()
+                .assertError(RuntimeException.class);
 
         assertThat(db.selectFromBook().count(), is(2));
     }

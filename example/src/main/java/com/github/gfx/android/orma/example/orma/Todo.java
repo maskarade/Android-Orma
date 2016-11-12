@@ -19,12 +19,21 @@ import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.Date;
 
 @Table
 public class Todo {
+
+    public static Todo create(@NonNull String title, @Nullable String content) {
+        Todo todo = new Todo();
+        todo.title = title;
+        todo.content = content;
+        todo.createdTime = new Date();
+        return todo;
+    }
 
     @PrimaryKey
     public long id;

@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.widget;
 
-import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.Relation;
 
 import android.content.Context;
@@ -25,13 +24,15 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 
-import rx.Observable;
-import rx.Single;
-import rx.functions.Action1;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Maybe;
+import io.reactivex.Single;
+import io.reactivex.functions.Consumer;
 
 
 /**
- * A {@link RecyclerView.Adapter} with the Orma backend, just like {@link android.widget.CursorAdapter}.
+ * A {@link RecyclerView.Adapter} with the Orma backend, createFactory like {@link android.widget.CursorAdapter}.
  *
  * @param <Model> An Orma model class
  * @param <VH>    A concrete view holder class
@@ -85,11 +86,11 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      */
     @CheckResult
     @NonNull
-    public Single<Long> addItemAsObservable(@NonNull final ModelFactory<Model> factory) {
-        return delegate.addItemAsObservable(factory)
-                .doOnSuccess(new Action1<Long>() {
+    public Single<Long> addItemAsSingle(@NonNull final Callable<Model> factory) {
+        return delegate.addItemAsSingle(factory)
+                .doOnSuccess(new Consumer<Long>() {
                     @Override
-                    public void call(Long rowId) {
+                    public void accept(Long rowId) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -104,34 +105,28 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
      * Inserts a model into the table and invokes {@link RecyclerView.Adapter#notifyItemInserted(int)}
      *
      * @param item A model factory invoked in a background thread.
-     * @return A hot {@link Observable} that yields the newly inserted row id.
+     * @return It yields the inserted row id.
      */
     @CheckResult
     @NonNull
-    public Single<Long> addItemAsObservable(@NonNull final Model item) {
-        return addItemAsObservable(new ModelFactory<Model>() {
-            @NonNull
-            @Override
-            public Model call() {
-                return item;
-            }
-        });
+    public Single<Long> addItemAsSingle(@NonNull Model item) {
+        return addItemAsSingle(delegate.createFactory(item));
     }
 
     /**
      * Removes an item from the table and invokes {@link RecyclerView.Adapter#notifyItemRemoved(int)}.
      *
      * @param item A model to remove.
-     * @return An {@link Observable} that yields the position at which the item was. {@code onNext()} is only called if the
+     * @return It yields the position at which the item was. {@code onNext()} is only called if the
      * item existed.
      */
     @CheckResult
     @NonNull
-    public Observable<Integer> removeItemAsObservable(@NonNull final Model item) {
-        return delegate.removeItemAsObservable(item)
-                .doOnNext(new Action1<Integer>() {
+    public Maybe<Integer> removeItemAsMaybe(@NonNull Model item) {
+        return delegate.removeItemAsMaybe(item)
+                .doOnSuccess(new Consumer<Integer>() {
                     @Override
-                    public void call(final Integer position) {
+                    public void accept(final Integer position) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -145,15 +140,15 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
     /**
      * Deletes all the rows in the table and invokes {@link RecyclerView.Adapter#notifyDataSetChanged()}.
      *
-     * @return A {@link Single} that yields the number of deleted items.
+     * @return It yields the number of deleted items.
      */
     @CheckResult
     @NonNull
-    public Single<Integer> clearAsObservable() {
-        return delegate.clearAsObservable()
-                .doOnSuccess(new Action1<Integer>() {
+    public Single<Integer> clearAsSingle() {
+        return delegate.clearAsSingle()
+                .doOnSuccess(new Consumer<Integer>() {
                     @Override
-                    public void call(Integer deletedItems) {
+                    public void accept(Integer deletedItems) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -163,4 +158,5 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
                     }
                 });
     }
+
 }

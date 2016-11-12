@@ -21,8 +21,9 @@ import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
-import rx.Single;
-import rx.SingleSubscriber;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Single;
 
 public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaConditionBase<Model, U> {
 
@@ -50,11 +51,11 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
 
     @CheckResult
     @NonNull
-    public Single<Integer> executeAsObservable() {
-        return Single.create(new Single.OnSubscribe<Integer>() {
+    public Single<Integer> executeAsSingle() {
+        return Single.fromCallable(new Callable<Integer>() {
             @Override
-            public void call(SingleSubscriber<? super Integer> subscriber) {
-                subscriber.onSuccess(execute());
+            public Integer call() throws Exception {
+                return execute();
             }
         });
     }

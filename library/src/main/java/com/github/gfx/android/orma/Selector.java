@@ -18,6 +18,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import com.github.gfx.android.orma.internal.OrmaIterator;
 
@@ -31,13 +32,12 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-import rx.Observable;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.Subscriber;
-import rx.functions.Action1;
-import rx.functions.FuncN;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Single;
 
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
@@ -164,17 +164,24 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return (int) conn.rawQueryForLong(sql, getBindArgs());
     }
 
-    /**
-     * Provided for {@link Observable#combineLatest(List, FuncN)}.
-     *
-     * @return An observable that yields {@link #count()}.
-     */
+    @CheckResult
     @NonNull
-    public Single<Integer> countAsObservable() {
-        return Single.create(new Single.OnSubscribe<Integer>() {
+    public Single<Integer> countAsSingle() {
+        return Single.fromCallable(new Callable<Integer>() {
             @Override
-            public void call(SingleSubscriber<? super Integer> singleSubscriber) {
-                singleSubscriber.onSuccess(count());
+            public Integer call() throws Exception {
+                return count();
+            }
+        });
+    }
+
+    @CheckResult
+    @NonNull
+    public Observable<Integer> countAsObservable() {
+        return Observable.fromCallable(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return count();
             }
         });
     }
@@ -192,7 +199,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     public Model value() throws NoValueException {
         Model model = getOrNull(0);
         if (model == null) {
-            throw new NoValueException("Expected single value but nothing for " + getSchema().getTableName());
+            throw new NoValueException("Expected single get but nothing for " + getSchema().getTableName());
         }
         return model;
     }
@@ -208,7 +215,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         Model model = getOrNull(position);
         if (model == null) {
             throw new NoValueException(
-                    "Expected single value for " + position + " but nothing for " + getSchema().getTableName());
+                    "Expected single get for " + position + " but nothing for " + getSchema().getTableName());
         }
         return model;
     }
@@ -229,23 +236,18 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     public <T> Observable<T> pluckAsObservable(final ColumnDef<Model, T> column) {
-        return Observable.create(new Observable.OnSubscribe<T>() {
+        return Observable.create(new ObservableOnSubscribe<T>() {
             @Override
-            public void call(Subscriber<? super T> subscriber) {
+            public void subscribe(ObservableEmitter< T> emitter) throws Exception {
                 Cursor cursor = executeWithColumns(column.getQualifiedName());
                 try {
-                    for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-                        if (subscriber.isUnsubscribed()) {
-                            return;
-                        }
-                        subscriber.onNext(column.getFromCursor(conn, cursor, 0));
+                    for (int pos = 0; !emitter.isDisposed() && cursor.moveToPosition(pos); pos++) {
+                        emitter.onNext(column.getFromCursor(conn, cursor, 0));
                     }
                 } finally {
                     cursor.close();
                 }
-                if (!subscriber.isUnsubscribed()) {
-                    subscriber.onCompleted();
-                }
+                emitter.onComplete();
             }
         });
     }
@@ -288,10 +290,10 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @NonNull
     public List<Model> toList() {
         final ArrayList<Model> list = new ArrayList<>();
-        forEach(new Action1<Model>() {
+        forEach(new Consumer1<Model>() {
             @Override
-            public void call(Model item) {
-                list.add(item);
+            public void accept(Model model) {
+                list.add(model);
             }
         });
         return list;
@@ -302,11 +304,11 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
      *
      * @param action An action called for each model in the iteration.
      */
-    public void forEach(@NonNull Action1<Model> action) {
+    public void forEach(@NonNull Consumer1<Model> action) {
         Cursor cursor = execute();
         try {
             for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-                action.call(newModelFromCursor(cursor));
+                action.accept(newModelFromCursor(cursor));
             }
         } finally {
             cursor.close();
@@ -320,23 +322,22 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
 
     @NonNull
     public Observable<Model> executeAsObservable() {
-        return Observable.create(new Observable.OnSubscribe<Model>() {
+        return Observable.create(new ObservableOnSubscribe<Model>() {
             @Override
-            public void call(final Subscriber<? super Model> subscriber) {
+            public void subscribe(ObservableEmitter<Model> emitter) throws Exception {
                 final Cursor cursor = execute();
                 try {
-                    for (int pos = 0; !subscriber.isUnsubscribed() && cursor.moveToPosition(pos); pos++) {
-                        subscriber.onNext(newModelFromCursor(cursor));
-                    }
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onCompleted();
+                    for (int pos = 0; !emitter.isDisposed() && cursor.moveToPosition(pos); pos++) {
+                        emitter.onNext(newModelFromCursor(cursor));
                     }
                 } finally {
                     cursor.close();
                 }
+                emitter.onComplete();
             }
         });
     }
+
 
     // implements Iterable<Model>
 

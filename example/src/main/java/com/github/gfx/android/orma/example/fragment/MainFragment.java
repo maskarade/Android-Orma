@@ -25,6 +25,7 @@ import com.github.gfx.android.orma.example.orma.Item;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.tool.LargeLog;
+import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.TraceListener;
 
@@ -45,8 +46,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import java.util.Date;
 import java.util.Locale;
+
+import io.reactivex.Single;
 
 public class MainFragment extends Fragment {
 
@@ -125,10 +127,17 @@ public class MainFragment extends Fragment {
 
         AsyncTask.SERIAL_EXECUTOR.execute(() -> {
             try {
+                Thread.sleep(1000);
+
                 orma.migrate(); // may throws SQLiteConstraintException
 
-                simpleCRUD();
+                Log.d(TAG, "CRUD:start ------------------------");
+                simpleCrud();
+                Log.d(TAG, "rxCRUD:start ------------------------");
+                rxCrud();
+                Log.d(TAG, "CRUD:start ------------------------");
                 associations();
+                Log.d(TAG, "------------------------");
             } catch (final Exception e) {
                 binding.getRoot().post(() -> {
                     LargeLog.e(TAG, e);
@@ -141,19 +150,19 @@ public class MainFragment extends Fragment {
     /**
      * Demonstrates simple CRUD operations, which makes no sense though.
      */
-    void simpleCRUD() {
+    void simpleCrud() {
         // create
-        Todo todo = new Todo();
-        todo.title = "buy";
-        todo.content = "milk banana apple";
-        todo.createdTime = new Date();
-        orma.insertIntoTodo(todo);
+        orma.insertIntoTodo(Todo.create("buy", "milk banana apple"));
 
         // read
-        todo = orma.selectFromTodo()
+        orma.selectFromTodo()
                 .titleEq("buy")
-                .value();
-        Log.d(TAG, "selectFromTodo: " + todo.id);
+                .forEach(new Consumer1<Todo>() {
+                    @Override
+                    public void accept(Todo todo) {
+                        Log.d(TAG, "selectFromTodo: " + todo.id);
+                    }
+                });
 
         // update
         orma.updateTodo()
@@ -165,6 +174,42 @@ public class MainFragment extends Fragment {
         orma.deleteFromTodo()
                 .doneEq(true)
                 .execute();
+    }
+
+    void rxCrud() {
+        // create
+        orma.prepareInsertIntoTodoAsSingle()
+                .flatMapObservable(todoInserter -> Single.concat(
+                        todoInserter.executeAsSingle(Todo.create("today", "coffee")),
+                        todoInserter.executeAsSingle(Todo.create("tomorrow", "tea"))
+                ).toObservable())
+                .subscribe((rowId) -> {
+                    Log.d(TAG, "inserted: " + rowId);
+                });
+
+        // read
+        orma.selectFromTodo()
+                .executeAsObservable()
+                .subscribe((item) -> {
+                    Log.d(TAG, "rx select: " + item.title);
+                });
+
+        // update
+        orma.updateTodo()
+                .titleEq("today")
+                .done(true)
+                .executeAsSingle()
+                .subscribe((count) -> {
+                    Log.d(TAG, "updated count: " + count);
+                });
+
+        // delete
+        orma.deleteFromTodo()
+                .doneEq(true)
+                .executeAsSingle()
+                .subscribe((count) -> {
+                    Log.d(TAG, "deleted count: " + count);
+                });
     }
 
     void associations() {

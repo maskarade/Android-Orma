@@ -14,6 +14,7 @@ dependencies {
     compile project(':annotations')
     compileOnly "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
     compile 'com.squareup:javapoet:1.7.0'
+    compile 'io.reactivex.rxjava2:rxjava:2.0.0'
     testCompile project.rootProject.ext.ANDROID_JAR
     testCompile 'junit:junit:4.12'
     testCompile 'com.google.testing.compile:compile-testing:0.9'

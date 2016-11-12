@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.function.Function1;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,8 +27,6 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import rx.functions.Func1;
 
 public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model, ?>> {
 
@@ -143,10 +142,10 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
 
     @SuppressWarnings("unchecked")
     protected <ColumnType, SerializedType> C in(boolean not, @NonNull ColumnDef<Model, ?> column,
-            @NonNull Collection<ColumnType> values, Func1<ColumnType, SerializedType> serializer) {
+            @NonNull Collection<ColumnType> values, Function1<ColumnType, SerializedType> serializer) {
         List<SerializedType> serializedValues = new ArrayList<>(values.size());
         for (ColumnType value : values) {
-            serializedValues.add(serializer.call(value));
+            serializedValues.add(serializer.apply(value));
         }
         return in(not, column, serializedValues);
     }
