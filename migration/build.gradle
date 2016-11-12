@@ -57,6 +57,9 @@ task generateParserSources(type: JavaExec) {
 
     doLast {
         delete fileTree(dir: "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH", include: '*.tokens')
+        fileTree(dir: "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH", include: '*.java').each { File file ->
+            file.setLastModified(GRAMMAR_FILE.lastModified())
+        }
     }
 }
 
