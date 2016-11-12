@@ -3,6 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
+        classpath 'io.realm:realm-gradle-plugin:2.2.0'
         classpath 'me.tatarka:gradle-retrolambda:3.3.1'
         classpath 'net.orfjackal.retrolambda:retrolambda:2.3.0'
     }
@@ -10,6 +11,7 @@ buildscript {
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {

@@ -24,6 +24,7 @@ import com.github.gfx.android.orma.example.handwritten.HandWrittenOpenHelper;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.orma.Todo_Selector;
+import com.github.gfx.android.orma.example.realm.RealmTodo;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -48,6 +49,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 public class BenchmarkFragment extends Fragment {
 
@@ -111,8 +116,19 @@ public class BenchmarkFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        Realm.init(getContext());
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+
+        RealmConfiguration realmConf = new RealmConfiguration.Builder().build();
+        Realm.setDefaultConfiguration(realmConf);
+        Realm.deleteRealm(realmConf);
 
         Schedulers.io().createWorker().schedule(() -> {
             getContext().deleteDatabase("orma-benchmark.db");
@@ -139,6 +155,10 @@ public class BenchmarkFragment extends Fragment {
 
         adapter.clear();
 
+        Realm realm = Realm.getDefaultInstance();
+        realm.executeTransaction(r -> r.delete(RealmTodo.class));
+        realm.close();
+
         hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
         orma.deleteFromTodo()
@@ -148,11 +168,19 @@ public class BenchmarkFragment extends Fragment {
                 .flatMap(integer -> startInsertWithOrma())
                 .flatMap(result -> {
                     adapter.add(result);
+                    return startInsertWithRealm(); // Realm objects can only be accessed on the thread they were created.
+                })
+                .flatMap(result -> {
+                    adapter.add(result);
                     return startInsertWithHandWritten();
                 })
                 .flatMap(result -> {
                     adapter.add(result);
                     return startSelectAllWithOrma();
+                })
+                .flatMap(result -> {
+                    adapter.add(result);
+                    return startSelectAllWithRealm(); // Realm objects can only be accessed on the thread they were created.
                 })
                 .flatMap(result -> {
                     adapter.add(result);
@@ -187,6 +215,29 @@ public class BenchmarkFragment extends Fragment {
                 });
             });
             return new Result("Orma/insert", result);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    Single<Result> startInsertWithRealm() {
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                Realm realm = Realm.getDefaultInstance();
+                realm.executeTransaction(r -> {
+                    long now = System.currentTimeMillis();
+
+                    for (int i = 0; i < N_ITEMS; i++) {
+                        RealmTodo todo = r.createObject(RealmTodo.class);
+
+                        todo.setTitle(titlePrefix + i);
+                        todo.setContent(contentPrefix + i);
+                        todo.setCreatedTime(new Date(now));
+                    }
+                });
+                realm.close();
+            });
+            return new Result("Realm/insert", result);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -250,6 +301,34 @@ public class BenchmarkFragment extends Fragment {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    Single<Result> startSelectAllWithRealm() {
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                AtomicInteger count = new AtomicInteger();
+                Realm realm = Realm.getDefaultInstance();
+                RealmResults<RealmTodo> results = realm.where(RealmTodo.class)
+                        .findAllSorted("createdTime", Sort.ASCENDING);
+                for (RealmTodo todo : results) {
+                    @SuppressWarnings("unused")
+                    String title = todo.getTitle();
+                    @SuppressWarnings("unused")
+                    String content = todo.getContent();
+                    @SuppressWarnings("unused")
+                    Date createdTime = todo.getCreatedTime();
+
+                    count.incrementAndGet();
+                }
+                if (results.size() != count.get()) {
+                    throw new AssertionError("unexpected get: " + count.get());
+                }
+                realm.close();
+
+                Log.d(TAG, "Realm/forEachAll count: " + count);
+            });
+            return new Result("Realm/forEachAll", result);
+        });
     }
 
     Single<Result> startSelectAllWithHandWritten() {
