@@ -8,6 +8,15 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v4.0.0-rc1 2016/11/12
+
+Orma v4 introduces RxJava 2.x support,
+including lots of incompatible changes by dropping RxJava 1.x.
+
+https://github.com/gfx/Android-Orma/compare/v3.2.1...v4.0.0-rc1
+
+Please test a new version if you use RxJava 2.x.
+
 ## v3.2.1 2016/11/08
 
 ### Bug Fixes
