@@ -21,7 +21,6 @@ import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
-import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.Book;
@@ -116,25 +115,6 @@ public class QueryTest {
     @Test
     public void toList() throws Exception {
         List<Book> books = db.selectFromBook().toList();
-        assertThat(books, hasSize(2));
-        assertThat(books.get(0).title, is("today"));
-        assertThat(books.get(0).content, is("milk, banana"));
-
-        assertThat(books.get(1).title, is("friday"));
-        assertThat(books.get(1).content, is("apple"));
-    }
-
-    @Test
-    public void forEach() throws Exception {
-        final List<Book> books = new ArrayList<>();
-
-        db.selectFromBook().forEach(new Consumer1<Book>() {
-            @Override
-            public void accept(Book book) {
-                books.add(book);
-            }
-        });
-
         assertThat(books, hasSize(2));
         assertThat(books.get(0).title, is("today"));
         assertThat(books.get(0).content, is("milk, banana"));
