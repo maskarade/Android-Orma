@@ -380,7 +380,7 @@ public class QueryTest {
 
     @Test
     public void limitAndOffset() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             Book book = new Book();
             book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
@@ -414,7 +414,7 @@ public class QueryTest {
 
     @Test
     public void pageAndPer() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             Book book = new Book();
             book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
@@ -423,18 +423,37 @@ public class QueryTest {
             db.insertIntoBook(book);
         }
 
-        List<Book> books = db.selectFromBook().page(1).per(2).toList();
-        assertThat(books, hasSize(2));
-        assertThat(books.get(0).title, is("today"));
-        assertThat(books.get(0).content, is("milk, banana"));
+        // toList()
+        {
+            List<Book> books = db.selectFromBook().page(1).per(2).toList();
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("today"));
+            assertThat(books.get(0).content, is("milk, banana"));
 
-        assertThat(books.get(1).title, is("friday"));
-        assertThat(books.get(1).content, is("apple"));
+            assertThat(books.get(1).title, is("friday"));
+            assertThat(books.get(1).content, is("apple"));
 
-        books = db.selectFromBook().page(2).per(2).toList();
-        assertThat(books, hasSize(2));
-        assertThat(books.get(0).title, is("name #0"));
-        assertThat(books.get(1).title, is("name #1"));
+            books = db.selectFromBook().page(2).per(2).toList();
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("name #0"));
+            assertThat(books.get(1).title, is("name #1"));
+        }
+
+        // OrmaIterator
+        {
+            List<Book> books = IteratorUtils.listFromIterable(db.selectFromBook().page(1).per(2));
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("today"));
+            assertThat(books.get(0).content, is("milk, banana"));
+
+            assertThat(books.get(1).title, is("friday"));
+            assertThat(books.get(1).content, is("apple"));
+
+            books = IteratorUtils.listFromIterable(db.selectFromBook().page(2).per(2));
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("name #0"));
+            assertThat(books.get(1).title, is("name #1"));
+        }
     }
 
     @Test

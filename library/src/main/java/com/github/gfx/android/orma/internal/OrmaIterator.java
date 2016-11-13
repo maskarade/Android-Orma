@@ -41,14 +41,11 @@ public class OrmaIterator<Model> implements Iterator<Model> {
     int cursorPos = 0;
 
     public OrmaIterator(Selector<Model, ?> selector) {
-        this.selector = selector;
         this.offset = selector.hasOffset() ? selector.getOffset() : 0L;
         this.totalCount = selector.hasLimit() ? selector.getLimit() : selector.count();
-        fill();
-    }
+        this.selector = selector.clone().resetLimitClause();
 
-    void finish() {
-        cursor.close();
+        fill();
     }
 
     void fill() {
@@ -56,13 +53,14 @@ public class OrmaIterator<Model> implements Iterator<Model> {
             cursor.close();
         }
         cursor = selector
-                .clone()
                 .limit(BATCH_SIZE)
                 .offset(offset)
                 .execute();
 
-        offset += BATCH_SIZE;
         cursorPos = 0;
+        cursor.moveToPosition(cursorPos);
+
+        offset += BATCH_SIZE;
     }
 
     @Override
@@ -76,18 +74,17 @@ public class OrmaIterator<Model> implements Iterator<Model> {
             throw new NoSuchElementException("OrmaIterator#next()");
         }
 
-        if (cursor.isLast()) {
-            fill();
-        }
-
-        cursor.moveToPosition(cursorPos);
         Model model = selector.newModelFromCursor(cursor);
 
         totalPos++;
         cursorPos++;
 
         if (!hasNext()) {
-            finish();
+            cursor.close();
+        } else if (cursor.isLast()) {
+            fill();
+        } else {
+            cursor.moveToPosition(cursorPos);
         }
 
         return model;
@@ -97,5 +94,4 @@ public class OrmaIterator<Model> implements Iterator<Model> {
     public void remove() {
         throw new UnsupportedOperationException("Iterator#remove()");
     }
-
 }

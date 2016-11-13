@@ -161,6 +161,15 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    @SuppressWarnings("unchecked")
+    public S resetLimitClause() {
+        limit = -1;
+        offset = -1;
+        page = -1;
+        return (S) this;
+    }
+
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public boolean hasLimit() {
         return limit != -1;
     }
