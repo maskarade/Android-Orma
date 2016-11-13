@@ -4,8 +4,6 @@ machine:
   environment:
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx1560m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
 dependencies:
-  cache_directories:
-    - "$ANDROID_HOME/build-tools"
   pre:
     - sudo service postgresql stop
     - sudo service mongodb stop
