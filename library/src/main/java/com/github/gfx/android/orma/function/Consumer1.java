@@ -16,6 +16,10 @@
 
 package com.github.gfx.android.orma.function;
 
+/**
+ * A copy of {@link io.reactivex.functions.Consumer} for independency from RxJava and Java8.
+ * @param <T> type of the argument of {@link #accept(T)}
+ */
 @FunctionalInterface
 public interface Consumer1<T> {
     void accept(T t);

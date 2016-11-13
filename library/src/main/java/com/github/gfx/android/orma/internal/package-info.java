@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.migration.sqliteparser;
+@RestrictTo(RestrictTo.Scope.GROUP_ID)
+package com.github.gfx.android.orma.internal;
 
 import android.support.annotation.RestrictTo;
-
-@RestrictTo(RestrictTo.Scope.TESTS)
-public class SelectStatement extends SQLiteComponent {
-
-}
