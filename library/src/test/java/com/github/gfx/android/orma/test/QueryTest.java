@@ -380,7 +380,7 @@ public class QueryTest {
 
     @Test
     public void limitAndOffset() throws Exception {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 15; i++) {
             Book book = new Book();
             book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
@@ -391,24 +391,20 @@ public class QueryTest {
 
         // toList
         {
-            List<Book> books = db.selectFromBook().limit(2).offset(3).toList();
-            assertThat(books, hasSize(2));
-            assertThat(books.get(0).title, is("name #1"));
-            assertThat(books.get(0).content, is("blah blah blah #1"));
-
-            assertThat(books.get(1).title, is("name #2"));
-            assertThat(books.get(1).content, is("blah blah blah #2"));
+            List<Book> books = db.selectFromBook().limit(3).offset(9).toList();
+            assertThat(books, hasSize(3));
+            assertThat(books.get(0).title, is("name #7"));
+            assertThat(books.get(1).title, is("name #8"));
+            assertThat(books.get(2).title, is("name #9"));
         }
 
         // OrmaIterator
         {
-            List<Book> books = IteratorUtils.listFromIterable(db.selectFromBook().limit(2).offset(3));
-            assertThat(books, hasSize(2));
-            assertThat(books.get(0).title, is("name #1"));
-            assertThat(books.get(0).content, is("blah blah blah #1"));
-
-            assertThat(books.get(1).title, is("name #2"));
-            assertThat(books.get(1).content, is("blah blah blah #2"));
+            List<Book> books = IteratorUtils.listFromIterable(db.selectFromBook().limit(3).offset(9));
+            assertThat(books, hasSize(3));
+            assertThat(books.get(0).title, is("name #7"));
+            assertThat(books.get(1).title, is("name #8"));
+            assertThat(books.get(2).title, is("name #9"));
         }
     }
 
