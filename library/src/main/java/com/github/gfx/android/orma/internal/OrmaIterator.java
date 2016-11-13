@@ -38,8 +38,6 @@ public class OrmaIterator<Model> implements Iterator<Model> {
 
     Cursor cursor;
 
-    int cursorPos = 0;
-
     public OrmaIterator(Selector<Model, ?> selector) {
         this.offset = selector.hasOffset() ? selector.getOffset() : 0L;
         this.totalCount = selector.hasLimit() ? selector.getLimit() : selector.count();
@@ -57,8 +55,7 @@ public class OrmaIterator<Model> implements Iterator<Model> {
                 .offset(offset)
                 .execute();
 
-        cursorPos = 0;
-        cursor.moveToPosition(cursorPos);
+        cursor.moveToFirst();
 
         offset += BATCH_SIZE;
     }
@@ -77,14 +74,13 @@ public class OrmaIterator<Model> implements Iterator<Model> {
         Model model = selector.newModelFromCursor(cursor);
 
         totalPos++;
-        cursorPos++;
 
         if (!hasNext()) {
             cursor.close();
         } else if (cursor.isLast()) {
             fill();
         } else {
-            cursor.moveToPosition(cursorPos);
+            cursor.moveToNext();
         }
 
         return model;
