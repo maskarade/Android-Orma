@@ -18,7 +18,6 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
-import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import com.github.gfx.android.orma.internal.OrmaIterator;
 
@@ -277,7 +276,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     public <T> Observable<T> pluckAsObservable(final ColumnDef<Model, T> column) {
         return Observable.create(new ObservableOnSubscribe<T>() {
             @Override
-            public void subscribe(ObservableEmitter< T> emitter) throws Exception {
+            public void subscribe(ObservableEmitter<T> emitter) throws Exception {
                 Cursor cursor = executeWithColumns(column.getQualifiedName());
                 try {
                     for (int pos = 0; !emitter.isDisposed() && cursor.moveToPosition(pos); pos++) {
@@ -329,29 +328,16 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @NonNull
     public List<Model> toList() {
         final ArrayList<Model> list = new ArrayList<>();
-        forEach(new Consumer1<Model>() {
-            @Override
-            public void accept(Model model) {
-                list.add(model);
-            }
-        });
-        return list;
-    }
 
-    /**
-     * Executes a query and calls {@code Action1<Model>#call} for each model}.
-     *
-     * @param action An action called for each model in the iteration.
-     */
-    public void forEach(@NonNull Consumer1<Model> action) {
         Cursor cursor = execute();
         try {
             for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-                action.accept(newModelFromCursor(cursor));
+                list.add(newModelFromCursor(cursor));
             }
         } finally {
             cursor.close();
         }
+        return list;
     }
 
     @NonNull
@@ -376,7 +362,6 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
             }
         });
     }
-
 
     // implements Iterable<Model>
 
