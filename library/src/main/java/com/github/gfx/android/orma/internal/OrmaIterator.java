@@ -16,6 +16,7 @@
 
 package com.github.gfx.android.orma.internal;
 
+import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Selector;
 
 import android.database.Cursor;
@@ -25,15 +26,15 @@ import java.util.NoSuchElementException;
 
 public class OrmaIterator<Model> implements Iterator<Model> {
 
-    static final int batchSize = 1000;
+    static final int BATCH_SIZE = BuildConfig.DEBUG ? 10 : 1000;
 
     final Selector<Model, ?> selector;
 
-    final int totalCount;
+    final long totalCount;
 
-    int totalPos = 0;
+    long totalPos = 0;
 
-    int offset = 0;
+    long offset;
 
     Cursor cursor;
 
@@ -41,7 +42,8 @@ public class OrmaIterator<Model> implements Iterator<Model> {
 
     public OrmaIterator(Selector<Model, ?> selector) {
         this.selector = selector;
-        this.totalCount = selector.count();
+        this.offset = selector.hasOffset() ? selector.getOffset() : 0L;
+        this.totalCount = selector.hasLimit() ? selector.getLimit() : selector.count();
         fill();
     }
 
@@ -55,11 +57,11 @@ public class OrmaIterator<Model> implements Iterator<Model> {
         }
         cursor = selector
                 .clone()
-                .limit(batchSize)
+                .limit(BATCH_SIZE)
                 .offset(offset)
                 .execute();
 
-        offset += batchSize;
+        offset += BATCH_SIZE;
         cursorPos = 0;
     }
 

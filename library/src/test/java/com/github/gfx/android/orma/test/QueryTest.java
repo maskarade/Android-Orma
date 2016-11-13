@@ -29,6 +29,7 @@ import com.github.gfx.android.orma.test.model.Book_Schema;
 import com.github.gfx.android.orma.test.model.Book_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
+import com.github.gfx.android.orma.test.toolbox.IteratorUtils;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
@@ -358,10 +359,23 @@ public class QueryTest {
 
     @Test
     public void limit() throws Exception {
-        List<Book> books = db.selectFromBook().limit(1).toList();
-        assertThat(books, hasSize(1));
-        assertThat(books.get(0).title, is("today"));
-        assertThat(books.get(0).content, is("milk, banana"));
+        // toList
+        {
+            List<Book> books = db.selectFromBook().limit(1).toList();
+            assertThat(books, hasSize(1));
+            assertThat(books.get(0).title, is("today"));
+            assertThat(books.get(0).content, is("milk, banana"));
+            assertThat(db.selectFromBook().limit(2).toList(), hasSize(2));
+        }
+
+        // OrmaIterator
+        {
+            List<Book> books = IteratorUtils.listFromIterable(db.selectFromBook().limit(1));
+            assertThat(books, hasSize(1));
+            assertThat(books.get(0).title, is("today"));
+            assertThat(books.get(0).content, is("milk, banana"));
+            assertThat(db.selectFromBook().limit(2).toList(), hasSize(2));
+        }
     }
 
     @Test
@@ -375,13 +389,27 @@ public class QueryTest {
             db.insertIntoBook(book);
         }
 
-        List<Book> books = db.selectFromBook().limit(2).offset(0).toList();
-        assertThat(books, hasSize(2));
-        assertThat(books.get(0).title, is("today"));
-        assertThat(books.get(0).content, is("milk, banana"));
+        // toList
+        {
+            List<Book> books = db.selectFromBook().limit(2).offset(3).toList();
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("name #1"));
+            assertThat(books.get(0).content, is("blah blah blah #1"));
 
-        assertThat(books.get(1).title, is("friday"));
-        assertThat(books.get(1).content, is("apple"));
+            assertThat(books.get(1).title, is("name #2"));
+            assertThat(books.get(1).content, is("blah blah blah #2"));
+        }
+
+        // OrmaIterator
+        {
+            List<Book> books = IteratorUtils.listFromIterable(db.selectFromBook().limit(2).offset(3));
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("name #1"));
+            assertThat(books.get(0).content, is("blah blah blah #1"));
+
+            assertThat(books.get(1).title, is("name #2"));
+            assertThat(books.get(1).content, is("blah blah blah #2"));
+        }
     }
 
     @Test
