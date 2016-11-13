@@ -22,12 +22,14 @@ import com.github.gfx.android.orma.function.Consumer1;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import com.github.gfx.android.orma.internal.OrmaIterator;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.support.annotation.CheckResult;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,6 +41,7 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Single;
 
+@SuppressLint("Assert")
 public abstract class Selector<Model, S extends Selector<Model, ?>>
         extends OrmaConditionBase<Model, S> implements Iterable<Model>, Cloneable {
 
@@ -154,6 +157,42 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
             } else {
                 return null;
             }
+        }
+    }
+
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    @SuppressWarnings("unchecked")
+    public S resetLimitClause() {
+        limit = -1;
+        offset = -1;
+        page = -1;
+        return (S) this;
+    }
+
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    public boolean hasLimit() {
+        return limit != -1;
+    }
+
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    public long getLimit() {
+        assert hasLimit();
+        return limit;
+    }
+
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    public boolean hasOffset() {
+        return offset != -1 || (limit != -1 && page != -1);
+    }
+
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    public long getOffset() {
+        assert hasOffset();
+
+        if (offset != -1) {
+            return offset;
+        } else {
+            return ((page - 1) * limit);
         }
     }
 

@@ -16,6 +16,7 @@
 
 package com.github.gfx.android.orma.internal;
 
+import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Selector;
 
 import android.database.Cursor;
@@ -24,29 +25,24 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class OrmaIterator<Model> implements Iterator<Model> {
-
-    static final int batchSize = 1000;
+    static final int BATCH_SIZE = BuildConfig.DEBUG ? 2 : 1000;
 
     final Selector<Model, ?> selector;
 
-    final int totalCount;
+    final long totalCount;
 
-    int totalPos = 0;
+    long totalPos = 0;
 
-    int offset = 0;
+    long offset;
 
     Cursor cursor;
 
-    int cursorPos = 0;
-
     public OrmaIterator(Selector<Model, ?> selector) {
-        this.selector = selector;
-        this.totalCount = selector.count();
-        fill();
-    }
+        this.offset = selector.hasOffset() ? selector.getOffset() : 0L;
+        this.totalCount = selector.hasLimit() ? selector.getLimit() : selector.count();
+        this.selector = selector.clone().resetLimitClause();
 
-    void finish() {
-        cursor.close();
+        fill();
     }
 
     void fill() {
@@ -54,13 +50,13 @@ public class OrmaIterator<Model> implements Iterator<Model> {
             cursor.close();
         }
         cursor = selector
-                .clone()
-                .limit(batchSize)
+                .limit(BATCH_SIZE)
                 .offset(offset)
                 .execute();
 
-        offset += batchSize;
-        cursorPos = 0;
+        cursor.moveToFirst();
+
+        offset += BATCH_SIZE;
     }
 
     @Override
@@ -74,18 +70,16 @@ public class OrmaIterator<Model> implements Iterator<Model> {
             throw new NoSuchElementException("OrmaIterator#next()");
         }
 
-        if (cursor.isLast()) {
-            fill();
-        }
-
-        cursor.moveToPosition(cursorPos);
         Model model = selector.newModelFromCursor(cursor);
 
         totalPos++;
-        cursorPos++;
 
         if (!hasNext()) {
-            finish();
+            cursor.close();
+        } else if (cursor.isLast()) {
+            fill();
+        } else {
+            cursor.moveToNext();
         }
 
         return model;
@@ -95,5 +89,4 @@ public class OrmaIterator<Model> implements Iterator<Model> {
     public void remove() {
         throw new UnsupportedOperationException("Iterator#remove()");
     }
-
 }

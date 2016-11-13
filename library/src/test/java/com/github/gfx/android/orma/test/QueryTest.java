@@ -29,6 +29,7 @@ import com.github.gfx.android.orma.test.model.Book_Schema;
 import com.github.gfx.android.orma.test.model.Book_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
+import com.github.gfx.android.orma.test.toolbox.IteratorUtils;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
 import org.junit.Before;
@@ -358,15 +359,28 @@ public class QueryTest {
 
     @Test
     public void limit() throws Exception {
-        List<Book> books = db.selectFromBook().limit(1).toList();
-        assertThat(books, hasSize(1));
-        assertThat(books.get(0).title, is("today"));
-        assertThat(books.get(0).content, is("milk, banana"));
+        // toList
+        {
+            List<Book> books = db.selectFromBook().limit(1).toList();
+            assertThat(books, hasSize(1));
+            assertThat(books.get(0).title, is("today"));
+            assertThat(books.get(0).content, is("milk, banana"));
+            assertThat(db.selectFromBook().limit(2).toList(), hasSize(2));
+        }
+
+        // OrmaIterator
+        {
+            List<Book> books = IteratorUtils.listFromIterable(db.selectFromBook().limit(1));
+            assertThat(books, hasSize(1));
+            assertThat(books.get(0).title, is("today"));
+            assertThat(books.get(0).content, is("milk, banana"));
+            assertThat(db.selectFromBook().limit(2).toList(), hasSize(2));
+        }
     }
 
     @Test
     public void limitAndOffset() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
             Book book = new Book();
             book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
@@ -375,18 +389,28 @@ public class QueryTest {
             db.insertIntoBook(book);
         }
 
-        List<Book> books = db.selectFromBook().limit(2).offset(0).toList();
-        assertThat(books, hasSize(2));
-        assertThat(books.get(0).title, is("today"));
-        assertThat(books.get(0).content, is("milk, banana"));
+        // toList
+        {
+            List<Book> books = db.selectFromBook().limit(3).offset(9).toList();
+            assertThat(books, hasSize(3));
+            assertThat(books.get(0).title, is("name #7"));
+            assertThat(books.get(1).title, is("name #8"));
+            assertThat(books.get(2).title, is("name #9"));
+        }
 
-        assertThat(books.get(1).title, is("friday"));
-        assertThat(books.get(1).content, is("apple"));
+        // OrmaIterator
+        {
+            List<Book> books = IteratorUtils.listFromIterable(db.selectFromBook().limit(3).offset(9));
+            assertThat(books, hasSize(3));
+            assertThat(books.get(0).title, is("name #7"));
+            assertThat(books.get(1).title, is("name #8"));
+            assertThat(books.get(2).title, is("name #9"));
+        }
     }
 
     @Test
     public void pageAndPer() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             Book book = new Book();
             book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
@@ -395,18 +419,37 @@ public class QueryTest {
             db.insertIntoBook(book);
         }
 
-        List<Book> books = db.selectFromBook().page(1).per(2).toList();
-        assertThat(books, hasSize(2));
-        assertThat(books.get(0).title, is("today"));
-        assertThat(books.get(0).content, is("milk, banana"));
+        // toList()
+        {
+            List<Book> books = db.selectFromBook().page(1).per(2).toList();
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("today"));
+            assertThat(books.get(0).content, is("milk, banana"));
 
-        assertThat(books.get(1).title, is("friday"));
-        assertThat(books.get(1).content, is("apple"));
+            assertThat(books.get(1).title, is("friday"));
+            assertThat(books.get(1).content, is("apple"));
 
-        books = db.selectFromBook().page(2).per(2).toList();
-        assertThat(books, hasSize(2));
-        assertThat(books.get(0).title, is("name #0"));
-        assertThat(books.get(1).title, is("name #1"));
+            books = db.selectFromBook().page(2).per(2).toList();
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("name #0"));
+            assertThat(books.get(1).title, is("name #1"));
+        }
+
+        // OrmaIterator
+        {
+            List<Book> books = IteratorUtils.listFromIterable(db.selectFromBook().page(1).per(2));
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("today"));
+            assertThat(books.get(0).content, is("milk, banana"));
+
+            assertThat(books.get(1).title, is("friday"));
+            assertThat(books.get(1).content, is("apple"));
+
+            books = IteratorUtils.listFromIterable(db.selectFromBook().page(2).per(2));
+            assertThat(books, hasSize(2));
+            assertThat(books.get(0).title, is("name #0"));
+            assertThat(books.get(1).title, is("name #1"));
+        }
     }
 
     @Test
