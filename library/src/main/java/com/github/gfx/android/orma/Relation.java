@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeEmitter;
 import io.reactivex.MaybeOnSubscribe;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 /**
@@ -250,6 +251,11 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @NonNull
     public Inserter<Model> upserter() {
         return inserter(OnConflict.REPLACE, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Observable<R> createQueryObservable() {
+        return (Observable<R>)conn.createQueryObservable(this);
     }
 
     // Iterator<Model>

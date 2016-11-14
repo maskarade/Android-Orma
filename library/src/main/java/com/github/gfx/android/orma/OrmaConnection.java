@@ -39,6 +39,12 @@ import android.util.Log;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.subjects.PublishSubject;
 
 /**
  * Low-level interface to Orma database connection.
@@ -69,6 +75,8 @@ public class OrmaConnection {
     final AccessThreadConstraint readOnMainThread;
 
     final AccessThreadConstraint writeOnMainThread;
+
+    final Map<Observer<Relation<?, ?>>, Relation<?, ?>> observerMap = new WeakHashMap<>();
 
     boolean migrationCompleted = false;
 
@@ -313,6 +321,24 @@ public class OrmaConnection {
         });
     }
 
+    @SuppressWarnings("unchecked")
+    public <R extends Relation<?, ?>> Observable<R> createQueryObservable(R relation) {
+        PublishSubject<R> subject = PublishSubject.create();
+        observerMap.put((PublishSubject<Relation<?, ?>>) subject, relation);
+        return subject;
+    }
+
+
+    public void trigger(Schema<?> schema) {
+        if (!observerMap.isEmpty()) {
+            for (Map.Entry<Observer<Relation<?, ?>>, Relation<?, ?>> entry : observerMap.entrySet()) {
+                if (schema == entry.getValue().getSchema()) {
+                    entry.getKey().onNext(entry.getValue());
+                }
+            }
+        }
+    }
+
     public void execSQL(@NonNull String sql, @NonNull Object... bindArgs) {
         trace(sql, bindArgs);
         SQLiteDatabase db = getWritableDatabase();
@@ -327,7 +353,7 @@ public class OrmaConnection {
         }
     }
 
-    protected void execSQL(@NonNull  SQLiteDatabase db, @NonNull String sql) {
+    protected void execSQL(@NonNull SQLiteDatabase db, @NonNull String sql) {
         trace(sql, null);
         db.execSQL(sql);
     }

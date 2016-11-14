@@ -70,7 +70,9 @@ public class Inserter<Model> {
             conn.trace(sql, schema.convertToArgs(conn, model, withoutAutoId));
         }
         schema.bindArgs(conn, statement, model, withoutAutoId);
-        return statement.executeInsert();
+        long rowId = statement.executeInsert();
+        conn.trigger(schema);
+        return rowId;
     }
 
     /**
