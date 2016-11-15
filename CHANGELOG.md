@@ -8,6 +8,22 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v4.0.0-rc2 2016/11/16
+
+### New Features
+
+* [#338](https://github.com/gfx/Android-Orma/pull/338): *Experimental* `Relation#createQueryObservable()` for SQLBrite `QueryObservable`,
+  to observe data-set changed events
+
+### Bug Fixes
+
+* [#333](https://github.com/gfx/Android-Orma/pull/333): Add `OrmaDatabase#deleteAll()`
+* [#336](https://github.com/gfx/Android-Orma/pull/336): Fix a bug that `for (T value : selector)` did not respect limit clauses
+
+### Changes
+
+* [#337](https://github.com/gfx/Android-Orma/pull/337): Remove `Selector#forEach()` because it's ambiguous to `Iterable#forEach()` implemented in API level 24. Just use `Iterable` interface for `Selector` (and `Relation`)
+
 ## v4.0.0-rc1 2016/11/12
 
 Orma v4 introduces RxJava 2.x support,
