@@ -311,6 +311,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     /**
+     * @param columns SQL result columns for the {@code SELECT} statement
      * @return A {@code SELECT} statement the selector represents
      */
     @NonNull

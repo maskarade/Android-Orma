@@ -19,8 +19,8 @@ package com.github.gfx.android.orma.function;
 /**
  * A copy of {@link io.reactivex.functions.Function} for independency from RxJava and Java8.
  *
- * @param <T> The type of argument of {@link #apply(T)}
- * @param <R> The type of return value of {@link #apply(T)}
+ * @param <T> The type of argument of this function interface
+ * @param <R> The type of return value of this function interface
  */
 @FunctionalInterface
 public interface Function1<T, R> {
