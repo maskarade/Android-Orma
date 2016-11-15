@@ -15,8 +15,10 @@
  */
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.support.annotation.CheckResult;
@@ -32,7 +34,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeEmitter;
 import io.reactivex.MaybeOnSubscribe;
+import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.functions.Function;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -250,6 +254,38 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @NonNull
     public Inserter<Model> upserter() {
         return inserter(OnConflict.REPLACE, false);
+    }
+
+    /**
+     * Experimental API to observe data-set changed events.
+     *
+     * @param <S> A concrete {@link Selector} class.
+     * @return A hot observable that yields {@link Selector} when the target data-set is changed.
+     */
+    @Experimental
+    @SuppressWarnings("unchecked")
+    public <S extends Selector<Model, ?>> Observable<S> createQueryObservable() {
+        return conn.createEventObservable((S)selector())
+                .map(new Function<DataSetChangedEvent<S>, S>() {
+                    @Override
+                    public S apply(DataSetChangedEvent<S> event) throws Exception {
+                        return event.getSelector();
+                    }
+                });
+    }
+
+    /**
+     * Experimental API to observe data-set changed events.
+     * This is provided to test whether it is useful or not, and not intended to be used in production yet.
+     *
+     * @param <S> A concrete {@link Selector} class.
+     * @return A hot observable that yields {@link Selector} when the target data-set is changed.
+     */
+    @Experimental
+    @Deprecated
+    @SuppressWarnings("unchecked")
+    public <S extends Selector<Model, ?>> Observable<DataSetChangedEvent<S>> createEventObservable() {
+        return conn.createEventObservable((S)selector());
     }
 
     // Iterator<Model>

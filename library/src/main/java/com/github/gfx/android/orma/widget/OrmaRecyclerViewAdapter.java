@@ -17,6 +17,7 @@
 package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.Selector;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -27,8 +28,11 @@ import android.view.LayoutInflater;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Maybe;
+import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 
 /**
@@ -41,12 +45,24 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
 
     protected final OrmaAdapter<Model> delegate;
 
+    protected final Observable<Selector<Model, ?>> observable;
+
     public OrmaRecyclerViewAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));
     }
 
+    @SuppressWarnings("unchecked")
     public OrmaRecyclerViewAdapter(@NonNull OrmaAdapter<Model> delegate) {
         this.delegate = delegate;
+        observable = delegate.getRelation().createQueryObservable();
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Selector<Model, ?>>() {
+                    @Override
+                    public void accept(Selector<Model, ?> selector) throws Exception {
+                        notifyDataSetChanged();
+                    }
+                });
     }
 
     @Override
@@ -69,10 +85,6 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
         return delegate.getRelation();
     }
 
-    public void runOnUiThread(@NonNull Runnable task) {
-        delegate.runOnUiThread(task);
-    }
-
     @NonNull
     public Model getItem(int position) {
         return delegate.getItem(position);
@@ -87,18 +99,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
     @CheckResult
     @NonNull
     public Single<Long> addItemAsSingle(@NonNull final Callable<Model> factory) {
-        return delegate.addItemAsSingle(factory)
-                .doOnSuccess(new Consumer<Long>() {
-                    @Override
-                    public void accept(Long rowId) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyItemInserted(getItemCount());
-                            }
-                        });
-                    }
-                });
+        return delegate.addItemAsSingle(factory);
     }
 
     /**
@@ -123,18 +124,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
     @CheckResult
     @NonNull
     public Maybe<Integer> removeItemAsMaybe(@NonNull Model item) {
-        return delegate.removeItemAsMaybe(item)
-                .doOnSuccess(new Consumer<Integer>() {
-                    @Override
-                    public void accept(final Integer position) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyItemRemoved(position);
-                            }
-                        });
-                    }
-                });
+        return delegate.removeItemAsMaybe(item);
     }
 
     /**
@@ -145,18 +135,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
     @CheckResult
     @NonNull
     public Single<Integer> clearAsSingle() {
-        return delegate.clearAsSingle()
-                .doOnSuccess(new Consumer<Integer>() {
-                    @Override
-                    public void accept(Integer deletedItems) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyDataSetChanged();
-                            }
-                        });
-                    }
-                });
+        return delegate.clearAsSingle();
     }
 
 }
