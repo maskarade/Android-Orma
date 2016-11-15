@@ -17,6 +17,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.support.annotation.CheckResult;
@@ -254,8 +255,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @SuppressWarnings("unchecked")
-    public Observable<R> createQueryObservable() {
-        return (Observable<R>)conn.createQueryObservable(this);
+    public <S extends Selector<Model, ?>> Observable<DataSetChangedEvent<S>> createQueryObservable() {
+        return conn.createQueryObservable((S)selector());
     }
 
     // Iterator<Model>

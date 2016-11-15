@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.exception.InsertionFailureException;
 
 import android.database.sqlite.SQLiteDatabase;
@@ -23,6 +24,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
+import java.io.Closeable;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
@@ -33,7 +35,7 @@ import io.reactivex.Single;
 /**
  * Represents a prepared statement to insert models in batch.
  */
-public class Inserter<Model> {
+public class Inserter<Model> implements Closeable {
 
     final OrmaConnection conn;
 
@@ -71,7 +73,7 @@ public class Inserter<Model> {
         }
         schema.bindArgs(conn, statement, model, withoutAutoId);
         long rowId = statement.executeInsert();
-        conn.trigger(schema);
+        conn.trigger(DataSetChangedEvent.Type.INSERT, schema);
         return rowId;
     }
 
@@ -145,5 +147,10 @@ public class Inserter<Model> {
                 emitter.onComplete();
             }
         });
+    }
+
+    @Override
+    public void close() {
+        statement.close();
     }
 }

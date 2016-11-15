@@ -17,6 +17,8 @@
 package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.event.DataSetChangedEvent;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -27,8 +29,11 @@ import android.widget.BaseAdapter;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Maybe;
+import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * A kind of {@link android.widget.ArrayAdapter} or {@link android.widget.CursorAdapter}.
@@ -37,12 +42,24 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
 
     protected final OrmaAdapter<Model> delegate;
 
+    private final Observable<DataSetChangedEvent<Selector<Model, ?>>> observable;
+
     public OrmaListAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));
     }
 
     public OrmaListAdapter(OrmaAdapter<Model> delegate) {
         this.delegate = delegate;
+
+        observable = delegate.getRelation().createQueryObservable();
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<DataSetChangedEvent<Selector<Model, ?>>>() {
+                    @Override
+                    public void accept(DataSetChangedEvent<Selector<Model, ?>> event) throws Exception {
+                        notifyDataSetChanged();
+                    }
+                });
     }
 
     @Override
@@ -76,10 +93,6 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
         return delegate.getRelation();
     }
 
-    public void runOnUiThread(@NonNull Runnable task) {
-        delegate.runOnUiThread(task);
-    }
-
     /**
      * Inserts a model into the table and invokes {@link BaseAdapter#notifyDataSetChanged()}.
      *
@@ -89,18 +102,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     @CheckResult
     @NonNull
     public Single<Long> addItemAsSingle(final Callable<Model> factory) {
-        return delegate.addItemAsSingle(factory)
-                .doOnSuccess(new Consumer<Long>() {
-                    @Override
-                    public void accept(Long rowId) throws Exception {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyDataSetChanged();
-                            }
-                        });
-                    }
-                });
+        return delegate.addItemAsSingle(factory);
     }
 
     /**
@@ -125,18 +127,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     @CheckResult
     @NonNull
     public Maybe<Integer> removeItemAsMaybe(@NonNull final Model item) {
-        return delegate.removeItemAsMaybe(item)
-                .doOnSuccess(new Consumer<Integer>() {
-                    @Override
-                    public void accept(Integer position) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyDataSetChanged();
-                            }
-                        });
-                    }
-                });
+        return delegate.removeItemAsMaybe(item);
     }
 
     /**
@@ -147,17 +138,6 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     @CheckResult
     @NonNull
     public Single<Integer> clearAsSingle() {
-        return delegate.clearAsSingle()
-                .doOnSuccess(new Consumer<Integer>() {
-                    @Override
-                    public void accept(Integer deletedItems) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyDataSetChanged();
-                            }
-                        });
-                    }
-                });
+        return delegate.clearAsSingle();
     }
 }

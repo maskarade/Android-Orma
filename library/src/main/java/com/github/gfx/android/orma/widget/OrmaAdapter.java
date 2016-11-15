@@ -20,8 +20,6 @@ import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.exception.NoValueException;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -38,11 +36,9 @@ import io.reactivex.Single;
  */
 public class OrmaAdapter<Model> {
 
-    final Context context;
+    protected final Context context;
 
-    final Relation<Model, ?> relation;
-
-    final Handler handler = new Handler(Looper.getMainLooper());
+    protected final Relation<Model, ?> relation;
 
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
@@ -66,10 +62,6 @@ public class OrmaAdapter<Model> {
     @NonNull
     public Relation<Model, ?> getRelation() {
         return relation.clone();
-    }
-
-    public void runOnUiThread(@NonNull final Runnable task) {
-        handler.postDelayed(task, 1000 / 30);
     }
 
     public Callable<Model> createFactory(final @NonNull Model model) {

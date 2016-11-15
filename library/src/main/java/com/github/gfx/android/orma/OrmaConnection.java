@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.event.DataSetChangedEvent;
+import com.github.gfx.android.orma.event.DataSetChangedTrigger;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
@@ -39,11 +41,8 @@ import android.util.Log;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.subjects.PublishSubject;
 
 /**
@@ -76,7 +75,7 @@ public class OrmaConnection {
 
     final AccessThreadConstraint writeOnMainThread;
 
-    final Map<Observer<Relation<?, ?>>, Relation<?, ?>> observerMap = new WeakHashMap<>();
+    final DataSetChangedTrigger trigger = new DataSetChangedTrigger();
 
     boolean migrationCompleted = false;
 
@@ -192,7 +191,9 @@ public class OrmaConnection {
         if (trace) {
             traceUpdateQuery(schema, values, whereClause, whereArgs);
         }
-        return db.update(schema.getEscapedTableName(), values, whereClause, whereArgs);
+        int count = db.update(schema.getEscapedTableName(), values, whereClause, whereArgs);
+        trigger(DataSetChangedEvent.Type.UPDATE, schema);
+        return count;
     }
 
     private void traceUpdateQuery(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
@@ -273,7 +274,9 @@ public class OrmaConnection {
         SQLiteStatement statement = db.compileStatement(sql);
         statement.bindAllArgsAsStrings(whereArgs);
         try {
-            return statement.executeUpdateDelete();
+            int count = statement.executeUpdateDelete();
+            trigger(DataSetChangedEvent.Type.DELETE, schema);
+            return count;
         } finally {
             statement.close();
         }
@@ -290,6 +293,8 @@ public class OrmaConnection {
         } finally {
             db.endTransaction();
             trace("end transaction (non exclusive)", null);
+
+            trigger.fireForTransaction();
         }
     }
 
@@ -304,6 +309,8 @@ public class OrmaConnection {
         } finally {
             db.endTransaction();
             trace("end transaction", null);
+
+            trigger.fireForTransaction();
         }
     }
 
@@ -321,22 +328,14 @@ public class OrmaConnection {
         });
     }
 
-    @SuppressWarnings("unchecked")
-    public <R extends Relation<?, ?>> Observable<R> createQueryObservable(R relation) {
-        PublishSubject<R> subject = PublishSubject.create();
-        observerMap.put((PublishSubject<Relation<?, ?>>) subject, relation);
+    public <S extends Selector<?, ?>> Observable<DataSetChangedEvent<S>> createQueryObservable(S selector) {
+        PublishSubject<DataSetChangedEvent<S>> subject = PublishSubject.create();
+        trigger.register(subject, selector);
         return subject;
     }
 
-
-    public void trigger(Schema<?> schema) {
-        if (!observerMap.isEmpty()) {
-            for (Map.Entry<Observer<Relation<?, ?>>, Relation<?, ?>> entry : observerMap.entrySet()) {
-                if (schema == entry.getValue().getSchema()) {
-                    entry.getKey().onNext(entry.getValue());
-                }
-            }
-        }
+    public <Model> void trigger(DataSetChangedEvent.Type type, Schema<Model> schema) {
+        trigger.fire(db, type, schema);
     }
 
     public void execSQL(@NonNull String sql, @NonNull Object... bindArgs) {

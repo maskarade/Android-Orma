@@ -16,9 +16,9 @@
 
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.ModelFactory;
+import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.test.model.Author;
-import com.github.gfx.android.orma.test.model.Author_Relation;
+import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
@@ -48,24 +47,18 @@ public class QueryObservableTest {
     public void setUp() throws Exception {
         db = OrmaFactory.create();
 
-        db.createAuthor(new ModelFactory<Author>() {
-            @NonNull
-            @Override
-            public Author call() {
-                return Author.create("foo");
-            }
-        });
+        db.insertIntoAuthor(Author.create("foo"));
     }
 
     @Test
-    public void triggerByInsert() throws Exception {
+    public void example() throws Exception {
         final List<String> result = new ArrayList<>();
 
-        Observable<Author_Relation> observable = db.relationOfAuthor().createQueryObservable();
-        observable.flatMap(new Function<Author_Relation, Observable<Author>>() {
+        Observable<DataSetChangedEvent<Author_Selector>> observable = db.relationOfAuthor().createQueryObservable();
+        observable.flatMap(new Function<DataSetChangedEvent<Author_Selector>, Observable<Author>>() {
             @Override
-            public Observable<Author> apply(Author_Relation authors) throws Exception {
-                return authors.selector().executeAsObservable();
+            public Observable<Author> apply(DataSetChangedEvent<Author_Selector> event) throws Exception {
+                return event.getSelector().executeAsObservable();
             }
         }).map(new Function<Author, String>() {
             @Override
@@ -79,25 +72,71 @@ public class QueryObservableTest {
             }
         });
 
-        // trigger an event
-        db.createAuthor(new ModelFactory<Author>() {
-            @NonNull
-            @Override
-            public Author call() {
-                return Author.create("bar");
-            }
-        });
+        // fire an event
+        db.insertIntoAuthor(Author.create("bar"));
         assertThat(result, contains("foo", "bar"));
 
-        // trigger another event
+        // fire another event
         result.clear();
-        db.createAuthor(new ModelFactory<Author>() {
-            @NonNull
-            @Override
-            public Author call() {
-                return Author.create("baz");
-            }
-        });
+        db.insertIntoAuthor(Author.create("baz"));
         assertThat(result, contains("foo", "bar", "baz"));
     }
+
+    @Test
+    public void eventTypes() throws Exception {
+        final List<DataSetChangedEvent.Type> result = new ArrayList<>();
+
+        Observable<DataSetChangedEvent<Author_Selector>> observable = db.relationOfAuthor().createQueryObservable();
+        observable.map(new Function<DataSetChangedEvent<Author_Selector>, DataSetChangedEvent.Type>() {
+            @Override
+            public DataSetChangedEvent.Type apply(DataSetChangedEvent<Author_Selector> event) throws Exception {
+                return event.getType();
+            }
+        }).subscribe(new Consumer<DataSetChangedEvent.Type>() {
+            @Override
+            public void accept(DataSetChangedEvent.Type type) throws Exception {
+                result.add(type);
+            }
+        });
+
+        // fire an INSERT event
+        db.insertIntoAuthor(Author.create("bar"));
+        assertThat(result, contains(DataSetChangedEvent.Type.INSERT));
+
+        // fire an UPDATE event
+        result.clear();
+        db.updateAuthor().note("test note").execute();
+        assertThat(result, contains(DataSetChangedEvent.Type.UPDATE));
+
+        // fire an DELETE event
+        result.clear();
+        db.deleteFromAuthor().execute();
+        assertThat(result, contains(DataSetChangedEvent.Type.DELETE));
+
+        // fire an TRANSACTION
+        result.clear();
+        db.transactionSync(new Runnable() {
+            @Override
+            public void run() {
+                db.insertIntoAuthor(Author.create("foo"));
+                db.insertIntoAuthor(Author.create("bar"));
+                db.insertIntoAuthor(Author.create("baz"));
+            }
+        });
+        assertThat(result, hasSize(1));
+        assertThat(result, contains(DataSetChangedEvent.Type.TRANSACTION));
+
+        result.clear();
+        db.transactionNonExclusiveSync(new Runnable() {
+            @Override
+            public void run() {
+                db.insertIntoAuthor(Author.create("FOO"));
+                db.insertIntoAuthor(Author.create("BAR"));
+                db.insertIntoAuthor(Author.create("BAZ"));
+            }
+        });
+        assertThat(result, hasSize(1));
+        assertThat(result, contains(DataSetChangedEvent.Type.TRANSACTION));
+    }
+
 }
