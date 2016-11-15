@@ -18,7 +18,6 @@ package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Selector;
-import com.github.gfx.android.orma.event.DataSetChangedEvent;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -46,7 +45,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
 
     protected final OrmaAdapter<Model> delegate;
 
-    protected final Observable<DataSetChangedEvent<Selector<Model, ?>>> observable;
+    protected final Observable<Selector<Model, ?>> observable;
 
     public OrmaRecyclerViewAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));
@@ -58,16 +57,10 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
         observable = delegate.getRelation().createQueryObservable();
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<DataSetChangedEvent<Selector<Model, ?>>>() {
+                .subscribe(new Consumer<Selector<Model, ?>>() {
                     @Override
-                    public void accept(DataSetChangedEvent<Selector<Model, ?>> event) throws Exception {
-                        switch (event.getType()) {
-                            case INSERT:
-                            case UPDATE:
-                            case DELETE:
-                            case TRANSACTION:
-                                notifyDataSetChanged();
-                        }
+                    public void accept(Selector<Model, ?> selector) throws Exception {
+                        notifyDataSetChanged();
                     }
                 });
     }

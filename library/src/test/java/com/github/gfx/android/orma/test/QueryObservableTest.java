@@ -54,23 +54,26 @@ public class QueryObservableTest {
     public void example() throws Exception {
         final List<String> result = new ArrayList<>();
 
-        Observable<DataSetChangedEvent<Author_Selector>> observable = db.relationOfAuthor().createQueryObservable();
-        observable.flatMap(new Function<DataSetChangedEvent<Author_Selector>, Observable<Author>>() {
+        Observable<Author_Selector> observable = db.relationOfAuthor()
+                .createQueryObservable();
+        observable.flatMap(new Function<Author_Selector, Observable<Author>>() {
             @Override
-            public Observable<Author> apply(DataSetChangedEvent<Author_Selector> event) throws Exception {
-                return event.getSelector().executeAsObservable();
+            public Observable<Author> apply(Author_Selector selector) throws Exception {
+                return selector.executeAsObservable();
             }
-        }).map(new Function<Author, String>() {
-            @Override
-            public String apply(Author author) throws Exception {
-                return author.name;
-            }
-        }).subscribe(new Consumer<String>() {
-            @Override
-            public void accept(String s) throws Exception {
-                result.add(s);
-            }
-        });
+        })
+                .map(new Function<Author, String>() {
+                    @Override
+                    public String apply(Author author) throws Exception {
+                        return author.name;
+                    }
+                })
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) throws Exception {
+                        result.add(s);
+                    }
+                });
 
         // fire an event
         db.insertIntoAuthor(Author.create("bar"));
@@ -83,10 +86,44 @@ public class QueryObservableTest {
     }
 
     @Test
+    public void autoDispose() throws Exception {
+        final List<String> result = new ArrayList<>();
+
+        db.relationOfAuthor()
+                .<Author_Selector>createQueryObservable()
+                .flatMap(new Function<Author_Selector, Observable<Author>>() {
+                    @Override
+                    public Observable<Author> apply(Author_Selector selector) throws Exception {
+                        return selector.executeAsObservable();
+                    }
+                })
+                .map(new Function<Author, String>() {
+            @Override
+            public String apply(Author author) throws Exception {
+                return author.name;
+            }
+        })
+                .subscribe(new Consumer<String>() {
+            @Override
+            public void accept(String s) throws Exception {
+                result.add(s);
+            }
+        });
+
+        System.gc();
+
+        // fire an event, but the observer is disposed by GC
+        db.insertIntoAuthor(Author.create("bar"));
+        assertThat(result, hasSize(0));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
     public void eventTypes() throws Exception {
         final List<DataSetChangedEvent.Type> result = new ArrayList<>();
 
-        Observable<DataSetChangedEvent<Author_Selector>> observable = db.relationOfAuthor().createQueryObservable();
+        Observable<DataSetChangedEvent<Author_Selector>> observable = db.relationOfAuthor()
+                .createEventObservable();
         observable.map(new Function<DataSetChangedEvent<Author_Selector>, DataSetChangedEvent.Type>() {
             @Override
             public DataSetChangedEvent.Type apply(DataSetChangedEvent<Author_Selector> event) throws Exception {

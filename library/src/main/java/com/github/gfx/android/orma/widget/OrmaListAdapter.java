@@ -18,7 +18,6 @@ package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Selector;
-import com.github.gfx.android.orma.event.DataSetChangedEvent;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -42,7 +41,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
 
     protected final OrmaAdapter<Model> delegate;
 
-    private final Observable<DataSetChangedEvent<Selector<Model, ?>>> observable;
+    private final Observable<Selector<Model, ?>> observable;
 
     public OrmaListAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));
@@ -54,9 +53,9 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
         observable = delegate.getRelation().createQueryObservable();
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<DataSetChangedEvent<Selector<Model, ?>>>() {
+                .subscribe(new Consumer<Selector<Model, ?>>() {
                     @Override
-                    public void accept(DataSetChangedEvent<Selector<Model, ?>> event) throws Exception {
+                    public void accept(Selector<Model, ?> selector) throws Exception {
                         notifyDataSetChanged();
                     }
                 });

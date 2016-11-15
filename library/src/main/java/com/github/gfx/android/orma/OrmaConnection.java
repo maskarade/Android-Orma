@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.event.DataSetChangedTrigger;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
@@ -328,7 +329,8 @@ public class OrmaConnection {
         });
     }
 
-    public <S extends Selector<?, ?>> Observable<DataSetChangedEvent<S>> createQueryObservable(S selector) {
+    @Experimental
+    public <S extends Selector<?, ?>> Observable<DataSetChangedEvent<S>> createEventObservable(S selector) {
         PublishSubject<DataSetChangedEvent<S>> subject = PublishSubject.create();
         trigger.register(subject, selector);
         return subject;
