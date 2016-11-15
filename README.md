@@ -725,6 +725,47 @@ OrmaDatabase orma = OrmaDatabase.builder(this)
 
 See [migration/README.md](migration/README.md) for details.
 
+## DataSet Changed Events
+
+NOTE: **This is experimental in v4.0.0: its existence, signature or behavior might change without warning from one release to the next.**
+
+There is a way to create [SQLBrite](https://github.com/square/sqlbrite)-like "Query Observable", which observes data-set changed events for tables.
+
+```java
+// NOTE: Keep the observable instance. If it's released, the observable is disposed.
+
+// create a query observable, which is a hot observable
+Observable<Author_Selector> observable = db.relationOfAuthor()
+        .createQueryObservable();
+
+// subscribe the events
+observable.flatMap(new Function<Author_Selector, Observable<Author>>() {
+    @Override
+    public Observable<Author> apply(Author_Selector selector) throws Exception {
+        Log.d(TAG, "Author has been changed!");
+        return selector.executeAsObservable();
+    }
+})
+        .map(new Function<Author, String>() {
+            @Override
+            public String apply(Author author) throws Exception {
+                return author.name;
+            }
+        })
+        .subscribe(new Consumer<String>() {
+            @Override
+            public void accept(String name) throws Exception {
+                Log.d(TAG, "name: " + name);
+            }
+        });
+```
+
+See `OrmaListAdapter` and `OrmaRecyclerViewAdapter`, which use Query Observables to
+trigger `#notifyDataSetChanged()`.
+
+* [OrmaListAdapter](https://github.com/gfx/Android-Orma/blob/master/library/src/main/java/com/github/gfx/android/orma/widget/OrmaListAdapter.java)
+* [OrmaRecyclerViewAdapter](https://github.com/gfx/Android-Orma/blob/master/library/src/main/java/com/github/gfx/android/orma/widget/OrmaRecyclerViewAdapter.java)
+
 ## Cooperation with Serialization Libraries
 
 Beause Orma reuqires nothing to do to models, serializers, e.g. Android Parcels or GSON, can
