@@ -45,6 +45,7 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
 
     protected final OrmaAdapter<Model> delegate;
 
+    // it must be a field, not a local var, to keep its strong reference
     protected final Observable<Selector<Model, ?>> observable;
 
     public OrmaRecyclerViewAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {

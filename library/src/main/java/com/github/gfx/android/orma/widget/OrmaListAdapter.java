@@ -41,7 +41,8 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
 
     protected final OrmaAdapter<Model> delegate;
 
-    private final Observable<Selector<Model, ?>> observable;
+    // it must be a field, not a local var, to keep its strong reference
+    protected final Observable<Selector<Model, ?>> observable;
 
     public OrmaListAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));

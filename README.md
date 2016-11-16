@@ -824,7 +824,9 @@ See [migration/README.md](migration/README.md) for details.
 
 NOTE: **This is experimental in v4.0.0: its existence, signature or behavior might change without warning from one release to the next.**
 
-There is a way to create [SQLBrite](https://github.com/square/sqlbrite)-like "Query Observable", which observes data-set changed events for tables.
+`Relation#createQueryObservable()` can create a event stream to observe data-set changed events for the relation.
+
+This likes [SQLBrite](https://github.com/square/sqlbrite)'s' "Query Observable", whereas Orma's does not notify the initial event.
 
 ```java
 // NOTE: Keep the observable instance. If it's released, the observable is disposed.
