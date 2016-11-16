@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.event;
 
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.annotation.Experimental;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.RestrictTo;
@@ -27,17 +28,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.subjects.PublishSubject;
 
 /**
  * Helper class for query observables. This class is NOT thread-safe.
  */
 @RestrictTo(RestrictTo.Scope.GROUP_ID)
+@Experimental
 public class DataSetChangedTrigger {
 
     final WeakHashMap<Observer<DataSetChangedEvent<?>>, Selector<?, ?>> observerMap = new WeakHashMap<>();
 
     Set<Schema<?>> changedDataSetInTransaction = null;
+
+    public <S extends Selector<?, ?>> Observable<DataSetChangedEvent<S>> create(S selector) {
+        PublishSubject<DataSetChangedEvent<S>> subject = PublishSubject.create();
+        register(subject, selector);
+        return subject;
+    }
 
     @SuppressWarnings("unchecked")
     public <S extends Selector<?, ?>> void register(Observer<DataSetChangedEvent<S>> observer, Selector<?, ?> selector) {

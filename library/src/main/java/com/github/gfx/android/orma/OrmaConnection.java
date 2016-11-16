@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
 
 /**
  * Low-level interface to Orma database connection.
@@ -331,9 +330,7 @@ public class OrmaConnection {
 
     @Experimental
     public <S extends Selector<?, ?>> Observable<DataSetChangedEvent<S>> createEventObservable(S selector) {
-        PublishSubject<DataSetChangedEvent<S>> subject = PublishSubject.create();
-        trigger.register(subject, selector);
-        return subject;
+        return trigger.create(selector);
     }
 
     public <Model> void trigger(DataSetChangedEvent.Type type, Schema<Model> schema) {

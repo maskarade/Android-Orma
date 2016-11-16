@@ -17,7 +17,9 @@
 package com.github.gfx.android.orma.event;
 
 import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.annotation.Experimental;
 
+@Experimental
 public class DataSetChangedEvent<S extends Selector<?, ?>> {
     public enum Type {
         INSERT,
