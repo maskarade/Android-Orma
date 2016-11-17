@@ -1,7 +1,1 @@
-<manifest xmlns:tools="http://schemas.android.com/tools"
-          package="com.github.gfx.android.orma.migration"
-        >
-
-    <application tools:ignore="GoogleAppIndexingWarning" />
-
-</manifest>
+<manifest package="com.github.gfx.android.orma.migration" />

@@ -31,6 +31,7 @@ android {
     lintOptions {
         textReport true
         textOutput 'stdout'
+        disable 'GoogleAppIndexingWarning'
     }
     dexOptions {
         preDexLibraries = !System.getenv("CI")
