@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.util.SparseArray;
 
 import java.util.List;
@@ -90,7 +91,7 @@ public class OrmaMigration extends AbstractMigrationEngine {
      * @param version A target version for the step
      * @param step    A migration step task for {@code version}
      */
-    @Deprecated
+    @VisibleForTesting
     public void addStep(int version, @NonNull ManualStepMigration.Step step) {
         manualStepMigration.addStep(version, step);
     }
