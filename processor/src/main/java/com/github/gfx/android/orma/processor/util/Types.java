@@ -82,9 +82,9 @@ public class Types {
 
     // RxJava
 
-    public static final ClassName Single = ClassName.get(io.reactivex.Single.class);
+    public static final ClassName Single = ClassName.get("io.reactivex", "Single");
 
-    public static final ClassName Completable = ClassName.get(io.reactivex.Completable.class);
+    public static final ClassName Completable = ClassName.get("io.reactivex", "Completable");
 
 
     public static final TypeVariableName T = TypeVariableName.get("T");
