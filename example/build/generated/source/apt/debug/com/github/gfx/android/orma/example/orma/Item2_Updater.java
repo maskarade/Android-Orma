@@ -4,8 +4,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Updater;
+import com.github.gfx.android.orma.example.tool.TypeAdapters;
 import java.util.Arrays;
 import java.util.Collection;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.ZonedDateTime;
 
 public class Item2_Updater extends Updater<Item2, Item2_Updater> {
   final Item2_Schema schema;
@@ -33,6 +36,16 @@ public class Item2_Updater extends Updater<Item2, Item2_Updater> {
 
   public Item2_Updater category2(@Nullable Category category2) {
     contents.put("`category2`", category2.id);
+    return this;
+  }
+
+  public Item2_Updater zonedTimestamp(@NonNull ZonedDateTime zonedTimestamp) {
+    contents.put("`zonedTimestamp`", TypeAdapters.serializeZonedDateTime(zonedTimestamp));
+    return this;
+  }
+
+  public Item2_Updater localDateTime(@NonNull LocalDateTime localDateTime) {
+    contents.put("`localDateTime`", TypeAdapters.serializeLocalDateTime(localDateTime));
     return this;
   }
 

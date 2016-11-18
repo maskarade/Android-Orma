@@ -179,7 +179,8 @@ public class Category_Schema implements Schema<Category> {
    */
   @NonNull
   @Override
-  public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Category model, boolean withoutAutoId) {
+  public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Category model,
+      boolean withoutAutoId) {
     Object[] args = new Object[withoutAutoId ? 1 : 2];
     if (model.name != null) {
       args[0] = model.name;
@@ -194,7 +195,8 @@ public class Category_Schema implements Schema<Category> {
   }
 
   @Override
-  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Category model, boolean withoutAutoId) {
+  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement,
+      @NonNull Category model, boolean withoutAutoId) {
     statement.bindString(1, model.name);
     if (!withoutAutoId) {
       statement.bindLong(2, model.id);
@@ -203,7 +205,8 @@ public class Category_Schema implements Schema<Category> {
 
   @NonNull
   @Override
-  public Category newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int offset) {
+  public Category newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor,
+      int offset) {
     String name = cursor.getString(offset + 0);
     long id = cursor.getLong(offset + 1);
     return new Category(id, name);

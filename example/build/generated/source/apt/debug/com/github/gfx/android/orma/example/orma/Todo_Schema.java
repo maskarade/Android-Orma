@@ -111,7 +111,8 @@ public class Todo_Schema implements Schema<Todo> {
 
       @NonNull
       @Override
-      public Boolean getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+      public Boolean getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor,
+          int index) {
         return cursor.getLong(index) != 0;
       }
     };
@@ -253,7 +254,8 @@ public class Todo_Schema implements Schema<Todo> {
    */
   @NonNull
   @Override
-  public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Todo model, boolean withoutAutoId) {
+  public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Todo model,
+      boolean withoutAutoId) {
     Object[] args = new Object[withoutAutoId ? 4 : 5];
     if (model.title != null) {
       args[0] = model.title;
@@ -278,7 +280,8 @@ public class Todo_Schema implements Schema<Todo> {
   }
 
   @Override
-  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Todo model, boolean withoutAutoId) {
+  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement,
+      @NonNull Todo model, boolean withoutAutoId) {
     statement.bindString(1, model.title);
     if (model.content != null) {
       statement.bindString(2, model.content);

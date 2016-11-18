@@ -30,7 +30,7 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.
    */
-  public static String SCHEMA_HASH = "80A4E14B77E16A6EABBC8244E5F545795B4430686421FBC3E5B3CF2DCFBFEC8F";
+  public static String SCHEMA_HASH = "67EA68700764198E813EB0AFCCD6EA98E4995B0F89666D2787A1951899A836CE";
 
   public static final List<Schema<?>> SCHEMAS = Arrays.<Schema<?>>asList(
     Category_Schema.INSTANCE,
@@ -189,7 +189,8 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @WorkerThread
-  public Inserter<Category> prepareInsertIntoCategory(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
+  public Inserter<Category> prepareInsertIntoCategory(@OnConflict int onConflictAlgorithm,
+      boolean withoutAutoId) {
     return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
@@ -213,7 +214,8 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict final int onConflictAlgorithm,
+      final boolean withoutAutoId) {
     return Single.fromCallable(new Callable<Inserter<Category>>() {
       @Override
       public Inserter<Category> call() throws Exception {
@@ -301,7 +303,8 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @WorkerThread
-  public Inserter<Item> prepareInsertIntoItem(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
+  public Inserter<Item> prepareInsertIntoItem(@OnConflict int onConflictAlgorithm,
+      boolean withoutAutoId) {
     return new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
@@ -325,7 +328,8 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict final int onConflictAlgorithm,
+      final boolean withoutAutoId) {
     return Single.fromCallable(new Callable<Inserter<Item>>() {
       @Override
       public Inserter<Item> call() throws Exception {
@@ -413,7 +417,8 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @WorkerThread
-  public Inserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
+  public Inserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm,
+      boolean withoutAutoId) {
     return new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
@@ -437,7 +442,8 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict final int onConflictAlgorithm,
+      final boolean withoutAutoId) {
     return Single.fromCallable(new Callable<Inserter<Item2>>() {
       @Override
       public Inserter<Item2> call() throws Exception {
@@ -525,7 +531,8 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @WorkerThread
-  public Inserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
+  public Inserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm,
+      boolean withoutAutoId) {
     return new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
@@ -549,7 +556,8 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict final int onConflictAlgorithm, final boolean withoutAutoId) {
+  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict final int onConflictAlgorithm,
+      final boolean withoutAutoId) {
     return Single.fromCallable(new Callable<Inserter<Todo>>() {
       @Override
       public Inserter<Todo> call() throws Exception {

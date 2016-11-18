@@ -66,7 +66,8 @@ public class Item_Schema implements Schema<Item> {
 
       @NonNull
       @Override
-      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor,
+          int index) {
         return Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, index + 1) /* consumes items: 2 */;
       }
     };
@@ -182,7 +183,8 @@ public class Item_Schema implements Schema<Item> {
    */
   @NonNull
   @Override
-  public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Item model, boolean withoutAutoId) {
+  public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Item model,
+      boolean withoutAutoId) {
     Object[] args = new Object[2];
     if (model.category != null) {
       args[0] = model.category.id;
@@ -200,7 +202,8 @@ public class Item_Schema implements Schema<Item> {
   }
 
   @Override
-  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Item model, boolean withoutAutoId) {
+  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement,
+      @NonNull Item model, boolean withoutAutoId) {
     statement.bindLong(1, model.category.id);
     statement.bindString(2, model.name);
   }

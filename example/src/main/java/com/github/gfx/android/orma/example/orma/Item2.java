@@ -18,10 +18,11 @@ package com.github.gfx.android.orma.example.orma;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 
-import android.support.annotation.NonNull;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.ZonedDateTime;
+
 import android.support.annotation.Nullable;
 
 /**
@@ -33,19 +34,18 @@ import android.support.annotation.Nullable;
 public class Item2 {
 
     @PrimaryKey
-    public final String name;
+    public String name;
 
     @Column(indexed = true)
-    public final Category category1;
+    public Category category1;
 
     @Nullable
     @Column(indexed = true)
-    public final Category category2;
+    public Category category2;
 
-    @Setter
-    public Item2(@NonNull String name, @NonNull Category category1, @Nullable Category category2) {
-        this.name = name;
-        this.category1 = category1;
-        this.category2 = category2;
-    }
+    @Column
+    public ZonedDateTime zonedTimestamp = ZonedDateTime.now();
+
+    @Column
+    public LocalDateTime localDateTime = LocalDateTime.now();
 }

@@ -9,10 +9,13 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.example.tool.TypeAdapters;
 import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.util.Arrays;
 import java.util.List;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.ZonedDateTime;
 
 public class Item2_Schema implements Schema<Item2> {
   public static final Item2_Schema INSTANCE = Schemas.register(new Item2_Schema());
@@ -23,6 +26,10 @@ public class Item2_Schema implements Schema<Item2> {
   public final AssociationDef<Item2, Category, Category_Schema> category1;
 
   public final AssociationDef<Item2, Category, Category_Schema> category2;
+
+  public final ColumnDef<Item2, ZonedDateTime> zonedTimestamp;
+
+  public final ColumnDef<Item2, LocalDateTime> localDateTime;
 
   public final ColumnDef<Item2, String> name;
 
@@ -68,7 +75,8 @@ public class Item2_Schema implements Schema<Item2> {
 
       @NonNull
       @Override
-      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor,
+          int index) {
         return Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, index + 1) /* consumes items: 2 */;
       }
     };
@@ -87,8 +95,49 @@ public class Item2_Schema implements Schema<Item2> {
 
       @Nullable
       @Override
-      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int index) {
+      public Category getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor,
+          int index) {
         return cursor.isNull(index + 2) ? null : Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, index + 1) /* consumes items: 2 */;
+      }
+    };
+    this.zonedTimestamp = new ColumnDef<Item2, ZonedDateTime>(this, "zonedTimestamp", ZonedDateTime.class, "TEXT", 0) {
+      @Override
+      @NonNull
+      public ZonedDateTime get(@NonNull Item2 model) {
+        return model.zonedTimestamp;
+      }
+
+      @NonNull
+      @Override
+      public String getSerialized(@NonNull Item2 model) {
+        return TypeAdapters.serializeZonedDateTime(model.zonedTimestamp);
+      }
+
+      @NonNull
+      @Override
+      public ZonedDateTime getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor,
+          int index) {
+        return TypeAdapters.deserializeZonedDateTime(cursor.getString(index));
+      }
+    };
+    this.localDateTime = new ColumnDef<Item2, LocalDateTime>(this, "localDateTime", LocalDateTime.class, "TEXT", 0) {
+      @Override
+      @NonNull
+      public LocalDateTime get(@NonNull Item2 model) {
+        return model.localDateTime;
+      }
+
+      @NonNull
+      @Override
+      public String getSerialized(@NonNull Item2 model) {
+        return TypeAdapters.serializeLocalDateTime(model.localDateTime);
+      }
+
+      @NonNull
+      @Override
+      public LocalDateTime getFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor,
+          int index) {
+        return TypeAdapters.deserializeLocalDateTime(cursor.getString(index));
       }
     };
     $defaultResultColumns = new String[]{
@@ -100,6 +149,8 @@ public class Item2_Schema implements Schema<Item2> {
             category2.associationSchema.name.getQualifiedName(),
             category2.associationSchema.id.getQualifiedName()
           ,
+          zonedTimestamp.getQualifiedName(),
+          localDateTime.getQualifiedName(),
           name.getQualifiedName()
         };
   }
@@ -157,6 +208,8 @@ public class Item2_Schema implements Schema<Item2> {
     return Arrays.<ColumnDef<Item2, ?>>asList(
           category1,
           category2,
+          zonedTimestamp,
+          localDateTime,
           name
         );
   }
@@ -170,7 +223,7 @@ public class Item2_Schema implements Schema<Item2> {
   @NonNull
   @Override
   public String getCreateTableStatement() {
-    return "CREATE TABLE `Item2` (`category1` INTEGER NOT NULL REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `category2` INTEGER REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `name` TEXT PRIMARY KEY)";
+    return "CREATE TABLE `Item2` (`category1` INTEGER NOT NULL REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `category2` INTEGER REFERENCES `Category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE, `zonedTimestamp` TEXT NOT NULL, `localDateTime` TEXT NOT NULL, `name` TEXT PRIMARY KEY)";
   }
 
   @NonNull
@@ -202,7 +255,7 @@ public class Item2_Schema implements Schema<Item2> {
       case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
       default: throw new IllegalArgumentException("Invalid OnConflict algorithm: " + onConflictAlgorithm);
     }
-    s.append(" INTO `Item2` (`category1`,`category2`,`name`) VALUES (?,?,?)");
+    s.append(" INTO `Item2` (`category1`,`category2`,`zonedTimestamp`,`localDateTime`,`name`) VALUES (?,?,?,?,?)");
     return s.toString();
   }
 
@@ -211,8 +264,9 @@ public class Item2_Schema implements Schema<Item2> {
    */
   @NonNull
   @Override
-  public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Item2 model, boolean withoutAutoId) {
-    Object[] args = new Object[3];
+  public Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Item2 model,
+      boolean withoutAutoId) {
+    Object[] args = new Object[5];
     if (model.category1 != null) {
       args[0] = model.category1.id;
     }
@@ -222,8 +276,20 @@ public class Item2_Schema implements Schema<Item2> {
     if (model.category2 != null) {
       args[1] = model.category2.id;
     }
+    if (model.zonedTimestamp != null) {
+      args[2] = TypeAdapters.serializeZonedDateTime(model.zonedTimestamp);
+    }
+    else {
+      throw new IllegalArgumentException("Item2.zonedTimestamp" + " must not be null, or use @Nullable to declare it as NULL");
+    }
+    if (model.localDateTime != null) {
+      args[3] = TypeAdapters.serializeLocalDateTime(model.localDateTime);
+    }
+    else {
+      throw new IllegalArgumentException("Item2.localDateTime" + " must not be null, or use @Nullable to declare it as NULL");
+    }
     if (model.name != null) {
-      args[2] = model.name;
+      args[4] = model.name;
     }
     else {
       throw new IllegalArgumentException("Item2.name" + " must not be null, or use @Nullable to declare it as NULL");
@@ -232,7 +298,8 @@ public class Item2_Schema implements Schema<Item2> {
   }
 
   @Override
-  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Item2 model, boolean withoutAutoId) {
+  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement,
+      @NonNull Item2 model, boolean withoutAutoId) {
     statement.bindLong(1, model.category1.id);
     if (model.category2 != null) {
       statement.bindLong(2, model.category2.id);
@@ -240,15 +307,21 @@ public class Item2_Schema implements Schema<Item2> {
     else {
       statement.bindNull(2);
     }
-    statement.bindString(3, model.name);
+    statement.bindString(3, TypeAdapters.serializeZonedDateTime(model.zonedTimestamp));
+    statement.bindString(4, TypeAdapters.serializeLocalDateTime(model.localDateTime));
+    statement.bindString(5, model.name);
   }
 
   @NonNull
   @Override
-  public Item2 newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor, int offset) {
-    Category category1 = Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset + 0 + 1) /* consumes items: 2 */;
-    Category category2 = cursor.isNull(offset + 3 + 2) ? null : Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset + 3 + 1) /* consumes items: 2 */;
-    String name = cursor.getString(offset + 6);
-    return new Item2(name, category1, category2);
+  public Item2 newModelFromCursor(@NonNull OrmaConnection conn, @NonNull Cursor cursor,
+      int offset) {
+    Item2 model = new Item2();
+    model.category1 = Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset + 0 + 1) /* consumes items: 2 */;
+    model.category2 = cursor.isNull(offset + 3 + 2) ? null : Category_Schema.INSTANCE.newModelFromCursor(conn, cursor, offset + 3 + 1) /* consumes items: 2 */;
+    model.zonedTimestamp = TypeAdapters.deserializeZonedDateTime(cursor.getString(offset + 6));
+    model.localDateTime = TypeAdapters.deserializeLocalDateTime(cursor.getString(offset + 7));
+    model.name = cursor.getString(offset + 8);
+    return model;
   }
 }
