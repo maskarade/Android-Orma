@@ -16,18 +16,23 @@
 
 package com.github.gfx.android.orma.widget;
 
+import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.exception.NoValueException;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.v4.util.LruCache;
 import android.view.LayoutInflater;
 
 import java.util.concurrent.Callable;
 
 import io.reactivex.Maybe;
+import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.functions.Consumer;
 
 /**
  * A helper class that provides adapter class details.
@@ -36,13 +41,31 @@ import io.reactivex.Single;
  */
 public class OrmaAdapter<Model> {
 
+    public static final int CACHE_SIZE = BuildConfig.DEBUG ? 2 : 256;
+
     protected final Context context;
 
     protected final Relation<Model, ?> relation;
 
+    protected final LruCache<Integer, Model> cache = new LruCache<>(CACHE_SIZE);
+
+    protected final Observable<Selector<Model, ?>> queryObservable;
+
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
         this.relation = relation;
+        this.queryObservable = relation.createQueryObservable();
+        queryObservable.subscribe(new Consumer<Selector<Model, ?>>() {
+            @Override
+            public void accept(Selector<Model, ?> models) throws Exception {
+                cache.evictAll();
+            }
+        });
+    }
+
+    @NonNull
+    public Observable<Selector<Model, ?>> getQueryObservable() {
+        return queryObservable;
     }
 
     @NonNull
@@ -74,12 +97,17 @@ public class OrmaAdapter<Model> {
     }
 
     @NonNull
-    public Model getItem(int position) {
+    public Model getItem(int position) throws NoValueException {
         if (position >= getItemCount()) {
             throw new NoValueException(
                     "ouf of range: getItem(" + position + ") for the relation with " + getItemCount() + " items");
         }
-        return relation.get(position);
+        Model item = cache.get(position);
+        if (item == null) {
+            item = relation.get(position);
+            cache.put(position, item);
+        }
+        return item;
     }
 
     @CheckResult

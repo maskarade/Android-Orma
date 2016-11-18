@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Maybe;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
@@ -45,9 +44,6 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
 
     protected final OrmaAdapter<Model> delegate;
 
-    // it must be a field, not a local var, to keep its strong reference
-    protected final Observable<Selector<Model, ?>> observable;
-
     public OrmaRecyclerViewAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));
     }
@@ -55,8 +51,8 @@ public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.Vie
     @SuppressWarnings("unchecked")
     public OrmaRecyclerViewAdapter(@NonNull OrmaAdapter<Model> delegate) {
         this.delegate = delegate;
-        observable = delegate.getRelation().createQueryObservable();
-        observable.subscribeOn(Schedulers.io())
+        delegate.getQueryObservable()
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Selector<Model, ?>>() {
                     @Override

@@ -42,6 +42,8 @@ import static org.hamcrest.Matchers.*;
 @RunWith(AndroidJUnit4.class)
 public class OrmaAdapterTest {
 
+    OrmaDatabase db;
+
     OrmaAdapter<Author> adapter;
 
     static Context getContext() {
@@ -50,9 +52,9 @@ public class OrmaAdapterTest {
 
     @Before
     public void setUp() throws Exception {
-        OrmaDatabase orma = OrmaFactory.create();
+        db = OrmaFactory.create();
 
-        Inserter<Author> inserter = orma.prepareInsertIntoAuthor();
+        Inserter<Author> inserter = db.prepareInsertIntoAuthor();
         inserter.execute(new ModelFactory<Author>() {
             @NonNull
             @Override
@@ -97,7 +99,7 @@ public class OrmaAdapterTest {
         });
 
         adapter = new OrmaAdapter<>(getContext(),
-                orma.relationOfAuthor().noteIsNotNull().orderByNameAsc());
+                db.relationOfAuthor().noteIsNotNull().orderByNameAsc());
     }
 
     @Test
@@ -155,6 +157,17 @@ public class OrmaAdapterTest {
                 })
                 .assertComplete();
         assertThat(adapter.getItem(3).name, is("D"));
+    }
+
+    @Test
+    public void testUpdateAndGetItem() throws Exception {
+        db.updateAuthor()
+                .nameEq("A")
+                .note("foo/bar/baz")
+                .execute();
+
+        assertThat(adapter.getItem(0).name, is("A"));
+        assertThat(adapter.getItem(0).note, is("foo/bar/baz"));
     }
 
     @Test

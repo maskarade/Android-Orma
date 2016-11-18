@@ -28,7 +28,6 @@ import android.widget.BaseAdapter;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Maybe;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
@@ -41,9 +40,6 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
 
     protected final OrmaAdapter<Model> delegate;
 
-    // it must be a field, not a local var, to keep its strong reference
-    protected final Observable<Selector<Model, ?>> observable;
-
     public OrmaListAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));
     }
@@ -51,8 +47,8 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     public OrmaListAdapter(OrmaAdapter<Model> delegate) {
         this.delegate = delegate;
 
-        observable = delegate.getRelation().createQueryObservable();
-        observable.subscribeOn(Schedulers.io())
+        delegate.getQueryObservable()
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Selector<Model, ?>>() {
                     @Override
