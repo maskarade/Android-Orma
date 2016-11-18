@@ -122,13 +122,6 @@ public class RxJava2Test {
     }
 
     @Test
-    public void countAsObservable2() throws Exception {
-        selector().countAsObservable()
-                .test()
-                .assertResult(2);
-    }
-
-    @Test
     public void selectorObservable2() throws Exception {
         selector().titleEq("today")
                 .executeAsObservable()

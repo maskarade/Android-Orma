@@ -213,17 +213,6 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         });
     }
 
-    @CheckResult
-    @NonNull
-    public Observable<Integer> countAsObservable() {
-        return Observable.fromCallable(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return count();
-            }
-        });
-    }
-
     public boolean isEmpty() {
         return count() == 0;
     }

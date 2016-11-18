@@ -108,11 +108,6 @@ public class QueryTest {
     }
 
     @Test
-    public void countAsObservable() throws Exception {
-        assertThat(db.selectFromBook().countAsObservable().blockingSingle(), is(2));
-    }
-
-    @Test
     public void toList() throws Exception {
         List<Book> books = db.selectFromBook().toList();
         assertThat(books, hasSize(2));
