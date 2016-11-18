@@ -135,7 +135,8 @@ public class RecyclerViewFragment extends Fragment {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(integer -> {
-                            setStrike(binding.title, done);
+                            // unlike ListViewAdapter, RecyclerViewAdapter can notify single item changed
+                            notifyItemChanged(position);
                         });
             });
 
