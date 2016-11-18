@@ -317,9 +317,9 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
      */
     @NonNull
     public List<Model> toList() {
-        final ArrayList<Model> list = new ArrayList<>();
-
         Cursor cursor = execute();
+
+        ArrayList<Model> list = new ArrayList<>(cursor.getCount());
         try {
             for (int pos = 0; cursor.moveToPosition(pos); pos++) {
                 list.add(newModelFromCursor(cursor));
