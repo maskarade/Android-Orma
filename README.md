@@ -25,15 +25,15 @@ as the author respects the Larry Wall's wisdom:
 - [The Components](#the-components)
     - [Database Handles](#database-handles)
     - [Models](#models)
-    - [Schema Helper](#schema-helper)
-    - [Relation Helper](#relation-helper)
-    - [Selector Helper](#selector-helper)
-    - [Updater Helper](#updater-helper)
-    - [Deleter Helper](#deleter-helper)
-    - [Query Helpers](#query-helpers)
+    - [Schema Helpers](#schema-helpers)
+    - [Relation Helpers](#relation-helpers)
+    - [Selector Helpers](#selector-helpers)
+    - [Updater Helpers](#updater-helpers)
+    - [Deleter Helpers](#deleter-helpers)
+    - [Query Helper Methods](#query-helper-methods)
         - [List of Query Helper Methods](#list-of-query-helper-methods)
         - [How to Control Generation of Query Helpers](#how-to-control-generation-of-query-helpers)
-    - [The Inserter Helper](#the-inserter-helper)
+    - [The Inserter Helpers](#the-inserter-helpers)
 - [Details of Database Handles](#details-of-database-handles)
     - [Configuration of Database Handles](#configuration-of-database-handles)
     - [Database Handle Builders](#database-handle-builders)
@@ -221,17 +221,17 @@ has at least one column, a field annotated with `@Column` or `@PrimaryKey`.
 Because these helper classes are generated at the compile time, you
 can use Orma as a type-safe ORM.
 
-### Schema Helper
+### Schema Helpers
 
 A Schema helper, e.g. `Todo_Schema`, has metadata for the corresponding model.
 
-This is an internal helper class, which is not intended to be used publicly.
+This is an internal helper class and not intended to be employed by users.
 
-### Relation Helper
+### Relation Helpers
 
-A Relation helper, e.g. `Todo_Relation`, is an entry point of table operations, which have conditions and orderings.
+A Relation helper, e.g. `Todo_Relation`, is an entry point of table operations, which has conditions and orderings.
 
-This is created by the database handle:
+This is created by a database handle:
 
 ```java
 public static Todo_Relation relation() {
@@ -239,7 +239,7 @@ public static Todo_Relation relation() {
 }
 ```
 
-This is able to create `Selector`, `Updater`, `Deleter`, and `Inserter` for the model.
+And is able to create `Selector`, `Updater`, `Deleter`, and `Inserter` for the model.
 
 ```java
 Todo_Relation todos = orma.relationOfTodo();
@@ -279,7 +279,7 @@ for (Todo todo : todos) {
 }
 ```
 
-### Selector Helper
+### Selector Helpers
 
 A `Selector` helper, e.g. `Todo_Selector`, is created by a `Relation`:
 
@@ -290,7 +290,7 @@ Todo_Selector selector = relation().selector();
 
 This is a query builder for `SELECT ... FROM *` statements.
 
-### Updater Helper
+### Updater Helpers
 
 An `Updater` helper, e.g. `Todo_Updater`, is created by a `Relation`:
 
@@ -301,7 +301,7 @@ Todo_Updater updater = relation().updater();
 
 This is a query builder for `UPDATE *` statements.
 
-### Deleter Helper
+### Deleter Helpers
 
 A `Deleter` helper, e.g. `Todo_Deleter`, is created by a `Relation`:
 
@@ -312,7 +312,7 @@ Todo_Deleter deleter = relation().deleter();
 
 This is a query builder for `DELETE FROM *` statements.
 
-### Query Helpers
+### Query Helper Methods
 
 There are **Query Helpers** which are generated to query conditions and orders in a type-safe way.
 
@@ -400,7 +400,7 @@ long ORDERS = ORDER_IN_ASC | ORDER_IN_DESC;
 long ALL = CONDITIONS | ORDERS;
 ```
 
-### The Inserter Helper
+### The Inserter Helpers
 
 This is a prepared statement for `INSERT INTO ...` for bulk insertions.
 
