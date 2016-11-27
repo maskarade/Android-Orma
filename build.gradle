@@ -68,38 +68,46 @@ def updateReadme(oldVersion, newVersion) {
     file("README.md").withWriter { it << result }
 }
 
-task bumpMajor << {
-    def oldVersion = versionName
-    def versionParts = versionName.split(/\./)
-    versionParts[0] = (versionParts[0] as int) + 1
-    def newVersion = "${versionParts[0]}.0.0"
-    versionFile.write(newVersion + "\n")
-    updateReadme(oldVersion, newVersion)
-    tasks.version.execute()
+task bumpMajor {
+    doLast {
+        def oldVersion = versionName
+        def versionParts = versionName.split(/\./)
+        versionParts[0] = (versionParts[0] as int) + 1
+        def newVersion = "${versionParts[0]}.0.0"
+        versionFile.write(newVersion + "\n")
+        updateReadme(oldVersion, newVersion)
+        tasks.version.execute()
+    }
 }
 
-task bumpMinor << {
-    def oldVersion = versionName
-    def versionParts = versionName.split(/\./)
-    versionParts[1] = (versionParts[1] as int) + 1
-    def newVersion = "${versionParts[0]}.${versionParts[1]}.0"
-    versionFile.write(newVersion + "\n")
-    updateReadme(oldVersion, newVersion)
-    tasks.version.execute()
+task bumpMinor {
+    doLast {
+        def oldVersion = versionName
+        def versionParts = versionName.split(/\./)
+        versionParts[1] = (versionParts[1] as int) + 1
+        def newVersion = "${versionParts[0]}.${versionParts[1]}.0"
+        versionFile.write(newVersion + "\n")
+        updateReadme(oldVersion, newVersion)
+        tasks.version.execute()
+    }
 }
 
-task bumpPatch << {
-    def oldVersion = versionName
-    def versionParts = versionName.split(/\./)
-    versionParts[2] = (versionParts[2].split(/\D/)[0] as int) + 1
-    def newVersion = "${versionParts[0]}.${versionParts[1]}.${versionParts[2]}"
-    versionFile.write(newVersion + "\n")
-    updateReadme(oldVersion, newVersion)
-    tasks.version.execute()
+task bumpPatch {
+    doLast {
+        def oldVersion = versionName
+        def versionParts = versionName.split(/\./)
+        versionParts[2] = (versionParts[2].split(/\D/)[0] as int) + 1
+        def newVersion = "${versionParts[0]}.${versionParts[1]}.${versionParts[2]}"
+        versionFile.write(newVersion + "\n")
+        updateReadme(oldVersion, newVersion)
+        tasks.version.execute()
+    }
 }
 
-task version << {
-    println "v" + versionFile.readLines()[0]
+task version {
+    doLast {
+        println "v" + versionFile.readLines()[0]
+    }
 }
 
 String shell(String command) {
@@ -115,20 +123,22 @@ String shell(String command) {
     return proc.in.text;
 }
 
-task releng << {
-    def tag = "v" + versionName
-    println "Release engineering for ${tag}"
+task releng {
+    doLast {
+        def tag = "v" + versionName
+        println "Release engineering for ${tag}"
 
-    def changes = shell "git status -s"
-    if (changes.trim()) {
-        throw new RuntimeException("There are changes not commited yet.\n${changes}")
+        def changes = shell "git status -s"
+        if (changes.trim()) {
+            throw new RuntimeException("There are changes not commited yet.\n${changes}")
+        }
+
+        println "> git tag ${tag}"
+        shell "git tag ${tag}"
+        println "> git push origin ${tag}"
+        shell "git push origin ${tag}"
+        shell "git push origin master"
     }
-
-    println "> git tag ${tag}"
-    shell "git tag ${tag}"
-    println "> git push origin ${tag}"
-    shell "git push origin ${tag}"
-    shell "git push origin master"
 }
 
 class TimingsListener implements TaskExecutionListener, BuildListener {
