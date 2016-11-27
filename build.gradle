@@ -1,4 +1,5 @@
 apply from: project.file('metadata.gradle')
+apply from: project.file('versioning.gradle')
 
 final ANDROID_SDK_PATH = {
     final localProperties = new Properties()
@@ -17,9 +18,6 @@ final ANDROID_SUPPORT_REPOSITORY = "${ANDROID_SDK_PATH}/extras/android/m2reposit
 ext {
     SUPPORT_LIBRARY_VERSION = '25.0.1'
     ANDROID_JAR = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-25/", include: 'android.jar')
-
-    versionFile = project.file("VERSION")
-    versionName = versionFile.readLines()[0].trim()
     metadata.version = versionName
 }
 
@@ -60,54 +58,6 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-
-def updateReadme(oldVersion, newVersion) {
-    def template = file('README.md').text
-    def result = template.replaceAll(java.util.regex.Pattern.quote(oldVersion), newVersion)
-    file("README.md").withWriter { it << result }
-}
-
-task bumpMajor {
-    doLast {
-        def oldVersion = versionName
-        def versionParts = versionName.split(/\./)
-        versionParts[0] = (versionParts[0] as int) + 1
-        def newVersion = "${versionParts[0]}.0.0"
-        versionFile.write(newVersion + "\n")
-        updateReadme(oldVersion, newVersion)
-        tasks.version.execute()
-    }
-}
-
-task bumpMinor {
-    doLast {
-        def oldVersion = versionName
-        def versionParts = versionName.split(/\./)
-        versionParts[1] = (versionParts[1] as int) + 1
-        def newVersion = "${versionParts[0]}.${versionParts[1]}.0"
-        versionFile.write(newVersion + "\n")
-        updateReadme(oldVersion, newVersion)
-        tasks.version.execute()
-    }
-}
-
-task bumpPatch {
-    doLast {
-        def oldVersion = versionName
-        def versionParts = versionName.split(/\./)
-        versionParts[2] = (versionParts[2].split(/\D/)[0] as int) + 1
-        def newVersion = "${versionParts[0]}.${versionParts[1]}.${versionParts[2]}"
-        versionFile.write(newVersion + "\n")
-        updateReadme(oldVersion, newVersion)
-        tasks.version.execute()
-    }
-}
-
-task version {
-    doLast {
-        println "v" + versionFile.readLines()[0]
-    }
 }
 
 String shell(String command) {
