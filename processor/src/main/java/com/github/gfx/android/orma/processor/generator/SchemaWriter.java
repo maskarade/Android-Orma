@@ -88,6 +88,8 @@ public class SchemaWriter extends BaseWriter {
     @Override
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getSchemaClassName());
+        markAsGenerated(classBuilder);
+
         if (schema.isGeneric()) {
             classBuilder.addAnnotation(Annotations.suppressWarnings("rawtypes"));
         }

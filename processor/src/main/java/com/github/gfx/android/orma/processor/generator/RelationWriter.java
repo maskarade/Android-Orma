@@ -54,6 +54,8 @@ public class RelationWriter extends BaseWriter {
     @Override
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getTargetClassName());
+        markAsGenerated(classBuilder);
+
         if (schema.isGeneric()) {
             classBuilder.addAnnotation(Annotations.suppressWarnings("rawtypes"));
         }
