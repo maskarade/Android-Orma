@@ -25,7 +25,9 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
 public class DeleterWriter extends BaseWriter {
@@ -43,6 +45,11 @@ public class DeleterWriter extends BaseWriter {
     @Override
     public String getPackageName() {
         return schema.getPackageName();
+    }
+
+    @Override
+    public Optional<? extends Element> getElement() {
+        return Optional.of(schema.getElement());
     }
 
     @Override

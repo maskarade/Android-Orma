@@ -39,9 +39,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 
@@ -83,6 +85,11 @@ public class SchemaWriter extends BaseWriter {
     @Override
     public String getPackageName() {
         return schema.getPackageName();
+    }
+
+    @Override
+    public Optional<? extends Element> getElement() {
+        return Optional.of(schema.getElement());
     }
 
     @Override

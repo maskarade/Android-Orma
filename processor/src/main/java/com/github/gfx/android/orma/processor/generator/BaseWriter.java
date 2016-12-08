@@ -19,6 +19,10 @@ import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.Optional;
+
+import javax.lang.model.element.Element;
+
 public abstract class BaseWriter {
 
     protected final ProcessingContext context;
@@ -30,6 +34,8 @@ public abstract class BaseWriter {
     public abstract TypeSpec buildTypeSpec();
 
     public abstract String getPackageName();
+
+    public abstract Optional<? extends Element> getElement();
 
     public JavaFile buildJavaFile() {
         return JavaFile.builder(getPackageName(), buildTypeSpec())
