@@ -38,7 +38,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
 public class DatabaseWriter extends BaseWriter {
@@ -78,6 +80,11 @@ public class DatabaseWriter extends BaseWriter {
     @Override
     public String getPackageName() {
         return database.getPackageName();
+    }
+
+    @Override
+    public Optional<? extends Element> getElement() {
+        return database.getElement();
     }
 
     public ClassName getClassName() {

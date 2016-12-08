@@ -35,7 +35,9 @@ import com.github.gfx.android.orma.processor.tool.AnnotationHandle;
 import com.github.gfx.android.orma.processor.tool.SynchronizedFiler;
 import com.squareup.javapoet.JavaFile;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -62,7 +64,7 @@ public class OrmaProcessor extends AbstractProcessor {
         if (annotations.size() == 0) {
             return true;
         }
-        long t0 = System.currentTimeMillis();
+        long t0 = System.nanoTime();
 
         ProcessingContext context = new ProcessingContext(processingEnv);
         try {
@@ -80,18 +82,20 @@ public class OrmaProcessor extends AbstractProcessor {
                         throw new ProcessingException("@VirtualTable is not yet implemented.", schema.getElement());
                     });
 
-            context.note(
-                    "built " + context.schemaMap.size() + " of schema models in " + (System.currentTimeMillis() - t0) + "ms");
+            context.note("built " + context.schemaMap.size() + " of schema models in " + TimeUnit.NANOSECONDS
+                    .toMillis(System.nanoTime() - t0) + "ms");
+            t0 = System.nanoTime();
 
             context.schemaMap.values()
-                    .parallelStream()
-                    .forEach((schema) -> {
-                        writeCodeForEachModel(schema, new SchemaWriter(context, schema));
-                        writeCodeForEachModel(schema, new RelationWriter(context, schema));
-                        writeCodeForEachModel(schema, new SelectorWriter(context, schema));
-                        writeCodeForEachModel(schema, new UpdaterWriter(context, schema));
-                        writeCodeForEachModel(schema, new DeleterWriter(context, schema));
-                    });
+                    .stream()
+                    .flatMap((schema) -> Stream.of(
+                            new SchemaWriter(context, schema),
+                            new RelationWriter(context, schema),
+                            new SelectorWriter(context, schema),
+                            new UpdaterWriter(context, schema),
+                            new DeleterWriter(context, schema)))
+                    .parallel()
+                    .forEach(this::writeCodeForEachModel);
 
             if (!context.schemaMap.isEmpty()) {
                 context.setupDefaultDatabaseIfNeeded();
@@ -107,7 +111,7 @@ public class OrmaProcessor extends AbstractProcessor {
         }
 
         context.printErrors();
-        context.note("process classes in " + (System.currentTimeMillis() - t0) + "ms");
+        context.note("process classes in " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0) + "ms");
 
         return false;
     }
@@ -144,8 +148,8 @@ public class OrmaProcessor extends AbstractProcessor {
                 .map(element -> new SchemaDefinition(context, (TypeElement) element));
     }
 
-    public void writeCodeForEachModel(SchemaDefinition schema, BaseWriter writer) {
-        writeToFiler(schema.getElement(), writer.buildJavaFile());
+    public void writeCodeForEachModel(BaseWriter writer) {
+        writeToFiler(writer.getElement().orElse(null), writer.buildJavaFile());
     }
 
     private void writeToFiler(Element element, JavaFile javaFile) {
