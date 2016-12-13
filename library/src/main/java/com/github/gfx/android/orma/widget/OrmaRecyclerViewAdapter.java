@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.annotation.Experimental;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -40,6 +41,7 @@ import io.reactivex.schedulers.Schedulers;
  * @param <Model> An Orma model class
  * @param <VH>    A concrete view holder class
  */
+@Experimental
 public abstract class OrmaRecyclerViewAdapter<Model, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     protected final OrmaAdapter<Model> delegate;
