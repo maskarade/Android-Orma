@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.widget;
 
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.annotation.Experimental;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -36,6 +37,7 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * A kind of {@link android.widget.ArrayAdapter} or {@link android.widget.CursorAdapter}.
  */
+@Experimental
 public abstract class OrmaListAdapter<Model> extends BaseAdapter {
 
     protected final OrmaAdapter<Model> delegate;

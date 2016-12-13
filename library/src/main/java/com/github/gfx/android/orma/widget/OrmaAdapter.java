@@ -19,6 +19,7 @@ package com.github.gfx.android.orma.widget;
 import com.github.gfx.android.orma.BuildConfig;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.exception.NoValueException;
 
 import android.content.Context;
@@ -39,6 +40,7 @@ import io.reactivex.functions.Consumer;
  *
  * @param <Model> An Orma model class
  */
+@Experimental
 public class OrmaAdapter<Model> {
 
     public static final int CACHE_SIZE = BuildConfig.DEBUG ? 2 : 256;
