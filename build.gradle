@@ -116,8 +116,9 @@ String shell(String command) {
 }
 
 task releng << {
+    def currentBranch = shell("git symbolic-ref --short HEAD")
     def tag = "v" + versionName
-    println "Release engineering for ${tag}"
+    println "Release engineering for ${tag} in ${currentBranch}"
 
     def changes = shell "git status -s"
     if (changes.trim()) {
@@ -128,7 +129,7 @@ task releng << {
     shell "git tag ${tag}"
     println "> git push origin ${tag}"
     shell "git push origin ${tag}"
-    shell "git push origin master"
+    shell "git push origin ${currentBranch}"
 }
 
 class TimingsListener implements TaskExecutionListener, BuildListener {
