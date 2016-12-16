@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2;
+import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Relation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Selector;
 import com.github.gfx.android.orma.test.model.ModelWithMoreNestedDirectAssociations;
 import com.github.gfx.android.orma.test.model.ModelWithNestedDirectAssociations;
@@ -511,6 +512,48 @@ public class DirectAssociationsTest {
         assertThat(selector.count(), is(1));
 
         ModelWithDirectAssociation model = selector.value();
+        assertThat(model.name, is("foo"));
+        assertThat(model.note, is("SQLite rocks"));
+        assertThat(model.author, is(notNullValue()));
+        assertThat(model.author.name, is(author1.name));
+        assertThat(model.author.note, is(author1.note));
+    }
+
+    @Test
+    public void testRelationWithWhereClauses() throws Exception {
+        Inserter<ModelWithDirectAssociation> inserter = orma.prepareInsertIntoModelWithDirectAssociation();
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.name = "foo";
+                model.author = author1;
+                model.publisher = publisher;
+                model.note = "SQLite rocks";
+                return model;
+            }
+        });
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.name = "bar";
+                model.author = author2;
+                model.publisher = publisher;
+                model.note = "SQLite supports most of SQL92";
+                return model;
+            }
+        });
+
+        ModelWithDirectAssociation_Relation relation = orma.relationOfModelWithDirectAssociation()
+                .nameEq("foo")
+                .orderByNameAsc();
+
+        assertThat(relation.count(), is(1));
+
+        ModelWithDirectAssociation model = relation.get(0);
         assertThat(model.name, is("foo"));
         assertThat(model.note, is("SQLite rocks"));
         assertThat(model.author, is(notNullValue()));
