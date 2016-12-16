@@ -8,6 +8,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
+## v3.2.2 2016/12/16
+
+* [#351](https://github.com/gfx/Android-Orma/pull/351): Fix "ambiguous name" errors in Relation
+
 ## v3.2.1 2016/11/08
 
 ### Bug Fixes
