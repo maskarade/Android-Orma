@@ -18,7 +18,6 @@ package com.github.gfx.android.orma.internal;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
-import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.function.Function1;
 
 import android.support.annotation.NonNull;
@@ -71,6 +70,9 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
         }
     }
 
+    @NonNull
+    protected abstract String buildColumnName(@NonNull ColumnDef<Model, ?> column);
+
     /**
      * Builds general `where` clause with arguments.
      * e.g. {@code where("title = ? OR title = ?", a, b)}
@@ -96,20 +98,17 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
 
     @SuppressWarnings("unchecked")
     public C where(@NonNull ColumnDef<Model, ?> column, @NonNull String operator, @NonNull Object value) {
-        String columnName = (this instanceof Selector) ? column.getQualifiedName() : column.getEscapedName();
-        return where(columnName + ' ' + operator + " ?", value);
+        return where(buildColumnName(column) + ' ' + operator + " ?", value);
     }
 
     @SuppressWarnings("unchecked")
     public C where(@NonNull ColumnDef<Model, ?> column, @NonNull String postfixOperator) {
-        String columnName = (this instanceof Selector) ? column.getQualifiedName() : column.getEscapedName();
-        return where(columnName + ' ' + postfixOperator);
+        return where(buildColumnName(column) + ' ' + postfixOperator);
     }
 
     @SuppressWarnings("unchecked")
     protected C whereBetween(@NonNull ColumnDef<Model, ?> column, Object a, Object b) {
-        String columnName = (this instanceof Selector) ? column.getQualifiedName() : column.getEscapedName();
-        return where(columnName + " BETWEEN ? AND ?", a, b);
+        return where(buildColumnName(column) + " BETWEEN ? AND ?", a, b);
     }
 
     @SuppressWarnings("unchecked")
@@ -119,7 +118,7 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
 
     @SuppressWarnings("unchecked")
     protected C in(boolean not, @NonNull ColumnDef<Model, ?> column, @NonNull Collection<?> values) {
-        String columnName = (this instanceof Selector) ? column.getQualifiedName() : column.getEscapedName();
+        String columnName = buildColumnName(column);
 
         StringBuilder clause = new StringBuilder();
 
