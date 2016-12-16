@@ -34,6 +34,12 @@ public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaCo
         super(relation);
     }
 
+    @NonNull
+    @Override
+    protected String buildColumnName(@NonNull ColumnDef<Model, ?> column) {
+        return column.getEscapedName();
+    }
+
     /**
      * @return Number of rows deleted.
      */

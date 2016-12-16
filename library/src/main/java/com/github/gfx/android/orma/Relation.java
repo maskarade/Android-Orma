@@ -58,6 +58,12 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         orderSpecs.addAll(relation.orderSpecs);
     }
 
+    @NonNull
+    @Override
+    protected String buildColumnName(@NonNull ColumnDef<Model, ?> column) {
+        return column.getQualifiedName();
+    }
+
     @SuppressWarnings("unchecked")
     public R orderBy(@NonNull OrderSpec<Model> orderSpec) {
         orderSpecs.add(orderSpec);

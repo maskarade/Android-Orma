@@ -84,6 +84,12 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @Override
     public abstract S clone();
 
+    @NonNull
+    @Override
+    protected String buildColumnName(@NonNull ColumnDef<Model, ?> column) {
+        return column.getQualifiedName();
+    }
+
     @SuppressWarnings("unchecked")
     public S groupBy(@NonNull String groupBy) {
         this.groupBy = groupBy;
