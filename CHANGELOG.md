@@ -10,6 +10,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.0.1 2016/12/16
+
+* [#351](https://github.com/gfx/Android-Orma/pull/350): Fix "ambiguous name" errors in Relation
+
 ## v4.0.0 2016/11/18
 
 https://github.com/gfx/Android-Orma/compare/v3.2.1...v4.0.0
