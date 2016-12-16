@@ -37,6 +37,12 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
     }
 
     @NonNull
+    @Override
+    protected String buildColumnName(@NonNull ColumnDef<Model, ?> column) {
+        return column.getEscapedName();
+    }
+
+    @NonNull
     public ContentValues getContentValues() {
         return contents;
     }
