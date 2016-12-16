@@ -1,6 +1,6 @@
 
 check:
-	./gradlew clean mavenAndroidJavadocs check bintrayUpload
+	./gradlew clean check bintrayUpload
 
 publish: check
 	./gradlew releng
