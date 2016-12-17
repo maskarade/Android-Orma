@@ -4,7 +4,7 @@ buildscript {
     }
     dependencies {
         classpath 'io.realm:realm-gradle-plugin:2.2.1'
-        classpath 'me.tatarka:gradle-retrolambda:3.3.1'
+        classpath 'me.tatarka:gradle-retrolambda:3.4.0'
         classpath 'net.orfjackal.retrolambda:retrolambda:2.3.0'
     }
 }
@@ -79,5 +79,5 @@ dependencies {
     compile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
     compile "com.android.support:design:${SUPPORT_LIBRARY_VERSION}"
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.4'
-    compile 'com.facebook.stetho:stetho:1.4.1'
+    compile 'com.facebook.stetho:stetho:1.4.2'
 }
