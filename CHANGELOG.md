@@ -10,7 +10,15 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.0.2 2016/12/18
+
+https://github.com/gfx/Android-Orma/compare/v4.0.1...v4.0.2
+
+* [#354](https://github.com/gfx/Android-Orma/pull/354) Upgrade ANTLR4 from 4.5.3 to 4.6, which might affects migration engines
+
 ## v4.0.1 2016/12/16
+
+https://github.com/gfx/Android-Orma/compare/v4.0.0...v4.0.1
 
 * [#351](https://github.com/gfx/Android-Orma/pull/350): Fix "ambiguous name" errors in Relation
 
