@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
+import com.github.gfx.android.orma.test.toolbox.TestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +38,8 @@ import io.reactivex.functions.Function;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeThat;
 
 @RunWith(AndroidJUnit4.class)
 public class QueryObservableTest {
@@ -87,6 +90,8 @@ public class QueryObservableTest {
 
     @Test
     public void autoDispose() throws Exception {
+        assumeFalse(TestUtils.runOnAndroid()); // FIXME
+
         final List<String> result = new ArrayList<>();
 
         db.relationOfAuthor()

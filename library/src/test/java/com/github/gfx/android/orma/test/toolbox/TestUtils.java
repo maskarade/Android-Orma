@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.gfx.android.orma.migration.test.util;
+package com.github.gfx.android.orma.test.toolbox;
 
 @SuppressWarnings("unused")
 public class TestUtils {
