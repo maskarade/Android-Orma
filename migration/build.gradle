@@ -76,8 +76,8 @@ task updateSqliteGrammar(type: Exec) {
 }
 
 dependencies {
-    antlr 'org.antlr:antlr4:4.5.3'
-    compile('org.antlr:antlr4-runtime:4.5.3')
+    antlr 'org.antlr:antlr4:4.6'
+    compile('org.antlr:antlr4-runtime:4.6')
     compile "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.1.4'
     testCompile 'junit:junit:4.12'
