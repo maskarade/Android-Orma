@@ -22,7 +22,7 @@ import android.support.annotation.RestrictTo;
  * Indicates the feature is in experimental state: its existence, signature or behavior
  * might change without warning from one release to the next.
  */
-@RestrictTo(RestrictTo.Scope.GROUP_ID) // not intended to be used outside the library
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // not intended to be used outside the library
 public @interface Experimental {
 
 }

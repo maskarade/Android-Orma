@@ -165,7 +165,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @SuppressWarnings("unchecked")
     public S resetLimitClause() {
         limit = -1;
@@ -174,23 +174,23 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return (S) this;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public boolean hasLimit() {
         return limit != -1;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public long getLimit() {
         assert hasLimit();
         return limit;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public boolean hasOffset() {
         return offset != -1 || (limit != -1 && page != -1);
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public long getOffset() {
         assert hasOffset();
 

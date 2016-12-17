@@ -35,7 +35,7 @@ import io.reactivex.subjects.PublishSubject;
 /**
  * Helper class for query observables. This class is NOT thread-safe.
  */
-@RestrictTo(RestrictTo.Scope.GROUP_ID)
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 @Experimental
 public class DataSetChangedTrigger {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@RestrictTo(RestrictTo.Scope.GROUP_ID)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 package com.github.gfx.android.orma.internal;
 
 import android.support.annotation.RestrictTo;

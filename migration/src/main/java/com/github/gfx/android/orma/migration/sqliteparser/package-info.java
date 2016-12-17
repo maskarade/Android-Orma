@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@RestrictTo(RestrictTo.Scope.GROUP_ID)
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 package com.github.gfx.android.orma.migration.sqliteparser;
 
 import android.support.annotation.RestrictTo;

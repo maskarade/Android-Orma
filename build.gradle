@@ -16,7 +16,7 @@ final ANDROID_SDK_PATH = {
 final ANDROID_SUPPORT_REPOSITORY = "${ANDROID_SDK_PATH}/extras/android/m2repository"
 
 ext {
-    SUPPORT_LIBRARY_VERSION = '25.0.1'
+    SUPPORT_LIBRARY_VERSION = '25.1.0'
     ANDROID_JAR = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-25/", include: 'android.jar')
     metadata.version = versionName
 }

@@ -18,7 +18,7 @@
  * This package includes generated code by ANTLR from SQLite.g4.
  * Not intended to be used outside Orma.
  */
-@RestrictTo(RestrictTo.Scope.GROUP_ID)
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 package com.github.gfx.android.orma.migration.sqliteparser.g;
 
 import android.support.annotation.RestrictTo;
