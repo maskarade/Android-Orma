@@ -16,6 +16,7 @@
 
 package com.github.gfx.android.orma.migration.sqliteparser;
 
+import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteBaseListener;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteLexer;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
@@ -31,12 +32,16 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 /**
  * An entrypoint of {@link SQLiteParser}
  */
 public class SQLiteParserUtils {
 
-    public static SQLiteParser createParser(String sql) {
+    @NonNull
+    public static SQLiteParser createParser(@NonNull String sql) {
         CharStream source = new ANTLRInputStream(sql);
         Lexer lexer = new SQLiteLexer(source);
         TokenStream tokenStream = new CommonTokenStream(lexer);
@@ -45,8 +50,12 @@ public class SQLiteParserUtils {
         return parser;
     }
 
-    public static SQLiteParser.ParseContext parse(String sql) throws ParseCancellationException {
+    public static SQLiteParser.ParseContext parse(@NonNull String sql, @Nullable SQLiteBaseListener collector)
+            throws ParseCancellationException {
         SQLiteParser parser = createParser(sql);
+        if (collector != null) {
+            parser.addParseListener(collector);
+        }
         try {
             return parser.parse();
         } catch (StackOverflowError e) {
@@ -54,47 +63,32 @@ public class SQLiteParserUtils {
         }
     }
 
-    public static CreateTableStatement parseIntoCreateTableStatement(String sql) throws ParseCancellationException {
-        SQLiteParser parser = createParser(sql);
+    public static SQLiteParser.ParseContext parse(@NonNull String sql) throws ParseCancellationException {
+        return parse(sql, null);
+    }
+
+    public static CreateTableStatement parseIntoCreateTableStatement(@NonNull String sql) throws ParseCancellationException {
         SQLiteCreateTableStatementCollector collector = new SQLiteCreateTableStatementCollector();
-        parser.addParseListener(collector);
-        try {
-            parser.parse();
-        } catch (StackOverflowError e) {
-            throw new ParseCancellationException("SQL is too complex to parse: " + sql, e);
-        }
+        SQLiteParser.ParseContext parseContext = parse(sql, collector);
+        appendTokenList(collector.createTableStatement, parseContext);
         return collector.createTableStatement;
     }
 
-    public static CreateIndexStatement parseIntoCreateIndexStatement(String sql) {
-        SQLiteParser parser = createParser(sql);
+    public static CreateIndexStatement parseIntoCreateIndexStatement(@NonNull String sql) {
         SQLiteCreateIndexStatementCollector collector = new SQLiteCreateIndexStatementCollector();
-        parser.addParseListener(collector);
-        SQLiteParser.ParseContext parseContext;
-        try {
-            parseContext = parser.parse();
-        } catch (StackOverflowError e) {
-            throw new ParseCancellationException("SQL is too complex to parse: " + sql, e);
-        }
+        SQLiteParser.ParseContext parseContext = parse(sql, collector);
         appendTokenList(collector.createIndexStatement, parseContext);
         return collector.createIndexStatement;
     }
 
-    public static SQLiteComponent parseIntoSQLiteComponent(String sql) throws ParseCancellationException {
-        SQLiteParser parser = createParser(sql);
-
-        SQLiteParser.ParseContext parseContext;
-        try {
-            parseContext = parser.parse();
-        } catch (StackOverflowError e) {
-            throw new ParseCancellationException("SQL is too complex to parse: " + sql);
-        }
+    public static SQLiteComponent parseIntoSQLiteComponent(@NonNull String sql) throws ParseCancellationException {
+        SQLiteParser.ParseContext parseContext = parse(sql);
         SQLiteComponent component = new SQLiteComponent();
         appendTokenList(component, parseContext);
         return component;
     }
 
-    public static void appendTokenList(final SQLiteComponent component, ParseTree node) {
+    static void appendTokenList(final SQLiteComponent component, ParseTree node) {
         node.accept(new AbstractParseTreeVisitor<Void>() {
             @Override
             public Void visitTerminal(TerminalNode node) {
