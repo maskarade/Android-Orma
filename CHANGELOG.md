@@ -8,7 +8,7 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 > * MINOR version when you add functionality in a backwards-compatible manner, and
 > * PATCH version when you make backwards-compatible bug fixes.
 
-## v1.3.1 - 2017/03/01
+## v1.3.1 - 2017/01/03
 
 * Added COLLATE NOCASE support for orderBY param in query (case insensitive in query)
 
