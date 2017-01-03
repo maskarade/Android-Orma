@@ -20,6 +20,10 @@ public class OrderSpec<Model> {
 
     public static String ASC = "ASC";
 
+    public static String INSENSITIVE_ASC = "COLLATE NOCASE ASC";
+
+    public static String INSENSITIVE_DESC = "COLLATE NOCASE DESC";
+
     public static String DESC = "DESC";
 
     public final ColumnDef<Model, ?> column;

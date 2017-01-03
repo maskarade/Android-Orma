@@ -89,9 +89,18 @@ public abstract class ColumnDef<Model, T> {
         return new OrderSpec<>(this, OrderSpec.ASC);
     }
 
+    public OrderSpec<Model> orderInsensitiveInAscending() {
+        return new OrderSpec<>(this, OrderSpec.INSENSITIVE_ASC);
+    }
+
+    public OrderSpec<Model> orderInsensitiveInDescending() {
+        return new OrderSpec<>(this, OrderSpec.INSENSITIVE_DESC);
+    }
+
     public OrderSpec<Model> orderInDescending() {
         return new OrderSpec<>(this, OrderSpec.DESC);
     }
+
 
     @NonNull
     @Override
