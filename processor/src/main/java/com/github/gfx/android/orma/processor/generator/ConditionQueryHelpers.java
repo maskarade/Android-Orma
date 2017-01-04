@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
 import com.github.gfx.android.orma.processor.model.AssociationDefinition;
 import com.github.gfx.android.orma.processor.model.ColumnDefinition;
+import com.github.gfx.android.orma.processor.model.IndexDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.SqlTypes;
@@ -70,6 +71,13 @@ public class ConditionQueryHelpers {
                 .filter(ColumnDefinition::hasConditionHelpers)
                 .forEach(column -> buildConditionHelpersForEachColumn(methodSpecs, column));
 
+        schema.getIndexes()
+                .stream()
+                .filter(index -> index.columns.size() > 1)
+                .forEach(index -> {
+                    buildConditionHelpersForCompositeIndex(methodSpecs, index);
+                });
+
         if (orderByHelpers) {
             schema.getColumns()
                     .stream()
@@ -107,6 +115,20 @@ public class ConditionQueryHelpers {
 
     }
 
+    ParameterSpec buildParameterSpec(ColumnDefinition column) {
+        AssociationDefinition r = column.getAssociation();
+
+        boolean isAssociation = r != null;
+        TypeName type = isAssociation ? r.getModelType() : column.getType();
+        List<AnnotationSpec> paramAnnotations = column.type.isPrimitive()
+                ? Collections.emptyList()
+                : Collections.singletonList(Annotations.nonNull());
+
+        return ParameterSpec.builder(type, column.name)
+                .addAnnotations(paramAnnotations)
+                .build();
+    }
+
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
         AssociationDefinition r = column.getAssociation();
 
@@ -119,9 +141,7 @@ public class ConditionQueryHelpers {
                 ? Collections.emptyList()
                 : Collections.singletonList(Annotations.nonNull());
 
-        ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
-                .addAnnotations(paramAnnotations)
-                .build();
+        ParameterSpec paramSpec = buildParameterSpec(column);
 
         List<AnnotationSpec> safeVarargsIfNeeded = Annotations.safeVarargsIfNeeded(column.getType());
 
@@ -359,6 +379,39 @@ public class ConditionQueryHelpers {
                     .build()
             );
         }
+    }
+
+    void buildConditionHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
+        // create only "==" helper
+
+        StringBuilder name = new StringBuilder();
+
+        CodeBlock.Builder conditions = CodeBlock.builder();
+        List<ParameterSpec> paramSpecs = new ArrayList<>();
+
+        for (int i = 0; i < index.columns.size(); i++) {
+            ColumnDefinition column = index.columns.get(i);
+
+            ParameterSpec paramSpec = buildParameterSpec(column);
+            CodeBlock serializedFieldExpr = serializedFieldExpr(column, paramSpec);
+            if (i == 0) {
+                name.append(column.name);
+            } else {
+                name.append("And");
+                name.append(Strings.toUpperFirst(column.name));
+                conditions.add(".");
+            }
+            conditions.add("where(schema.$L, $S, $L)",
+                    column.columnName, "=", serializedFieldExpr);
+            paramSpecs.add(paramSpec);
+        }
+
+        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(name.toString())
+                .addModifiers(Modifier.PUBLIC)
+                .addParameters(paramSpecs)
+                .addStatement("return $L", conditions.build())
+                .returns(targetClassName);
+       methodSpecs.add(methodSpec.build());
     }
 
     void buildOrderByHelpers(List<MethodSpec> methodSpecs, ColumnDefinition column) {

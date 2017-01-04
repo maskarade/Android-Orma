@@ -126,13 +126,17 @@ public class SchemaDefinition {
             name = context.sqlg.buildIndexName(tableName, index.value());
         }
 
+        List<ColumnDefinition> columns = new ArrayList<>();
         for (String indexedColumnName : index.value()) {
-            if (!findColumnByColumnName(indexedColumnName).isPresent()) {
+            Optional<ColumnDefinition> column = findColumnByColumnName(indexedColumnName);
+            if (column.isPresent()) {
+                columns.add(column.get());
+            } else {
                 context.warn("No column found for `" + indexedColumnName + "`", typeElement);
             }
         }
 
-        return new IndexDefinition(name, index.unique(), index.value());
+        return new IndexDefinition(name, index.unique(), columns);
     }
 
     Stream<IndexDefinition> extractIndexes() {
@@ -141,7 +145,7 @@ public class SchemaDefinition {
                 .map(column -> new IndexDefinition(
                         context.sqlg.buildIndexName(tableName, column.columnName),
                         false,
-                        column.columnName
+                        column
                 ));
     }
 

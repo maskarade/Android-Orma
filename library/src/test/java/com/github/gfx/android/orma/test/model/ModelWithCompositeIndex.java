@@ -33,19 +33,19 @@ import com.github.gfx.android.orma.annotation.Table;
 public class ModelWithCompositeIndex {
 
     @Column
-    public String c1;
+    public long c1;
 
     @Column
     public String c2;
 
     @Column
-    public String c3;
+    public long c3;
 
     @Column
     public String c4;
 
     @Setter
-    public ModelWithCompositeIndex(String c1, String c2, String c3, String c4) {
+    public ModelWithCompositeIndex(long c1, String c2, long c3, String c4) {
         this.c1 = c1;
         this.c2 = c2;
         this.c3 = c3;

@@ -192,7 +192,7 @@ public class SqlGenerator {
                         if (i != 0) {
                             sb.append(", ");
                         }
-                        appendIdentifier(sb, index.columns.get(i));
+                        appendIdentifier(sb, index.columns.get(i).columnName);
                     }
                     sb.append(")");
 

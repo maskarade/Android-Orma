@@ -25,15 +25,15 @@ public class IndexDefinition {
 
     public final boolean unique;
 
-    public final List<String> columns;
+    public final List<ColumnDefinition> columns;
 
-    public IndexDefinition(String name, boolean unique, List<String> columns) {
+    public IndexDefinition(String name, boolean unique, List<ColumnDefinition> columns) {
         this.name = name;
         this.unique = unique;
         this.columns = columns;
     }
 
-    public IndexDefinition(String name, boolean unique, String... columns) {
+    public IndexDefinition(String name, boolean unique, ColumnDefinition... columns) {
         this.name = name;
         this.unique = unique;
         this.columns = Arrays.asList(columns);
