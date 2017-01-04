@@ -31,6 +31,7 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SqlGenerator {
 
@@ -168,18 +169,31 @@ public class SqlGenerator {
         }
     }
 
+    public String buildIndexName(String tableName, String... columnNames) {
+        return "index_" + Stream.of(columnNames).collect(Collectors.joining("_")) + "_on_" + tableName;
+    }
+
     public List<String> buildCreateIndexStatements(SchemaDefinition schema) {
-        return schema.getColumns().stream()
-                .filter(column -> column.indexed && !column.primaryKey)
-                .map(column -> {
+        return schema.getIndexes()
+                .stream()
+                .map(index -> {
                     StringBuilder sb = new StringBuilder();
 
-                    sb.append("CREATE INDEX ");
-                    appendIdentifier(sb, "index_" + column.columnName + "_on_" + schema.getTableName());
+                    sb.append("CREATE ");
+                    if (index.unique) {
+                        sb.append("UNIQUE ");
+                    }
+                    sb.append("INDEX ");
+                    appendIdentifier(sb, index.name);
                     sb.append(" ON ");
                     appendIdentifier(sb, schema.getTableName());
                     sb.append(" (");
-                    appendIdentifier(sb, column.columnName);
+                    for (int i = 0; i < index.columns.size(); i++) {
+                        if (i != 0) {
+                            sb.append(", ");
+                        }
+                        appendIdentifier(sb, index.columns.get(i));
+                    }
                     sb.append(")");
 
                     return sb.toString();

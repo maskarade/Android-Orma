@@ -30,6 +30,15 @@ public class CreateIndexStatement extends SQLiteComponent {
 
     List<Name> columns = new ArrayList<>();
 
+    public boolean isUnique() {
+        for (CharSequence token : tokens) {
+            if (token.equals("unique")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Name getIndexName() {
         return indexName;
     }

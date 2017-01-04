@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.processor.model;
 
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.Getter;
+import com.github.gfx.android.orma.annotation.Index;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -62,9 +64,11 @@ public class SchemaDefinition {
 
     final String tableName;
 
+    final List<ColumnDefinition> columns;
+
     final String[] constraints;
 
-    final List<ColumnDefinition> columns;
+    final List<IndexDefinition> indexes;
 
     final ColumnDefinition primaryKey;
 
@@ -108,7 +112,37 @@ public class SchemaDefinition {
 
         this.primaryKey = findPrimaryKey(columns);
 
+        this.indexes = Stream.concat(
+                Stream.of(table.indexes()).map(this::createIndexDefinition),
+                extractIndexes()
+        ).collect(Collectors.toList());
+
         SchemaValidator.validate(context, this);
+    }
+
+    IndexDefinition createIndexDefinition(Index index) {
+        String name = index.name();
+        if (name.equals("")) {
+            name = context.sqlg.buildIndexName(tableName, index.value());
+        }
+
+        for (String indexedColumnName : index.value()) {
+            if (!findColumnByColumnName(indexedColumnName).isPresent()) {
+                context.warn("No column found for `" + indexedColumnName + "`", typeElement);
+            }
+        }
+
+        return new IndexDefinition(name, index.unique(), index.value());
+    }
+
+    Stream<IndexDefinition> extractIndexes() {
+        return columns.stream()
+                .filter(column -> column.indexed && !column.primaryKey)
+                .map(column -> new IndexDefinition(
+                        context.sqlg.buildIndexName(tableName, column.columnName),
+                        false,
+                        column.columnName
+                ));
     }
 
     /**
@@ -254,12 +288,14 @@ public class SchemaDefinition {
         methods.add(accessor);
     }
 
-    private void pushFrontAccessorCandidate(Map<String, List<ExecutableElement>> map, String name, ExecutableElement accessor) {
+    private void pushFrontAccessorCandidate(Map<String, List<ExecutableElement>> map, String name,
+            ExecutableElement accessor) {
         List<ExecutableElement> methods = map.computeIfAbsent(name, (_name) -> new ArrayList<>());
         methods.add(0, accessor);
     }
 
-    private void extractNameFromGetter(Map<String, List<ExecutableElement>> map, Getter annotation, ExecutableElement accessor) {
+    private void extractNameFromGetter(Map<String, List<ExecutableElement>> map, Getter annotation,
+            ExecutableElement accessor) {
         if (annotation != null && !Strings.isEmpty(annotation.value())) {
             pushFrontAccessorCandidate(map, annotation.value(), accessor);
         } else if (accessor.getParameters().isEmpty()) {
@@ -277,7 +313,8 @@ public class SchemaDefinition {
         }
     }
 
-    private void extractNameFromSetter(Map<String, List<ExecutableElement>> map, Setter annotation, ExecutableElement accessor) {
+    private void extractNameFromSetter(Map<String, List<ExecutableElement>> map, Setter annotation,
+            ExecutableElement accessor) {
         if (constructorElement != null) {
             if (annotation != null) {
                 context.addError("@Setter annotations are already used for the constructor", accessor);
@@ -307,6 +344,10 @@ public class SchemaDefinition {
 
     public String[] getConstraints() {
         return constraints;
+    }
+
+    public List<IndexDefinition> getIndexes() {
+        return indexes;
     }
 
     public TypeElement getElement() {
@@ -362,7 +403,7 @@ public class SchemaDefinition {
     }
 
     public Optional<ColumnDefinition> findColumnByColumnName(String name) {
-        return columns.stream().filter(column -> column.columnName.contentEquals(name)).findFirst();
+        return columns.stream().filter(column -> column.columnName.equalsIgnoreCase(name)).findFirst();
     }
 
     public Optional<ColumnDefinition> getPrimaryKey() {

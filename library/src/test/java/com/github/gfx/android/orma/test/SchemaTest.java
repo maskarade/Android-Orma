@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.ModelWithCompositeIndex_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithInheritance;
@@ -187,5 +188,16 @@ public class SchemaTest {
         assertThat(schema.getTableAlias(), is(notNullValue()));
         assertThat(schema.getEscapedTableAlias(), is(notNullValue()));
         assertThat(schema.md.associationSchema.name.getQualifiedName(), endsWith(".`name`"));
+    }
+
+    @Test
+    public void compositeIndexes() throws Exception {
+        ModelWithCompositeIndex_Schema schema = ModelWithCompositeIndex_Schema.INSTANCE;
+
+        assertThat(schema.getCreateIndexStatements(), contains(
+                "CREATE INDEX `index_c1_c2_on_ModelWithCompositeIndex` ON `ModelWithCompositeIndex` (`c1`, `c2`)",
+                "CREATE UNIQUE INDEX `custom_index_on_ModelWithCompositeIndex` ON `ModelWithCompositeIndex` (`c3`, `c4`)"
+
+        ));
     }
 }

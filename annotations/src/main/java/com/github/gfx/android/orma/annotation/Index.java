@@ -13,37 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.gfx.android.orma.annotation;
+
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
+/**
+ * To create indexes for multiple columns.
+ *
+ * @see <a href="https://sqlite.org/lang_createindex.html">CREATE INDEX</a>
+ */
+@Target({ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.CLASS)
-public @interface Table {
+public @interface Index {
 
-    /**
-     * @return The table name in SQLite. It is case-insensitive.
-     */
-    String value() default "";
+    String[] value();
 
-    /**
-     * @return Table constraints added to {@code CREATE TABLE}.
-     * @see <a href="https://www.sqlite.org/lang_createtable.html">CREATE TABLE</a> in the SQLite reference.
-     */
-    String[] constraints() default {};
+    boolean unique() default false;
 
-    Index[] indexes() default {};
-
-    String schemaClassName() default "";
-
-    String relationClassName() default "";
-
-    String updaterClassName() default "";
-
-    String deleterClassName() default "";
-
-    String selectorClassName() default "";
+    String name() default ""; // default: index_${value().join("_")}_on_${table}
 }
