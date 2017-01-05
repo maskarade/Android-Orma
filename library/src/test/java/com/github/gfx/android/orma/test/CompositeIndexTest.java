@@ -63,11 +63,11 @@ public class CompositeIndexTest {
     @Test
     public void comositeIndexEq() throws Exception {
         ModelWithCompositeIndex_Selector s = db.selectFromModelWithCompositeIndex()
-                .c1AndC2(0, "c2:even");
+                .c1AndC2Eq(0, "c2:even");
         assertThat(s.count(), is(1));
 
         s = db.selectFromModelWithCompositeIndex()
-                .c3AndC4(1, "c4:odd");
+                .c4AndC3Eq("c4:odd", 1);
         assertThat(s.count(), is(1));
     }
 
@@ -76,5 +76,18 @@ public class CompositeIndexTest {
         db.insertIntoModelWithCompositeIndex(
                 new ModelWithCompositeIndex(1, "foo", 0, "c4:even")
         );
+    }
+
+    @Test
+    public void orderByIndexedColumns() throws Exception {
+        assertThat(db.selectFromModelWithCompositeIndex()
+                .orderByc1AndC2Asc().value().c1, is(0L));
+        assertThat(db.selectFromModelWithCompositeIndex()
+                .orderByc1AndC2Desc().value().c1, is(2L));
+
+        assertThat(db.selectFromModelWithCompositeIndex()
+                .orderByc4AndC3Asc().value().c1, is(0L));
+        assertThat(db.selectFromModelWithCompositeIndex()
+                .orderByc4AndC3Desc().value().c1, is(1L));
     }
 }

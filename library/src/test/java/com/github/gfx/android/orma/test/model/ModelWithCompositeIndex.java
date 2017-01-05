@@ -25,7 +25,7 @@ import com.github.gfx.android.orma.annotation.Table;
 @Table(indexes = {
         @Index({"c1", "c2"}),
         @Index(
-                value = {"c3", "c4"},
+                value = {"c4", "c3"},
                 unique = true,
                 name = "custom_index_on_ModelWithCompositeIndex"
         )

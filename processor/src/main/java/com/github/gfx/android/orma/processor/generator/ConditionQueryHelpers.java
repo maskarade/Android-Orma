@@ -83,6 +83,13 @@ public class ConditionQueryHelpers {
                     .stream()
                     .filter(ColumnDefinition::hasOrderHelpers)
                     .forEach(column -> buildOrderByHelpers(methodSpecs, column));
+
+            schema.getIndexes()
+                    .stream()
+                    .filter(index -> index.columns.size() > 1)
+                    .forEach(index -> {
+                        buildOrderByHelpersForCompositeIndex(methodSpecs, index);
+                    });
         }
 
         if (aggregatorHelpers) {
@@ -381,39 +388,6 @@ public class ConditionQueryHelpers {
         }
     }
 
-    void buildConditionHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
-        // create only "==" helper
-
-        StringBuilder name = new StringBuilder();
-
-        CodeBlock.Builder conditions = CodeBlock.builder();
-        List<ParameterSpec> paramSpecs = new ArrayList<>();
-
-        for (int i = 0; i < index.columns.size(); i++) {
-            ColumnDefinition column = index.columns.get(i);
-
-            ParameterSpec paramSpec = buildParameterSpec(column);
-            CodeBlock serializedFieldExpr = serializedFieldExpr(column, paramSpec);
-            if (i == 0) {
-                name.append(column.name);
-            } else {
-                name.append("And");
-                name.append(Strings.toUpperFirst(column.name));
-                conditions.add(".");
-            }
-            conditions.add("where(schema.$L, $S, $L)",
-                    column.columnName, "=", serializedFieldExpr);
-            paramSpecs.add(paramSpec);
-        }
-
-        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(name.toString())
-                .addModifiers(Modifier.PUBLIC)
-                .addParameters(paramSpecs)
-                .addStatement("return $L", conditions.build())
-                .returns(targetClassName);
-       methodSpecs.add(methodSpec.build());
-    }
-
     void buildOrderByHelpers(List<MethodSpec> methodSpecs, ColumnDefinition column) {
         if (column.hasHelper(Column.Helpers.ORDER_IN_ASC)) {
             methodSpecs.add(MethodSpec.methodBuilder("orderBy" + Strings.toUpperFirst(column.name) + "Asc")
@@ -487,5 +461,91 @@ public class ConditionQueryHelpers {
                 .addStatement("cursor.close()")
                 .endControlFlow()
                 .build();
+    }
+
+
+    void buildConditionHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
+        // create only "==" helper
+
+        StringBuilder baseName = new StringBuilder();
+
+        CodeBlock.Builder conditions = CodeBlock.builder();
+        List<ParameterSpec> paramSpecs = new ArrayList<>();
+
+        for (int i = 0; i < index.columns.size(); i++) {
+            ColumnDefinition column = index.columns.get(i);
+
+            ParameterSpec paramSpec = buildParameterSpec(column);
+            CodeBlock serializedFieldExpr = serializedFieldExpr(column, paramSpec);
+            if (i == 0) {
+                baseName.append(column.name);
+            } else {
+                baseName.append("And");
+                baseName.append(Strings.toUpperFirst(column.name));
+                conditions.add(".");
+            }
+            conditions.add("where(schema.$L, $S, $L)",
+                    column.columnName, "=", serializedFieldExpr);
+            paramSpecs.add(paramSpec);
+        }
+
+        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(baseName + "Eq")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameters(paramSpecs)
+                .addStatement("return $L", conditions.build())
+                .returns(targetClassName);
+        methodSpecs.add(methodSpec.build());
+    }
+
+    void buildOrderByHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
+        StringBuilder baseName = new StringBuilder();
+        for (int i = 0; i < index.columns.size(); i++) {
+            ColumnDefinition column = index.columns.get(i);
+
+            if (i == 0) {
+                baseName.append(column.name);
+            } else {
+                baseName.append("And");
+                baseName.append(Strings.toUpperFirst(column.name));
+            }
+        }
+
+        {
+            CodeBlock.Builder conditions = CodeBlock.builder();
+
+            for (int i = 0; i < index.columns.size(); i++) {
+                ColumnDefinition column = index.columns.get(i);
+
+                if (i != 0) {
+                    conditions.add(".");
+                }
+                conditions.add("orderBy(schema.$L.orderInAscending())", column.name);
+            }
+
+            MethodSpec.Builder methodSpec = MethodSpec.methodBuilder("orderBy" + baseName + "Asc")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addStatement("return $L", conditions.build())
+                    .returns(targetClassName);
+            methodSpecs.add(methodSpec.build());
+        }
+
+        {
+            CodeBlock.Builder conditions = CodeBlock.builder();
+
+            for (int i = 0; i < index.columns.size(); i++) {
+                ColumnDefinition column = index.columns.get(i);
+
+                if (i != 0) {
+                    conditions.add(".");
+                }
+                conditions.add("orderBy(schema.$L.orderInDescending())", column.name);
+            }
+
+            MethodSpec.Builder methodSpec = MethodSpec.methodBuilder("orderBy" + baseName + "Desc")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addStatement("return $L", conditions.build())
+                    .returns(targetClassName);
+            methodSpecs.add(methodSpec.build());
+        }
     }
 }
