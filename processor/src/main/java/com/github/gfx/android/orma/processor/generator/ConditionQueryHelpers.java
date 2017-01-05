@@ -463,11 +463,26 @@ public class ConditionQueryHelpers {
                 .build();
     }
 
+    CharSequence buildBaseNameForCompositeIndex(IndexDefinition index) {
+        StringBuilder baseName = new StringBuilder();
+        for (int i = 0; i < index.columns.size(); i++) {
+            ColumnDefinition column = index.columns.get(i);
+
+            if (i == 0) {
+                baseName.append(column.name);
+            } else {
+                baseName.append("And");
+                baseName.append(Strings.toUpperFirst(column.name));
+            }
+        }
+
+        return baseName;
+    }
 
     void buildConditionHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
         // create only "==" helper
 
-        StringBuilder baseName = new StringBuilder();
+        CharSequence baseName = buildBaseNameForCompositeIndex(index);
 
         CodeBlock.Builder conditions = CodeBlock.builder();
         List<ParameterSpec> paramSpecs = new ArrayList<>();
@@ -477,11 +492,7 @@ public class ConditionQueryHelpers {
 
             ParameterSpec paramSpec = buildParameterSpec(column);
             CodeBlock serializedFieldExpr = serializedFieldExpr(column, paramSpec);
-            if (i == 0) {
-                baseName.append(column.name);
-            } else {
-                baseName.append("And");
-                baseName.append(Strings.toUpperFirst(column.name));
+            if (i != 0) {
                 conditions.add(".");
             }
             conditions.add("where(schema.$L, $S, $L)",
@@ -498,17 +509,7 @@ public class ConditionQueryHelpers {
     }
 
     void buildOrderByHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
-        StringBuilder baseName = new StringBuilder();
-        for (int i = 0; i < index.columns.size(); i++) {
-            ColumnDefinition column = index.columns.get(i);
-
-            if (i == 0) {
-                baseName.append(column.name);
-            } else {
-                baseName.append("And");
-                baseName.append(Strings.toUpperFirst(column.name));
-            }
-        }
+        CharSequence baseName = buildBaseNameForCompositeIndex(index);
 
         {
             CodeBlock.Builder conditions = CodeBlock.builder();
