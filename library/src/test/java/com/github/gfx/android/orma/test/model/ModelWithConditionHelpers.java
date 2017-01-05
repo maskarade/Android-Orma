@@ -16,7 +16,6 @@
 package com.github.gfx.android.orma.test.model;
 
 import com.github.gfx.android.orma.annotation.Column;
-import com.github.gfx.android.orma.annotation.Index;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Table;
 
