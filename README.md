@@ -111,8 +111,8 @@ Declare dependencies to use Orma and its annotation processor.
 
 ```gradle:build.gradle
 dependencies {
-    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.0.2'
-    compile 'com.github.gfx.android.orma:orma:4.0.2'
+    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.1.0'
+    compile 'com.github.gfx.android.orma:orma:4.1.0'
 }
 ```
 
@@ -876,7 +876,7 @@ See [migration/README.md](migration/README.md) for details.
 
 ## DataSet Changed Events
 
-NOTE: **This is experimental in v4.0.2: its existence, signature or behavior might change without warning from one release to the next.**
+NOTE: **This is experimental in v4.1.0: its existence, signature or behavior might change without warning from one release to the next.**
 
 `Relation#createQueryObservable()` can create a event stream to observe data-set changed events for the relation.
 
@@ -945,7 +945,7 @@ I welcome benchmark in another condition and/or another code.
 
 ## Method Count
 
-Orma runtime is very lightweight: [Method Count for v4.0.2](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:4.0.2)
+Orma runtime is very lightweight: [Method Count for v4.1.0](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:4.1.0)
 
 ## FAQ
 
@@ -999,8 +999,8 @@ Yes. As of Android Gradle Plugin 2.2.2, Orma should work with Jack.
 
 ```gradle:build.gradle
 dependencies {
-    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.0.2'
-    compile 'com.github.gfx.android.orma:orma:4.0.2'
+    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.1.0'
+    compile 'com.github.gfx.android.orma:orma:4.1.0'
 }
 ```
 
