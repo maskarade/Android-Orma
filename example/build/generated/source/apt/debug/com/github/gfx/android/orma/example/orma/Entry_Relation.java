@@ -101,4 +101,16 @@ public class Entry_Relation extends Relation<Entry, Entry_Relation> {
   public Entry_Relation idBetween(long idA, long idB) {
     return whereBetween(schema.id, idA, idB);
   }
+
+  public Entry_Relation resourceTypeAndResourceIdEq(@NonNull String resourceType, long resourceId) {
+    return where(schema.resourceType, "=", resourceType).where(schema.resourceId, "=", resourceId);
+  }
+
+  public Entry_Relation orderByresourceTypeAndResourceIdAsc() {
+    return orderBy(schema.resourceType.orderInAscending()).orderBy(schema.resourceId.orderInAscending());
+  }
+
+  public Entry_Relation orderByresourceTypeAndResourceIdDesc() {
+    return orderBy(schema.resourceType.orderInDescending()).orderBy(schema.resourceId.orderInDescending());
+  }
 }

@@ -165,7 +165,7 @@ public class Entry_Schema implements Schema<Entry> {
   @Override
   public List<String> getCreateIndexStatements() {
     return Arrays.asList(
-      "CREATE UNIQUE INDEX `index_resource_on_Entry` ON `Entry` ()"
+      "CREATE UNIQUE INDEX `index_resourceType_resourceId_on_Entry` ON `Entry` (`resourceType`, `resourceId`)"
     );
   }
 

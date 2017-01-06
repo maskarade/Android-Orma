@@ -81,4 +81,8 @@ public class Entry_Updater extends Updater<Entry, Entry_Updater> {
   public Entry_Updater idBetween(long idA, long idB) {
     return whereBetween(schema.id, idA, idB);
   }
+
+  public Entry_Updater resourceTypeAndResourceIdEq(@NonNull String resourceType, long resourceId) {
+    return where(schema.resourceType, "=", resourceType).where(schema.resourceId, "=", resourceId);
+  }
 }

@@ -71,4 +71,8 @@ public class Entry_Deleter extends Deleter<Entry, Entry_Deleter> {
   public Entry_Deleter idBetween(long idA, long idB) {
     return whereBetween(schema.id, idA, idB);
   }
+
+  public Entry_Deleter resourceTypeAndResourceIdEq(@NonNull String resourceType, long resourceId) {
+    return where(schema.resourceType, "=", resourceType).where(schema.resourceId, "=", resourceId);
+  }
 }

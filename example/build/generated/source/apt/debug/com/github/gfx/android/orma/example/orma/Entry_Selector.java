@@ -84,6 +84,18 @@ public class Entry_Selector extends Selector<Entry, Entry_Selector> {
     return whereBetween(schema.id, idA, idB);
   }
 
+  public Entry_Selector resourceTypeAndResourceIdEq(@NonNull String resourceType, long resourceId) {
+    return where(schema.resourceType, "=", resourceType).where(schema.resourceId, "=", resourceId);
+  }
+
+  public Entry_Selector orderByresourceTypeAndResourceIdAsc() {
+    return orderBy(schema.resourceType.orderInAscending()).orderBy(schema.resourceId.orderInAscending());
+  }
+
+  public Entry_Selector orderByresourceTypeAndResourceIdDesc() {
+    return orderBy(schema.resourceType.orderInDescending()).orderBy(schema.resourceId.orderInDescending());
+  }
+
   @Nullable
   public Long minByResourceId() {
     Cursor cursor = executeWithColumns(schema.resourceId.buildCallExpr("MIN"));
