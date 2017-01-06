@@ -196,7 +196,7 @@ public class SchemaTest {
 
         assertThat(schema.getCreateIndexStatements(), contains(
                 "CREATE INDEX `index_c1_c2_on_ModelWithCompositeIndex` ON `ModelWithCompositeIndex` (`c1`, `c2`)",
-                "CREATE UNIQUE INDEX `custom_index_on_ModelWithCompositeIndex` ON `ModelWithCompositeIndex` (`c3`, `c4`)"
+                "CREATE UNIQUE INDEX `custom_index_on_ModelWithCompositeIndex` ON `ModelWithCompositeIndex` (`c4`, `c3`)"
 
         ));
     }
