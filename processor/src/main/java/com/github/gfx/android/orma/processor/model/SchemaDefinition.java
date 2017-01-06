@@ -136,7 +136,7 @@ public class SchemaDefinition {
             }
         }
 
-        return new IndexDefinition(name, index.unique(), columns);
+        return new IndexDefinition(name, index.unique(), index.helpers(), columns);
     }
 
     Stream<IndexDefinition> extractIndexes() {
@@ -145,6 +145,7 @@ public class SchemaDefinition {
                 .map(column -> new IndexDefinition(
                         context.sqlg.buildIndexName(tableName, column.columnName),
                         false,
+                        Column.Helpers.AUTO,
                         column
                 ));
     }

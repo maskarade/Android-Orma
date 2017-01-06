@@ -36,4 +36,11 @@ public @interface Index {
     boolean unique() default false;
 
     String name() default ""; // default: index_${value().join("_")}_on_${table}
+
+    /**
+     *
+     * @return Bit flags that indicates which helpers to generate
+     * @see Column#helpers()
+     */
+    @Column.Helpers long helpers() default Column.Helpers.AUTO;
 }

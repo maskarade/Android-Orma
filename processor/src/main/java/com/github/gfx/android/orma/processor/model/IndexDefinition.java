@@ -16,6 +16,8 @@
 
 package com.github.gfx.android.orma.processor.model;
 
+import com.github.gfx.android.orma.annotation.Column;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,18 +27,24 @@ public class IndexDefinition {
 
     public final boolean unique;
 
+    @Column.Helpers
+    public final long helperFlags;
+
     public final List<ColumnDefinition> columns;
 
-    public IndexDefinition(String name, boolean unique, List<ColumnDefinition> columns) {
+    public IndexDefinition(String name, boolean unique, @Column.Helpers long helperFlags, List<ColumnDefinition> columns) {
         this.name = name;
         this.unique = unique;
+        this.helperFlags = helperFlags == Column.Helpers.AUTO ? Column.Helpers.ALL : helperFlags;
         this.columns = columns;
     }
 
-    public IndexDefinition(String name, boolean unique, ColumnDefinition... columns) {
-        this.name = name;
-        this.unique = unique;
-        this.columns = Arrays.asList(columns);
+    public IndexDefinition(String name, boolean unique, @Column.Helpers long helperFlags, ColumnDefinition... columns) {
+        this(name, unique, helperFlags, Arrays.asList(columns));
     }
 
+    public boolean hasHelper(@Column.Helpers long f) {
+        assert f != Column.Helpers.NONE && f != Column.Helpers.AUTO;
+        return (helperFlags & f) == f;
+    }
 }

@@ -481,6 +481,9 @@ public class ConditionQueryHelpers {
 
     void buildConditionHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
         // create only "==" helper
+        if (!index.hasHelper(Column.Helpers.CONDITION_EQ)) {
+            return;
+        }
 
         CharSequence baseName = buildBaseNameForCompositeIndex(index);
 
@@ -511,7 +514,7 @@ public class ConditionQueryHelpers {
     void buildOrderByHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
         CharSequence baseName = buildBaseNameForCompositeIndex(index);
 
-        {
+        if (index.hasHelper(Column.Helpers.ORDER_IN_ASC)){
             CodeBlock.Builder conditions = CodeBlock.builder();
 
             for (int i = 0; i < index.columns.size(); i++) {
@@ -530,7 +533,7 @@ public class ConditionQueryHelpers {
             methodSpecs.add(methodSpec.build());
         }
 
-        {
+        if (index.hasHelper(Column.Helpers.ORDER_IN_DESC)){
             CodeBlock.Builder conditions = CodeBlock.builder();
 
             for (int i = 0; i < index.columns.size(); i++) {

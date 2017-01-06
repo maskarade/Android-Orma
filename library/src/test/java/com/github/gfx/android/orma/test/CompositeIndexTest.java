@@ -65,10 +65,6 @@ public class CompositeIndexTest {
         ModelWithCompositeIndex_Selector s = db.selectFromModelWithCompositeIndex()
                 .c1AndC2Eq(0, "c2:even");
         assertThat(s.count(), is(1));
-
-        s = db.selectFromModelWithCompositeIndex()
-                .c4AndC3Eq("c4:odd", 1);
-        assertThat(s.count(), is(1));
     }
 
     @Test(expected = SQLiteConstraintException.class)
@@ -84,10 +80,5 @@ public class CompositeIndexTest {
                 .orderByc1AndC2Asc().value().c1, is(0L));
         assertThat(db.selectFromModelWithCompositeIndex()
                 .orderByc1AndC2Desc().value().c1, is(2L));
-
-        assertThat(db.selectFromModelWithCompositeIndex()
-                .orderByc4AndC3Asc().value().c1, is(0L));
-        assertThat(db.selectFromModelWithCompositeIndex()
-                .orderByc4AndC3Desc().value().c1, is(1L));
     }
 }

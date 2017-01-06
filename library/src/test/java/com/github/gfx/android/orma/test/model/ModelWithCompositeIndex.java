@@ -27,7 +27,8 @@ import com.github.gfx.android.orma.annotation.Table;
         @Index(
                 value = {"c4", "c3"},
                 unique = true,
-                name = "custom_index_on_ModelWithCompositeIndex"
+                name = "custom_index_on_ModelWithCompositeIndex",
+                helpers = Column.Helpers.NONE
         )
 })
 public class ModelWithCompositeIndex {
