@@ -25,7 +25,6 @@ import com.github.gfx.android.orma.annotation.Table;
  * An example for table connstraints and indexes.
  */
 @Table(
-
         indexes = @Index(
                 value = {"resourceType", "resourceId"},
                 unique = true
@@ -34,7 +33,7 @@ import com.github.gfx.android.orma.annotation.Table;
 public class Entry {
 
     @PrimaryKey
-    long id;
+    public long id;
 
 
     @Column

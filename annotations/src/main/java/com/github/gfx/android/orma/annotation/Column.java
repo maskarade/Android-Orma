@@ -78,8 +78,7 @@ public @interface Column {
     String storageType() default "";
 
     /**
-     *
-     * @return Bit flags that indicates which helpers to generate
+     * @return Flags that control which helpers to generate
      */
     @Helpers long helpers() default Helpers.AUTO;
 
@@ -124,11 +123,8 @@ public @interface Column {
     @Target({ElementType.FIELD, ElementType.LOCAL_VARIABLE, ElementType.PARAMETER, ElementType.METHOD})
     @Retention(RetentionPolicy.CLASS)
     @IntDef(flag = true, value = {
-            // set of values
             Helpers.NONE,
             Helpers.AUTO,
-
-            // values
             Helpers.CONDITION_EQ,
             Helpers.CONDITION_NOT_EQ,
             Helpers.CONDITION_IS_NULL,
@@ -147,7 +143,6 @@ public @interface Column {
             Helpers.MAX,
             Helpers.SUM,
             Helpers.AVG,
-
     })
     @interface Helpers {
 

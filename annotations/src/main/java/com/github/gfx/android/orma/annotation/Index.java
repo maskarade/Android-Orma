@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * To create indexes for multiple columns.
+ * To create SQLite indexes for multiple columns.
  *
  * @see <a href="https://sqlite.org/lang_createindex.html">CREATE INDEX</a>
  */
@@ -31,15 +31,23 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface Index {
 
+    /**
+     * @return A list of SQLite column names for it.
+     */
     String[] value();
 
+    /**
+     * @return If true, it builds {@code CREATE UNIQUE INDEX}
+     */
     boolean unique() default false;
 
+    /**
+     * @return An SQLite index name for the index
+     */
     String name() default ""; // default: index_${value().join("_")}_on_${table}
 
     /**
-     *
-     * @return Bit flags that indicates which helpers to generate
+     * @return Flags that control which helpers to generate
      * @see Column#helpers()
      */
     @Column.Helpers long helpers() default Column.Helpers.AUTO;

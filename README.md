@@ -552,8 +552,26 @@ There is the `indexes` parameter that `@Table` takes
 in order to create composite indexes (a.k.a. multi-column indexes).
 
 ```java
+// for CREATE INDEX:
+@Table(indexes = @Index(value = {"resourceType", "resourceId"}))
+public class Entry {
+
+    @PrimaryKey
+    public long id;
+
+    @Column
+    public String resourceType;
+
+    @Column
+    public long resourceId;
+}
+```
+
+
+```java
+// for CREATE UNIQUE INDEX:
 @Table(
-        indexes = @Index(
+    indexes = @Index(
                 value = {"resourceType", "resourceId"},
                 unique = true
         )
@@ -561,8 +579,7 @@ in order to create composite indexes (a.k.a. multi-column indexes).
 public class Entry {
 
     @PrimaryKey
-    long id;
-
+    public long id;
 
     @Column
     public String resourceType;
