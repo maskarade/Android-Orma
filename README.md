@@ -40,6 +40,7 @@ as the author respects the Larry Wall's wisdom:
 - [Details of Models](#details-of-models)
     - [Setters and Getters](#setters-and-getters)
     - [Immutable Models](#immutable-models)
+    - [Composite Indexes](#composite-indexes)
 - [Associations](#associations)
     - [Has-One Associations with `SingleAssociation<T>`](#has-one-associations-with-singleassociationt)
     - [Has-Many Associations with `SingleAssociation<T>`](#has-many-associations-with-singleassociationt)
@@ -544,6 +545,42 @@ public class KeyValuePair {
     }
 }
 ```
+
+### Composite Indexes
+
+There is the `indexes` parameter that `@Table` takes
+in order to create composite indexes (a.k.a. multi-column indexes).
+
+```java
+@Table(
+        indexes = @Index(
+                value = {"resourceType", "resourceId"},
+                unique = true
+        )
+)
+public class Entry {
+
+    @PrimaryKey
+    long id;
+
+
+    @Column
+    public String resourceType;
+
+    @Column
+    public long resourceId;
+}
+```
+
+Composite indexes generate query helper methods only for `==` and `ORDER BY` for helper classes like the following:
+
+* `Selector#resourceTypeAndResourceIdEq(String, long)`
+* `Selector#orderByResourceTypeAndResourceIdAsc()`
+* `Selector#orderByResourceTypeAndResourceIdDesc()`
+
+You can control generated helpers with the `helpers` parameter.
+
+See also [Query Helper Methods](#query-helper-methods).
 
 ## Associations
 

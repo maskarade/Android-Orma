@@ -30,10 +30,11 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.
    */
-  public static String SCHEMA_HASH = "67EA68700764198E813EB0AFCCD6EA98E4995B0F89666D2787A1951899A836CE";
+  public static String SCHEMA_HASH = "4C26F904E7FFF90B1EB8F50265BFCC3159C1C01BBB30FC6D5C0604E8743699FD";
 
   public static final List<Schema<?>> SCHEMAS = Arrays.<Schema<?>>asList(
     Category_Schema.INSTANCE,
+    Entry_Schema.INSTANCE,
     Item_Schema.INSTANCE,
     Item2_Schema.INSTANCE,
     Todo_Schema.INSTANCE
@@ -220,6 +221,120 @@ public class OrmaDatabase implements DatabaseHandle {
       @Override
       public Inserter<Category> call() throws Exception {
         return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+      }
+    });
+  }
+
+  /**
+   * Retrieves a model from a cursor. */
+  @NonNull
+  public Entry newEntryFromCursor(@NonNull Cursor cursor) {
+    return Entry_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
+  }
+
+  /**
+   * Inserts a model created by {@code ModelFactory<T>}, and retrieves it which is just inserted.
+   *  The return value has the row ID.
+   */
+  @NonNull
+  @WorkerThread
+  public Entry createEntry(@NonNull ModelFactory<Entry> factory) {
+    return connection.createModel(Entry_Schema.INSTANCE, factory);
+  }
+
+  /**
+   * Creates a relation of {@code Entry}, which is an entry point of all the operations.
+   */
+  @NonNull
+  public Entry_Relation relationOfEntry() {
+    return new Entry_Relation(connection, Entry_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code SELECT * FROM Entry ...}.
+   */
+  @NonNull
+  public Entry_Selector selectFromEntry() {
+    return new Entry_Selector(connection, Entry_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code UPDATE Entry ...}.
+   */
+  @WorkerThread
+  @NonNull
+  public Entry_Updater updateEntry() {
+    return new Entry_Updater(connection, Entry_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code DELETE FROM Entry ...}.
+   */
+  @WorkerThread
+  @NonNull
+  public Entry_Deleter deleteFromEntry() {
+    return new Entry_Deleter(connection, Entry_Schema.INSTANCE);
+  }
+
+  /**
+   * Executes a query: {@code INSERT INTO Entry ...}.
+   */
+  @WorkerThread
+  public long insertIntoEntry(@NonNull Entry model) {
+    return prepareInsertIntoEntry().execute(model);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Entry ...}.
+   */
+  @WorkerThread
+  public Inserter<Entry> prepareInsertIntoEntry() {
+    return prepareInsertIntoEntry(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Entry ...}.
+   */
+  @WorkerThread
+  public Inserter<Entry> prepareInsertIntoEntry(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoEntry(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Entry ...}.
+   */
+  @WorkerThread
+  public Inserter<Entry> prepareInsertIntoEntry(@OnConflict int onConflictAlgorithm,
+      boolean withoutAutoId) {
+    return new Inserter<Entry>(connection, Entry_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Entry ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Entry>> prepareInsertIntoEntryAsSingle() {
+    return prepareInsertIntoEntryAsSingle(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Entry ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Entry>> prepareInsertIntoEntryAsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoEntryAsSingle(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Entry ...}.
+   */
+  @CheckResult
+  public Single<Inserter<Entry>> prepareInsertIntoEntryAsSingle(@OnConflict final int onConflictAlgorithm,
+      final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<Inserter<Entry>>() {
+      @Override
+      public Inserter<Entry> call() throws Exception {
+        return new Inserter<Entry>(connection, Entry_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
