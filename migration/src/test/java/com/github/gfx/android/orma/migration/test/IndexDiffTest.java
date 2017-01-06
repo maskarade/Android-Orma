@@ -102,4 +102,29 @@ public class IndexDiffTest {
                 "CREATE INDEX IF NOT EXISTS `index_bar` ON `t` (`bar`)"
         ));
     }
+
+    @Test
+    public void indexDiff_removeUnique() throws Exception {
+        assertThat(migration.indexDiff(Collections.singletonList(
+                "CREATE UNIQUE INDEX IF NOT EXISTS `index_foo` ON `t` (`foo`)"
+        ), Collections.singletonList(
+                "CREATE INDEX IF NOT EXISTS `index_foo` ON `t` (`foo`)"
+        )), contains(
+                "DROP INDEX IF EXISTS `index_foo`",
+                "CREATE INDEX IF NOT EXISTS `index_foo` ON `t` (`foo`)"
+        ));
+    }
+
+
+    @Test
+    public void indexDiff_multiColumnIndex() throws Exception {
+        assertThat(migration.indexDiff(Collections.<String>emptyList(), Collections.singletonList(
+                "CREATE INDEX IF NOT EXISTS `index_foo` ON `t` (`foo`, `bar`)"
+        )), contains(
+                "CREATE INDEX IF NOT EXISTS `index_foo` ON `t` (`foo`, `bar`)"
+        ));
+    }
 }
+
+
+

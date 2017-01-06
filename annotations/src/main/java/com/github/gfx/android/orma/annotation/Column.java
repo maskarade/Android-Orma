@@ -77,6 +77,9 @@ public @interface Column {
      */
     String storageType() default "";
 
+    /**
+     * @return Flags that control which helpers to generate
+     */
     @Helpers long helpers() default Helpers.AUTO;
 
     /**
@@ -121,9 +124,25 @@ public @interface Column {
     @Retention(RetentionPolicy.CLASS)
     @IntDef(flag = true, value = {
             Helpers.NONE,
-            Helpers.CONDITIONS,
-            Helpers.ORDERS,
-            Helpers.ALL,
+            Helpers.AUTO,
+            Helpers.CONDITION_EQ,
+            Helpers.CONDITION_NOT_EQ,
+            Helpers.CONDITION_IS_NULL,
+            Helpers.CONDITION_IS_NOT_NULL,
+            Helpers.CONDITION_IN,
+            Helpers.CONDITION_NOT_IN,
+            Helpers.CONDITION_LT,
+            Helpers.CONDITION_LE,
+            Helpers.CONDITION_GT,
+            Helpers.CONDITION_GE,
+            Helpers.CONDITION_BETWEEN,
+            Helpers.ORDER_IN_ASC,
+            Helpers.ORDER_IN_DESC,
+            Helpers.PLUCK,
+            Helpers.MIN,
+            Helpers.MAX,
+            Helpers.SUM,
+            Helpers.AVG,
     })
     @interface Helpers {
 

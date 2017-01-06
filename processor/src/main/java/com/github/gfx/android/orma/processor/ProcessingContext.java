@@ -216,4 +216,10 @@ public class ProcessingContext {
         processingEnv.getMessager()
                 .printMessage(Diagnostic.Kind.NOTE, "[" + OrmaProcessor.TAG + "] " + message);
     }
+
+    public void warn(String message, Element element) {
+        processingEnv.getMessager()
+                .printMessage(Diagnostic.Kind.WARNING, "[" + OrmaProcessor.TAG + "] " + message, element);
+    }
+
 }

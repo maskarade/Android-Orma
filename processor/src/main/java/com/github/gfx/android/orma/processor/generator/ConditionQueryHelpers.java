@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.processor.ProcessingContext;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
 import com.github.gfx.android.orma.processor.model.AssociationDefinition;
 import com.github.gfx.android.orma.processor.model.ColumnDefinition;
+import com.github.gfx.android.orma.processor.model.IndexDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.SqlTypes;
@@ -70,11 +71,25 @@ public class ConditionQueryHelpers {
                 .filter(ColumnDefinition::hasConditionHelpers)
                 .forEach(column -> buildConditionHelpersForEachColumn(methodSpecs, column));
 
+        schema.getIndexes()
+                .stream()
+                .filter(index -> index.columns.size() > 1)
+                .forEach(index -> {
+                    buildConditionHelpersForCompositeIndex(methodSpecs, index);
+                });
+
         if (orderByHelpers) {
             schema.getColumns()
                     .stream()
                     .filter(ColumnDefinition::hasOrderHelpers)
                     .forEach(column -> buildOrderByHelpers(methodSpecs, column));
+
+            schema.getIndexes()
+                    .stream()
+                    .filter(index -> index.columns.size() > 1)
+                    .forEach(index -> {
+                        buildOrderByHelpersForCompositeIndex(methodSpecs, index);
+                    });
         }
 
         if (aggregatorHelpers) {
@@ -107,6 +122,20 @@ public class ConditionQueryHelpers {
 
     }
 
+    ParameterSpec buildParameterSpec(ColumnDefinition column) {
+        AssociationDefinition r = column.getAssociation();
+
+        boolean isAssociation = r != null;
+        TypeName type = isAssociation ? r.getModelType() : column.getType();
+        List<AnnotationSpec> paramAnnotations = column.type.isPrimitive()
+                ? Collections.emptyList()
+                : Collections.singletonList(Annotations.nonNull());
+
+        return ParameterSpec.builder(type, column.name)
+                .addAnnotations(paramAnnotations)
+                .build();
+    }
+
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
         AssociationDefinition r = column.getAssociation();
 
@@ -119,9 +148,7 @@ public class ConditionQueryHelpers {
                 ? Collections.emptyList()
                 : Collections.singletonList(Annotations.nonNull());
 
-        ParameterSpec paramSpec = ParameterSpec.builder(type, column.name)
-                .addAnnotations(paramAnnotations)
-                .build();
+        ParameterSpec paramSpec = buildParameterSpec(column);
 
         List<AnnotationSpec> safeVarargsIfNeeded = Annotations.safeVarargsIfNeeded(column.getType());
 
@@ -434,5 +461,95 @@ public class ConditionQueryHelpers {
                 .addStatement("cursor.close()")
                 .endControlFlow()
                 .build();
+    }
+
+    CharSequence buildBaseNameForCompositeIndex(IndexDefinition index) {
+        StringBuilder baseName = new StringBuilder();
+        for (int i = 0; i < index.columns.size(); i++) {
+            ColumnDefinition column = index.columns.get(i);
+
+            if (i == 0) {
+                baseName.append(column.name);
+            } else {
+                baseName.append("And");
+                baseName.append(Strings.toUpperFirst(column.name));
+            }
+        }
+
+        return baseName;
+    }
+
+    void buildConditionHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
+        // create only "==" helper
+        if (!index.hasHelper(Column.Helpers.CONDITION_EQ)) {
+            return;
+        }
+
+        CharSequence baseName = buildBaseNameForCompositeIndex(index);
+
+        CodeBlock.Builder conditions = CodeBlock.builder();
+        List<ParameterSpec> paramSpecs = new ArrayList<>();
+
+        for (int i = 0; i < index.columns.size(); i++) {
+            ColumnDefinition column = index.columns.get(i);
+
+            ParameterSpec paramSpec = buildParameterSpec(column);
+            CodeBlock serializedFieldExpr = serializedFieldExpr(column, paramSpec);
+            if (i != 0) {
+                conditions.add(".");
+            }
+            conditions.add("where(schema.$L, $S, $L)",
+                    column.columnName, "=", serializedFieldExpr);
+            paramSpecs.add(paramSpec);
+        }
+
+        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(baseName + "Eq")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameters(paramSpecs)
+                .addStatement("return $L", conditions.build())
+                .returns(targetClassName);
+        methodSpecs.add(methodSpec.build());
+    }
+
+    void buildOrderByHelpersForCompositeIndex(List<MethodSpec> methodSpecs, IndexDefinition index) {
+        CharSequence baseName = buildBaseNameForCompositeIndex(index);
+
+        if (index.hasHelper(Column.Helpers.ORDER_IN_ASC)){
+            CodeBlock.Builder conditions = CodeBlock.builder();
+
+            for (int i = 0; i < index.columns.size(); i++) {
+                ColumnDefinition column = index.columns.get(i);
+
+                if (i != 0) {
+                    conditions.add(".");
+                }
+                conditions.add("orderBy(schema.$L.orderInAscending())", column.name);
+            }
+
+            MethodSpec.Builder methodSpec = MethodSpec.methodBuilder("orderBy" + baseName + "Asc")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addStatement("return $L", conditions.build())
+                    .returns(targetClassName);
+            methodSpecs.add(methodSpec.build());
+        }
+
+        if (index.hasHelper(Column.Helpers.ORDER_IN_DESC)){
+            CodeBlock.Builder conditions = CodeBlock.builder();
+
+            for (int i = 0; i < index.columns.size(); i++) {
+                ColumnDefinition column = index.columns.get(i);
+
+                if (i != 0) {
+                    conditions.add(".");
+                }
+                conditions.add("orderBy(schema.$L.orderInDescending())", column.name);
+            }
+
+            MethodSpec.Builder methodSpec = MethodSpec.methodBuilder("orderBy" + baseName + "Desc")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addStatement("return $L", conditions.build())
+                    .returns(targetClassName);
+            methodSpecs.add(methodSpec.build());
+        }
     }
 }

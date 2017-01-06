@@ -238,8 +238,8 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     /**
-     * @param srcIndexes Set of "CREATED INDEX" statements which the DB has
-     * @param dstIndexes Set of "CREATE INDEX" statements which the code has
+     * @param srcIndexes Set of "CREATE INDEX" statements which the DB has
+     * @param dstIndexes Set of "CREATE INDEX" statements which the running code has
      * @return List of "CREATED INDEX" statements to apply to DB
      */
     @NonNull
