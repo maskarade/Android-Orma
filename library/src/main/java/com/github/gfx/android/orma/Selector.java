@@ -18,6 +18,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.function.Function1;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import com.github.gfx.android.orma.internal.OrmaIterator;
 
@@ -31,8 +32,10 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
@@ -335,6 +338,28 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
             cursor.close();
         }
         return list;
+    }
+
+    /**
+     * Executes a query and returns the result as a map; its key is mapped by {@code keyMapper}.
+     *
+     * @param keyMapper A function that takes a model and returns the key of the map
+     * @return A map of models
+     */
+    @NonNull
+    public <Key> Map<Key, Model> toMap(@NonNull Function1<Model, Key> keyMapper) {
+        Cursor cursor = execute();
+
+        Map<Key, Model> map = new HashMap<>(cursor.getCount());
+        try {
+            for (int pos = 0; cursor.moveToPosition(pos); pos++) {
+                Model model = newModelFromCursor(cursor);
+                map.put(keyMapper.apply(model), model);
+            }
+        } finally {
+            cursor.close();
+        }
+        return map;
     }
 
     @NonNull
