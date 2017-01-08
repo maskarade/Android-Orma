@@ -44,8 +44,9 @@ as the author respects the Larry Wall's wisdom:
 - [RxJava Integration](#rxjava-integration)
 - [Associations](#associations)
     - [Has-One Associations with `SingleAssociation<T>`](#has-one-associations-with-singleassociationt)
-    - [Has-Many Associations with `SingleAssociation<T>`](#has-many-associations-with-singleassociationt)
     - [Direct Associations](#direct-associations)
+    - [Has-Many Associations with `SingleAssociation<T>`](#has-many-associations-with-singleassociationt)
+    - [Has-Many Associations with Direct Associations](#has-many-associations-with-direct-associations)
     - [Limitations in Associations](#limitations-in-associations)
 - [Type Adapters](#type-adapters)
     - [How Serialized Types Used](#how-serialized-types-used)
@@ -628,8 +629,7 @@ In addition, there are another two kind of association supports: indirect associ
 
 ### Has-One Associations with `SingleAssociation<T>`
 
-There is `SingleAssociation<T>` to support has-one associations, which is
-retrieved on demand, or loaded lazily.
+There is `SingleAssociation<T>` to support has-one associations, which is retrieved on demand; this is useful if the associations are not always used.
 
 For example, a book has a publisher:
 
@@ -645,34 +645,39 @@ class Book {
 
     @Column
     public SingleAssociation<Publisher> publisher;
-
 }
 ```
 
-The entity of `Book#publisher` is `Publisher#id`.
-
-### Has-Many Associations with `SingleAssociation<T>`
-
-Has-many associations are not directly supported but you can define a method to get associated objects:
+To save this a book:
 
 ```java
-@Table
-class Publisher {
-    @PrimaryKey
-    public long id;
+Book book = new Book();
+Publisher publisher = new Publisher();
 
-    public Book_Relation getBooks(OrmaDatabase orma) {
-        return orma.relationOfBook().publisherEq(this);
-    }
-}
+long publisherId = db.insertIntoPublisher()
+    .execute(publisher);
 
-@Table
-class Book {
+// if publisher has a valid primary key, `just(publisher)` is also okay.
+book.publisher = SingleAssociation.just(publisherId);
 
-    @Column(indexed = true)
-    public SingleAssociation<Publisher> publisher;
+db.insertIntoBook()
+    .execute(book)
+```
 
-}
+To get a publisher from books:
+
+```java
+db.selectFromBook()
+    .forEach((book) -> {
+        // blocking:
+        Publisher publisher = book.publisher.get();
+
+        // with RxJava Single<Publisher>:
+        book.publisher.single()
+            .subscribe((publisher) -> {
+                // use publisher
+            })
+    });
 ```
 
 ### Direct Associations
@@ -725,6 +730,56 @@ should be joined in `SELECT` statements.
 
 In Java, `Book#publisher` is a `Publisher` instance, which is retrieved in each
 `SELECT` operations. There is no lazy loading in direct associations.
+
+### Has-Many Associations with `SingleAssociation<T>`
+
+Has-many associations are not directly supported but you can define a method to get associated objects:
+
+```java
+@Table
+class Publisher {
+    @PrimaryKey
+    public long id;
+
+    // NOTE: If OrmaDatabase is a singleton, no parameter is required!
+    public Book_Relation getBooks(OrmaDatabase db) {
+        return db.relationOfBook().publisherEq(this);
+    }
+}
+
+@Table
+class Book {
+
+    @Column(indexed = true)
+    public SingleAssociation<Publisher> publisher;
+
+}
+```
+
+### Has-Many Associations with Direct Associations
+
+As `SingleAssociation` is, you can define a helper method to get has-many associations:
+
+```java
+@Table
+class Publisher {
+    @PrimaryKey
+    public long id;
+
+    // NOTE: If OrmaDatabase is a singleton, no parameter is required!
+    public Book_Relation getBooks(OrmaDatabase db) {
+        return db.relationOfBook().publisherEq(this);
+    }
+}
+
+@Table
+class Book {
+
+    @Column(indexed = true)
+    public Publisher publisher;
+
+}
+```
 
 ### Limitations in Associations
 

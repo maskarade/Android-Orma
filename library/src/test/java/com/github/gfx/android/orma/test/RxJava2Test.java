@@ -78,7 +78,7 @@ public class RxJava2Test {
                 book.title = "today";
                 book.content = "milk, banana";
                 book.inPrint = true;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -91,7 +91,7 @@ public class RxJava2Test {
                 book.title = "friday";
                 book.content = "apple";
                 book.inPrint = false;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -104,7 +104,7 @@ public class RxJava2Test {
                 book.title = "tomorrow";
                 book.content = "orange";
                 book.inPrint = false;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -173,7 +173,7 @@ public class RxJava2Test {
                                 book.title = "single days";
                                 book.content = "reactive";
                                 book.inPrint = false;
-                                book.publisher = SingleAssociation.id(publisher.id);
+                                book.publisher = SingleAssociation.just(publisher);
                                 return book;
                             }
                         });
@@ -200,7 +200,7 @@ public class RxJava2Test {
                         book.title = "single days";
                         book.content = "reactive";
                         book.inPrint = false;
-                        book.publisher = SingleAssociation.id(publisher.id);
+                        book.publisher = SingleAssociation.just(publisher);
                         return bookInserter.executeAllAsObservable(Collections.singleton(book));
                     }
                 })

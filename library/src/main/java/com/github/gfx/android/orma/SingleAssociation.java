@@ -24,16 +24,19 @@ import com.github.gfx.android.orma.internal.Schemas;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.RestrictTo;
 
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 
 /**
- * Represents a has-one relation with lazy loading.
+ * Lazy has-one association. The {@code Model} is assumed to have a primary key with the `long` type.
+ * This is typically created from factory methods.
  *
- * @param <Model> The type of a model to relate.
+ * @param <Model> The type of a model
  */
 @JsonAdapter(SingleAssociationTypeAdapterFactory.class)
 public class SingleAssociation<Model> implements Parcelable {
@@ -42,16 +45,19 @@ public class SingleAssociation<Model> implements Parcelable {
 
     final Single<Model> single;
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
     public SingleAssociation(long id, @NonNull Model model) {
         this.id = id;
         this.single = Single.just(model);
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
     public SingleAssociation(long id, @NonNull Single<Model> single) {
         this.id = id;
         this.single = single;
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
     public SingleAssociation(@NonNull final OrmaConnection conn, @NonNull final Schema<Model> schema, final long id) {
         this.id = id;
         single = Single.create(new SingleOnSubscribe<Model>() {
@@ -72,28 +78,51 @@ public class SingleAssociation<Model> implements Parcelable {
         });
     }
 
+    /**
+     * The most typical factory method to create a {@code SingleAssociation} instance,
+     * just wrapping the model with it.
+
+     * @param model A model to wrap, which must have a valid primary key
+     * @param <T> The type of the model to wrap
+     * @return An instance of {@code SingleAssociation}
+     */
     @SuppressWarnings("unchecked")
+    @NonNull
     public static <T> SingleAssociation<T> just(@NonNull T model) {
         Schema<T> schema = Schemas.get((Class<T>) model.getClass());
         return just(schema, model);
     }
 
+    @NonNull
     public static <T> SingleAssociation<T> just(long id, @NonNull T model) {
         return new SingleAssociation<>(id, model);
     }
 
+    @NonNull
     public static <T> SingleAssociation<T> just(@NonNull Schema<T> schema, @NonNull T model) {
         return new SingleAssociation<>((long) schema.getPrimaryKey().getSerialized(model), model);
     }
 
-    public static <T> SingleAssociation<T> id(final long id) {
+    @NonNull
+    public static <T> SingleAssociation<T> just(final long id) {
         return new SingleAssociation<>(id, Single.<T>error(new NoValueException("No value set for id=" + id)));
     }
 
+    // use just(id) instead
+    @Deprecated
+    @NonNull
+    public static <T> SingleAssociation<T> id(final long id) {
+        return just(id);
+    }
+
+    /**
+     * @return The primary key of the associated model.
+     */
     public long getId() {
         return id;
     }
 
+    @CheckResult
     @NonNull
     public Single<Model> single() {
         return single;
