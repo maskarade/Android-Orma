@@ -73,7 +73,7 @@ public class GsonTypeAdapterTest {
                 book.title = "today";
                 book.content = "milk, banana";
                 book.inPrint = true;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });

@@ -78,7 +78,7 @@ public class QueryTest {
                 book.title = "today";
                 book.content = "milk, banana";
                 book.inPrint = true;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -91,7 +91,7 @@ public class QueryTest {
                 book.title = "friday";
                 book.content = "apple";
                 book.inPrint = false;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -359,7 +359,7 @@ public class QueryTest {
             Book book = new Book();
             book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
-            book.publisher = SingleAssociation.id(publisher.id);
+            book.publisher = SingleAssociation.just(publisher);
 
             db.insertIntoBook(book);
         }
@@ -389,7 +389,7 @@ public class QueryTest {
             Book book = new Book();
             book.title = "name #" + i;
             book.content = "blah blah blah #" + i;
-            book.publisher = SingleAssociation.id(publisher.id);
+            book.publisher = SingleAssociation.just(publisher);
 
             db.insertIntoBook(book);
         }
@@ -460,7 +460,7 @@ public class QueryTest {
                 book.title = "today";
                 book.content = "avocado";
                 book.inPrint = true;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -473,7 +473,7 @@ public class QueryTest {
                 book.title = "today";
                 book.content = "avocado";
                 book.inPrint = true;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -486,7 +486,7 @@ public class QueryTest {
                 book.title = "friday";
                 book.content = "fig";
                 book.inPrint = false;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -553,7 +553,7 @@ public class QueryTest {
             Book book = new Book();
             book.title = "friday";
             book.content = "apple" + i;
-            book.publisher = SingleAssociation.id(publisher.id);
+            book.publisher = SingleAssociation.just(publisher);
             books.add(book);
         }
         return books;
@@ -659,7 +659,7 @@ public class QueryTest {
                 Book book = new Book();
                 book.title = "monday";
                 book.content = "apple";
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });

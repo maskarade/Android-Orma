@@ -75,7 +75,7 @@ public class ForeignKeysTest {
                 book.title = "today";
                 book.content = "milk, banana";
                 book.inPrint = true;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -88,7 +88,7 @@ public class ForeignKeysTest {
                 book.title = "friday";
                 book.content = "apple";
                 book.inPrint = false;
-                book.publisher = SingleAssociation.id(publisher.id);
+                book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
         });
@@ -131,7 +131,7 @@ public class ForeignKeysTest {
                 @Override
                 public Book call() {
                     Book book = new Book();
-                    book.publisher = SingleAssociation.id(a.id);
+                    book.publisher = SingleAssociation.just(a);
                     book.title = "a " + x;
                     return book;
                 }
@@ -145,7 +145,7 @@ public class ForeignKeysTest {
                 @Override
                 public Book call() {
                     Book book = new Book();
-                    book.publisher = SingleAssociation.id(b.id);
+                    book.publisher = SingleAssociation.just(b);
                     book.title = "b " + x;
                     return book;
                 }
@@ -197,7 +197,7 @@ public class ForeignKeysTest {
 
         int count = db.updateBook()
                 .titleEq("today")
-                .publisher(SingleAssociation.<Publisher>id(publisher.id))
+                .publisher(SingleAssociation.just(publisher))
                 .execute();
 
         assertThat(count, is(1));
@@ -208,7 +208,7 @@ public class ForeignKeysTest {
 
     @Test(expected = SQLiteException.class)
     public void onUpdateCascade() throws Exception {
-        db.updateBook().publisher(SingleAssociation.<Publisher>id(0L)).execute();
+        db.updateBook().publisher(SingleAssociation.<Publisher>just(0L)).execute();
     }
 
     @Test
