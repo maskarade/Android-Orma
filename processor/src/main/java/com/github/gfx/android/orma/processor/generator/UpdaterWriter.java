@@ -59,6 +59,8 @@ public class UpdaterWriter extends BaseWriter {
     @Override
     public TypeSpec buildTypeSpec() {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getUpdaterClassName());
+        markAsGenerated(classBuilder);
+
         if (schema.isGeneric()) {
             classBuilder.addAnnotation(Annotations.suppressWarnings("rawtypes"));
         }
