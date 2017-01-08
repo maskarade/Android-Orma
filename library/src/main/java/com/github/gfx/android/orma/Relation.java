@@ -65,6 +65,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @SuppressWarnings("unchecked")
+    @NonNull
     public R orderBy(@NonNull OrderSpec<Model> orderSpec) {
         orderSpecs.add(orderSpec);
         return (R) this;

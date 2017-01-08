@@ -268,6 +268,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return result;
     }
 
+    @NonNull
     public <T> Observable<T> pluckAsObservable(final ColumnDef<Model, T> column) {
         return Observable.create(new ObservableOnSubscribe<T>() {
             @Override
