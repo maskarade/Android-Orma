@@ -41,6 +41,7 @@ as the author respects the Larry Wall's wisdom:
     - [Setters and Getters](#setters-and-getters)
     - [Immutable Models](#immutable-models)
     - [Composite Indexes](#composite-indexes)
+- [RxJava Integration](#rxjava-integration)
 - [Associations](#associations)
     - [Has-One Associations with `SingleAssociation<T>`](#has-one-associations-with-singleassociationt)
     - [Has-Many Associations with `SingleAssociation<T>`](#has-many-associations-with-singleassociationt)
@@ -598,6 +599,24 @@ Composite indexes generate query helper methods only for `==` and `ORDER BY` for
 You can control generated helpers with the `helpers` parameter.
 
 See also [Query Helper Methods](#query-helper-methods).
+
+## RxJava Integration
+
+RxJava integration provides a set of powerful API to transform, filter, and combine DB rows.
+
+For example, there is a model named `Book` with `@Column(unique = true) String title`
+and you'd like to get a `Map<String, Book>` where the key is `Book#title`:
+
+```java
+Map<String, Book> map = db.selectFromBook()
+    .executeAsObservable()
+        .toMap(new Function<Book, String>() {
+            @Override
+            public String apply(Book book) throws Exception {
+                return book.title;
+            }
+        }).blockingGet();
+```
 
 ## Associations
 
