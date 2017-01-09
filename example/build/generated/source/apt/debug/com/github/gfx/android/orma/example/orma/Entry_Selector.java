@@ -16,9 +16,9 @@ public class Entry_Selector extends Selector<Entry, Entry_Selector> {
     this.schema = schema;
   }
 
-  public Entry_Selector(Entry_Selector selector) {
-    super(selector);
-    this.schema = selector.getSchema();
+  public Entry_Selector(Entry_Selector that) {
+    super(that);
+    this.schema = that.getSchema();
   }
 
   public Entry_Selector(Entry_Relation relation) {

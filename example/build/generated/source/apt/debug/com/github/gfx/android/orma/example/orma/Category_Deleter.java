@@ -14,9 +14,19 @@ public class Category_Deleter extends Deleter<Category, Category_Deleter> {
     this.schema = schema;
   }
 
+  public Category_Deleter(Category_Deleter that) {
+    super(that);
+    this.schema = that.getSchema();
+  }
+
   public Category_Deleter(Category_Relation relation) {
     super(relation);
     this.schema = relation.getSchema();
+  }
+
+  @Override
+  public Category_Deleter clone() {
+    return new Category_Deleter(this);
   }
 
   @NonNull

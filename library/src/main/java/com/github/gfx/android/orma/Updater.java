@@ -25,7 +25,8 @@ import java.util.concurrent.Callable;
 
 import io.reactivex.Single;
 
-public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaConditionBase<Model, U> {
+public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaConditionBase<Model, U>
+    implements Cloneable {
 
     final protected ContentValues contents = new ContentValues();
 
@@ -33,9 +34,15 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
         super(conn);
     }
 
+    public Updater(@NonNull Updater<Model, U> that) {
+        super(that);
+    }
+
     public Updater(@NonNull Relation<Model, ?> relation) {
         super(relation);
     }
+
+    public abstract Updater<Model, U> clone();
 
     @NonNull
     @Override

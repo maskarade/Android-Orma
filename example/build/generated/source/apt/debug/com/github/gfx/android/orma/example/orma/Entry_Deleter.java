@@ -14,9 +14,19 @@ public class Entry_Deleter extends Deleter<Entry, Entry_Deleter> {
     this.schema = schema;
   }
 
+  public Entry_Deleter(Entry_Deleter that) {
+    super(that);
+    this.schema = that.getSchema();
+  }
+
   public Entry_Deleter(Entry_Relation relation) {
     super(relation);
     this.schema = relation.getSchema();
+  }
+
+  @Override
+  public Entry_Deleter clone() {
+    return new Entry_Deleter(this);
   }
 
   @NonNull

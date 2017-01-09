@@ -405,6 +405,10 @@ public class ColumnDefinition {
         return null;
     }
 
+    public boolean isAssociation() {
+        return isDirectAssociation() || isSingleAssociation();
+    }
+
     public boolean isDirectAssociation() {
         return Types.isDirectAssociation(context, type);
     }

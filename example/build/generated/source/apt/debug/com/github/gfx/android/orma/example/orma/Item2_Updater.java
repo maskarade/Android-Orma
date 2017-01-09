@@ -18,9 +18,19 @@ public class Item2_Updater extends Updater<Item2, Item2_Updater> {
     this.schema = schema;
   }
 
+  public Item2_Updater(Item2_Updater that) {
+    super(that);
+    this.schema = that.getSchema();
+  }
+
   public Item2_Updater(Item2_Relation relation) {
     super(relation);
     this.schema = relation.getSchema();
+  }
+
+  @Override
+  public Item2_Updater clone() {
+    return new Item2_Updater(this);
   }
 
   @NonNull

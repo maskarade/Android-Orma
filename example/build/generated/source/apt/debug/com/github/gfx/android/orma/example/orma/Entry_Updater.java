@@ -14,9 +14,19 @@ public class Entry_Updater extends Updater<Entry, Entry_Updater> {
     this.schema = schema;
   }
 
+  public Entry_Updater(Entry_Updater that) {
+    super(that);
+    this.schema = that.getSchema();
+  }
+
   public Entry_Updater(Entry_Relation relation) {
     super(relation);
     this.schema = relation.getSchema();
+  }
+
+  @Override
+  public Entry_Updater clone() {
+    return new Entry_Updater(this);
   }
 
   @NonNull

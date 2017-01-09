@@ -14,9 +14,9 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
     this.schema = schema;
   }
 
-  public Item2_Selector(Item2_Selector selector) {
-    super(selector);
-    this.schema = selector.getSchema();
+  public Item2_Selector(Item2_Selector that) {
+    super(that);
+    this.schema = that.getSchema();
   }
 
   public Item2_Selector(Item2_Relation relation) {

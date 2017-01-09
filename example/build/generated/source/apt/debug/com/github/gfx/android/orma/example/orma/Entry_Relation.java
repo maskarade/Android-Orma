@@ -15,9 +15,9 @@ public class Entry_Relation extends Relation<Entry, Entry_Relation> {
     this.schema = schema;
   }
 
-  public Entry_Relation(Entry_Relation relation) {
-    super(relation);
-    this.schema = relation.getSchema();
+  public Entry_Relation(Entry_Relation that) {
+    super(that);
+    this.schema = that.getSchema();
   }
 
   @Override

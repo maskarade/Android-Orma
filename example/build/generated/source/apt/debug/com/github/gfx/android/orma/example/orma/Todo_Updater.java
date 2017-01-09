@@ -17,9 +17,19 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
     this.schema = schema;
   }
 
+  public Todo_Updater(Todo_Updater that) {
+    super(that);
+    this.schema = that.getSchema();
+  }
+
   public Todo_Updater(Todo_Relation relation) {
     super(relation);
     this.schema = relation.getSchema();
+  }
+
+  @Override
+  public Todo_Updater clone() {
+    return new Todo_Updater(this);
   }
 
   @NonNull
