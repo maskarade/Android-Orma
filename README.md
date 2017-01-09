@@ -52,6 +52,7 @@ as the author respects the Larry Wall's wisdom:
     - [How Serialized Types Used](#how-serialized-types-used)
     - [`@StaticTypeAdapters` for Multiple Serializers at Once](#statictypeadapters-for-multiple-serializers-at-once)
     - [Built-In Type Adapters](#built-in-type-adapters)
+    - [Generic Type Adapters](#generic-type-adapters)
 - [Raw Queries](#raw-queries)
 - [Migration](#migration)
 - [DataSet Changed Events](#dataset-changed-events)
@@ -896,6 +897,51 @@ There are built-in type adapters for typically used value objects and collection
 * `java.util.Set<String>`
 * `java.util.HashSet<String>`
 * `android.net.Uri`
+
+### Generic Type Adapters
+
+If your `deserialize()` takes a `Class<T>` parameter, the type serializer is _generic_, handling classes with the common base classe.
+
+For example, if you have some enums that implement `EnumDescription`, e.g. `T extends Enum<T> & EnumDescription`, you can handle it with a generic type adapter.
+
+Given an interface `EnumDescription`:
+
+```java
+public interface EnumDescription {
+
+    long getValue();
+}
+```
+
+And here is its type adapter:
+
+
+```java
+@StaticTypeAdapter(
+        targetType = EnumDescription.class,
+        serializedType = long.class
+)
+public class EnumTypeAdapter {
+
+    public static <T extends Enum<T> & EnumDescription> long serialize(@NonNull T value) {
+        return value.getValue();
+    }
+
+    @NonNull
+    public static <T extends Enum<T> & EnumDescription> T deserialize(long serialized, @NonNull Class<T> type) {
+
+        for (T enumValue : type.getEnumConstants()) {
+            if (enumValue.getValue() == serialized) {
+                return enumValue;
+            }
+        }
+
+        throw new RuntimeException("Unknown id: " + serialized + " for " + type);
+    }
+}
+```
+
+Now `deserialize()` uses the type information for the conclete target class.
 
 ## Raw Queries
 
