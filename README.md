@@ -1094,6 +1094,7 @@ Here is a list of open-source Androdi apps using Orma which are released to Goog
 
 * [gfx/Android-Helium](https://github.com/gfx/Android-Helium)
 * [konifar/droidkaigi2016](https://github.com/konifar/droidkaigi2016)
+* By [GitHub search](https://github.com/search?o=desc&q=%22com.github.gfx.android.orma%22+filename%3Abuild.gradle&ref=searchresults&s=indexed&type=Code&utf8=%E2%9C%93)
 
 Here is a list of apps using Orma which are proprietary and released to Google Play:
 
