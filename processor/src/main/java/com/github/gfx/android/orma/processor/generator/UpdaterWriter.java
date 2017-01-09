@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Types;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -46,6 +47,10 @@ public class UpdaterWriter extends BaseWriter {
         queryHelpers = new ConditionQueryHelpers(context, schema, schema.getUpdaterClassName());
     }
 
+    ClassName getTargetClassName() {
+        return schema.getUpdaterClassName();
+    }
+
     @Override
     public String getPackageName() {
         return schema.getPackageName();
@@ -58,7 +63,7 @@ public class UpdaterWriter extends BaseWriter {
 
     @Override
     public TypeSpec buildTypeSpec() {
-        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(schema.getUpdaterClassName());
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(getTargetClassName());
         if (schema.isGeneric()) {
             classBuilder.addAnnotation(Annotations.suppressWarnings("rawtypes"));
         }
@@ -75,32 +80,9 @@ public class UpdaterWriter extends BaseWriter {
     public List<MethodSpec> buildMethodSpecs() {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
-        methodSpecs.add(
-                MethodSpec.constructorBuilder()
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(Types.OrmaConnection, "conn")
-                        .addParameter(schema.getSchemaClassName(), "schema")
-                        .addStatement("super(conn)")
-                        .addStatement("this.schema = schema")
-                        .build()
-        );
-
-        methodSpecs.add(
-                MethodSpec.constructorBuilder()
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(schema.getRelationClassName(), "relation")
-                        .addStatement("super(relation)")
-                        .addStatement("this.schema = relation.getSchema()")
-                        .build()
-        );
-
-        methodSpecs.add(MethodSpec.methodBuilder("getSchema")
-                .addAnnotation(Annotations.nonNull())
-                .addAnnotation(Annotations.override())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSchemaClassName())
-                .addStatement("return schema")
-                .build());
+        methodSpecs.addAll(
+                new ConditionBaseMethods(context, schema, getTargetClassName())
+                        .buildMethodSpecs());
 
         schema.getColumnsWithoutAutoId().forEach(column -> {
             AssociationDefinition r = column.getAssociation();

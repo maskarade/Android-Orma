@@ -77,35 +77,9 @@ public class RelationWriter extends BaseWriter {
     public List<MethodSpec> buildMethodSpecs() {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
-        methodSpecs.add(MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(Types.OrmaConnection, "conn")
-                .addParameter(schema.getSchemaClassName(), "schema")
-                .addStatement("super(conn)")
-                .addStatement("this.schema = schema")
-                .build());
-
-        methodSpecs.add(MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(getTargetClassName(), "relation")
-                .addStatement("super(relation)")
-                .addStatement("this.schema = relation.getSchema()")
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("clone")
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Annotations.override())
-                .returns(getTargetClassName())
-                .addStatement("return new $T(this)", getTargetClassName())
-                .build());
-
-        methodSpecs.add(MethodSpec.methodBuilder("getSchema")
-                .addAnnotation(Annotations.nonNull())
-                .addAnnotation(Annotations.override())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(schema.getSchemaClassName())
-                .addStatement("return schema")
-                .build());
+        methodSpecs.addAll(
+                new ConditionBaseMethods(context, schema, getTargetClassName())
+                        .buildMethodSpecs());
 
         if (schema.hasPrimaryIdEqHelper()) {
             schema.getPrimaryKey().ifPresent(primaryKey -> {

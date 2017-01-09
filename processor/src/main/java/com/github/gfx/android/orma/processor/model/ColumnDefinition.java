@@ -267,7 +267,7 @@ public class ColumnDefinition {
     }
 
     public TypeName getSerializedType() {
-        if (isDirectAssociation() || isSingleAssociation()) {
+        if (isAssociation()) {
             return getAssociatedSchema().getPrimaryKey()
                     .map(ColumnDefinition::getSerializedType)
                     .orElseGet(() -> Types.ByteArray); // dummy
@@ -403,6 +403,10 @@ public class ColumnDefinition {
             return AssociationDefinition.createDirectAssociation(type);
         }
         return null;
+    }
+
+    public boolean isAssociation() {
+        return isDirectAssociation() || isSingleAssociation();
     }
 
     public boolean isDirectAssociation() {

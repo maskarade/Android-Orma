@@ -14,9 +14,9 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     this.schema = schema;
   }
 
-  public Todo_Selector(Todo_Selector selector) {
-    super(selector);
-    this.schema = selector.getSchema();
+  public Todo_Selector(Todo_Selector that) {
+    super(that);
+    this.schema = that.getSchema();
   }
 
   public Todo_Selector(Todo_Relation relation) {

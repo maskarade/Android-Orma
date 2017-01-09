@@ -14,9 +14,19 @@ public class Category_Updater extends Updater<Category, Category_Updater> {
     this.schema = schema;
   }
 
+  public Category_Updater(Category_Updater that) {
+    super(that);
+    this.schema = that.getSchema();
+  }
+
   public Category_Updater(Category_Relation relation) {
     super(relation);
     this.schema = relation.getSchema();
+  }
+
+  @Override
+  public Category_Updater clone() {
+    return new Category_Updater(this);
   }
 
   @NonNull

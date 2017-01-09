@@ -14,9 +14,9 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
     this.schema = schema;
   }
 
-  public Category_Selector(Category_Selector selector) {
-    super(selector);
-    this.schema = selector.getSchema();
+  public Category_Selector(Category_Selector that) {
+    super(that);
+    this.schema = that.getSchema();
   }
 
   public Category_Selector(Category_Relation relation) {

@@ -15,9 +15,9 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
     this.schema = schema;
   }
 
-  public Category_Relation(Category_Relation relation) {
-    super(relation);
-    this.schema = relation.getSchema();
+  public Category_Relation(Category_Relation that) {
+    super(that);
+    this.schema = that.getSchema();
   }
 
   @Override

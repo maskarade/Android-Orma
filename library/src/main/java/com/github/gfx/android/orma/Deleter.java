@@ -24,15 +24,22 @@ import java.util.concurrent.Callable;
 
 import io.reactivex.Single;
 
-public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaConditionBase<Model, D> {
+public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaConditionBase<Model, D>
+    implements Cloneable {
 
     public Deleter(@NonNull OrmaConnection connection) {
         super(connection);
     }
 
+    public Deleter(@NonNull Deleter<Model, D> relation) {
+        super(relation);
+    }
+
     public Deleter(@NonNull Relation<Model, ?> relation) {
         super(relation);
     }
+
+    public abstract Deleter<Model, D> clone();
 
     @NonNull
     @Override
