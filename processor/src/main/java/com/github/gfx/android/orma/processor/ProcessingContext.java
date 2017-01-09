@@ -104,6 +104,11 @@ public class ProcessingContext {
     }
 
     public void addTypeAdapterDefinition(TypeAdapterDefinition typeAdapterDefinition) {
+        // warn if non-built-in type adapters are overridden
+        TypeAdapterDefinition previous = typeAdapterMap.get(typeAdapterDefinition.targetType);
+        if (previous != null && !previous.builtin) {
+            warn("Duplicated @StaticTypeAdapter for " + typeAdapterDefinition.targetType, typeAdapterDefinition.element);
+        }
         typeAdapterMap.put(typeAdapterDefinition.targetType, typeAdapterDefinition);
     }
 

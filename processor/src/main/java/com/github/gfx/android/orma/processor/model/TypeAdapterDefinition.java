@@ -87,6 +87,8 @@ public class TypeAdapterDefinition {
 
     public final boolean generic;
 
+    public final boolean builtin;
+
     public TypeAdapterDefinition(ProcessingContext context, Element element,
             AnnotationHandle<StaticTypeAdapter> staticTypeAdapter) {
         this.element = (TypeElement) element;
@@ -104,9 +106,11 @@ public class TypeAdapterDefinition {
         deserializerMethod = getBestFitDeserializer(context, element, deserializer, methods.get(deserializer));
 
         generic = deserializerMethod != null && deserializerMethod.getParameters().size() != 1;
+        builtin = false;
     }
 
-    public TypeAdapterDefinition(ClassName typeAdapter, TypeName targetType, TypeName serializedType,
+    // for built-in
+    private TypeAdapterDefinition(ClassName typeAdapter, TypeName targetType, TypeName serializedType,
             String serializer, String deserializer, boolean generic) {
         this.element = null;
         this.typeAdapterImpl = typeAdapter;
@@ -117,6 +121,7 @@ public class TypeAdapterDefinition {
         this.serializerMethod = null;
         this.deserializerMethod = null;
         this.generic = generic;
+        this.builtin = true;
     }
 
     public static TypeAdapterDefinition make(Class<?> targetType, Class<?> serializedType) {

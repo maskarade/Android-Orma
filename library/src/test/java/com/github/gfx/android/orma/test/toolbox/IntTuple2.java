@@ -16,12 +16,28 @@
 
 package com.github.gfx.android.orma.test.toolbox;
 
+import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
+
+import android.support.annotation.NonNull;
+
 /**
  * A demo class to show how {@link com.github.gfx.android.orma.annotation.StaticTypeAdapter} works.
- *
- * @see com.github.gfx.android.orma.test.type_adapter.IntTuple2Adapter
  */
+@StaticTypeAdapter(
+        targetType = IntTuple2.class,
+        serializedType = long.class
+)
 public class IntTuple2 {
+
+    public static long serialize(@NonNull IntTuple2 tuple) {
+        return ((long) tuple.first << 32) | (long) tuple.second;
+    }
+
+    @NonNull
+    public static IntTuple2 deserialize(long serialized) {
+        return new IntTuple2((int) (serialized >> 32), (int) serialized);
+    }
+
 
     public final int first;
 
