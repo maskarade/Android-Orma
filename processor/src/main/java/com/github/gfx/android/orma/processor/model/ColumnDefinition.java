@@ -267,7 +267,7 @@ public class ColumnDefinition {
     }
 
     public TypeName getSerializedType() {
-        if (isDirectAssociation() || isSingleAssociation()) {
+        if (isAssociation()) {
             return getAssociatedSchema().getPrimaryKey()
                     .map(ColumnDefinition::getSerializedType)
                     .orElseGet(() -> Types.ByteArray); // dummy
