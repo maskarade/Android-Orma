@@ -19,7 +19,6 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.function.Function1;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2;
@@ -594,7 +593,7 @@ public class DirectAssociationsTest {
 
         // FIXME add overloads
         ModelWithDirectAssociation_Relation relation = orma.relationOfModelWithDirectAssociation()
-                .where((ColumnDef)ModelWithDirectAssociation_Schema.INSTANCE.author.associationSchema.name, "=", author1.name);
+                .where((ColumnDef) ModelWithDirectAssociation_Schema.INSTANCE.author.associationSchema.name, "=", author1.name);
 
         assertThat(relation.count(), is(1));
 

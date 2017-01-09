@@ -30,6 +30,7 @@ import javax.lang.model.element.Modifier;
 
 public class ConditionBaseMethods {
 
+    @SuppressWarnings("unused")
     private final ProcessingContext context;
 
     private final SchemaDefinition schema;
