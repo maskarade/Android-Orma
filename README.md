@@ -194,18 +194,6 @@ orma.deleteFromTodo()
   .execute();
 ```
 
-Note that **Orma aborts if writing occurs on main thread** in debug build.
-
-Use background threads for writing or RxJava interfaces with `Schedulers.io()`.
-
-Otherwise you can disable this behavior:
-
-```java
-OrmaDatabase orma = OrmaDatabase.builder(context)
-    .writeOnMainThread(BuildConfig.DEBUG ? AccessThreadConstraint.WARNING : AccessThreadConstraint.NONE)
-    .build();
-```
-
 ## The Components
 
 ### Database Handles
@@ -454,6 +442,18 @@ has configure the database handle instance:
 * **\*1** `BuildConfig.DEBUG ? true : false`
 * **\*2** `BuildConfig.DEBUG ? WARN : NONE`
 * **\*3** `BuildConfig.DEBUG ? FATAL : NONE`
+
+Note that **Orma aborts if writing occurs on main thread** in debug build.
+
+Use background threads, e.g. via `AsyncTask` for writing, or RxJava interfaces with `Schedulers.io()`.
+
+Otherwise you can disable this behavior:
+
+```java
+OrmaDatabase orma = OrmaDatabase.builder(context)
+    .writeOnMainThread(AccessThreadConstraint.NONE)
+    .build();
+```
 
 ## Details of Models
 
