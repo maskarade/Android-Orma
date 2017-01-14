@@ -12,11 +12,10 @@ dependencies:
     - sudo service couchdb stop
     - sudo service rabbitmq-server stop
     - sudo service zookeeper stop
-    - echo y | android -s update sdk -u -a -t "tools"
-    - echo y | android -s update sdk -u -a -t "platform-tools"
-    - echo y | android -s update sdk -u -a -t "extra-android-m2repository"
+    - echo y | android -s update sdk -u -a -t "tools" # update Android SDK that includes sdkmanager(1)
     - mkdir -p "$ANDROID_HOME"/licenses
     - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME"/licenses/android-sdk-license
+    - $ANDROID_HOME/tools/bin/sdkmanager "platform-tools" "extras;android;m2repository"
 test:
   override:
     - TERM=dumb ./gradlew lint example:assembleDebug
