@@ -3,6 +3,27 @@ machine:
     version: oraclejdk8
   environment:
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx1560m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
+# hack to checkout merged masterhttps://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662/8
+checkout:
+  post:
+    - |
+        if [[ -n "${CIRCLE_PR_NUMBER}" ]]
+        then
+            # Update PR refs for testing.
+            FETCH_REFS="+${CIRCLE_PR_BASE_BRANCH}:${CIRCLE_PR_BASE_BRANCH}"
+            FETCH_REFS="${FETCH_REFS} +refs/pull/${CIRCLE_PR_NUMBER}/head:pr/${CIRCLE_PR_NUMBER}/head"
+            FETCH_REFS="${FETCH_REFS} +refs/pull/${CIRCLE_PR_NUMBER}/merge:pr/${CIRCLE_PR_NUMBER}/merge"
+
+            # Retrieve the refs
+            git fetch -u origin ${FETCH_REFS}
+
+            # Checkout PR merge ref.
+            git checkout -qf "pr/${CIRCLE_PR_NUMBER}/merge"
+
+            # Test for merge conflicts.
+            git branch --merged | grep ${CIRCLE_PR_BASE_BRANCH} > /dev/null
+            git branch --merged | grep "pr/${CIRCLE_PR_NUMBER}/head" > /dev/null
+        fi
 dependencies:
   pre:
     - sudo service postgresql stop
