@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.test.model.Author_Schema;
 import com.github.gfx.android.orma.test.model.Book_Schema;
+import com.github.gfx.android.orma.test.model.Holder_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithCompositeIndex_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
@@ -199,5 +200,10 @@ public class SchemaTest {
                 "CREATE UNIQUE INDEX `custom_index_on_ModelWithCompositeIndex` ON `ModelWithCompositeIndex` (`c4`, `c3`)"
 
         ));
+    }
+
+    @Test
+    public void foreignKeyType() throws Exception {
+        assertThat(Holder_Schema.INSTANCE.object.storageType, is("INTEGER"));
     }
 }

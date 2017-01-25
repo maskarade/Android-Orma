@@ -105,7 +105,7 @@ public class UpdaterWriter extends BaseWriter {
                             .beginControlFlow("else");
                 }
                 methodSpecBuilder.addStatement("contents.put($S, $L)", column.getEscapedColumnName(),
-                        column.buildSerializeExpr("conn", paramName));
+                        column.applySerialization("conn", paramName));
                 if (column.isNullableInJava()) {
                     methodSpecBuilder.endControlFlow();
                 }
@@ -155,7 +155,7 @@ public class UpdaterWriter extends BaseWriter {
                                 )
                                 .addStatement("contents.put($S, $L)",
                                         column.getEscapedColumnName(),
-                                        primaryKey.buildGetColumnExpr(column.name))
+                                        primaryKey.buildSerializedColumnExpr("conn", column.name))
                                 .addStatement("return this")
                                 .build()
                 );

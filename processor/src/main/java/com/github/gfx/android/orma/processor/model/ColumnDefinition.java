@@ -231,7 +231,7 @@ public class ColumnDefinition {
             return SqlTypes.getSqliteType(TypeName.LONG);
         } else if (Types.isDirectAssociation(context, type)) {
             return context.getSchemaDef(type).getPrimaryKey()
-                    .map(primaryKey -> SqlTypes.getSqliteType(primaryKey.getType()))
+                    .map(primaryKey -> SqlTypes.getSqliteType(primaryKey.getSerializedType()))
                     .orElseGet(() -> {
                         context.addError("Missing @PrimaryKey as foreign key", element);
                         return "UNKNOWN";
@@ -326,29 +326,36 @@ public class ColumnDefinition {
     }
 
     public CodeBlock buildSerializedColumnExpr(String connectionExpr, String modelExpr) {
+        return buildSerializedColumnExpr(connectionExpr, CodeBlock.of("$L", modelExpr));
+    }
+
+    public CodeBlock buildSerializedColumnExpr(String connectionExpr, CodeBlock modelExpr) {
         CodeBlock getColumnExpr = buildGetColumnExpr(modelExpr);
 
         if (isSingleAssociation()) {
             return CodeBlock.of("$L.getId()", getColumnExpr);
         } else if (isDirectAssociation()) {
             return getAssociatedSchema().getPrimaryKey()
-                    .map(primaryKey -> primaryKey.buildGetColumnExpr(getColumnExpr))
+                    .map(primaryKey -> primaryKey.buildSerializedColumnExpr(connectionExpr, getColumnExpr))
                     .orElseGet(() -> CodeBlock.of("null /* missing @PrimaryKey */"));
-        } else if (needsTypeAdapter()) {
-            return buildSerializeExpr(connectionExpr, getColumnExpr);
         } else {
-            return getColumnExpr;
+            return applySerialization(connectionExpr, getColumnExpr);
         }
     }
 
-    public CodeBlock buildSerializeExpr(String connectionExpr, String valueExpr) {
-        return buildSerializeExpr(connectionExpr, CodeBlock.of("$L", valueExpr));
+    public CodeBlock applySerialization(String connectionExpr, String valueExpr) {
+        return applySerialization(connectionExpr, CodeBlock.of("$L", valueExpr));
     }
 
-    public CodeBlock buildSerializeExpr(String connectionExpr, CodeBlock valueExpr) {
+    public CodeBlock applySerialization(String connectionExpr, CodeBlock valueExpr) {
         // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
+                if (isAssociation()) {
+                    throw new AssertionError("[BUG] applySerialization() called for "
+                            + schema.getModelClassName() + "#" + name);
+                }
+
                 throw new ProcessingException("Missing @StaticTypeAdapter to serialize " + type, element);
             }
 
