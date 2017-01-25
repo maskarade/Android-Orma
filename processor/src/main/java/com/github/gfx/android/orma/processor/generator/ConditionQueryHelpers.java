@@ -117,7 +117,7 @@ public class ConditionQueryHelpers {
                     .add("$L /* primary key */", primaryKey.buildGetColumnExpr(paramSpec.name))
                     .build();
         } else {
-            return column.buildSerializeExpr("conn", paramSpec.name);
+            return column.applySerialization("conn", paramSpec.name);
         }
 
     }
@@ -227,7 +227,7 @@ public class ConditionQueryHelpers {
                             .addModifiers(Modifier.PUBLIC)
                             .returns(column.getSerializedBoxType())
                             .addParameter(ParameterSpec.builder(type.box(), "value").build())
-                            .addStatement("return $L", column.buildSerializeExpr("conn", "value"))
+                            .addStatement("return $L", column.applySerialization("conn", "value"))
                             .build())
                     .build();
 

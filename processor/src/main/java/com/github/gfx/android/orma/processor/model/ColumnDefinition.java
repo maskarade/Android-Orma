@@ -335,17 +335,17 @@ public class ColumnDefinition {
                     .map(primaryKey -> primaryKey.buildGetColumnExpr(getColumnExpr))
                     .orElseGet(() -> CodeBlock.of("null /* missing @PrimaryKey */"));
         } else if (needsTypeAdapter()) {
-            return buildSerializeExpr(connectionExpr, getColumnExpr);
+            return applySerialization(connectionExpr, getColumnExpr);
         } else {
             return getColumnExpr;
         }
     }
 
-    public CodeBlock buildSerializeExpr(String connectionExpr, String valueExpr) {
-        return buildSerializeExpr(connectionExpr, CodeBlock.of("$L", valueExpr));
+    public CodeBlock applySerialization(String connectionExpr, String valueExpr) {
+        return applySerialization(connectionExpr, CodeBlock.of("$L", valueExpr));
     }
 
-    public CodeBlock buildSerializeExpr(String connectionExpr, CodeBlock valueExpr) {
+    public CodeBlock applySerialization(String connectionExpr, CodeBlock valueExpr) {
         // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
