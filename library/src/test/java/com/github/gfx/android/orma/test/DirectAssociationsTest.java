@@ -591,9 +591,8 @@ public class DirectAssociationsTest {
             }
         });
 
-        // FIXME add overloads
         ModelWithDirectAssociation_Relation relation = orma.relationOfModelWithDirectAssociation()
-                .where((ColumnDef) ModelWithDirectAssociation_Schema.INSTANCE.author.associationSchema.name, "=", author1.name);
+                .where(ModelWithDirectAssociation_Schema.INSTANCE.author, "=", author1.name);
 
         assertThat(relation.count(), is(1));
 
