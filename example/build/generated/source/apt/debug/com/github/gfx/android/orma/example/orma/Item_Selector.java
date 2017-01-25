@@ -36,7 +36,7 @@ public class Item_Selector extends Selector<Item, Item_Selector> {
   }
 
   public Item_Selector categoryEq(@NonNull Category category) {
-    return where(schema.category, "=", category.id /* primary key */);
+    return where(schema.category, "=", category.id);
   }
 
   public Item_Selector categoryEq(long categoryId) {

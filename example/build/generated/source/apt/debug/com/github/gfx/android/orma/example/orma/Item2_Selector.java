@@ -36,7 +36,7 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
   }
 
   public Item2_Selector category1Eq(@NonNull Category category1) {
-    return where(schema.category1, "=", category1.id /* primary key */);
+    return where(schema.category1, "=", category1.id);
   }
 
   public Item2_Selector category1Eq(long category1Id) {
@@ -52,7 +52,7 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
   }
 
   public Item2_Selector category2Eq(@NonNull Category category2) {
-    return where(schema.category2, "=", category2.id /* primary key */);
+    return where(schema.category2, "=", category2.id);
   }
 
   public Item2_Selector category2Eq(long category2Id) {

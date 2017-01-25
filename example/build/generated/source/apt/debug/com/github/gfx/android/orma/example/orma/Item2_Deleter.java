@@ -36,7 +36,7 @@ public class Item2_Deleter extends Deleter<Item2, Item2_Deleter> {
   }
 
   public Item2_Deleter category1Eq(@NonNull Category category1) {
-    return where(schema.category1, "=", category1.id /* primary key */);
+    return where(schema.category1, "=", category1.id);
   }
 
   public Item2_Deleter category1Eq(long category1Id) {
@@ -52,7 +52,7 @@ public class Item2_Deleter extends Deleter<Item2, Item2_Deleter> {
   }
 
   public Item2_Deleter category2Eq(@NonNull Category category2) {
-    return where(schema.category2, "=", category2.id /* primary key */);
+    return where(schema.category2, "=", category2.id);
   }
 
   public Item2_Deleter category2Eq(long category2Id) {

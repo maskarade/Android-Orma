@@ -36,7 +36,7 @@ public class Item_Deleter extends Deleter<Item, Item_Deleter> {
   }
 
   public Item_Deleter categoryEq(@NonNull Category category) {
-    return where(schema.category, "=", category.id /* primary key */);
+    return where(schema.category, "=", category.id);
   }
 
   public Item_Deleter categoryEq(long categoryId) {

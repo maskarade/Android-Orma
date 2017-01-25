@@ -46,7 +46,7 @@ public class Item_Updater extends Updater<Item, Item_Updater> {
   }
 
   public Item_Updater categoryEq(@NonNull Category category) {
-    return where(schema.category, "=", category.id /* primary key */);
+    return where(schema.category, "=", category.id);
   }
 
   public Item_Updater categoryEq(long categoryId) {

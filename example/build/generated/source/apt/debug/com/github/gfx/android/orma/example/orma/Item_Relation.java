@@ -56,7 +56,7 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   }
 
   public Item_Relation categoryEq(@NonNull Category category) {
-    return where(schema.category, "=", category.id /* primary key */);
+    return where(schema.category, "=", category.id);
   }
 
   public Item_Relation categoryEq(long categoryId) {
