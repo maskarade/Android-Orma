@@ -326,13 +326,17 @@ public class ColumnDefinition {
     }
 
     public CodeBlock buildSerializedColumnExpr(String connectionExpr, String modelExpr) {
+        return buildSerializedColumnExpr(connectionExpr, CodeBlock.of("$L", modelExpr));
+    }
+
+    public CodeBlock buildSerializedColumnExpr(String connectionExpr, CodeBlock modelExpr) {
         CodeBlock getColumnExpr = buildGetColumnExpr(modelExpr);
 
         if (isSingleAssociation()) {
             return CodeBlock.of("$L.getId()", getColumnExpr);
         } else if (isDirectAssociation()) {
             return getAssociatedSchema().getPrimaryKey()
-                    .map(primaryKey -> primaryKey.buildGetColumnExpr(getColumnExpr))
+                    .map(primaryKey -> primaryKey.buildSerializedColumnExpr(connectionExpr, getColumnExpr))
                     .orElseGet(() -> CodeBlock.of("null /* missing @PrimaryKey */"));
         } else if (needsTypeAdapter()) {
             return applySerialization(connectionExpr, getColumnExpr);

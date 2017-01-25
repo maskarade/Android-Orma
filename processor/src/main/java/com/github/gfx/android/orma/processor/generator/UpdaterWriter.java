@@ -155,7 +155,7 @@ public class UpdaterWriter extends BaseWriter {
                                 )
                                 .addStatement("contents.put($S, $L)",
                                         column.getEscapedColumnName(),
-                                        primaryKey.buildGetColumnExpr(column.name))
+                                        primaryKey.buildSerializedColumnExpr("conn", column.name))
                                 .addStatement("return this")
                                 .build()
                 );
