@@ -10,17 +10,23 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.1.1 2017/01/25
+
+https://github.com/gfx/Android-Orma/compare/v4.1.0...v4.1.1
+
+* [#370](https://github.com/gfx/Android-Orma/pull/370): Embedded type were not used as foreign keys (reported by @sakuna63 at [#368](https://github.com/gfx/Android-Orma/issues/368))
+
 ## v4.1.0 2017/01/06
 
 https://github.com/gfx/Android-Orma/compare/v4.0.2...v4.1.0
 
-* [#358](https://github.com/gfx/Android-Orma/pull/358) Composite Indexes (a.k.a. Multi-column Indexes)
+* [#358](https://github.com/gfx/Android-Orma/pull/358): Composite Indexes (a.k.a. Multi-column Indexes)
 
 ## v4.0.2 2016/12/18
 
 https://github.com/gfx/Android-Orma/compare/v4.0.1...v4.0.2
 
-* [#354](https://github.com/gfx/Android-Orma/pull/354) Upgrade ANTLR4 from 4.5.3 to 4.6, which might affects migration engines
+* [#354](https://github.com/gfx/Android-Orma/pull/354): Upgrade ANTLR4 from 4.5.3 to 4.6, which might affects migration engines
 
 ## v4.0.1 2016/12/16
 
