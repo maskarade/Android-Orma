@@ -231,7 +231,7 @@ public class ColumnDefinition {
             return SqlTypes.getSqliteType(TypeName.LONG);
         } else if (Types.isDirectAssociation(context, type)) {
             return context.getSchemaDef(type).getPrimaryKey()
-                    .map(primaryKey -> SqlTypes.getSqliteType(primaryKey.getType()))
+                    .map(primaryKey -> SqlTypes.getSqliteType(primaryKey.getSerializedType()))
                     .orElseGet(() -> {
                         context.addError("Missing @PrimaryKey as foreign key", element);
                         return "UNKNOWN";
@@ -338,10 +338,8 @@ public class ColumnDefinition {
             return getAssociatedSchema().getPrimaryKey()
                     .map(primaryKey -> primaryKey.buildSerializedColumnExpr(connectionExpr, getColumnExpr))
                     .orElseGet(() -> CodeBlock.of("null /* missing @PrimaryKey */"));
-        } else if (needsTypeAdapter()) {
-            return applySerialization(connectionExpr, getColumnExpr);
         } else {
-            return getColumnExpr;
+            return applySerialization(connectionExpr, getColumnExpr);
         }
     }
 
@@ -353,6 +351,11 @@ public class ColumnDefinition {
         // TODO: parameter injection for static type serializers
         if (needsTypeAdapter()) {
             if (typeAdapter == null) {
+                if (isAssociation()) {
+                    throw new AssertionError("[BUG] applySerialization() called for "
+                            + schema.getModelClassName() + "#" + name);
+                }
+
                 throw new ProcessingException("Missing @StaticTypeAdapter to serialize " + type, element);
             }
 

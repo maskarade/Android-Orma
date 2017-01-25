@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class PrimaryKeyWithTypeAdapterTest {
-    
+
     OrmaDatabase db;
 
     @Before
@@ -44,25 +44,28 @@ public class PrimaryKeyWithTypeAdapterTest {
 
     @Test
     public void bigIntegerPrimaryKey() throws Exception {
-        final ModelWithCustomPrimaryKey model = db.createModelWithCustomPrimaryKey(new ModelFactory<ModelWithCustomPrimaryKey>() {
-            @NonNull
-            @Override
-            public ModelWithCustomPrimaryKey call() {
-                return ModelWithCustomPrimaryKey.create(EnumA.FOO);
-            }
-        });
+        final ModelWithCustomPrimaryKey model = db
+                .createModelWithCustomPrimaryKey(new ModelFactory<ModelWithCustomPrimaryKey>() {
+                    @NonNull
+                    @Override
+                    public ModelWithCustomPrimaryKey call() {
+                        return ModelWithCustomPrimaryKey.create(EnumA.FOO);
+                    }
+                });
 
         ModelWithCustomPrimaryKey.Holder holder = db.createHolder(new ModelFactory<ModelWithCustomPrimaryKey.Holder>() {
             @NonNull
             @Override
             public ModelWithCustomPrimaryKey.Holder call() {
                 ModelWithCustomPrimaryKey.Holder holder = new ModelWithCustomPrimaryKey.Holder();
-                holder.model = model;
+                holder.object = model;
                 return holder;
             }
         });
 
-        assertThat(holder.model.id, is(EnumA.FOO));
-        assertThat(db.selectFromHolder().modelEq(EnumA.FOO).count(), is(1));
+        assertThat(holder.object.id, is(EnumA.FOO));
+
+        assertThat(db.selectFromHolder().objectEq(EnumA.FOO).value().object.id, is(EnumA.FOO));
+        assertThat(db.selectFromHolder().objectEq(model).value().object.id, is(EnumA.FOO));
     }
 }

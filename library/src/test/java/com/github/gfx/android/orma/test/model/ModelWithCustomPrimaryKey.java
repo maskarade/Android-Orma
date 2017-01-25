@@ -41,6 +41,6 @@ public class ModelWithCustomPrimaryKey {
         public long id;
 
         @Column(indexed = true)
-        public ModelWithCustomPrimaryKey model;
+        public ModelWithCustomPrimaryKey object;
     }
 }

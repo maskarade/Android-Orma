@@ -113,9 +113,7 @@ public class ConditionQueryHelpers {
                     .orElseThrow(() -> new ProcessingException(
                             "Missing @PrimaryKey for " + associatedSchema.getModelClassName().simpleName(),
                             associatedSchema.getElement()));
-            return CodeBlock.builder()
-                    .add("$L /* primary key */", primaryKey.buildGetColumnExpr(paramSpec.name))
-                    .build();
+            return primaryKey.buildSerializedColumnExpr("conn", paramSpec.name);
         } else {
             return column.applySerialization("conn", paramSpec.name);
         }
@@ -190,6 +188,7 @@ public class ConditionQueryHelpers {
                 SchemaDefinition associatedSchema = column.getAssociatedSchema();
                 associatedSchema.getPrimaryKey().ifPresent(foreignKey -> {
                     String paramName = column.name + Strings.toUpperFirst(foreignKey.name);
+                    CodeBlock serializedParamExpr = foreignKey.applySerialization("conn", paramName);
                     methodSpecs.add(
                             MethodSpec.methodBuilder(column.name + "Eq")
                                     .addModifiers(Modifier.PUBLIC)
@@ -198,7 +197,7 @@ public class ConditionQueryHelpers {
                                                     .addAnnotations(foreignKey.nullabilityAnnotations())
                                                     .build())
                                     .returns(targetClassName)
-                                    .addStatement("return where($L, $S, $L)", columnExpr, "=", paramName)
+                                    .addStatement("return where($L, $S, $L)", columnExpr, "=", serializedParamExpr)
                                     .build()
                     );
                 });
