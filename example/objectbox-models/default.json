@@ -1,0 +1,47 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": 1,
+      "lastPropertyId": 5,
+      "name": "ObTodo",
+      "properties": [
+        {
+          "id": 1,
+          "name": "id",
+          "refId": 6663642558565624638
+        },
+        {
+          "id": 2,
+          "name": "title",
+          "refId": 8523874559090136140
+        },
+        {
+          "id": 3,
+          "name": "content",
+          "refId": 8051656494281694311
+        },
+        {
+          "id": 4,
+          "name": "done",
+          "refId": 7802807386305818924
+        },
+        {
+          "id": 5,
+          "name": "createdTime",
+          "refId": 6584413658061231853
+        }
+      ],
+      "refId": 454262214946537927
+    }
+  ],
+  "lastEntityId": 1,
+  "lastIndexId": 0,
+  "lastSequenceId": 0,
+  "metaVersion": 1,
+  "retiredEntityRefIds": [],
+  "retiredPropertyRefIds": [],
+  "version": 1
+}

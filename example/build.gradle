@@ -1,11 +1,22 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url "http://objectbox.net/beta-repo/"
+        }
     }
     dependencies {
         classpath 'io.realm:realm-gradle-plugin:2.3.0'
         classpath 'me.tatarka:gradle-retrolambda:3.5.0'
         classpath 'net.orfjackal.retrolambda:retrolambda:2.5.0'
+        classpath 'io.objectbox:objectbox-gradle-plugin:0.9.6'
+    }
+}
+
+repositories {
+    jcenter()
+    maven {
+        url "http://objectbox.net/beta-repo/"
     }
 }
 
@@ -13,6 +24,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'io.objectbox'
 
 android {
     compileSdkVersion 25
@@ -41,7 +53,7 @@ android {
             signingConfig signingConfigs.debug
         }
         debug {
-            minifyEnabled true
+            //minifyEnabled true
             useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
@@ -80,4 +92,5 @@ dependencies {
     compile "com.android.support:design:${SUPPORT_LIBRARY_VERSION}"
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.4'
     compile 'com.facebook.stetho:stetho:1.4.2'
+    compile 'io.objectbox:objectbox-android:0.9.6'
 }
