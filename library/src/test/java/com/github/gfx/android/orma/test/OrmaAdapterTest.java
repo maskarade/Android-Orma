@@ -23,6 +23,8 @@ import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 import com.github.gfx.android.orma.widget.OrmaAdapter;
+import com.github.gfx.android.orma.widget.OrmaListAdapter;
+import com.github.gfx.android.orma.widget.OrmaRecyclerViewAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +34,10 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import io.reactivex.functions.Predicate;
 
@@ -184,5 +189,53 @@ public class OrmaAdapterTest {
                 .test()
                 .assertResult(3);
         assertThat(adapter.getItemCount(), is(0));
+    }
+
+    @Test
+    public void explicitNotifyDataSetChangedForListViewAdapter() throws Exception {
+        OrmaListAdapter<Author> listAdapter = new OrmaListAdapter<Author>(adapter) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                return null;
+            }
+        };
+
+        db.updateAuthor()
+                .nameEq("A")
+                .note("foo/bar/baz")
+                .execute();
+
+        assertThat(listAdapter.getItem(0).name, is("A"));
+        assertThat(listAdapter.getItem(0).note, is("foo/bar/baz"));
+    }
+
+    @Test
+    public void explicitNotifyDataSetChangedForRecyclerViewAdapter() throws Exception {
+        class VH extends RecyclerView.ViewHolder {
+
+            public VH(View itemView) {
+                super(itemView);
+            }
+        }
+
+        OrmaRecyclerViewAdapter<Author, VH> listAdapter = new OrmaRecyclerViewAdapter<Author, VH>(adapter) {
+            @Override
+            public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+                return null;
+            }
+
+            @Override
+            public void onBindViewHolder(VH holder, int position) {
+
+            }
+        };
+
+        db.updateAuthor()
+                .nameEq("A")
+                .note("foo/bar/baz")
+                .execute();
+
+        assertThat(listAdapter.getItem(0).name, is("A"));
+        assertThat(listAdapter.getItem(0).note, is("foo/bar/baz"));
     }
 }
