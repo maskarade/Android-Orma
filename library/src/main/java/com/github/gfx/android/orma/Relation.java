@@ -221,28 +221,58 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @Override
     public abstract R clone();
 
-    // Operation helpers
-
+    /**
+     * {@code selector()} creates a {@link Selector} with queries that the relation has.
+     * For example, if the relation has some order-by queries, the new selector also has them.
+     *
+     * @return A selector derived from the relation
+     */
     @NonNull
     public abstract Selector<Model, ?> selector();
 
+    /**
+     * {@code updater()} creates an {@link Updater} with queries that the relation has.
+     * For example, if the relation has some order-by queries, the new updater also has them.
+     *
+     * @return An updater derived from the relation
+     */
     @NonNull
     public abstract Updater<Model, ?> updater();
 
+    /**
+     * {@code deleter()} creates a {@link Deleter} with queries that the relation has.
+     * For example, if the relation has some order-by queries, the new deleter also has them.
+     *
+     * @return A deleter derived from the relation
+     */
     @NonNull
     public abstract Deleter<Model, ?> deleter();
 
+    /**
+     * {@code inserter()} creates an {@link Inserter}, a prepared statement for {@code INSERT}.
+     *
+     * @return An inserter
+     */
     @NonNull
     public Inserter<Model> inserter() {
         return inserter(OnConflict.NONE, true);
     }
 
+
+    /**
+     * {@code inserter()} creates an {@link Inserter} with options, a prepared statement for {@code INSERT}.
+     *
+     * @param onConflictAlgorithm {@link OnConflict} algorithm
+     * @return An inserter with options
+     */
     @NonNull
     public Inserter<Model> inserter(@OnConflict int onConflictAlgorithm) {
         return new Inserter<>(conn, getSchema(), onConflictAlgorithm, true);
     }
 
     /**
+     * {@code inserter()} creates an {@link Inserter} with options, a prepared statement for {@code INSERT}.
+     *
      * @param onConflictAlgorithm {@link OnConflict} algorithm
      * @param withoutAutoId       If {@code true}, the primary key with {@link PrimaryKey#auto()} is omitted in the {@code
      *                            INSERT} statement.
