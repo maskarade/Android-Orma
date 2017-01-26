@@ -26,13 +26,6 @@ checkout:
         fi
 dependencies:
   pre:
-    - sudo service postgresql stop
-    - sudo service mongodb stop
-    - sudo service memcached stop
-    - sudo service mysql stop
-    - sudo service couchdb stop
-    - sudo service rabbitmq-server stop
-    - sudo service zookeeper stop
     - echo y | android -s update sdk -u -a -t "tools" # update Android SDK that includes sdkmanager(1)
     - mkdir -p "$ANDROID_HOME"/licenses
     - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME"/licenses/android-sdk-license
