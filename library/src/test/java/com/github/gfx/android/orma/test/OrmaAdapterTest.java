@@ -230,6 +230,8 @@ public class OrmaAdapterTest {
             }
         };
 
+        listAdapter.getItem(0); // to touch the cache
+
         db.updateAuthor()
                 .nameEq("A")
                 .note("foo/bar/baz")
