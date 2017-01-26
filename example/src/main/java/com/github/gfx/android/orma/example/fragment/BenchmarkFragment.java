@@ -42,7 +42,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -227,13 +229,17 @@ public class BenchmarkFragment extends Fragment {
                 realm.executeTransaction(r -> {
                     long now = System.currentTimeMillis();
 
+                    List<RealmTodo> todos = new ArrayList<RealmTodo>();
                     for (int i = 0; i < N_ITEMS; i++) {
-                        RealmTodo todo = r.createObject(RealmTodo.class);
+                        RealmTodo todo = new RealmTodo();
 
                         todo.setTitle(titlePrefix + i);
                         todo.setContent(contentPrefix + i);
                         todo.setCreatedTime(new Date(now));
+
+                        todos.add(todo);
                     }
+                    realm.insert(todos);
                 });
                 realm.close();
             });
