@@ -10,6 +10,10 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## NEXT
+
+* [#377](https://github.com/gfx/Android-Orma/pull/377): `Schema#getPrimaryKey` holds the boxed type of the primary key, instead of wildcard type
+
 ## v4.1.1 2017/01/25
 
 https://github.com/gfx/Android-Orma/compare/v4.1.0...v4.1.1
