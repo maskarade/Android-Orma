@@ -114,7 +114,7 @@ public class Category_Schema implements Schema<Category> {
 
   @NonNull
   @Override
-  public ColumnDef<Category, ?> getPrimaryKey() {
+  public ColumnDef<Category, Long> getPrimaryKey() {
     return id;
   }
 
