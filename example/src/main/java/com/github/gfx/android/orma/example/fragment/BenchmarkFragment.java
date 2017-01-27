@@ -260,13 +260,17 @@ public class BenchmarkFragment extends Fragment {
 
                 long now = System.currentTimeMillis();
 
+                final int titleIndex = 1; // bind param starts 1
+                final int contentIndex = 2;
+                final int doneIndex = 3;
+                final int createTimeIndex = 4;
+
                 for (int i = 1; i <= N_ITEMS; i++) {
-                    inserter.bindAllArgsAsStrings(new String[]{
-                            titlePrefix + i, // title
-                            contentPrefix + i, // content
-                            "0", // done
-                            String.valueOf(now), // createdTime
-                    });
+                    inserter.bindString(titleIndex, titlePrefix + 1);
+                    inserter.bindString(contentIndex, contentPrefix + 1);
+                    inserter.bindLong(doneIndex, 2);
+                    inserter.bindLong(createTimeIndex, now);
+
                     inserter.executeInsert();
                 }
 
