@@ -269,6 +269,7 @@ public class SchemaWriter extends BaseWriter {
                 .build());
 
         return new FieldSpecDefinition(
+                c,
                 FieldSpec.builder(c.getColumnDefType(), c.name).addModifiers(publicFinal).build(),
                 columnDefType.build());
     }
@@ -477,7 +478,7 @@ public class SchemaWriter extends BaseWriter {
                 MethodSpec.methodBuilder("getPrimaryKey")
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.getColumnDef(schema.getModelClassName(), Types.WildcardType))
+                        .returns(Types.getColumnDef(schema.getModelClassName(), primaryKeyFieldSpecDef.column.getBoxType()))
                         .addStatement("return $N", primaryKeyFieldSpecDef.fieldSpec)
                         .build()
         );
@@ -837,11 +838,14 @@ public class SchemaWriter extends BaseWriter {
 
     private static class FieldSpecDefinition {
 
-        FieldSpec fieldSpec;
+        final ColumnDefinition column;
 
-        TypeSpec initializer;
+        final FieldSpec fieldSpec;
 
-        FieldSpecDefinition(FieldSpec fieldSpec, TypeSpec initializer) {
+        final TypeSpec initializer;
+
+        FieldSpecDefinition(ColumnDefinition column, FieldSpec fieldSpec, TypeSpec initializer) {
+            this.column = column;
             this.fieldSpec = fieldSpec;
             this.initializer = initializer;
         }

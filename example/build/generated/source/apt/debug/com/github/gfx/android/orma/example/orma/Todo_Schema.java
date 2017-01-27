@@ -182,7 +182,7 @@ public class Todo_Schema implements Schema<Todo> {
 
   @NonNull
   @Override
-  public ColumnDef<Todo, ?> getPrimaryKey() {
+  public ColumnDef<Todo, Long> getPrimaryKey() {
     return id;
   }
 

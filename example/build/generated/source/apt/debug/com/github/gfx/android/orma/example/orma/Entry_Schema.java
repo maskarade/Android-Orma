@@ -135,7 +135,7 @@ public class Entry_Schema implements Schema<Entry> {
 
   @NonNull
   @Override
-  public ColumnDef<Entry, ?> getPrimaryKey() {
+  public ColumnDef<Entry, Long> getPrimaryKey() {
     return id;
   }
 

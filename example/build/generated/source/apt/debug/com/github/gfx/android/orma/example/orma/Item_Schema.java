@@ -121,7 +121,7 @@ public class Item_Schema implements Schema<Item> {
 
   @NonNull
   @Override
-  public ColumnDef<Item, ?> getPrimaryKey() {
+  public ColumnDef<Item, String> getPrimaryKey() {
     return name;
   }
 
