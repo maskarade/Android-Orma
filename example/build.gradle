@@ -39,12 +39,14 @@ android {
             useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
+            resValue "string", "app_name", "Orma ${rootProject.ext.versionName} (release)"
         }
         debug {
             minifyEnabled true
             useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
+            resValue "string", "app_name", "Orma ${rootProject.ext.versionName} (release)"
         }
     }
     productFlavors {
