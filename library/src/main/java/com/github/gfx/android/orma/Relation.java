@@ -21,6 +21,8 @@ import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.support.annotation.CheckResult;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
@@ -284,13 +286,84 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
-     * Equivalent to {@code relation.inserter(OnConflict.REPLACE, false)}.
+     * Deprecated. Use {@code relation.inserter(OnConflict.REPLACE, false)} or {@code upsert(model)}.
      *
      * @return An {@code Inserter} instance to upsert rows.
      */
     @NonNull
+    @Deprecated
     public Inserter<Model> upserter() {
         return inserter(OnConflict.REPLACE, false);
+    }
+
+    public <PrimaryKeyType> Model find(PrimaryKeyType primaryKeyValue) {
+        return selector().where(getSchema().getPrimaryKey(), "=", primaryKeyValue).value();
+    }
+
+    /**
+     * @param model A model
+     * @return A new model
+     */
+    public Model upsert(@NonNull final Model model) {
+        class Ref<T> {
+            T value;
+        }
+        final Ref<Model> modelRef = new Ref<>();
+        conn.transactionSync(new Runnable() {
+            @Override
+            public void run() {
+                modelRef.value = find(upsertWithoutTransaction(model));
+            }
+        });
+        return modelRef.value;
+    }
+
+    private <PrimaryKeyType> PrimaryKeyType upsertWithoutTransaction(@NonNull final Model model) {
+        Schema<Model> schema = getSchema();
+
+        @SuppressWarnings("unchecked")
+        ColumnDef<Model, PrimaryKeyType> primaryKey = (ColumnDef<Model, PrimaryKeyType>) schema.getPrimaryKey();
+
+        ContentValues contentValues = new ContentValues();
+
+        for (ColumnDef<Model, ?> column : schema.getColumns()) {
+            if (column instanceof AssociationDef) {
+                Object foreignKey = updateOrInsertForAssociation((AssociationDef) column, model);
+                schema.putToContentValues(contentValues, (ColumnDef) column, foreignKey);
+            } else {
+                schema.putToContentValues(contentValues, (ColumnDef) column, column.get(model));
+            }
+        }
+
+        if (primaryKey.get(model) != null) {
+            int updatedRows = updater()
+                    .where(primaryKey, "=", primaryKey.getSerialized(model))
+                    .putAll(contentValues)
+                    .execute();
+
+            if (updatedRows != 0) {
+                return primaryKey.get(model);
+            }
+        }
+
+        // fallback to insert
+
+        long rowId = conn.insert(schema, contentValues);
+
+        // primary key is not necessarily "long", so get the resal primary key value
+        Cursor cursor = selector().where("_rowid_ = ?", rowId).executeWithColumns(primaryKey.getQualifiedName());
+
+        try {
+            cursor.moveToFirst();
+            return primaryKey.getFromCursor(conn, cursor, 0);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private <T, PrimaryKeyType> PrimaryKeyType updateOrInsertForAssociation(AssociationDef<Model, T, Schema<T>> column, Model model) {
+        Schema<T> s = column.associationSchema;
+        return s.createRelation(conn).upsertWithoutTransaction(column.get(model));
     }
 
     /**
@@ -302,7 +375,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @Experimental
     @SuppressWarnings("unchecked")
     public <S extends Selector<Model, ?>> Observable<S> createQueryObservable() {
-        return conn.createEventObservable((S)selector())
+        return conn.createEventObservable((S) selector())
                 .map(new Function<DataSetChangedEvent<S>, S>() {
                     @Override
                     public S apply(DataSetChangedEvent<S> event) throws Exception {
@@ -322,7 +395,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @Deprecated
     @SuppressWarnings("unchecked")
     public <S extends Selector<Model, ?>> Observable<DataSetChangedEvent<S>> createEventObservable() {
-        return conn.createEventObservable((S)selector());
+        return conn.createEventObservable((S) selector());
     }
 
     // Iterator<Model>

@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -130,7 +131,7 @@ public class SchemaWriter extends BaseWriter {
         if (primaryKeyFieldSpecDef == null) {
             // Even if primary key is omitted, "_rowid_" is always available.
             // (WITHOUT ROWID is not supported by Orma)
-            primaryKeyFieldSpecDef = buildPrimaryKeyColumn();
+            primaryKeyFieldSpecDef = buildDefaultPrimaryKeyColumn();
             fieldSpecs.add(primaryKeyFieldSpecDef.fieldSpec);
         }
 
@@ -328,7 +329,7 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    public FieldSpecDefinition buildPrimaryKeyColumn() {
+    public FieldSpecDefinition buildDefaultPrimaryKeyColumn() {
         return buildColumnFieldSpec(ColumnDefinition.createDefaultPrimaryKey(schema));
     }
 
@@ -491,6 +492,86 @@ public class SchemaWriter extends BaseWriter {
                         .addStatement("return $L", buildColumnsInitializer())
                         .build()
         );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("createRelation")
+                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Types.DatabaseHandle, "db")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .returns(schema.getRelationClassName())
+                        .addStatement("return new $T(db.getConnection(), this)", schema.getRelationClassName())
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("createRelation")
+                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Types.OrmaConnection, "conn")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .returns(schema.getRelationClassName())
+                        .addStatement("return new $T(conn, this)", schema.getRelationClassName())
+                        .build()
+        );
+
+        // Relation#putToContentValues
+        CodeBlock.Builder putToContentValues = CodeBlock.builder();
+        List<ColumnDefinition> columns = schema.getColumns();
+        if (!columns.isEmpty()) {
+            columns.forEach(new Consumer<ColumnDefinition>() {
+                int index = 0;
+
+                @Override
+                public void accept(ColumnDefinition column) {
+                    if (column.element == null) {
+                        // skip for default primary key columns
+                        return;
+                    }
+
+                    if (++index == 1) {
+                        putToContentValues.beginControlFlow("if (column == $L)", column.name);
+                    } else {
+                        putToContentValues.beginControlFlow("else if (column == $L)", column.name);
+                    }
+
+                    putToContentValues.addStatement("contentValues.put(column.getEscapedName(), $L)",
+                            column.buildSerializedExpr("conn", CodeBlock.of("value"), true));
+                    putToContentValues.endControlFlow();
+                }
+            });
+            putToContentValues.beginControlFlow("else")
+                    .addStatement("throw new $T($S + column)", AssertionError.class, "No such column: ")
+                    .endControlFlow();
+        } else {
+            putToContentValues.addStatement("throw new $T($S)", "Not reached"); // just for placeholder
+        }
+
+        methodSpecs.add(MethodSpec.methodBuilder("putToContentValues")
+                .addAnnotation(Annotations.override())
+                .addAnnotation(Annotations.suppressWarnings("unchecked"))
+                .addTypeVariable(Types.T)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(
+                        ParameterSpec.builder(Types.ContentValues, "contentValues")
+                                .addAnnotation(Annotations.nonNull())
+                                .build()
+                )
+                .addParameter(
+                        ParameterSpec.builder(Types.getColumnDef(schema.getModelClassName(), Types.T), "column")
+                                .addAnnotation(Annotations.nonNull())
+                                .build()
+                )
+                .addParameter(
+                        ParameterSpec.builder(Types.T, "value")
+                                .build()
+                )
+                .addCode(putToContentValues.build())
+                .build());
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("getDefaultResultColumns")

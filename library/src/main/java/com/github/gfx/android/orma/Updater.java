@@ -20,13 +20,14 @@ import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.RestrictTo;
 
 import java.util.concurrent.Callable;
 
 import io.reactivex.Single;
 
 public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaConditionBase<Model, U>
-    implements Cloneable {
+        implements Cloneable {
 
     final protected ContentValues contents = new ContentValues();
 
@@ -53,6 +54,13 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
     @NonNull
     public ContentValues getContentValues() {
         return contents;
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    @SuppressWarnings("unchecked")
+    public U putAll(ContentValues contentValues) {
+        contents.putAll(contentValues);
+        return (U) this;
     }
 
     /**

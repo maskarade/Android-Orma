@@ -35,6 +35,7 @@ import android.support.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -61,6 +62,8 @@ public class ColumnDefinition {
     public final TypeName type;
 
     public final boolean nullable;
+
+    public final boolean explicitNonNull;
 
     public final boolean primaryKey;
 
@@ -144,6 +147,7 @@ public class ColumnDefinition {
         }
 
         nullable = hasNullableAnnotation(element);
+        explicitNonNull = hasNonNullAnnotation(element);
     }
 
     // to create primary key columns
@@ -155,6 +159,7 @@ public class ColumnDefinition {
         columnName = kDefaultPrimaryKeyName;
         type = TypeName.LONG;
         nullable = false;
+        explicitNonNull = false;
         primaryKey = true;
         primaryKeyOnConflict = OnConflict.NONE;
         autoincrement = false;
@@ -200,6 +205,16 @@ public class ColumnDefinition {
         for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
             // allow anything named "Nullable"
             if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("Nullable")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean hasNonNullAnnotation(Element element) {
+        for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
+            // allow anything named "NonNull"
+            if (annotation.getAnnotationType().asElement().getSimpleName().contentEquals("NonNull")) {
                 return true;
             }
         }
@@ -282,6 +297,21 @@ public class ColumnDefinition {
         return getSerializedType().box();
     }
 
+    public TypeName getStorableBoxType() {
+        if (isSingleAssociation()) {
+            return TypeName.LONG;
+        } else if (isDirectAssociation()) {
+            return getAssociatedSchema().getPrimaryKey().orElseThrow(new Supplier<RuntimeException>() {
+                @Override
+                public RuntimeException get() {
+                    return new RuntimeException("No primary key exists in " + getAssociatedSchema().getModelClassName());
+                }
+            }).getBoxType();
+        } else {
+            return getBoxType();
+        }
+    }
+
     public String getStorageType() {
         if (storageType == null) {
             storageType = extractStorageType(context, type, element, typeAdapter);
@@ -331,15 +361,24 @@ public class ColumnDefinition {
 
     public CodeBlock buildSerializedColumnExpr(String connectionExpr, CodeBlock modelExpr) {
         CodeBlock getColumnExpr = buildGetColumnExpr(modelExpr);
+        return buildSerializedExpr(connectionExpr, getColumnExpr, false);
+    }
+
+    public CodeBlock buildSerializedExpr(String connectionExpr, String valueExpr, boolean castIsRequired) {
+        return buildSerializedExpr(connectionExpr, CodeBlock.of("$L", valueExpr), castIsRequired);
+    }
+
+    public CodeBlock buildSerializedExpr(String connectionExpr, CodeBlock valueExpr, boolean castIsRequired) {
+        CodeBlock typedValueExpr = castIsRequired ? CodeBlock.of("(($T) $L)", getBoxType(), valueExpr) : valueExpr;
 
         if (isSingleAssociation()) {
-            return CodeBlock.of("$L.getId()", getColumnExpr);
+            return CodeBlock.of("$L.getId()", typedValueExpr);
         } else if (isDirectAssociation()) {
             return getAssociatedSchema().getPrimaryKey()
-                    .map(primaryKey -> primaryKey.buildSerializedColumnExpr(connectionExpr, getColumnExpr))
+                    .map(primaryKey -> primaryKey.buildSerializedColumnExpr(connectionExpr, typedValueExpr))
                     .orElseGet(() -> CodeBlock.of("null /* missing @PrimaryKey */"));
         } else {
-            return applySerialization(connectionExpr, getColumnExpr);
+            return applySerialization(connectionExpr, typedValueExpr);
         }
     }
 

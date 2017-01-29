@@ -164,24 +164,28 @@ public class OrmaConnection {
         return db;
     }
 
+    public <T> long insert(Schema<T> schema, ContentValues contentValues) {
+        return getWritableDatabase().insertOrThrow(schema.getEscapedTableName(), null, contentValues);
+    }
+
     @NonNull
     public <T> T createModel(Schema<T> schema, ModelFactory<T> factory) {
         T model = factory.call();
         Inserter<T> sth = new Inserter<>(this, schema);
-        long id = sth.execute(model);
+        long rowId = sth.execute(model);
 
         ColumnDef<T, ?> primaryKey = schema.getPrimaryKey();
         String whereClause = primaryKey.getQualifiedName() + " = ?";
         String primaryKeyValue;
         if (primaryKey.isAutoValue()) {
-            primaryKeyValue = Long.toString(id);
+            primaryKeyValue = Long.toString(rowId);
         } else {
             primaryKeyValue = String.valueOf(primaryKey.getSerialized(model));
         }
         String[] whereArgs = {primaryKeyValue};
         T createdModel = querySingle(schema, schema.getDefaultResultColumns(), whereClause, whereArgs, null, null, null, 0);
         if (createdModel == null) {
-            throw new NoValueException("Can't retrieve the created model for " + model + " (rowid=" + id + ")");
+            throw new NoValueException("Can't retrieve the created model for " + model + " (rowId=" + rowId + ")");
         }
         return createdModel;
     }

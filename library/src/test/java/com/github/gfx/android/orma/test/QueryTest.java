@@ -634,14 +634,6 @@ public class QueryTest {
     }
 
     @Test
-    public void upsertWithPrimaryKey() throws Exception {
-        Book book = db.selectFromBook().value();
-        book.content = "modified";
-        db.prepareInsertIntoBook(OnConflict.REPLACE, false).execute(book);
-        assertThat(db.selectFromBook().bookIdEq(book.bookId).value().content, is("modified"));
-    }
-
-    @Test
     public void inserterExecuteAll() throws Exception {
         Inserter<Book> inserter = db.prepareInsertIntoBook();
         inserter.executeAll(someBooks());

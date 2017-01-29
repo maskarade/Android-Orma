@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.migration.MigrationSchema;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
@@ -63,6 +64,14 @@ public interface Schema<Model> extends MigrationSchema {
 
     @NonNull
     List<ColumnDef<Model, ?>> getColumns();
+
+    @NonNull
+    Relation<Model, ?> createRelation(DatabaseHandle db);
+
+    @NonNull
+    Relation<Model, ?> createRelation(OrmaConnection conn);
+
+    <T> void putToContentValues(@NonNull ContentValues contentValues, @NonNull ColumnDef<Model, T> column, T value);
 
     @NonNull
     String getCreateTableStatement();

@@ -291,16 +291,6 @@ public class RelationTest {
     }
 
     @Test
-    public void upserter() throws Exception {
-        ModelWithDate model = rel().selector().nameEq("A").value();
-        model.note = "modified";
-
-        rel().upserter().execute(model);
-
-        assertThat(rel().nameEq(model.name).selector().value().note, is("modified"));
-    }
-
-    @Test
     public void iterable() throws Exception {
         Relation<ModelWithDate, ?> rel = rel().orderByNameAsc();
 
