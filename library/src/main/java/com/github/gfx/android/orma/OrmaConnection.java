@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.Experimental;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.event.DataSetChangedTrigger;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
@@ -164,8 +165,49 @@ public class OrmaConnection {
         return db;
     }
 
-    public <T> long insert(Schema<T> schema, ContentValues contentValues) {
-        return getWritableDatabase().insertOrThrow(schema.getEscapedTableName(), null, contentValues);
+    public <T> long insert(Schema<T> schema, ContentValues contentValues, @OnConflict int onConflict) {
+        if (trace) {
+            traceInsert(schema, contentValues, onConflict);
+        }
+        return getWritableDatabase().insertWithOnConflict(schema.getEscapedTableName(), null, contentValues, onConflict);
+    }
+
+    private <T> void traceInsert(Schema<T> schema, @NonNull ContentValues contentValues, @OnConflict int onConflict) {
+        // copied from SQLiteDatabase#insertWithOnConflict()
+
+        StringBuilder s = new StringBuilder();
+        s.append("INSERT");
+        switch (onConflict) {
+            case OnConflict.NONE: /* nop */ break;
+            case OnConflict.ABORT: s.append(" OR ABORT"); break;
+            case OnConflict.FAIL: s.append(" OR FAIL"); break;
+            case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
+            case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
+            case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
+            default: break;
+        }
+        s.append(" INTO ");
+        s.append(schema.getEscapedTableName());
+        s.append('(');
+
+        Object[] bindArgs = null;
+        int size = contentValues.size();
+        bindArgs = new Object[size];
+        int i = 0;
+        for (String colName : contentValues.keySet()) {
+            s.append((i > 0) ? "," : "");
+            s.append(colName);
+            bindArgs[i++] = contentValues.get(colName);
+        }
+        s.append(')');
+        s.append(" VALUES (");
+        for (i = 0; i < size; i++) {
+            s.append((i > 0) ? ",?" : "?");
+        }
+
+        s.append(')');
+
+        trace(s,  bindArgs);
     }
 
     @NonNull
@@ -228,7 +270,7 @@ public class OrmaConnection {
             sql.append(whereClause);
         }
 
-        trace(sql.toString(), bindArgs);
+        trace(sql, bindArgs);
     }
 
     @NonNull
@@ -360,7 +402,7 @@ public class OrmaConnection {
         db.execSQL(sql);
     }
 
-    protected void trace(@NonNull String sql, @Nullable Object[] bindArgs) {
+    protected void trace(@NonNull CharSequence sql, @Nullable Object[] bindArgs) {
         if (trace) {
             String prefix = "[" + Thread.currentThread().getName() + "] ";
             if (bindArgs == null) {

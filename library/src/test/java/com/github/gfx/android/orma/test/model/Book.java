@@ -43,4 +43,11 @@ public class Book {
 
     @Column(indexed = true)
     public SingleAssociation<Publisher> publisher;
+
+    public static Book create(String title, Publisher publisher) {
+        Book book = new Book();
+        book.title = title;
+        book.publisher = SingleAssociation.just(publisher);
+        return book;
+    }
 }

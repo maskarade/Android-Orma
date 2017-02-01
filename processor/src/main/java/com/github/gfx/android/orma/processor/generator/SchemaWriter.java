@@ -164,6 +164,9 @@ public class SchemaWriter extends BaseWriter {
             for (CodeBlock join : joins) {
                 code.add("$L\n", join);
             }
+        } else {
+            code.add("+ ($L != null ? $S + '`' + $L +  '`' : $S)",
+                    $alias, " AS ", $alias, "");
         }
 
         return code.build();

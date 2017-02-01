@@ -20,14 +20,15 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
+import com.github.gfx.android.orma.internal.Schemas;
 
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.support.annotation.CheckResult;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
@@ -296,74 +297,76 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return inserter(OnConflict.REPLACE, false);
     }
 
-    public <PrimaryKeyType> Model find(PrimaryKeyType primaryKeyValue) {
-        return selector().where(getSchema().getPrimaryKey(), "=", primaryKeyValue).value();
-    }
-
     /**
      * @param model A model
      * @return A new model
      */
+    @NonNull
     public Model upsert(@NonNull final Model model) {
         class Ref<T> {
+
             T value;
         }
         final Ref<Model> modelRef = new Ref<>();
         conn.transactionSync(new Runnable() {
             @Override
             public void run() {
-                modelRef.value = find(upsertWithoutTransaction(model));
+                modelRef.value = upsertWithoutTransaction(model);
             }
         });
         return modelRef.value;
     }
 
-    private <PrimaryKeyType> PrimaryKeyType upsertWithoutTransaction(@NonNull final Model model) {
-        Schema<Model> schema = getSchema();
+    @SuppressWarnings("unchecked")
+    private <M, PK> M upsertWithoutTransaction(@NonNull final M model) {
+        Schema<M> schema = (Schema<M>) getSchema();
 
-        @SuppressWarnings("unchecked")
-        ColumnDef<Model, PrimaryKeyType> primaryKey = (ColumnDef<Model, PrimaryKeyType>) schema.getPrimaryKey();
+        ColumnDef<M, PK> primaryKey = (ColumnDef<M, PK>)schema.getPrimaryKey();
 
         ContentValues contentValues = new ContentValues();
 
-        for (ColumnDef<Model, ?> column : schema.getColumns()) {
-            if (column instanceof AssociationDef) {
-                Object foreignKey = updateOrInsertForAssociation((AssociationDef) column, model);
-                schema.putToContentValues(contentValues, (ColumnDef) column, foreignKey);
+        for (ColumnDef<M, ?> column : schema.getColumns()) {
+            if (column.isPrimaryKey() && primaryKey.isAutoValue()) {
+                // nothing to do
+            } else if (column instanceof AssociationDef) {
+                Object newAssociatedModel = updateOrInsertForAssociation(((AssociationDef) column).associationSchema,
+                        column.get(model));
+                schema.putToContentValues(contentValues, (ColumnDef) column, newAssociatedModel);
+            } else if (column.type instanceof ParameterizedType
+                    && ((Class<?>) ((ParameterizedType) column.type).getRawType()).isAssignableFrom(SingleAssociation.class)) {
+                SingleAssociation<?> assoc = (SingleAssociation<?>) column.get(model);
+                Object newAssociatedModel = updateOrInsertForAssociation((Schema) Schemas.get(assoc.get().getClass()),
+                        assoc.get());
+                schema.putToContentValues(contentValues, (ColumnDef) column, SingleAssociation.just(newAssociatedModel));
             } else {
                 schema.putToContentValues(contentValues, (ColumnDef) column, column.get(model));
             }
         }
 
-        if (primaryKey.get(model) != null) {
+        if (hasInitializedPrimaryKey(primaryKey, model)) {
             int updatedRows = updater()
-                    .where(primaryKey, "=", primaryKey.getSerialized(model))
+                    .where((ColumnDef<Model, PK>) primaryKey, "=", primaryKey.getSerialized(model))
                     .putAll(contentValues)
                     .execute();
 
             if (updatedRows != 0) {
-                return primaryKey.get(model);
+                return model;
             }
         }
 
         // fallback to insert
-
-        long rowId = conn.insert(schema, contentValues);
-
-        // primary key is not necessarily "long", so get the resal primary key value
-        Cursor cursor = selector().where("_rowid_ = ?", rowId).executeWithColumns(primaryKey.getQualifiedName());
-
-        try {
-            cursor.moveToFirst();
-            return primaryKey.getFromCursor(conn, cursor, 0);
-        } finally {
-            cursor.close();
-        }
+        long rowId = conn.insert(schema, contentValues, OnConflict.NONE);
+        String tableAlias = schema.getEscapedTableAlias();
+        return schema.createRelation(conn).where((tableAlias == null ? "" : tableAlias + ".") + "`_rowid_` = ?", rowId).get(0);
     }
 
-    private <T, PrimaryKeyType> PrimaryKeyType updateOrInsertForAssociation(AssociationDef<Model, T, Schema<T>> column, Model model) {
-        Schema<T> s = column.associationSchema;
-        return s.createRelation(conn).upsertWithoutTransaction(column.get(model));
+    private <M> boolean hasInitializedPrimaryKey(ColumnDef<M, ?> primaryKey, M model) {
+        return primaryKey.get(model) != null
+                && (!primaryKey.isAutoValue() || ((Number) primaryKey.get(model)).longValue() != 0);
+    }
+
+    private <T> Object updateOrInsertForAssociation(Schema<T> associatedSchema, T model) {
+        return associatedSchema.createRelation(conn).upsertWithoutTransaction(model);
     }
 
     /**

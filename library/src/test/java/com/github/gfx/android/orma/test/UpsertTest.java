@@ -18,10 +18,13 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.test.model.Author;
+import com.github.gfx.android.orma.test.model.Book;
+import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +42,11 @@ public class UpsertTest {
     @Before
     public void setUp() throws Exception {
         db = OrmaFactory.create();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        db.getConnection().getWritableDatabase().close();
     }
 
     @Test
@@ -81,11 +89,46 @@ public class UpsertTest {
     }
 
     @Test
-    public void upsertAsUpdateForModelsWitAutoId() throws Exception {
+    public void upsertAsUpdateForModelsWithAutoId() throws Exception {
         Publisher publisher = Publisher.create("foo", 2000, 12);
         Publisher newPublisher = db.relationOfPublisher().upsert(publisher);
         newPublisher.startedYear = 1999;
         assertThat(db.relationOfPublisher().upsert(newPublisher).startedYear, is(1999));
     }
 
+    @Test
+    public void upsertAsInsertForModelsWithSingleAssociation() throws Exception {
+        Book book = Book.create("foo", Publisher.create("bar", 2017, 1));
+        Book newBook = db.relationOfBook().upsert(book);
+        assertThat(newBook.bookId, is(not(0L)));
+        assertThat(newBook.publisher.get().name, is("bar"));
+    }
+
+    @Test
+    public void upsertAsUpdateForModelsWithSingleAssociation() throws Exception {
+        Book book = Book.create("foo", Publisher.create("bar", 2017, 1));
+        Book newBook = db.relationOfBook().upsert(book);
+        newBook.content = "Hello, world!";
+        assertThat(db.relationOfBook().upsert(newBook).content, is("Hello, world!"));
+    }
+
+    @Test
+    public void upsertAsInsertForModelsWithDirectAssociation() throws Exception {
+        ModelWithDirectAssociation model = ModelWithDirectAssociation.create("foo", Author.create("author"), Publisher.create("publisher", 2017, 1), "note");
+        ModelWithDirectAssociation newModel = db.relationOfModelWithDirectAssociation().upsert(model);
+        assertThat(newModel.name, is("foo"));
+        assertThat(newModel.author.name, is("author"));
+        assertThat(newModel.publisher.name, is("publisher"));
+    }
+
+    @Test
+    public void upsertAsUpdateForModelsWithDirectAssociation() throws Exception {
+        ModelWithDirectAssociation model = ModelWithDirectAssociation.create("foo", Author.create("author"), Publisher.create("publisher", 2017, 1), "note");
+        ModelWithDirectAssociation newModel = db.relationOfModelWithDirectAssociation().upsert(model);
+        newModel.note = "model's note";
+        newModel.author.note = "author's note";
+
+        assertThat(db.relationOfModelWithDirectAssociation().upsert(newModel).note, is("model's note"));
+        assertThat(db.relationOfModelWithDirectAssociation().upsert(newModel).author.note, is("author's note"));
+    }
 }

@@ -34,4 +34,13 @@ public class ModelWithDirectAssociation {
 
     @Column(indexed = true)
     public String note; // the same name as Author#note
+
+    public static ModelWithDirectAssociation create(String name, Author author, Publisher publisher, String note) {
+        ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+        model.name = name;
+        model.author = author;
+        model.publisher = publisher;
+        model.note = note;
+        return model;
+    }
 }
