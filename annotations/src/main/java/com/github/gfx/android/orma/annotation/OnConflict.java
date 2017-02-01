@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface OnConflict {
 
-    int NONE = 0;
+    int NONE = 0; // SQLiteDatabase.CONFLICT_NONE
 
     /**
      * <blockquote cite="https://www.sqlite.org/lang_conflict.html">When an applicable constraint violation occurs, the
@@ -48,7 +48,7 @@ public @interface OnConflict {
      * (other than the implied transaction that is created on every command) then the ROLLBACK resolution algorithm works the
      * same as the ABORT algorithm.</blockquote>
      */
-    int ROLLBACK = 1;
+    int ROLLBACK = 1; // SQLiteDatabase.CONFLICT_ROLLBACK
 
     /**
      * <blockquote cite="https://www.sqlite.org/lang_conflict.html">When an applicable constraint violation occurs, the ABORT
@@ -58,7 +58,7 @@ public @interface OnConflict {
      * is
      * the default behavior and the behavior specified by the SQL standard.</blockquote>
      */
-    int ABORT = 2;
+    int ABORT = 2; // SQLiteDatabase.CONFLICT_ABORT
 
     /**
      * <blockquote cite="https://www.sqlite.org/lang_conflict.html">When an applicable constraint violation occurs, the FAIL
@@ -68,7 +68,7 @@ public @interface OnConflict {
      * violation on the 100th row that it attempts to update, then the first 99 row changes are preserved but changes to
      * rows 100 and beyond never occur.</blockquote>
      */
-    int FAIL = 3;
+    int FAIL = 3; // SQLiteDatabase.CONFLICT_FAIL
 
     /**
      * <blockquote cite="https://www.sqlite.org/lang_conflict.html">When an applicable constraint violation occurs, the IGNORE
@@ -78,7 +78,7 @@ public @interface OnConflict {
      * normally.
      * No error is returned when the IGNORE conflict resolution algorithm is used.</blockquote>
      */
-    int IGNORE = 4;
+    int IGNORE = 4; // SQLiteDatabase.CONFLICT_IGNORE
 
     /**
      * <blockquote cite="https://www.sqlite.org/lang_conflict.html">When a UNIQUE or PRIMARY KEY constraint violation occurs,
@@ -96,5 +96,5 @@ public @interface OnConflict {
      * REPLACE increment the change counter. The exceptional behaviors defined in this paragraph might change in a future
      * release.</blockquote>
      */
-    int REPLACE = 5;
+    int REPLACE = 5; // SQLiteDatabase.CONFLICT_REPLACE
 }
