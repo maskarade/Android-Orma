@@ -317,15 +317,26 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return modelRef.value;
     }
 
-    @SuppressWarnings("unchecked")
-    private <M, PK> M upsertWithoutTransaction(@NonNull final M model) {
-        Schema<M> schema = (Schema<M>) getSchema();
+    @NonNull
+    public Single<Model> upsertAsObservable(@NonNull final Model model) {
+        return Single.fromCallable(new ModelFactory<Model>() {
+            @NonNull
+            @Override
+            public Model call() {
+                return upsert(model);
+            }
+        });
+    }
 
-        ColumnDef<M, PK> primaryKey = (ColumnDef<M, PK>)schema.getPrimaryKey();
+    @SuppressWarnings("unchecked")
+    private <PK> Model upsertWithoutTransaction(@NonNull final Model model) {
+        Schema<Model> schema = getSchema();
+
+        ColumnDef<Model, PK> primaryKey = (ColumnDef<Model, PK>) schema.getPrimaryKey();
 
         ContentValues contentValues = new ContentValues();
 
-        for (ColumnDef<M, ?> column : schema.getColumns()) {
+        for (ColumnDef<Model, ?> column : schema.getColumns()) {
             if (column.isPrimaryKey() && primaryKey.isAutoValue()) {
                 // nothing to do
             } else if (column instanceof AssociationDef) {
@@ -345,7 +356,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
         if (hasInitializedPrimaryKey(primaryKey, model)) {
             int updatedRows = updater()
-                    .where((ColumnDef<Model, PK>) primaryKey, "=", primaryKey.getSerialized(model))
+                    .where(primaryKey, "=", primaryKey.getSerialized(model))
                     .putAll(contentValues)
                     .execute();
 
@@ -354,10 +365,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
             }
         }
 
-        // fallback to insert
         long rowId = conn.insert(schema, contentValues, OnConflict.NONE);
-        String tableAlias = schema.getEscapedTableAlias();
-        return schema.createRelation(conn).where((tableAlias == null ? "" : tableAlias + ".") + "`_rowid_` = ?", rowId).get(0);
+        return conn.findByRowId(schema, rowId);
     }
 
     private <M> boolean hasInitializedPrimaryKey(ColumnDef<M, ?> primaryKey, M model) {

@@ -178,13 +178,25 @@ public class OrmaConnection {
         StringBuilder s = new StringBuilder();
         s.append("INSERT");
         switch (onConflict) {
-            case OnConflict.NONE: /* nop */ break;
-            case OnConflict.ABORT: s.append(" OR ABORT"); break;
-            case OnConflict.FAIL: s.append(" OR FAIL"); break;
-            case OnConflict.IGNORE: s.append(" OR IGNORE"); break;
-            case OnConflict.REPLACE: s.append(" OR REPLACE"); break;
-            case OnConflict.ROLLBACK: s.append(" OR ROLLBACK"); break;
-            default: break;
+            case OnConflict.NONE: /* nop */
+                break;
+            case OnConflict.ABORT:
+                s.append(" OR ABORT");
+                break;
+            case OnConflict.FAIL:
+                s.append(" OR FAIL");
+                break;
+            case OnConflict.IGNORE:
+                s.append(" OR IGNORE");
+                break;
+            case OnConflict.REPLACE:
+                s.append(" OR REPLACE");
+                break;
+            case OnConflict.ROLLBACK:
+                s.append(" OR ROLLBACK");
+                break;
+            default:
+                break;
         }
         s.append(" INTO ");
         s.append(schema.getEscapedTableName());
@@ -207,7 +219,7 @@ public class OrmaConnection {
 
         s.append(')');
 
-        trace(s,  bindArgs);
+        trace(s, bindArgs);
     }
 
     @NonNull
@@ -215,19 +227,19 @@ public class OrmaConnection {
         T model = factory.call();
         Inserter<T> sth = new Inserter<>(this, schema);
         long rowId = sth.execute(model);
+        return findByRowId(schema, rowId);
+    }
 
-        ColumnDef<T, ?> primaryKey = schema.getPrimaryKey();
-        String whereClause = primaryKey.getQualifiedName() + " = ?";
-        String primaryKeyValue;
-        if (primaryKey.isAutoValue()) {
-            primaryKeyValue = Long.toString(rowId);
-        } else {
-            primaryKeyValue = String.valueOf(primaryKey.getSerialized(model));
-        }
-        String[] whereArgs = {primaryKeyValue};
+    public <T> T findByRowId(Schema<T> schema, long rowId) {
+        String tableAlias = schema.getEscapedTableAlias();
+
+        String whereClause = (tableAlias == null ? "" : tableAlias + ".") + "`_rowid_` = ?";
+        String[] whereArgs = {String.valueOf(rowId)};
+
         T createdModel = querySingle(schema, schema.getDefaultResultColumns(), whereClause, whereArgs, null, null, null, 0);
         if (createdModel == null) {
-            throw new NoValueException("Can't retrieve the created model for " + model + " (rowId=" + rowId + ")");
+            throw new NoValueException("Can't retrieve the created model for rowId="
+                    + rowId + " in " + schema.getModelClass().getCanonicalName());
         }
         return createdModel;
     }
