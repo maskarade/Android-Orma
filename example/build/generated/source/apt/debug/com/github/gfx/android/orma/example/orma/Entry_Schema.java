@@ -1,10 +1,12 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.ColumnDef;
+import com.github.gfx.android.orma.DatabaseHandle;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
@@ -130,7 +132,7 @@ public class Entry_Schema implements Schema<Entry> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Entry`";
+    return "`Entry`"+ ($alias != null ? " AS " + '`' + $alias +  '`' : "");
   }
 
   @NonNull
@@ -147,6 +149,36 @@ public class Entry_Schema implements Schema<Entry> {
           resourceId,
           id
         );
+  }
+
+  @NonNull
+  @Override
+  public Entry_Relation createRelation(@NonNull DatabaseHandle db) {
+    return new Entry_Relation(db.getConnection(), this);
+  }
+
+  @NonNull
+  @Override
+  public Entry_Relation createRelation(@NonNull OrmaConnection conn) {
+    return new Entry_Relation(conn, this);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> void putToContentValues(@NonNull ContentValues contentValues,
+      @NonNull ColumnDef<Entry, T> column, T value) {
+    if (column == resourceType) {
+      contentValues.put(column.getEscapedName(), ((String) value));
+    }
+    else if (column == resourceId) {
+      contentValues.put(column.getEscapedName(), ((Long) value));
+    }
+    else if (column == id) {
+      contentValues.put(column.getEscapedName(), ((Long) value));
+    }
+    else {
+      throw new AssertionError("No such column: " + column);
+    }
   }
 
   @NonNull

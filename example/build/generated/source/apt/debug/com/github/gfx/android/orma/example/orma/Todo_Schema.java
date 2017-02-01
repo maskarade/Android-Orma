@@ -1,11 +1,13 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.ColumnDef;
+import com.github.gfx.android.orma.DatabaseHandle;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
@@ -177,7 +179,7 @@ public class Todo_Schema implements Schema<Todo> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Todo`";
+    return "`Todo`"+ ($alias != null ? " AS " + '`' + $alias +  '`' : "");
   }
 
   @NonNull
@@ -196,6 +198,42 @@ public class Todo_Schema implements Schema<Todo> {
           createdTime,
           id
         );
+  }
+
+  @NonNull
+  @Override
+  public Todo_Relation createRelation(@NonNull DatabaseHandle db) {
+    return new Todo_Relation(db.getConnection(), this);
+  }
+
+  @NonNull
+  @Override
+  public Todo_Relation createRelation(@NonNull OrmaConnection conn) {
+    return new Todo_Relation(conn, this);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> void putToContentValues(@NonNull ContentValues contentValues,
+      @NonNull ColumnDef<Todo, T> column, T value) {
+    if (column == title) {
+      contentValues.put(column.getEscapedName(), ((String) value));
+    }
+    else if (column == content) {
+      contentValues.put(column.getEscapedName(), ((String) value));
+    }
+    else if (column == done) {
+      contentValues.put(column.getEscapedName(), ((Boolean) value));
+    }
+    else if (column == createdTime) {
+      contentValues.put(column.getEscapedName(), BuiltInSerializers.serializeDate(((Date) value)));
+    }
+    else if (column == id) {
+      contentValues.put(column.getEscapedName(), ((Long) value));
+    }
+    else {
+      throw new AssertionError("No such column: " + column);
+    }
   }
 
   @NonNull

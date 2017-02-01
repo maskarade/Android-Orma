@@ -1,11 +1,13 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.AssociationDef;
 import com.github.gfx.android.orma.ColumnDef;
+import com.github.gfx.android.orma.DatabaseHandle;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
@@ -212,6 +214,42 @@ public class Item2_Schema implements Schema<Item2> {
           localDateTime,
           name
         );
+  }
+
+  @NonNull
+  @Override
+  public Item2_Relation createRelation(@NonNull DatabaseHandle db) {
+    return new Item2_Relation(db.getConnection(), this);
+  }
+
+  @NonNull
+  @Override
+  public Item2_Relation createRelation(@NonNull OrmaConnection conn) {
+    return new Item2_Relation(conn, this);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> void putToContentValues(@NonNull ContentValues contentValues,
+      @NonNull ColumnDef<Item2, T> column, T value) {
+    if (column == category1) {
+      contentValues.put(column.getEscapedName(), ((Category) value).id);
+    }
+    else if (column == category2) {
+      contentValues.put(column.getEscapedName(), ((Category) value).id);
+    }
+    else if (column == zonedTimestamp) {
+      contentValues.put(column.getEscapedName(), TypeAdapters.serializeZonedDateTime(((ZonedDateTime) value)));
+    }
+    else if (column == localDateTime) {
+      contentValues.put(column.getEscapedName(), TypeAdapters.serializeLocalDateTime(((LocalDateTime) value)));
+    }
+    else if (column == name) {
+      contentValues.put(column.getEscapedName(), ((String) value));
+    }
+    else {
+      throw new AssertionError("No such column: " + column);
+    }
   }
 
   @NonNull
