@@ -551,7 +551,7 @@ public class SchemaWriter extends BaseWriter {
                     .addStatement("throw new $T($S + column)", AssertionError.class, "No such column: ")
                     .endControlFlow();
         } else {
-            putToContentValues.addStatement("throw new $T($S)", "Not reached"); // just for placeholder
+            putToContentValues.addStatement("throw new $T($S)", AssertionError.class, "Not reached"); // just for placeholder
         }
 
         methodSpecs.add(MethodSpec.methodBuilder("putToContentValues")
