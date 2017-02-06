@@ -332,12 +332,10 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     private <PK> Model upsertWithoutTransaction(@NonNull final Model model) {
         Schema<Model> schema = getSchema();
 
-        ColumnDef<Model, PK> primaryKey = (ColumnDef<Model, PK>) schema.getPrimaryKey();
-
         ContentValues contentValues = new ContentValues();
 
         for (ColumnDef<Model, ?> column : schema.getColumns()) {
-            if (column.isPrimaryKey() && primaryKey.isAutoValue()) {
+            if (column.isPrimaryKey() && column.isAutoValue()) {
                 // nothing to do
             } else if (column instanceof AssociationDef) {
                 Object newAssociatedModel = updateOrInsertForAssociation(((AssociationDef) column).associationSchema,
@@ -353,6 +351,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
                 schema.putToContentValues(contentValues, (ColumnDef) column, column.get(model));
             }
         }
+
+        ColumnDef<Model, PK> primaryKey = (ColumnDef<Model, PK>) schema.getPrimaryKey();
 
         if (hasInitializedPrimaryKey(primaryKey, model)) {
             int updatedRows = updater()
