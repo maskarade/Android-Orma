@@ -1,6 +1,5 @@
 package com.github.gfx.android.orma.example.orma;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
@@ -139,21 +138,6 @@ public class Category_Schema implements Schema<Category> {
   @Override
   public Category_Relation createRelation(@NonNull OrmaConnection conn) {
     return new Category_Relation(conn, this);
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <T> void putToContentValues(@NonNull ContentValues contentValues,
-      @NonNull ColumnDef<Category, T> column, T value) {
-    if (column == name) {
-      contentValues.put(column.getEscapedName(), ((String) value));
-    }
-    else if (column == id) {
-      contentValues.put(column.getEscapedName(), ((Long) value));
-    }
-    else {
-      throw new AssertionError("No such column: " + column);
-    }
   }
 
   @NonNull
