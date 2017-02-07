@@ -178,8 +178,8 @@ public class RelationWriter extends BaseWriter {
                     associatedModelExpr = CodeBlock.of("$L", column.buildGetColumnExpr(modelExpr));
                 }
 
-                CodeBlock newAssociatedModelExpr = CodeBlock.of("$L.createRelation(conn).upsertWithoutTransaction($L)",
-                        associatedSchemaExpr, associatedModelExpr);
+                CodeBlock newAssociatedModelExpr = CodeBlock.of("new $T(conn, $L).upsertWithoutTransaction($L)",
+                        associatedSchema.getRelationClassName(), associatedSchemaExpr, associatedModelExpr);
 
                 ColumnDefinition associatedKey = associatedSchema.getPrimaryKey()
                         .orElseThrow(() -> new ProcessingException("No explicit primary key defined",
