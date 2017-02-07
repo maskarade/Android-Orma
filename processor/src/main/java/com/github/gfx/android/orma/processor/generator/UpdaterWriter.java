@@ -113,7 +113,6 @@ public class UpdaterWriter extends BaseWriter {
                 methodSpecBuilder.addStatement("return this");
 
                 methodSpecs.add(methodSpecBuilder.build());
-
             } else {
                 if (r.isSingleAssociation()) {
                     methodSpecs.add(

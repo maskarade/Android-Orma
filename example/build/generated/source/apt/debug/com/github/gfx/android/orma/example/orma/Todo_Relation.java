@@ -1,9 +1,12 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -35,6 +38,24 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   @CheckResult
   public Todo reload(@NonNull Todo model) {
     return selector().idEq(model.id).value();
+  }
+
+  @NonNull
+  @Override
+  public Todo upsertWithoutTransaction(@NonNull Todo model) {
+    ContentValues contentValues = new ContentValues();
+    contentValues.put("`title`", model.title);
+    contentValues.put("`content`", model.content);
+    contentValues.put("`done`", model.done);
+    contentValues.put("`createdTime`", BuiltInSerializers.serializeDate(model.createdTime));
+    if (model.id != 0) {
+      int updatedRows = updater().idEq(model.id).putAll(contentValues).execute();
+      if (updatedRows != 0) {
+        return selector().idEq(model.id).value();
+      }
+    }
+    long rowId = conn.insert(schema, contentValues, OnConflict.NONE);
+    return conn.findByRowId(schema, rowId);
   }
 
   @NonNull

@@ -1,9 +1,11 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -35,6 +37,20 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   @CheckResult
   public Item reload(@NonNull Item model) {
     return selector().nameEq(model.name).value();
+  }
+
+  @NonNull
+  @Override
+  public Item upsertWithoutTransaction(@NonNull Item model) {
+    ContentValues contentValues = new ContentValues();
+    contentValues.put("`category`", Category_Schema.INSTANCE.createRelation(conn).upsertWithoutTransaction(model.category).id);
+    contentValues.put("`name`", model.name);
+    int updatedRows = updater().nameEq(model.name).putAll(contentValues).execute();
+    if (updatedRows != 0) {
+      return selector().nameEq(model.name).value();
+    }
+    long rowId = conn.insert(schema, contentValues, OnConflict.NONE);
+    return conn.findByRowId(schema, rowId);
   }
 
   @NonNull

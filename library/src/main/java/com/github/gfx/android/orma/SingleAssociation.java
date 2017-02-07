@@ -81,9 +81,9 @@ public class SingleAssociation<Model> implements Parcelable {
     /**
      * The most typical factory method to create a {@code SingleAssociation} instance,
      * just wrapping the model with it.
-
+     *
      * @param model A model to wrap, which must have a valid primary key
-     * @param <T> The type of the model to wrap
+     * @param <T>   The type of the model to wrap
      * @return An instance of {@code SingleAssociation}
      */
     @SuppressWarnings("unchecked")

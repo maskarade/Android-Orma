@@ -130,7 +130,7 @@ public class SchemaWriter extends BaseWriter {
         if (primaryKeyFieldSpecDef == null) {
             // Even if primary key is omitted, "_rowid_" is always available.
             // (WITHOUT ROWID is not supported by Orma)
-            primaryKeyFieldSpecDef = buildPrimaryKeyColumn();
+            primaryKeyFieldSpecDef = buildDefaultPrimaryKeyColumn();
             fieldSpecs.add(primaryKeyFieldSpecDef.fieldSpec);
         }
 
@@ -163,6 +163,9 @@ public class SchemaWriter extends BaseWriter {
             for (CodeBlock join : joins) {
                 code.add("$L\n", join);
             }
+        } else {
+            code.add("+ ($L != null ? $S + '`' + $L +  '`' : $S)",
+                    $alias, " AS ", $alias, "");
         }
 
         return code.build();
@@ -328,7 +331,7 @@ public class SchemaWriter extends BaseWriter {
         return builder.build();
     }
 
-    public FieldSpecDefinition buildPrimaryKeyColumn() {
+    public FieldSpecDefinition buildDefaultPrimaryKeyColumn() {
         return buildColumnFieldSpec(ColumnDefinition.createDefaultPrimaryKey(schema));
     }
 
@@ -489,6 +492,32 @@ public class SchemaWriter extends BaseWriter {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(Types.getColumnDefList(schema.getModelClassName()))
                         .addStatement("return $L", buildColumnsInitializer())
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("createRelation")
+                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Types.DatabaseHandle, "db")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .returns(schema.getRelationClassName())
+                        .addStatement("return new $T(db.getConnection(), this)", schema.getRelationClassName())
+                        .build()
+        );
+
+        methodSpecs.add(
+                MethodSpec.methodBuilder("createRelation")
+                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(
+                                ParameterSpec.builder(Types.OrmaConnection, "conn")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .returns(schema.getRelationClassName())
+                        .addStatement("return new $T(conn, this)", schema.getRelationClassName())
                         .build()
         );
 

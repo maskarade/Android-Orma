@@ -106,9 +106,8 @@ public class ConditionQueryHelpers {
         AssociationDefinition r = column.getAssociation();
 
         boolean isAssociation = r != null;
-        TypeName type = isAssociation ? r.getModelType() : column.getType();
         if (isAssociation) {
-            SchemaDefinition associatedSchema = context.getSchemaDef(type);
+            SchemaDefinition associatedSchema = context.getSchemaDef(r.getModelType());
             ColumnDefinition primaryKey = associatedSchema.getPrimaryKey()
                     .orElseThrow(() -> new ProcessingException(
                             "Missing @PrimaryKey for " + associatedSchema.getModelClassName().simpleName(),

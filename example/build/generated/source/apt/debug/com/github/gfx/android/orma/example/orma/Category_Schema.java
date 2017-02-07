@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.ColumnDef;
+import com.github.gfx.android.orma.DatabaseHandle;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
@@ -109,7 +110,7 @@ public class Category_Schema implements Schema<Category> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Category`";
+    return "`Category`"+ ($alias != null ? " AS " + '`' + $alias +  '`' : "");
   }
 
   @NonNull
@@ -125,6 +126,18 @@ public class Category_Schema implements Schema<Category> {
           name,
           id
         );
+  }
+
+  @NonNull
+  @Override
+  public Category_Relation createRelation(@NonNull DatabaseHandle db) {
+    return new Category_Relation(db.getConnection(), this);
+  }
+
+  @NonNull
+  @Override
+  public Category_Relation createRelation(@NonNull OrmaConnection conn) {
+    return new Category_Relation(conn, this);
   }
 
   @NonNull

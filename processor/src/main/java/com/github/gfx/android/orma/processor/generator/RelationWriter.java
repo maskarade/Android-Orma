@@ -15,11 +15,17 @@
  */
 package com.github.gfx.android.orma.processor.generator;
 
+import com.github.gfx.android.orma.annotation.Column;
+import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.processor.ProcessingContext;
+import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.model.AssociationDefinition;
+import com.github.gfx.android.orma.processor.model.ColumnDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.util.Annotations;
 import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -97,6 +103,17 @@ public class RelationWriter extends BaseWriter {
             });
         }
 
+        methodSpecs.add(MethodSpec.methodBuilder("upsertWithoutTransaction")
+                .addAnnotations(Annotations.overrideAndNonNull())
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(
+                        ParameterSpec.builder(schema.getModelClassName(), "model")
+                                .addAnnotation(Annotations.nonNull())
+                                .build())
+                .returns(schema.getModelClassName())
+                .addCode(buildUpsert("model"))
+                .build());
+
         methodSpecs.add(MethodSpec.methodBuilder("selector")
                 .addAnnotations(Annotations.overrideAndNonNull())
                 .addModifiers(Modifier.PUBLIC)
@@ -121,5 +138,80 @@ public class RelationWriter extends BaseWriter {
         methodSpecs.addAll(queryHelpers.buildConditionHelpers(true));
 
         return methodSpecs;
+    }
+
+    private CodeBlock buildUpsert(String modelExpr) {
+        CodeBlock.Builder code = CodeBlock.builder();
+
+        Optional<ColumnDefinition> optionalPrimaryKey = schema.getPrimaryKey();
+
+        if (!optionalPrimaryKey.isPresent()) {
+            return code.addStatement("throw new $T($S)",
+                    UnsupportedOperationException.class,
+                    "upsert is not supported because of missing @PrimaryKey"
+            ).build();
+        }
+
+        ColumnDefinition primaryKey = optionalPrimaryKey.get();
+
+        if (!primaryKey.hasHelper(Column.Helpers.CONDITION_EQ)) {
+            return code.addStatement("throw new $T($S)",
+                    UnsupportedOperationException.class,
+                    "upsert is not supported because of missing @PrimaryKey's CONDITION_EQ helper"
+            ).build();
+        }
+
+        // build contentValues
+
+        code.addStatement("$T contentValues = new $T()", Types.ContentValues, Types.ContentValues);
+
+        for (ColumnDefinition column : schema.getColumnsWithoutAutoId()) {
+            AssociationDefinition r = column.getAssociation();
+
+            if (r != null) {
+                SchemaDefinition associatedSchema = context.getSchemaDef(r.getModelType());
+                CodeBlock associatedSchemaExpr = CodeBlock.of("$T.INSTANCE", associatedSchema.getSchemaClassName());
+                CodeBlock associatedModelExpr;
+                if (r.isSingleAssociation()) {
+                    associatedModelExpr = CodeBlock.of("$L.get()", column.buildGetColumnExpr(modelExpr));
+                } else {
+                    associatedModelExpr = CodeBlock.of("$L", column.buildGetColumnExpr(modelExpr));
+                }
+
+                CodeBlock newAssociatedModelExpr = CodeBlock.of("$L.createRelation(conn).upsertWithoutTransaction($L)",
+                        associatedSchemaExpr, associatedModelExpr);
+
+                ColumnDefinition associatedKey = associatedSchema.getPrimaryKey()
+                        .orElseThrow(() -> new ProcessingException("No explicit primary key defined",
+                                associatedSchema.getElement()));
+                code.addStatement("contentValues.put($S, $L)",
+                        column.getEscapedColumnName(),
+                        associatedKey.buildSerializedColumnExpr("conn", newAssociatedModelExpr));
+            } else {
+                code.addStatement("contentValues.put($S, $L)",
+                        column.getEscapedColumnName(), column.buildSerializedColumnExpr("conn", modelExpr));
+            }
+        }
+
+        // only "auto = true" supports conditional UPDATE
+        if (primaryKey.autoId) {
+            code.beginControlFlow("if ($L != 0)", primaryKey.buildGetColumnExpr(modelExpr));
+        }
+
+        code.addStatement("int updatedRows = updater().$LEq($L).putAll(contentValues).execute()",
+                primaryKey.name, primaryKey.buildGetColumnExpr(modelExpr));
+        code.beginControlFlow("if (updatedRows != 0)");
+        code.addStatement("return selector().$LEq($L).value()",
+                primaryKey.name, primaryKey.buildGetColumnExpr(modelExpr));
+        code.endControlFlow();
+
+        if (primaryKey.autoId) {
+            code.endControlFlow();
+        }
+
+        code.addStatement("long rowId = conn.insert(schema, contentValues, $T.NONE)", OnConflict.class);
+        code.addStatement("return conn.findByRowId(schema, rowId)");
+
+        return code.build();
     }
 }

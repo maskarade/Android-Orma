@@ -65,6 +65,12 @@ public interface Schema<Model> extends MigrationSchema {
     List<ColumnDef<Model, ?>> getColumns();
 
     @NonNull
+    Relation<Model, ?> createRelation(DatabaseHandle db);
+
+    @NonNull
+    Relation<Model, ?> createRelation(OrmaConnection conn);
+
+    @NonNull
     String getCreateTableStatement();
 
     @NonNull

@@ -284,14 +284,62 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
-     * Equivalent to {@code relation.inserter(OnConflict.REPLACE, false)}.
+     * Deprecated. Use {@code relation.inserter(OnConflict.REPLACE, false)} or {@code upsert(model)}.
      *
      * @return An {@code Inserter} instance to upsert rows.
      */
     @NonNull
+    @Deprecated
     public Inserter<Model> upserter() {
         return inserter(OnConflict.REPLACE, false);
     }
+
+    /**
+     * <p>Upsert a model recursively.</p>
+     * <p>
+     *     NOTE: <strong>You must use the return value for the model</strong>
+     *     because the returned model might have newly assigned the primary key and foreign keys.
+     * </p>
+     *
+     * @param model A model to upsert
+     * @return A new model
+     */
+    @NonNull
+    public Model upsert(@NonNull final Model model) {
+        class Ref<T> {
+
+            T value;
+        }
+        final Ref<Model> modelRef = new Ref<>();
+        conn.transactionSync(new Runnable() {
+            @Override
+            public void run() {
+                modelRef.value = upsertWithoutTransaction(model);
+            }
+        });
+        return modelRef.value;
+    }
+
+    /**
+     * RxJava interface to {@link #upsert(Object)}.
+     *
+     * @param model A model to upsert
+     * @return An observable that yields a new model.
+     */
+    @NonNull
+    @CheckResult
+    public Single<Model> upsertAsObservable(@NonNull final Model model) {
+        return Single.fromCallable(new ModelFactory<Model>() {
+            @NonNull
+            @Override
+            public Model call() {
+                return upsert(model);
+            }
+        });
+    }
+
+    @NonNull
+    public abstract Model upsertWithoutTransaction(@NonNull final Model model);
 
     /**
      * Experimental API to observe data-set changed events.
@@ -302,7 +350,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @Experimental
     @SuppressWarnings("unchecked")
     public <S extends Selector<Model, ?>> Observable<S> createQueryObservable() {
-        return conn.createEventObservable((S)selector())
+        return conn.createEventObservable((S) selector())
                 .map(new Function<DataSetChangedEvent<S>, S>() {
                     @Override
                     public S apply(DataSetChangedEvent<S> event) throws Exception {
@@ -322,7 +370,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     @Deprecated
     @SuppressWarnings("unchecked")
     public <S extends Selector<Model, ?>> Observable<DataSetChangedEvent<S>> createEventObservable() {
-        return conn.createEventObservable((S)selector());
+        return conn.createEventObservable((S) selector());
     }
 
     // Iterator<Model>

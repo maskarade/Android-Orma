@@ -1,9 +1,12 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.example.tool.TypeAdapters;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -35,6 +38,23 @@ public class Item2_Relation extends Relation<Item2, Item2_Relation> {
   @CheckResult
   public Item2 reload(@NonNull Item2 model) {
     return selector().nameEq(model.name).value();
+  }
+
+  @NonNull
+  @Override
+  public Item2 upsertWithoutTransaction(@NonNull Item2 model) {
+    ContentValues contentValues = new ContentValues();
+    contentValues.put("`category1`", Category_Schema.INSTANCE.createRelation(conn).upsertWithoutTransaction(model.category1).id);
+    contentValues.put("`category2`", Category_Schema.INSTANCE.createRelation(conn).upsertWithoutTransaction(model.category2).id);
+    contentValues.put("`zonedTimestamp`", TypeAdapters.serializeZonedDateTime(model.zonedTimestamp));
+    contentValues.put("`localDateTime`", TypeAdapters.serializeLocalDateTime(model.localDateTime));
+    contentValues.put("`name`", model.name);
+    int updatedRows = updater().nameEq(model.name).putAll(contentValues).execute();
+    if (updatedRows != 0) {
+      return selector().nameEq(model.name).value();
+    }
+    long rowId = conn.insert(schema, contentValues, OnConflict.NONE);
+    return conn.findByRowId(schema, rowId);
   }
 
   @NonNull

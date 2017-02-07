@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.ColumnDef;
+import com.github.gfx.android.orma.DatabaseHandle;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
@@ -177,7 +178,7 @@ public class Todo_Schema implements Schema<Todo> {
   @NonNull
   @Override
   public String getSelectFromTableClause() {
-    return "`Todo`";
+    return "`Todo`"+ ($alias != null ? " AS " + '`' + $alias +  '`' : "");
   }
 
   @NonNull
@@ -196,6 +197,18 @@ public class Todo_Schema implements Schema<Todo> {
           createdTime,
           id
         );
+  }
+
+  @NonNull
+  @Override
+  public Todo_Relation createRelation(@NonNull DatabaseHandle db) {
+    return new Todo_Relation(db.getConnection(), this);
+  }
+
+  @NonNull
+  @Override
+  public Todo_Relation createRelation(@NonNull OrmaConnection conn) {
+    return new Todo_Relation(conn, this);
   }
 
   @NonNull
