@@ -43,7 +43,7 @@ public class Item_Relation extends Relation<Item, Item_Relation> {
   @Override
   public Item upsertWithoutTransaction(@NonNull Item model) {
     ContentValues contentValues = new ContentValues();
-    contentValues.put("`category`", Category_Schema.INSTANCE.createRelation(conn).upsertWithoutTransaction(model.category).id);
+    contentValues.put("`category`", new Category_Relation(conn, Category_Schema.INSTANCE).upsertWithoutTransaction(model.category).id);
     contentValues.put("`name`", model.name);
     int updatedRows = updater().nameEq(model.name).putAll(contentValues).execute();
     if (updatedRows != 0) {

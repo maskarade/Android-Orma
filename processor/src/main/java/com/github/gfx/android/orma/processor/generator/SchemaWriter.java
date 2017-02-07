@@ -496,32 +496,6 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("createRelation")
-                        .addAnnotations(Annotations.overrideAndNonNull())
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(
-                                ParameterSpec.builder(Types.DatabaseHandle, "db")
-                                        .addAnnotation(Annotations.nonNull())
-                                        .build())
-                        .returns(schema.getRelationClassName())
-                        .addStatement("return new $T(db.getConnection(), this)", schema.getRelationClassName())
-                        .build()
-        );
-
-        methodSpecs.add(
-                MethodSpec.methodBuilder("createRelation")
-                        .addAnnotations(Annotations.overrideAndNonNull())
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(
-                                ParameterSpec.builder(Types.OrmaConnection, "conn")
-                                        .addAnnotation(Annotations.nonNull())
-                                        .build())
-                        .returns(schema.getRelationClassName())
-                        .addStatement("return new $T(conn, this)", schema.getRelationClassName())
-                        .build()
-        );
-
-        methodSpecs.add(
                 MethodSpec.methodBuilder("getDefaultResultColumns")
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)

@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.AssociationDef;
 import com.github.gfx.android.orma.ColumnDef;
-import com.github.gfx.android.orma.DatabaseHandle;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
@@ -133,18 +132,6 @@ public class Item_Schema implements Schema<Item> {
           category,
           name
         );
-  }
-
-  @NonNull
-  @Override
-  public Item_Relation createRelation(@NonNull DatabaseHandle db) {
-    return new Item_Relation(db.getConnection(), this);
-  }
-
-  @NonNull
-  @Override
-  public Item_Relation createRelation(@NonNull OrmaConnection conn) {
-    return new Item_Relation(conn, this);
   }
 
   @NonNull
