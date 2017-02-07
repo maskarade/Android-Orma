@@ -58,12 +58,14 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
     testCompile 'com.google.code.gson:gson:2.8.0'
+    testCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
 
     androidTestApt project(':processor')
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
     androidTestCompile 'com.google.code.gson:gson:2.8.0'
+    androidTestCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
 }
 
 publish {
