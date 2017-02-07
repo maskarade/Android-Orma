@@ -20,15 +20,12 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
-import com.github.gfx.android.orma.internal.Schemas;
 
-import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
@@ -298,7 +295,13 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     /**
-     * @param model A model
+     * <p>Upsert a model recursively.</p>
+     * <p>
+     *     NOTE: <strong>You must use the return value for the model</strong>
+     *     because the returned model might have newly assigned the primary key and foreign keys.
+     * </p>
+     *
+     * @param model A model to upsert
      * @return A new model
      */
     @NonNull
@@ -317,7 +320,14 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return modelRef.value;
     }
 
+    /**
+     * RxJava interface to {@link #upsert(Object)}.
+     *
+     * @param model A model to upsert
+     * @return An observable that yields a new model.
+     */
     @NonNull
+    @CheckResult
     public Single<Model> upsertAsObservable(@NonNull final Model model) {
         return Single.fromCallable(new ModelFactory<Model>() {
             @NonNull
@@ -328,55 +338,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         });
     }
 
-    @SuppressWarnings("unchecked")
-    private <PK> Model upsertWithoutTransaction(@NonNull final Model model) {
-        Schema<Model> schema = getSchema();
-
-        ContentValues contentValues = new ContentValues();
-
-        for (ColumnDef<Model, ?> column : schema.getColumns()) {
-            if (column.isPrimaryKey() && column.isAutoValue()) {
-                // nothing to do
-            } else if (column instanceof AssociationDef) {
-                Object newAssociatedModel = updateOrInsertForAssociation(((AssociationDef) column).associationSchema,
-                        column.get(model));
-                schema.putToContentValues(contentValues, (ColumnDef) column, newAssociatedModel);
-            } else if (column.type instanceof ParameterizedType
-                    && ((Class<?>) ((ParameterizedType) column.type).getRawType()).isAssignableFrom(SingleAssociation.class)) {
-                SingleAssociation<?> assoc = (SingleAssociation<?>) column.get(model);
-                Object newAssociatedModel = updateOrInsertForAssociation((Schema) Schemas.get(assoc.get().getClass()),
-                        assoc.get());
-                schema.putToContentValues(contentValues, (ColumnDef) column, SingleAssociation.just(newAssociatedModel));
-            } else {
-                schema.putToContentValues(contentValues, (ColumnDef) column, column.get(model));
-            }
-        }
-
-        ColumnDef<Model, PK> primaryKey = (ColumnDef<Model, PK>) schema.getPrimaryKey();
-
-        if (hasInitializedPrimaryKey(primaryKey, model)) {
-            int updatedRows = updater()
-                    .where(primaryKey, "=", primaryKey.getSerialized(model))
-                    .putAll(contentValues)
-                    .execute();
-
-            if (updatedRows != 0) {
-                return model;
-            }
-        }
-
-        long rowId = conn.insert(schema, contentValues, OnConflict.NONE);
-        return conn.findByRowId(schema, rowId);
-    }
-
-    private <M> boolean hasInitializedPrimaryKey(ColumnDef<M, ?> primaryKey, M model) {
-        return primaryKey.get(model) != null
-                && (!primaryKey.isAutoValue() || ((Number) primaryKey.get(model)).longValue() != 0);
-    }
-
-    private <T> Object updateOrInsertForAssociation(Schema<T> associatedSchema, T model) {
-        return associatedSchema.createRelation(conn).upsertWithoutTransaction(model);
-    }
+    @NonNull
+    public abstract Model upsertWithoutTransaction(@NonNull final Model model);
 
     /**
      * Experimental API to observe data-set changed events.

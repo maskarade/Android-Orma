@@ -34,6 +34,9 @@ import android.support.test.runner.AndroidJUnit4;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * {@link com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Relation#upsertWithoutTransaction(ModelWithDirectAssociation)}
+ */
 @RunWith(AndroidJUnit4.class)
 public class UpsertTest {
 
