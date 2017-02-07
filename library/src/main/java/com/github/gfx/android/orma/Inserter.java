@@ -65,7 +65,7 @@ public class Inserter<Model> implements Closeable {
      * it.</p>
      *
      * @param model a model object to insert
-     * @return The last inserted row id
+     * @return The last inserted row id. {@code -1} for failure (e.g. constraint violations).
      */
     public long execute(@NonNull Model model) {
         if (conn.trace) {

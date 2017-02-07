@@ -398,7 +398,7 @@ public class ModelSpecTest {
 
     @Test
     public void testPrimaryKeyOnConflict() throws Exception {
-        db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+        db.insertIntoModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
             @NonNull
             @Override
             public ModelWithConflictResolutions call() {
@@ -411,9 +411,9 @@ public class ModelSpecTest {
                 model.uniqueOrReplace = 1;
                 return model;
             }
-        });
+        }.call());
 
-        db.createModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
+        db.insertIntoModelWithConflictResolutions(new ModelFactory<ModelWithConflictResolutions>() {
             @NonNull
             @Override
             public ModelWithConflictResolutions call() {
@@ -426,7 +426,7 @@ public class ModelSpecTest {
                 model.uniqueOrReplace = 2;
                 return model;
             }
-        });
+        }.call());
 
         assertThat(db.selectFromModelWithConflictResolutions().count(), is(1));
     }

@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.event.DataSetChangedTrigger;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
+import com.github.gfx.android.orma.exception.InsertionFailureException;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
@@ -227,6 +228,9 @@ public class OrmaConnection {
         T model = factory.call();
         Inserter<T> sth = new Inserter<>(this, schema);
         long rowId = sth.execute(model);
+        if (rowId == -1) {
+            throw new InsertionFailureException("Failed to INSERT for " + model);
+        }
         return findByRowId(schema, rowId);
     }
 

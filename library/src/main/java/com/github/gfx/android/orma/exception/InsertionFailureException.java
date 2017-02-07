@@ -19,6 +19,10 @@ package com.github.gfx.android.orma.exception;
 @SuppressWarnings("serial")
 public class InsertionFailureException extends OrmaException {
 
+    public InsertionFailureException(String detailMessage) {
+        super(detailMessage);
+    }
+
     public InsertionFailureException(Throwable throwable) {
         super(throwable);
     }
