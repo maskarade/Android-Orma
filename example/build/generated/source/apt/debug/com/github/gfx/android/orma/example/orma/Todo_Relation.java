@@ -45,7 +45,7 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   public Todo upsertWithoutTransaction(@NonNull Todo model) {
     ContentValues contentValues = new ContentValues();
     contentValues.put("`title`", model.title);
-    contentValues.put("`content`", model.content);
+    contentValues.put("`content`", model.content != null ? model.content : null);
     contentValues.put("`done`", model.done);
     contentValues.put("`createdTime`", BuiltInSerializers.serializeDate(model.createdTime));
     if (model.id != 0) {

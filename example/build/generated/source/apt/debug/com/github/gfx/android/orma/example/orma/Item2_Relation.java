@@ -45,7 +45,7 @@ public class Item2_Relation extends Relation<Item2, Item2_Relation> {
   public Item2 upsertWithoutTransaction(@NonNull Item2 model) {
     ContentValues contentValues = new ContentValues();
     contentValues.put("`category1`", new Category_Relation(conn, Category_Schema.INSTANCE).upsertWithoutTransaction(model.category1).id);
-    contentValues.put("`category2`", new Category_Relation(conn, Category_Schema.INSTANCE).upsertWithoutTransaction(model.category2).id);
+    contentValues.put("`category2`", model.category2 != null ? new Category_Relation(conn, Category_Schema.INSTANCE).upsertWithoutTransaction(model.category2).id : null);
     contentValues.put("`zonedTimestamp`", TypeAdapters.serializeZonedDateTime(model.zonedTimestamp));
     contentValues.put("`localDateTime`", TypeAdapters.serializeLocalDateTime(model.localDateTime));
     contentValues.put("`name`", model.name);
