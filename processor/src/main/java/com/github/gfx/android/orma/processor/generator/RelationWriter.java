@@ -195,6 +195,8 @@ public class RelationWriter extends BaseWriter {
     private CodeBlock upsertColumnAndGet(String modelExpr, ColumnDefinition column) {
         AssociationDefinition r = column.getAssociation();
 
+        CodeBlock expr;
+
         if (r != null) {
             SchemaDefinition associatedSchema = context.getSchemaDef(r.getModelType());
             CodeBlock associatedSchemaExpr = CodeBlock.of("$T.INSTANCE", associatedSchema.getSchemaClassName());
@@ -211,9 +213,15 @@ public class RelationWriter extends BaseWriter {
             ColumnDefinition associatedKey = associatedSchema.getPrimaryKey()
                     .orElseThrow(() -> new ProcessingException("No explicit primary key defined",
                             associatedSchema.getElement()));
-            return associatedKey.buildSerializedColumnExpr("conn", newAssociatedModelExpr);
+            expr = associatedKey.buildSerializedColumnExpr("conn", newAssociatedModelExpr);
         } else {
-            return column.buildSerializedColumnExpr("conn", modelExpr);
+            expr = column.buildSerializedColumnExpr("conn", modelExpr);
+        }
+
+        if (column.isNullableInJava()) {
+            return CodeBlock.of("$L != null ? $L : null", column.buildGetColumnExpr(modelExpr), expr);
+        } else {
+            return expr;
         }
     }
 }
