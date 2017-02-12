@@ -10,11 +10,15 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.2.0-rc2 2017/02/12
+
+* [#382](https://github.com/gfx/Android-Orma/pull/382): Fix NPE in `Relation#upsert(Model)`
+
 ## v4.2.0-rc1 2017/02/07
 
-* [#379](https://github.com/gfx/Android-Orma/pull/379)
-  * Deprecate `Relation#upserter()`. Use `inserter(OnConflict.REPLACE)` or `#upsert(Model)` instead.
-  * `Relation#upsert(Model)` to "UPDATE or INSERT", working recursively on associations
+* [#379](https://github.com/gfx/Android-Orma/pull/379): `Relation#upsert(Model)` to "UPDATE or INSERT", working recursively on associations
+
+  * And thus deprecate `Relation#upserter()` because it's confusing. Use `inserter(OnConflict.REPLACE)` or `#upsert(Model)` instead.
 * [#377](https://github.com/gfx/Android-Orma/pull/377): `Schema#getPrimaryKey` holds the boxed type of the primary key, instead of wildcard type
 
 ## v4.1.1 2017/01/25
