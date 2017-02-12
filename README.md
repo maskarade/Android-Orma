@@ -221,7 +221,7 @@ This is an internal helper class and not intended to be employed by users.
 
 ### Relation Helpers
 
-A Relation helper, e.g. `Todo_Relation`, is an entry point of table operations, which has conditions and orderings.
+A Relation helper, e.g. `Todo_Relation`, is an entry point of table operations.
 
 This is created by a database handle:
 
@@ -231,7 +231,7 @@ public static Todo_Relation relation() {
 }
 ```
 
-And is able to create `Selector`, `Updater`, `Deleter`, and `Inserter` for the model.
+And is able to create `Selector`, `Updater`, `Deleter`, and `Inserter` for the target model.
 
 ```java
 Todo_Relation todos = orma.relationOfTodo();
@@ -270,6 +270,16 @@ for (Todo todo : todos) {
   // ...
 }
 ```
+
+And has convenience `#upsert()` to "save it anyway":
+
+```java
+Todo_Relation todos = orma.relationOfTodo()
+
+todos.upsert(todo); // INSERT if it's not persistent; UPDATE Otherwise
+```
+
+Unlike `INSERT` with `OnConflict.REPLACE`, `#upsert()` doesn't break associations.
 
 ### Selector Helpers
 
