@@ -10,6 +10,13 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.2.0 2017/02/12
+
+https://github.com/gfx/Android-Orma/compare/v4.1.1...v4.2.0
+
+
+* Confenience `Relation#upsert()` is now available!
+
 ## v4.2.0-rc2 2017/02/12
 
 * [#382](https://github.com/gfx/Android-Orma/pull/382): Fix NPE in `Relation#upsert(Model)`
