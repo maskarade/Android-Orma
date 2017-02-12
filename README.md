@@ -271,15 +271,18 @@ for (Todo todo : todos) {
 }
 ```
 
-And has convenience `#upsert()` to "save it anyway":
+And has convenience `#upsert()` to "save it anyway", returning a new model:
 
 ```java
 Todo_Relation todos = orma.relationOfTodo()
 
-todos.upsert(todo); // INSERT if it's not persistent; UPDATE Otherwise
+Todo newTodo = todos.upsert(todo); // INSERT if it's not persistent; UPDATE Otherwise
 ```
 
 Unlike `INSERT` with `OnConflict.REPLACE`, `#upsert()` doesn't break associations.
+
+NOTE: if you use a model after `#upsert()`, you must use the returned `newModel`.
+This is because Orma does not change the model's primary key on `INSERT`.
 
 ### Selector Helpers
 
