@@ -20,6 +20,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Book;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
+import com.github.gfx.android.orma.test.model.ModelWithNullableDirectAssociations;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
 import com.github.gfx.android.orma.test.toolbox.OrmaFactory;
@@ -133,5 +134,21 @@ public class UpsertTest {
 
         assertThat(db.relationOfModelWithDirectAssociation().upsert(newModel).note, is("model's note"));
         assertThat(db.relationOfModelWithDirectAssociation().upsert(newModel).author.note, is("author's note"));
+    }
+
+    @Test
+    public void upsertAsInsertForModelsWithNullableDirectAssociation() throws Exception {
+        ModelWithNullableDirectAssociations model = new ModelWithNullableDirectAssociations();
+        ModelWithNullableDirectAssociations newModel = db.relationOfModelWithNullableDirectAssociations().upsert(model);
+        assertThat(newModel.id, is(not(0L)));
+        assertThat(newModel.author, is(nullValue()));
+    }
+
+    @Test
+    public void upsertAsUpdateForModelsWithNullableDirectAssociation() throws Exception {
+        ModelWithNullableDirectAssociations model = new ModelWithNullableDirectAssociations();
+        ModelWithNullableDirectAssociations newModel = db.relationOfModelWithNullableDirectAssociations().upsert(model);
+        newModel.author = Author.create("foo");
+        assertThat(db.relationOfModelWithNullableDirectAssociations().upsert(newModel).author.name, is("foo"));
     }
 }
