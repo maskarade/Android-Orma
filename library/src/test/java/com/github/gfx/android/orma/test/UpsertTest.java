@@ -32,6 +32,8 @@ import org.junit.runner.RunWith;
 
 import android.support.test.runner.AndroidJUnit4;
 
+import java.util.Collections;
+
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -118,7 +120,8 @@ public class UpsertTest {
 
     @Test
     public void upsertAsInsertForModelsWithDirectAssociation() throws Exception {
-        ModelWithDirectAssociation model = ModelWithDirectAssociation.create("foo", Author.create("author"), Publisher.create("publisher", 2017, 1), "note");
+        ModelWithDirectAssociation model = ModelWithDirectAssociation
+                .create("foo", Author.create("author"), Publisher.create("publisher", 2017, 1), "note");
         ModelWithDirectAssociation newModel = db.relationOfModelWithDirectAssociation().upsert(model);
         assertThat(newModel.name, is("foo"));
         assertThat(newModel.author.name, is("author"));
@@ -127,7 +130,8 @@ public class UpsertTest {
 
     @Test
     public void upsertAsUpdateForModelsWithDirectAssociation() throws Exception {
-        ModelWithDirectAssociation model = ModelWithDirectAssociation.create("foo", Author.create("author"), Publisher.create("publisher", 2017, 1), "note");
+        ModelWithDirectAssociation model = ModelWithDirectAssociation
+                .create("foo", Author.create("author"), Publisher.create("publisher", 2017, 1), "note");
         ModelWithDirectAssociation newModel = db.relationOfModelWithDirectAssociation().upsert(model);
         newModel.note = "model's note";
         newModel.author.note = "author's note";
@@ -149,6 +153,29 @@ public class UpsertTest {
         ModelWithNullableDirectAssociations model = new ModelWithNullableDirectAssociations();
         ModelWithNullableDirectAssociations newModel = db.relationOfModelWithNullableDirectAssociations().upsert(model);
         newModel.author = Author.create("foo");
-        assertThat(db.relationOfModelWithNullableDirectAssociations().upsert(newModel).author.name, is("foo"));
+        assertThat(db.relationOfModelWithNullableDirectAssociations().upsert(newModel).author, is(notNullValue()));
     }
+
+    // -------------------------
+
+    @Test
+    public void others() throws Exception {
+        Author author = Author.create("foo");
+
+        // for Iterable<T>
+        assertThat(db.relationOfAuthor().upsert(Collections.singleton(author)), contains(author));
+
+        // as single
+        db.relationOfAuthor().upsertAsSingle(author)
+                .test()
+                .assertResult(author);
+
+
+        // as observable
+        db.relationOfAuthor().upsertAsObservable(Collections.singleton(author))
+                .test()
+                .assertResult(author);
+
+    }
+
 }

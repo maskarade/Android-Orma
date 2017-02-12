@@ -28,6 +28,7 @@ import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,6 +36,8 @@ import io.reactivex.Maybe;
 import io.reactivex.MaybeEmitter;
 import io.reactivex.MaybeOnSubscribe;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
 
@@ -297,8 +300,8 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     /**
      * <p>Upsert a model recursively.</p>
      * <p>
-     *     NOTE: <strong>You must use the return value for the model</strong>
-     *     because the returned model might have newly assigned the primary key and foreign keys.
+     * NOTE: <strong>You must use the return value for the model</strong>
+     * because the returned model might have newly assigned the primary key and foreign keys.
      * </p>
      *
      * @param model A model to upsert
@@ -328,12 +331,47 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
      */
     @NonNull
     @CheckResult
-    public Single<Model> upsertAsObservable(@NonNull final Model model) {
+    public Single<Model> upsertAsSingle(@NonNull final Model model) {
         return Single.fromCallable(new ModelFactory<Model>() {
             @NonNull
             @Override
             public Model call() {
                 return upsert(model);
+            }
+        });
+    }
+
+    @NonNull
+    public List<Model> upsert(@NonNull final Iterable<Model> models) {
+        final List<Model> result = new ArrayList<>();
+        conn.transactionSync(new Runnable() {
+            @Override
+            public void run() {
+                for (Model model : models) {
+                    Model newModel = upsertWithoutTransaction(model);
+                    result.add(newModel);
+                }
+            }
+        });
+        return result;
+    }
+
+    @NonNull
+    @CheckResult
+    public Observable<Model> upsertAsObservable(@NonNull final Iterable<Model> models) {
+        return Observable.create(new ObservableOnSubscribe<Model>() {
+            @Override
+            public void subscribe(final ObservableEmitter<Model> emitter) {
+                conn.transactionSync(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Model model : models) {
+                            Model newModel = upsertWithoutTransaction(model);
+                            emitter.onNext(newModel);
+                        }
+                    }
+                });
+                emitter.onComplete();
             }
         });
     }
