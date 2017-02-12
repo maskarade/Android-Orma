@@ -166,31 +166,8 @@ public class RelationWriter extends BaseWriter {
         code.addStatement("$T contentValues = new $T()", Types.ContentValues, Types.ContentValues);
 
         for (ColumnDefinition column : schema.getColumnsWithoutAutoId()) {
-            AssociationDefinition r = column.getAssociation();
-
-            if (r != null) {
-                SchemaDefinition associatedSchema = context.getSchemaDef(r.getModelType());
-                CodeBlock associatedSchemaExpr = CodeBlock.of("$T.INSTANCE", associatedSchema.getSchemaClassName());
-                CodeBlock associatedModelExpr;
-                if (r.isSingleAssociation()) {
-                    associatedModelExpr = CodeBlock.of("$L.get()", column.buildGetColumnExpr(modelExpr));
-                } else {
-                    associatedModelExpr = CodeBlock.of("$L", column.buildGetColumnExpr(modelExpr));
-                }
-
-                CodeBlock newAssociatedModelExpr = CodeBlock.of("new $T(conn, $L).upsertWithoutTransaction($L)",
-                        associatedSchema.getRelationClassName(), associatedSchemaExpr, associatedModelExpr);
-
-                ColumnDefinition associatedKey = associatedSchema.getPrimaryKey()
-                        .orElseThrow(() -> new ProcessingException("No explicit primary key defined",
-                                associatedSchema.getElement()));
-                code.addStatement("contentValues.put($S, $L)",
-                        column.getEscapedColumnName(),
-                        associatedKey.buildSerializedColumnExpr("conn", newAssociatedModelExpr));
-            } else {
-                code.addStatement("contentValues.put($S, $L)",
-                        column.getEscapedColumnName(), column.buildSerializedColumnExpr("conn", modelExpr));
-            }
+            CodeBlock expr = upsertColumnAndGet(modelExpr, column);
+            code.addStatement("contentValues.put($S, $L)", column.getEscapedColumnName(), expr);
         }
 
         // only "auto = true" supports conditional UPDATE
@@ -213,5 +190,30 @@ public class RelationWriter extends BaseWriter {
         code.addStatement("return conn.findByRowId(schema, rowId)");
 
         return code.build();
+    }
+
+    private CodeBlock upsertColumnAndGet(String modelExpr, ColumnDefinition column) {
+        AssociationDefinition r = column.getAssociation();
+
+        if (r != null) {
+            SchemaDefinition associatedSchema = context.getSchemaDef(r.getModelType());
+            CodeBlock associatedSchemaExpr = CodeBlock.of("$T.INSTANCE", associatedSchema.getSchemaClassName());
+            CodeBlock associatedModelExpr;
+            if (r.isSingleAssociation()) {
+                associatedModelExpr = CodeBlock.of("$L.get()", column.buildGetColumnExpr(modelExpr));
+            } else {
+                associatedModelExpr = CodeBlock.of("$L", column.buildGetColumnExpr(modelExpr));
+            }
+
+            CodeBlock newAssociatedModelExpr = CodeBlock.of("new $T(conn, $L).upsertWithoutTransaction($L)",
+                    associatedSchema.getRelationClassName(), associatedSchemaExpr, associatedModelExpr);
+
+            ColumnDefinition associatedKey = associatedSchema.getPrimaryKey()
+                    .orElseThrow(() -> new ProcessingException("No explicit primary key defined",
+                            associatedSchema.getElement()));
+            return associatedKey.buildSerializedColumnExpr("conn", newAssociatedModelExpr);
+        } else {
+            return column.buildSerializedColumnExpr("conn", modelExpr);
+        }
     }
 }
