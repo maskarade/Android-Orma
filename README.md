@@ -1166,7 +1166,7 @@ and forget `close`.
 Here is a list of open-source Androdi apps using Orma which are released to Google Play:
 
 * [gfx/Android-Helium](https://github.com/gfx/Android-Helium)
-* [konifar/droidkaigi2016](https://github.com/konifar/droidkaigi2016)
+* [DroidKaigi/conference-app-2017](https://github.com/DroidKaigi/conference-app-2017)
 
 Or you can search use cases by [GitHub search](https://github.com/search?o=desc&q=%22com.github.gfx.android.orma%22+filename%3Abuild.gradle&ref=searchresults&s=indexed&type=Code&utf8=%E2%9C%93).
 
