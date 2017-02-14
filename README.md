@@ -620,7 +620,7 @@ See also [Query Helper Methods](#query-helper-methods).
 
 Column names starting `$` are reserved for metadata.
 
-Other names, include SQLite keywords, are allowed.
+Other names, including SQLite keywords, are allowed.
 
 ## RxJava Integration
 
