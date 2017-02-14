@@ -37,6 +37,7 @@ as the author respects the Larry Wall's wisdom:
 - [Details of Database Handles](#details-of-database-handles)
     - [Configuration of Database Handles](#configuration-of-database-handles)
     - [Database Handle Builders](#database-handle-builders)
+    - [In-Memory Database](#in-memory-database)
 - [Details of Models](#details-of-models)
     - [Setters and Getters](#setters-and-getters)
     - [Immutable Models](#immutable-models)
@@ -468,6 +469,12 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .writeOnMainThread(AccessThreadConstraint.NONE)
     .build();
 ```
+
+### In-Memory Database
+
+You can create in-memory databases by passing `null` to `OrmaDatabase.Builder#name()`.
+
+This is useful for testhing.
 
 ## Details of Models
 
