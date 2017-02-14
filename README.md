@@ -41,6 +41,7 @@ as the author respects the Larry Wall's wisdom:
     - [Setters and Getters](#setters-and-getters)
     - [Immutable Models](#immutable-models)
     - [Composite Indexes](#composite-indexes)
+    - [Reserved Names](#reserved-names)
 - [RxJava Integration](#rxjava-integration)
 - [Associations](#associations)
     - [Has-One Associations with `SingleAssociation<T>`](#has-one-associations-with-singleassociationt)
@@ -614,6 +615,12 @@ Composite indexes generate query helper methods only for `==` and `ORDER BY` for
 You can control generated helpers with the `helpers` parameter.
 
 See also [Query Helper Methods](#query-helper-methods).
+
+### Reserved Names
+
+Column names starting `$` are reserved for metadata.
+
+Other names, include SQLite keywords, are allowed.
 
 ## RxJava Integration
 
