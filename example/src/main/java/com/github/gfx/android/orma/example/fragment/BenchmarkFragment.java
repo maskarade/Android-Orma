@@ -21,6 +21,8 @@ import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.example.databinding.FragmentBenchmarkBinding;
 import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
 import com.github.gfx.android.orma.example.handwritten.HandWrittenOpenHelper;
+import com.github.gfx.android.orma.example.objectbox.MyObjectBox;
+import com.github.gfx.android.orma.example.objectbox.ObTodo;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.orma.Todo_Selector;
@@ -48,6 +50,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -78,6 +82,8 @@ public class BenchmarkFragment extends Fragment {
     FragmentBenchmarkBinding binding;
 
     ResultAdapter adapter;
+
+    BoxStore boxStore;
 
     public BenchmarkFragment() {
     }
@@ -122,6 +128,7 @@ public class BenchmarkFragment extends Fragment {
         super.onStart();
 
         Realm.init(getContext());
+        boxStore = MyObjectBox.builder().androidContext(getContext().getApplicationContext()).build();
     }
 
     @Override
@@ -161,6 +168,8 @@ public class BenchmarkFragment extends Fragment {
         realm.executeTransaction(r -> r.delete(RealmTodo.class));
         realm.close();
 
+        boxStore.boxFor(ObTodo.class).removeAll();
+
         hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
         orma.deleteFromTodo()
@@ -174,6 +183,10 @@ public class BenchmarkFragment extends Fragment {
                 })
                 .flatMap(result -> {
                     adapter.add(result);
+                    return startInsertWithObjectBox();
+                })
+                .flatMap(result -> {
+                    adapter.add(result);
                     return startInsertWithHandWritten();
                 })
                 .flatMap(result -> {
@@ -183,6 +196,10 @@ public class BenchmarkFragment extends Fragment {
                 .flatMap(result -> {
                     adapter.add(result);
                     return startSelectAllWithRealm(); // Realm objects can only be accessed on the thread they were created.
+                })
+                .flatMap(result -> {
+                    adapter.add(result);
+                    return startSelectAllWithObjectBox();
                 })
                 .flatMap(result -> {
                     adapter.add(result);
@@ -247,6 +264,24 @@ public class BenchmarkFragment extends Fragment {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+
+    Single<Result> startInsertWithObjectBox() {
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+               Box<ObTodo> box = boxStore.boxFor(ObTodo.class);
+                boxStore.runInTx(() -> {
+                    long now = System.currentTimeMillis();
+
+                    for (int i = 0; i < N_ITEMS; i++) {
+                        ObTodo todo = new ObTodo(0L, titlePrefix + i, contentPrefix + i,false, new Date(now));
+                        box.put(todo);
+                    }
+                });
+            });
+            return new Result("ObjectBox/insert", result);
+        });
     }
 
     Single<Result> startInsertWithHandWritten() {
@@ -338,6 +373,33 @@ public class BenchmarkFragment extends Fragment {
                 Log.d(TAG, "Realm/forEachAll count: " + count);
             });
             return new Result("Realm/forEachAll", result);
+        });
+    }
+
+    Single<Result> startSelectAllWithObjectBox() {
+        return Single.fromCallable(() -> {
+            long result = runWithBenchmark(() -> {
+                AtomicInteger count = new AtomicInteger();
+                Box<ObTodo> box = boxStore.boxFor(ObTodo.class);
+
+                List<ObTodo> results = box.query().build().find();
+                for (ObTodo todo : results) {
+                    @SuppressWarnings("unused")
+                    String title = todo.getTitle();
+                    @SuppressWarnings("unused")
+                    String content = todo.getContent();
+                    @SuppressWarnings("unused")
+                    Date createdTime = todo.getCreatedTime();
+
+                    count.incrementAndGet();
+                }
+                if (results.size() != count.get()) {
+                    throw new AssertionError("unexpected get: " + count.get());
+                }
+
+                Log.d(TAG, "ObjectBox/forEachAll count: " + count);
+            });
+            return new Result("ObjectBox/forEachAll", result);
         });
     }
 
