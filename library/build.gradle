@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.novoda.bintray-release'
 
 android {
@@ -44,7 +43,7 @@ dependencies {
 
     compile "com.android.support:support-compat:${SUPPORT_LIBRARY_VERSION}"
     compile "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
-    compile 'io.reactivex.rxjava2:rxjava:2.0.5'
+    compile 'io.reactivex.rxjava2:rxjava:2.0.6'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
     provided("com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}") {
@@ -53,14 +52,14 @@ dependencies {
     }
     provided 'com.google.code.gson:gson:2.8.0'
 
-    testApt project(':processor')
+    testAnnotationProcessor project(':processor')
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.1.4'
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
     testCompile 'com.google.code.gson:gson:2.8.0'
     testCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
 
-    androidTestApt project(':processor')
+    androidTestAnnotationProcessor project(':processor')
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
