@@ -10,6 +10,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.2.1 2017/03/05
+
+https://github.com/gfx/Android-Orma/compare/v4.2.0...v4.2.1
+
+* [#389](https://github.com/gfx/Android-Orma/pull/389): Built with Android Gradle plugin v2.3.0 and fixed usage of `@RestrictTo`
+
 ## v4.2.0 2017/02/12
 
 https://github.com/gfx/Android-Orma/compare/v4.1.1...v4.2.0
