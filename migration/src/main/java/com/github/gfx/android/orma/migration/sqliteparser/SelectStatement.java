@@ -16,9 +16,6 @@
 
 package com.github.gfx.android.orma.migration.sqliteparser;
 
-import android.support.annotation.RestrictTo;
-
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 public class SelectStatement extends SQLiteComponent {
 
 }
