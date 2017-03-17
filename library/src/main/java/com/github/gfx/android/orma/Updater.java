@@ -20,7 +20,6 @@ import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.RestrictTo;
 
 import java.util.concurrent.Callable;
 
@@ -56,7 +55,6 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
         return contents;
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     @SuppressWarnings("unchecked")
     public U putAll(ContentValues contentValues) {
         contents.putAll(contentValues);

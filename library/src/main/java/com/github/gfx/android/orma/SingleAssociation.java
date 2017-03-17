@@ -57,7 +57,7 @@ public class SingleAssociation<Model> implements Parcelable {
         this.single = single;
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    // may be called from *_Schema
     public SingleAssociation(@NonNull final OrmaConnection conn, @NonNull final Schema<Model> schema, final long id) {
         this.id = id;
         single = Single.create(new SingleOnSubscribe<Model>() {
