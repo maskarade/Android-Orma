@@ -10,6 +10,13 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.2.3 2017/03/17
+
+https://github.com/gfx/Android-Orma/compare/v4.2.2...v4.2.3
+
+* [#392](https://github.com/gfx/Android-Orma/pull/392): Amend #393 to avoid lint errors
+* [#393](https://github.com/gfx/Android-Orma/pull/393): refactoring SingleAssociation
+
 ## v4.2.2 2017/03/17
 
 https://github.com/gfx/Android-Orma/compare/v4.2.1...v4.2.2
