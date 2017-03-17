@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+/**
+ * This package provides internal utilities that are used in generated classes.
+ */
 package com.github.gfx.android.orma.internal;
 
-import android.support.annotation.RestrictTo;
