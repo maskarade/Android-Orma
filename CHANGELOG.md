@@ -10,6 +10,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.2.2 2017/03/17
+
+https://github.com/gfx/Android-Orma/compare/v4.2.0...v4.2.1
+
+* [#391](https://github.com/gfx/Android-Orma/pull/391): Fix lint errors with Android Gradle plugin v2.3.0
+
 ## v4.2.1 2017/03/05
 
 https://github.com/gfx/Android-Orma/compare/v4.2.0...v4.2.1
