@@ -12,7 +12,7 @@ Note that _experimental_ features, annotated with `@Experimental` may change wit
 
 ## v4.2.2 2017/03/17
 
-https://github.com/gfx/Android-Orma/compare/v4.2.0...v4.2.1
+https://github.com/gfx/Android-Orma/compare/v4.2.1...v4.2.2
 
 * [#391](https://github.com/gfx/Android-Orma/pull/391): Fix lint errors with Android Gradle plugin v2.3.0
 
