@@ -29,8 +29,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
 
 /**
  * Lazy has-one association. The {@code Model} is assumed to have a primary key with the `long` type.
@@ -60,20 +58,11 @@ public class SingleAssociation<Model> implements Parcelable {
     // may be called from *_Schema
     public SingleAssociation(@NonNull final OrmaConnection conn, @NonNull final Schema<Model> schema, final long id) {
         this.id = id;
-        single = Single.create(new SingleOnSubscribe<Model>() {
+        single = Single.fromCallable(new ModelFactory<Model>() {
+            @NonNull
             @Override
-            public void subscribe(SingleEmitter<Model> emitter) throws Exception {
-                ColumnDef<Model, ?> primaryKey = schema.getPrimaryKey();
-                String whereClause = primaryKey.getEscapedName() + " = ?";
-                String[] whereArgs = {String.valueOf(id)};
-                Model model = conn.querySingle(schema, schema.getDefaultResultColumns(),
-                        whereClause, whereArgs, null, null, null, 0);
-                if (model != null) {
-                    emitter.onSuccess(model);
-                } else {
-                    emitter.onError(new NoValueException("No value found for "
-                            + schema.getTableName() + "." + primaryKey.name + " = " + id));
-                }
+            public Model call() {
+                return conn.findByRowId(schema, id);
             }
         });
     }
