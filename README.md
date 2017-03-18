@@ -4,10 +4,10 @@
 <img src="Orma.png" width="256" height="256"  alt="Android Orma" />
 </p>
 
-Orma is an ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html),
-generating helper classes at compile time with **annotation processing**, inspired in ActiveAndroid, GreenDAO, and Realm.
+Orma is a ORM (Object-Relation Mapper) for [Android SQLiteDatabase](http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html).
+Because it generates helper classes at compile time with **annotation processing**, its query builders are type-safe.
 
-The interface of Orma is very simple and easy to use,
+The interface of Orma is simple and easy to use,
 as the author respects the Larry Wall's wisdom:
 
 > Easy things should be easy, and hard things should be possible
@@ -82,9 +82,10 @@ as the author respects the Larry Wall's wisdom:
 
 ## Motivation
 
-There are already [a lot of ORMs](https://android-arsenal.com/tag/69). Why I have to add another wheel?
+There are already [a lot of ORMs for Android](https://github.com/search?q=topic%3Aandroid+topic%3Aorm).
+Why I have to add another wheel?
 
-The answer is that I need ORM that have *all* the following features:
+The answer is that I need an ORM that has *all* the following features:
 
 * Fast as hand-written code
 * POJO models
@@ -92,18 +93,19 @@ The answer is that I need ORM that have *all* the following features:
   * Might implement `Parcelable` and/or extend any classes
   * They should be passed to another thread
 * A database handle must be an object instance
-  * Not a singleton class
   * Not a static-method based class
+  * Even though it is designed to be used as a singleton scope
 * Easy migration
   * Some `ALTER TABLE`, e.g. `add column` and `drop column`, should be detectd and processed
   * There is a wheel in Perl: [SQL::Translator::Diff](https://metacpan.org/pod/SQL::Translator::Diff)
-* Code completion friendly
+* Type safe and code completion friendly
   * `db.selectFromModel()` is better than `new Select(Model.class)`
+  * `todos.idEq(id).toList()` is better than `todos.equalTo("id", id)`
 * Custom raw queries are sometimes inevitable
   * `GROUP BY ... HAVING ...`
   * `SELECT max(value), min(value), avg(value), count(value) FROM ...`
 
-And now they are what Orma has.
+And now they are exactly what Orma has.
 
 ## Requirements
 
@@ -139,7 +141,7 @@ import android.support.annotation.Nullable;
 @Table
 public class Todo {
 
-    @PrimaryKey
+    @PrimaryKey(autoincrement = true)
     public long id;
 
     @Column(indexed = true)
@@ -161,6 +163,7 @@ Here is an example to configure `OrmaDatabase`:
 ```java
 // See OrmaDatabaseBuilderBase for other options.
 OrmaDatabase orma = OrmaDatabase.builder(context)
+    .name("main.db") // default: "${applicationId}.orma.db"
     .build();
 ```
 
