@@ -42,6 +42,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
 
     protected final OrmaAdapter<Model> delegate;
 
+
     public OrmaListAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));
     }
@@ -49,7 +50,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     public OrmaListAdapter(OrmaAdapter<Model> delegate) {
         this.delegate = delegate;
 
-        delegate.getQueryObservable()
+        delegate.addSubscription(delegate.getQueryObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Selector<Model, ?>>() {
@@ -57,7 +58,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
                     public void accept(Selector<Model, ?> selector) throws Exception {
                         notifyDataSetChanged();
                     }
-                });
+                }));
     }
 
     @Override

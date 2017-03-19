@@ -33,6 +33,8 @@ import java.util.concurrent.Callable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 /**
@@ -53,21 +55,29 @@ public class OrmaAdapter<Model> {
 
     protected final Observable<Selector<Model, ?>> queryObservable;
 
+    protected final CompositeDisposable queryObservableSubscription;
+
     public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
         this.context = context;
         this.relation = relation;
         this.queryObservable = relation.createQueryObservable();
-        queryObservable.subscribe(new Consumer<Selector<Model, ?>>() {
+
+        queryObservableSubscription = new CompositeDisposable();
+        queryObservableSubscription.add(queryObservable.subscribe(new Consumer<Selector<Model, ?>>() {
             @Override
             public void accept(Selector<Model, ?> models) throws Exception {
                 cache.evictAll();
             }
-        });
+        }));
     }
 
     @NonNull
     public Observable<Selector<Model, ?>> getQueryObservable() {
         return queryObservable;
+    }
+
+    public void addSubscription(Disposable subscription) {
+        queryObservableSubscription.add(subscription);
     }
 
     @NonNull

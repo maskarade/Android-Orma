@@ -40,6 +40,7 @@ import android.widget.TextView;
 import java.util.Date;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class ListViewFragment extends Fragment {
@@ -64,6 +65,7 @@ public class ListViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentListViewBinding.inflate(inflater, container, false);
 
+        // NOTE: the DB handle should be a singleton in production
         orma = OrmaDatabase.builder(getContext())
                 .build();
 
@@ -114,7 +116,8 @@ public class ListViewFragment extends Fragment {
                 Todo currentTodo = getRelation().reload(todo);
                 final boolean done = !currentTodo.done;
 
-                getRelation()
+                @SuppressWarnings("unused")
+                Disposable disposable = getRelation()
                         .updater()
                         .idEq(todo.id)
                         .done(done)

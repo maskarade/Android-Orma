@@ -74,28 +74,28 @@ public class AnnotationHandle<T extends Annotation> {
     }
 
     public <V> V getOrDefault(String name, Class<V> t) {
-        return get(name, t).orElseGet(() -> getDefaultValue(name));
+        return get(name, t).orElseGet(() -> t.cast(getDefaultValue(name)));
     }
 
     public TypeName getValueAsTypeName(String name) {
         return TypeName.get(getOrDefault(name, TypeMirror.class));
     }
 
-    public <V> Stream<V> getValues(String name, Class<V> t) {
+    public <V> Stream<V> getValues(String name, Class<V> valueType) {
         @SuppressWarnings("unchecked")
         List<AnnotationValue> values = get(name, List.class)
-                .orElseGet(() -> Arrays.asList(getDefaultValue(name)));
-        return values.stream().map(v -> t.cast(v.getValue()));
+                .orElseGet(() -> Arrays.asList((Class[])getDefaultValue(name)));
+        return values.stream().map(v -> valueType.cast(v.getValue()));
     }
 
     @SuppressWarnings("unchecked")
-    private <V> V getDefaultValue(String name) {
+    private Object getDefaultValue(String name) {
         Method m;
         try {
             m = annotationClass.getMethod(name);
         } catch (NoSuchMethodException e) {
             throw new AssertionError(e);
         }
-        return (V) m.getDefaultValue();
+        return m.getDefaultValue();
     }
 }

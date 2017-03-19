@@ -170,6 +170,7 @@ public class MainFragment extends Fragment {
                 .execute();
     }
 
+    @SuppressWarnings("CheckReturnValue")
     void rxCrud() {
         // create
         orma.prepareInsertIntoTodoAsSingle()

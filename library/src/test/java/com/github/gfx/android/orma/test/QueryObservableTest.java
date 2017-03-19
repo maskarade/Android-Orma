@@ -33,13 +33,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeThat;
 
 @RunWith(AndroidJUnit4.class)
 public class QueryObservableTest {
@@ -59,7 +59,7 @@ public class QueryObservableTest {
 
         Observable<Author_Selector> observable = db.relationOfAuthor()
                 .createQueryObservable();
-        observable.flatMap(new Function<Author_Selector, Observable<Author>>() {
+        Disposable subscription = observable.flatMap(new Function<Author_Selector, Observable<Author>>() {
             @Override
             public Observable<Author> apply(Author_Selector selector) throws Exception {
                 return selector.executeAsObservable();
@@ -86,6 +86,8 @@ public class QueryObservableTest {
         result.clear();
         db.insertIntoAuthor(Author.create("baz"));
         assertThat(result, contains("foo", "bar", "baz"));
+
+        subscription.dispose();
     }
 
     @Test
@@ -94,7 +96,7 @@ public class QueryObservableTest {
 
         final List<String> result = new ArrayList<>();
 
-        db.relationOfAuthor()
+        Disposable subscription = db.relationOfAuthor()
                 .<Author_Selector>createQueryObservable()
                 .flatMap(new Function<Author_Selector, Observable<Author>>() {
                     @Override
@@ -114,6 +116,7 @@ public class QueryObservableTest {
                 result.add(s);
             }
         });
+        subscription.dispose();
 
         System.gc();
 
@@ -122,7 +125,7 @@ public class QueryObservableTest {
         assertThat(result, hasSize(0));
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation"})
     @Test
     public void eventTypes() throws Exception {
         final List<DataSetChangedEvent.Type> result = new ArrayList<>();

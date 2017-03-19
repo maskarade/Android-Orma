@@ -42,6 +42,7 @@ import android.widget.TextView;
 import java.util.Date;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class RecyclerViewFragment extends Fragment {
@@ -127,7 +128,8 @@ public class RecyclerViewFragment extends Fragment {
                 Todo currentTodo = getRelation().reload(todo);
                 final boolean done = !currentTodo.done;
 
-                getRelation()
+                @SuppressWarnings("unused")
+                Disposable disposable = getRelation()
                         .updater()
                         .idEq(todo.id)
                         .done(done)

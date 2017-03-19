@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -163,7 +164,8 @@ public class BenchmarkFragment extends Fragment {
 
         hw.getWritableDatabase().execSQL("DELETE FROM todo");
 
-        orma.deleteFromTodo()
+        @SuppressLint("unused")
+        Disposable disposable = orma.deleteFromTodo()
                 .executeAsSingle()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -189,7 +191,9 @@ public class BenchmarkFragment extends Fragment {
                     return startSelectAllWithHandWritten();
                 })
                 .subscribe(
-                        result -> adapter.add(result),
+                        result ->  {
+                            adapter.add(result);
+                        },
                         error -> {
                             Log.wtf(TAG, error);
                             Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_LONG).show();
