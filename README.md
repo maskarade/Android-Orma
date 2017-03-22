@@ -1,4 +1,4 @@
-# Android Orma [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/)
+# Android Orma [![Circle CI](https://circleci.com/gh/gfx/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/gfx/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/) [![Gitter](http://badges.gitter.im/Android-Orma.svg)](https://gitter.im/Android-Orma/Lobby)
 
 <p align="center">
 <img src="Orma.png" width="256" height="256"  alt="Android Orma" />
@@ -1184,6 +1184,9 @@ Tell me if your projects use Orma!
 
 * Use [GitHub issues](https://github.com/gfx/Android-Orma/issues) for the issue tracker
 * Feel free to ask for questions to the author [@\_\_gfx\_\_](https://twitter.com/__gfx__)
+* Gitter Rooms:
+    * https://gitter.im/Android-Orma/Lobby (en)
+    * https://gitter.im/Android-Orma/Ja (ja)
 
 ## Licenses in Runtime Dependencies
 
