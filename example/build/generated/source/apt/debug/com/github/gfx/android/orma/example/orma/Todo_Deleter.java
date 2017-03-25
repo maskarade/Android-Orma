@@ -1,10 +1,13 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
+import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.Deleter;
 import com.github.gfx.android.orma.OrmaConnection;
+import com.github.gfx.android.orma.function.Function1;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
   final Todo_Schema schema;
@@ -75,6 +78,66 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
     return where(schema.title, ">=", title);
   }
 
+  @Deprecated
+  public Todo_Deleter contentIsNull() {
+    return where(schema.content, " IS NULL");
+  }
+
+  @Deprecated
+  public Todo_Deleter contentIsNotNull() {
+    return where(schema.content, " IS NOT NULL");
+  }
+
+  @Deprecated
+  public Todo_Deleter contentEq(@NonNull String content) {
+    return where(schema.content, "=", content);
+  }
+
+  @Deprecated
+  public Todo_Deleter contentNotEq(@NonNull String content) {
+    return where(schema.content, "<>", content);
+  }
+
+  @Deprecated
+  public Todo_Deleter contentIn(@NonNull Collection<String> values) {
+    return in(false, schema.content, values);
+  }
+
+  @Deprecated
+  public Todo_Deleter contentNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.content, values);
+  }
+
+  @Deprecated
+  public final Todo_Deleter contentIn(@NonNull String... values) {
+    return contentIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Todo_Deleter contentNotIn(@NonNull String... values) {
+    return contentNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Todo_Deleter contentLt(@NonNull String content) {
+    return where(schema.content, "<", content);
+  }
+
+  @Deprecated
+  public Todo_Deleter contentLe(@NonNull String content) {
+    return where(schema.content, "<=", content);
+  }
+
+  @Deprecated
+  public Todo_Deleter contentGt(@NonNull String content) {
+    return where(schema.content, ">", content);
+  }
+
+  @Deprecated
+  public Todo_Deleter contentGe(@NonNull String content) {
+    return where(schema.content, ">=", content);
+  }
+
   public Todo_Deleter doneEq(boolean done) {
     return where(schema.done, "=", done);
   }
@@ -113,6 +176,74 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
 
   public Todo_Deleter doneGe(boolean done) {
     return where(schema.done, ">=", done);
+  }
+
+  @Deprecated
+  public Todo_Deleter createdTimeEq(@NonNull Date createdTime) {
+    return where(schema.createdTime, "=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Deleter createdTimeNotEq(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<>", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Deleter createdTimeIn(@NonNull Collection<Date> values) {
+    return in(false, schema.createdTime, values, new Function1<Date, Long>() {
+      @Override
+      public Long apply(Date value) {
+        return BuiltInSerializers.serializeDate(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public Todo_Deleter createdTimeNotIn(@NonNull Collection<Date> values) {
+    return in(true, schema.createdTime, values, new Function1<Date, Long>() {
+      @Override
+      public Long apply(Date value) {
+        return BuiltInSerializers.serializeDate(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public final Todo_Deleter createdTimeIn(@NonNull Date... values) {
+    return createdTimeIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Todo_Deleter createdTimeNotIn(@NonNull Date... values) {
+    return createdTimeNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Todo_Deleter createdTimeLt(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Deleter createdTimeLe(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Deleter createdTimeGt(@NonNull Date createdTime) {
+    return where(schema.createdTime, ">", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Deleter createdTimeGe(@NonNull Date createdTime) {
+    return where(schema.createdTime, ">=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  /**
+   * To build a condition <code>createdTime BETWEEN a AND b</code>, which is equivalent to <code>a <= createdTime AND createdTime <= b</code>.
+   */
+  @Deprecated
+  public Todo_Deleter createdTimeBetween(@NonNull Date createdTimeA, @NonNull Date createdTimeB) {
+    return whereBetween(schema.createdTime, BuiltInSerializers.serializeDate(createdTimeA), BuiltInSerializers.serializeDate(createdTimeB));
   }
 
   public Todo_Deleter idEq(long id) {

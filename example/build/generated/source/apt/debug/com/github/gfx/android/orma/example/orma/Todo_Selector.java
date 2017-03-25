@@ -1,10 +1,13 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
+import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.function.Function1;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 public class Todo_Selector extends Selector<Todo, Todo_Selector> {
   final Todo_Schema schema;
@@ -75,6 +78,66 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     return where(schema.title, ">=", title);
   }
 
+  @Deprecated
+  public Todo_Selector contentIsNull() {
+    return where(schema.content, " IS NULL");
+  }
+
+  @Deprecated
+  public Todo_Selector contentIsNotNull() {
+    return where(schema.content, " IS NOT NULL");
+  }
+
+  @Deprecated
+  public Todo_Selector contentEq(@NonNull String content) {
+    return where(schema.content, "=", content);
+  }
+
+  @Deprecated
+  public Todo_Selector contentNotEq(@NonNull String content) {
+    return where(schema.content, "<>", content);
+  }
+
+  @Deprecated
+  public Todo_Selector contentIn(@NonNull Collection<String> values) {
+    return in(false, schema.content, values);
+  }
+
+  @Deprecated
+  public Todo_Selector contentNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.content, values);
+  }
+
+  @Deprecated
+  public final Todo_Selector contentIn(@NonNull String... values) {
+    return contentIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Todo_Selector contentNotIn(@NonNull String... values) {
+    return contentNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Todo_Selector contentLt(@NonNull String content) {
+    return where(schema.content, "<", content);
+  }
+
+  @Deprecated
+  public Todo_Selector contentLe(@NonNull String content) {
+    return where(schema.content, "<=", content);
+  }
+
+  @Deprecated
+  public Todo_Selector contentGt(@NonNull String content) {
+    return where(schema.content, ">", content);
+  }
+
+  @Deprecated
+  public Todo_Selector contentGe(@NonNull String content) {
+    return where(schema.content, ">=", content);
+  }
+
   public Todo_Selector doneEq(boolean done) {
     return where(schema.done, "=", done);
   }
@@ -113,6 +176,74 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
 
   public Todo_Selector doneGe(boolean done) {
     return where(schema.done, ">=", done);
+  }
+
+  @Deprecated
+  public Todo_Selector createdTimeEq(@NonNull Date createdTime) {
+    return where(schema.createdTime, "=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Selector createdTimeNotEq(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<>", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Selector createdTimeIn(@NonNull Collection<Date> values) {
+    return in(false, schema.createdTime, values, new Function1<Date, Long>() {
+      @Override
+      public Long apply(Date value) {
+        return BuiltInSerializers.serializeDate(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public Todo_Selector createdTimeNotIn(@NonNull Collection<Date> values) {
+    return in(true, schema.createdTime, values, new Function1<Date, Long>() {
+      @Override
+      public Long apply(Date value) {
+        return BuiltInSerializers.serializeDate(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public final Todo_Selector createdTimeIn(@NonNull Date... values) {
+    return createdTimeIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Todo_Selector createdTimeNotIn(@NonNull Date... values) {
+    return createdTimeNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Todo_Selector createdTimeLt(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Selector createdTimeLe(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Selector createdTimeGt(@NonNull Date createdTime) {
+    return where(schema.createdTime, ">", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Selector createdTimeGe(@NonNull Date createdTime) {
+    return where(schema.createdTime, ">=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  /**
+   * To build a condition <code>createdTime BETWEEN a AND b</code>, which is equivalent to <code>a <= createdTime AND createdTime <= b</code>.
+   */
+  @Deprecated
+  public Todo_Selector createdTimeBetween(@NonNull Date createdTimeA, @NonNull Date createdTimeB) {
+    return whereBetween(schema.createdTime, BuiltInSerializers.serializeDate(createdTimeA), BuiltInSerializers.serializeDate(createdTimeB));
   }
 
   public Todo_Selector idEq(long id) {
@@ -170,6 +301,16 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     return orderBy(schema.title.orderInDescending());
   }
 
+  @Deprecated
+  public Todo_Selector orderByContentAsc() {
+    return orderBy(schema.content.orderInAscending());
+  }
+
+  @Deprecated
+  public Todo_Selector orderByContentDesc() {
+    return orderBy(schema.content.orderInDescending());
+  }
+
   public Todo_Selector orderByDoneAsc() {
     return orderBy(schema.done.orderInAscending());
   }
@@ -184,5 +325,15 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
 
   public Todo_Selector orderByCreatedTimeDesc() {
     return orderBy(schema.createdTime.orderInDescending());
+  }
+
+  @Deprecated
+  public Todo_Selector orderByIdAsc() {
+    return orderBy(schema.id.orderInAscending());
+  }
+
+  @Deprecated
+  public Todo_Selector orderByIdDesc() {
+    return orderBy(schema.id.orderInDescending());
   }
 }

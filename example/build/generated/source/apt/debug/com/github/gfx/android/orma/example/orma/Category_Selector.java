@@ -35,6 +35,56 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
     return schema;
   }
 
+  @Deprecated
+  public Category_Selector nameEq(@NonNull String name) {
+    return where(schema.name, "=", name);
+  }
+
+  @Deprecated
+  public Category_Selector nameNotEq(@NonNull String name) {
+    return where(schema.name, "<>", name);
+  }
+
+  @Deprecated
+  public Category_Selector nameIn(@NonNull Collection<String> values) {
+    return in(false, schema.name, values);
+  }
+
+  @Deprecated
+  public Category_Selector nameNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.name, values);
+  }
+
+  @Deprecated
+  public final Category_Selector nameIn(@NonNull String... values) {
+    return nameIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Category_Selector nameNotIn(@NonNull String... values) {
+    return nameNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Category_Selector nameLt(@NonNull String name) {
+    return where(schema.name, "<", name);
+  }
+
+  @Deprecated
+  public Category_Selector nameLe(@NonNull String name) {
+    return where(schema.name, "<=", name);
+  }
+
+  @Deprecated
+  public Category_Selector nameGt(@NonNull String name) {
+    return where(schema.name, ">", name);
+  }
+
+  @Deprecated
+  public Category_Selector nameGe(@NonNull String name) {
+    return where(schema.name, ">=", name);
+  }
+
   public Category_Selector idEq(long id) {
     return where(schema.id, "=", id);
   }
@@ -80,5 +130,25 @@ public class Category_Selector extends Selector<Category, Category_Selector> {
    */
   public Category_Selector idBetween(long idA, long idB) {
     return whereBetween(schema.id, idA, idB);
+  }
+
+  @Deprecated
+  public Category_Selector orderByNameAsc() {
+    return orderBy(schema.name.orderInAscending());
+  }
+
+  @Deprecated
+  public Category_Selector orderByNameDesc() {
+    return orderBy(schema.name.orderInDescending());
+  }
+
+  @Deprecated
+  public Category_Selector orderByIdAsc() {
+    return orderBy(schema.id.orderInAscending());
+  }
+
+  @Deprecated
+  public Category_Selector orderByIdDesc() {
+    return orderBy(schema.id.orderInDescending());
   }
 }

@@ -72,6 +72,56 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
     return new Category_Deleter(this);
   }
 
+  @Deprecated
+  public Category_Relation nameEq(@NonNull String name) {
+    return where(schema.name, "=", name);
+  }
+
+  @Deprecated
+  public Category_Relation nameNotEq(@NonNull String name) {
+    return where(schema.name, "<>", name);
+  }
+
+  @Deprecated
+  public Category_Relation nameIn(@NonNull Collection<String> values) {
+    return in(false, schema.name, values);
+  }
+
+  @Deprecated
+  public Category_Relation nameNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.name, values);
+  }
+
+  @Deprecated
+  public final Category_Relation nameIn(@NonNull String... values) {
+    return nameIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Category_Relation nameNotIn(@NonNull String... values) {
+    return nameNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Category_Relation nameLt(@NonNull String name) {
+    return where(schema.name, "<", name);
+  }
+
+  @Deprecated
+  public Category_Relation nameLe(@NonNull String name) {
+    return where(schema.name, "<=", name);
+  }
+
+  @Deprecated
+  public Category_Relation nameGt(@NonNull String name) {
+    return where(schema.name, ">", name);
+  }
+
+  @Deprecated
+  public Category_Relation nameGe(@NonNull String name) {
+    return where(schema.name, ">=", name);
+  }
+
   public Category_Relation idEq(long id) {
     return where(schema.id, "=", id);
   }
@@ -117,5 +167,25 @@ public class Category_Relation extends Relation<Category, Category_Relation> {
    */
   public Category_Relation idBetween(long idA, long idB) {
     return whereBetween(schema.id, idA, idB);
+  }
+
+  @Deprecated
+  public Category_Relation orderByNameAsc() {
+    return orderBy(schema.name.orderInAscending());
+  }
+
+  @Deprecated
+  public Category_Relation orderByNameDesc() {
+    return orderBy(schema.name.orderInDescending());
+  }
+
+  @Deprecated
+  public Category_Relation orderByIdAsc() {
+    return orderBy(schema.id.orderInAscending());
+  }
+
+  @Deprecated
+  public Category_Relation orderByIdDesc() {
+    return orderBy(schema.id.orderInDescending());
   }
 }

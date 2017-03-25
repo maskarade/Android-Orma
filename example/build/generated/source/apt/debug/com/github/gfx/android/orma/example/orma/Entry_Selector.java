@@ -37,6 +37,114 @@ public class Entry_Selector extends Selector<Entry, Entry_Selector> {
     return schema;
   }
 
+  @Deprecated
+  public Entry_Selector resourceTypeEq(@NonNull String resourceType) {
+    return where(schema.resourceType, "=", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceTypeNotEq(@NonNull String resourceType) {
+    return where(schema.resourceType, "<>", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceTypeIn(@NonNull Collection<String> values) {
+    return in(false, schema.resourceType, values);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceTypeNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.resourceType, values);
+  }
+
+  @Deprecated
+  public final Entry_Selector resourceTypeIn(@NonNull String... values) {
+    return resourceTypeIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Entry_Selector resourceTypeNotIn(@NonNull String... values) {
+    return resourceTypeNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Entry_Selector resourceTypeLt(@NonNull String resourceType) {
+    return where(schema.resourceType, "<", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceTypeLe(@NonNull String resourceType) {
+    return where(schema.resourceType, "<=", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceTypeGt(@NonNull String resourceType) {
+    return where(schema.resourceType, ">", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceTypeGe(@NonNull String resourceType) {
+    return where(schema.resourceType, ">=", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceIdEq(long resourceId) {
+    return where(schema.resourceId, "=", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceIdNotEq(long resourceId) {
+    return where(schema.resourceId, "<>", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceIdIn(@NonNull Collection<Long> values) {
+    return in(false, schema.resourceId, values);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceIdNotIn(@NonNull Collection<Long> values) {
+    return in(true, schema.resourceId, values);
+  }
+
+  @Deprecated
+  public final Entry_Selector resourceIdIn(@NonNull Long... values) {
+    return resourceIdIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Entry_Selector resourceIdNotIn(@NonNull Long... values) {
+    return resourceIdNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Entry_Selector resourceIdLt(long resourceId) {
+    return where(schema.resourceId, "<", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceIdLe(long resourceId) {
+    return where(schema.resourceId, "<=", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceIdGt(long resourceId) {
+    return where(schema.resourceId, ">", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Selector resourceIdGe(long resourceId) {
+    return where(schema.resourceId, ">=", resourceId);
+  }
+
+  /**
+   * To build a condition <code>resourceId BETWEEN a AND b</code>, which is equivalent to <code>a <= resourceId AND resourceId <= b</code>.
+   */
+  @Deprecated
+  public Entry_Selector resourceIdBetween(long resourceIdA, long resourceIdB) {
+    return whereBetween(schema.resourceId, resourceIdA, resourceIdB);
+  }
+
   public Entry_Selector idEq(long id) {
     return where(schema.id, "=", id);
   }
@@ -86,6 +194,36 @@ public class Entry_Selector extends Selector<Entry, Entry_Selector> {
 
   public Entry_Selector resourceTypeAndResourceIdEq(@NonNull String resourceType, long resourceId) {
     return where(schema.resourceType, "=", resourceType).where(schema.resourceId, "=", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Selector orderByResourceTypeAsc() {
+    return orderBy(schema.resourceType.orderInAscending());
+  }
+
+  @Deprecated
+  public Entry_Selector orderByResourceTypeDesc() {
+    return orderBy(schema.resourceType.orderInDescending());
+  }
+
+  @Deprecated
+  public Entry_Selector orderByResourceIdAsc() {
+    return orderBy(schema.resourceId.orderInAscending());
+  }
+
+  @Deprecated
+  public Entry_Selector orderByResourceIdDesc() {
+    return orderBy(schema.resourceId.orderInDescending());
+  }
+
+  @Deprecated
+  public Entry_Selector orderByIdAsc() {
+    return orderBy(schema.id.orderInAscending());
+  }
+
+  @Deprecated
+  public Entry_Selector orderByIdDesc() {
+    return orderBy(schema.id.orderInDescending());
   }
 
   public Entry_Selector orderByresourceTypeAndResourceIdAsc() {

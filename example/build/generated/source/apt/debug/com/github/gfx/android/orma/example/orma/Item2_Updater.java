@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Updater;
 import com.github.gfx.android.orma.example.tool.TypeAdapters;
+import com.github.gfx.android.orma.function.Function1;
 import java.util.Arrays;
 import java.util.Collection;
 import org.threeten.bp.LocalDateTime;
@@ -86,6 +87,126 @@ public class Item2_Updater extends Updater<Item2, Item2_Updater> {
 
   public Item2_Updater category2Eq(long category2Id) {
     return where(schema.category2, "=", category2Id);
+  }
+
+  @Deprecated
+  public Item2_Updater zonedTimestampEq(@NonNull ZonedDateTime zonedTimestamp) {
+    return where(schema.zonedTimestamp, "=", TypeAdapters.serializeZonedDateTime(zonedTimestamp));
+  }
+
+  @Deprecated
+  public Item2_Updater zonedTimestampNotEq(@NonNull ZonedDateTime zonedTimestamp) {
+    return where(schema.zonedTimestamp, "<>", TypeAdapters.serializeZonedDateTime(zonedTimestamp));
+  }
+
+  @Deprecated
+  public Item2_Updater zonedTimestampIn(@NonNull Collection<ZonedDateTime> values) {
+    return in(false, schema.zonedTimestamp, values, new Function1<ZonedDateTime, String>() {
+      @Override
+      public String apply(ZonedDateTime value) {
+        return TypeAdapters.serializeZonedDateTime(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public Item2_Updater zonedTimestampNotIn(@NonNull Collection<ZonedDateTime> values) {
+    return in(true, schema.zonedTimestamp, values, new Function1<ZonedDateTime, String>() {
+      @Override
+      public String apply(ZonedDateTime value) {
+        return TypeAdapters.serializeZonedDateTime(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public final Item2_Updater zonedTimestampIn(@NonNull ZonedDateTime... values) {
+    return zonedTimestampIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Item2_Updater zonedTimestampNotIn(@NonNull ZonedDateTime... values) {
+    return zonedTimestampNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Item2_Updater zonedTimestampLt(@NonNull ZonedDateTime zonedTimestamp) {
+    return where(schema.zonedTimestamp, "<", TypeAdapters.serializeZonedDateTime(zonedTimestamp));
+  }
+
+  @Deprecated
+  public Item2_Updater zonedTimestampLe(@NonNull ZonedDateTime zonedTimestamp) {
+    return where(schema.zonedTimestamp, "<=", TypeAdapters.serializeZonedDateTime(zonedTimestamp));
+  }
+
+  @Deprecated
+  public Item2_Updater zonedTimestampGt(@NonNull ZonedDateTime zonedTimestamp) {
+    return where(schema.zonedTimestamp, ">", TypeAdapters.serializeZonedDateTime(zonedTimestamp));
+  }
+
+  @Deprecated
+  public Item2_Updater zonedTimestampGe(@NonNull ZonedDateTime zonedTimestamp) {
+    return where(schema.zonedTimestamp, ">=", TypeAdapters.serializeZonedDateTime(zonedTimestamp));
+  }
+
+  @Deprecated
+  public Item2_Updater localDateTimeEq(@NonNull LocalDateTime localDateTime) {
+    return where(schema.localDateTime, "=", TypeAdapters.serializeLocalDateTime(localDateTime));
+  }
+
+  @Deprecated
+  public Item2_Updater localDateTimeNotEq(@NonNull LocalDateTime localDateTime) {
+    return where(schema.localDateTime, "<>", TypeAdapters.serializeLocalDateTime(localDateTime));
+  }
+
+  @Deprecated
+  public Item2_Updater localDateTimeIn(@NonNull Collection<LocalDateTime> values) {
+    return in(false, schema.localDateTime, values, new Function1<LocalDateTime, String>() {
+      @Override
+      public String apply(LocalDateTime value) {
+        return TypeAdapters.serializeLocalDateTime(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public Item2_Updater localDateTimeNotIn(@NonNull Collection<LocalDateTime> values) {
+    return in(true, schema.localDateTime, values, new Function1<LocalDateTime, String>() {
+      @Override
+      public String apply(LocalDateTime value) {
+        return TypeAdapters.serializeLocalDateTime(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public final Item2_Updater localDateTimeIn(@NonNull LocalDateTime... values) {
+    return localDateTimeIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Item2_Updater localDateTimeNotIn(@NonNull LocalDateTime... values) {
+    return localDateTimeNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Item2_Updater localDateTimeLt(@NonNull LocalDateTime localDateTime) {
+    return where(schema.localDateTime, "<", TypeAdapters.serializeLocalDateTime(localDateTime));
+  }
+
+  @Deprecated
+  public Item2_Updater localDateTimeLe(@NonNull LocalDateTime localDateTime) {
+    return where(schema.localDateTime, "<=", TypeAdapters.serializeLocalDateTime(localDateTime));
+  }
+
+  @Deprecated
+  public Item2_Updater localDateTimeGt(@NonNull LocalDateTime localDateTime) {
+    return where(schema.localDateTime, ">", TypeAdapters.serializeLocalDateTime(localDateTime));
+  }
+
+  @Deprecated
+  public Item2_Updater localDateTimeGe(@NonNull LocalDateTime localDateTime) {
+    return where(schema.localDateTime, ">=", TypeAdapters.serializeLocalDateTime(localDateTime));
   }
 
   public Item2_Updater nameEq(@NonNull String name) {

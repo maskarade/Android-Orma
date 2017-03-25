@@ -35,6 +35,56 @@ public class Category_Deleter extends Deleter<Category, Category_Deleter> {
     return schema;
   }
 
+  @Deprecated
+  public Category_Deleter nameEq(@NonNull String name) {
+    return where(schema.name, "=", name);
+  }
+
+  @Deprecated
+  public Category_Deleter nameNotEq(@NonNull String name) {
+    return where(schema.name, "<>", name);
+  }
+
+  @Deprecated
+  public Category_Deleter nameIn(@NonNull Collection<String> values) {
+    return in(false, schema.name, values);
+  }
+
+  @Deprecated
+  public Category_Deleter nameNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.name, values);
+  }
+
+  @Deprecated
+  public final Category_Deleter nameIn(@NonNull String... values) {
+    return nameIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Category_Deleter nameNotIn(@NonNull String... values) {
+    return nameNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Category_Deleter nameLt(@NonNull String name) {
+    return where(schema.name, "<", name);
+  }
+
+  @Deprecated
+  public Category_Deleter nameLe(@NonNull String name) {
+    return where(schema.name, "<=", name);
+  }
+
+  @Deprecated
+  public Category_Deleter nameGt(@NonNull String name) {
+    return where(schema.name, ">", name);
+  }
+
+  @Deprecated
+  public Category_Deleter nameGe(@NonNull String name) {
+    return where(schema.name, ">=", name);
+  }
+
   public Category_Deleter idEq(long id) {
     return where(schema.id, "=", id);
   }
