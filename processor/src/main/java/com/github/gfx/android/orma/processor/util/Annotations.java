@@ -37,8 +37,6 @@ public class Annotations {
 
     private static final AnnotationSpec checkResult = AnnotationSpec.builder(Types.CheckResult).build();
 
-    private static final AnnotationSpec deprecated = AnnotationSpec.builder(Deprecated.class).build();
-
     private static final List<AnnotationSpec> safeVarArgsAnnotations = Arrays.asList(
             AnnotationSpec.builder(SafeVarargs.class).build(),
             suppressWarnings("varargs")
@@ -52,6 +50,10 @@ public class Annotations {
     private static List<AnnotationSpec> overrideAndNullable = Arrays.asList(
             Annotations.nullable(),
             Annotations.override()
+    );
+
+    private static List<AnnotationSpec> deprecated = Collections.singletonList(
+            AnnotationSpec.builder(Deprecated.class).build()
     );
 
     public static AnnotationSpec override() {
@@ -87,6 +89,18 @@ public class Annotations {
         }
     }
 
+    public static List<AnnotationSpec> deprecatedIf(boolean needed) {
+        if (needed) {
+            return deprecated;
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    public static List<AnnotationSpec> deprecatedUnless(boolean notNeeded) {
+        return deprecatedIf(!notNeeded);
+    }
+
     public static AnnotationSpec suppressWarnings(String... warnings) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(SuppressWarnings.class);
         CodeBlock.Builder names = CodeBlock.builder();
@@ -105,10 +119,6 @@ public class Annotations {
             builder.addMember("value", "{$L}", names.build());
         }
         return builder.build();
-    }
-
-    public static AnnotationSpec deprecated() {
-        return deprecated;
     }
 
     public static AnnotationSpec checkResult() {
