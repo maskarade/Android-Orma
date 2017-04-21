@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface  Database {
+public @interface Database {
 
     String DEFAULT_DATABASE_CLASS_NAME = "OrmaDatabase";
 
