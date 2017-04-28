@@ -62,6 +62,7 @@ android {
         disable 'RtlSymmetry'
         disable 'RtlHardcoded'
         disable 'IconLocation'
+        disable 'InvalidPackage' // java.nio.file in ANLR4
     }
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
