@@ -10,6 +10,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v4.2.4 2017/04/28
+
+https://github.com/gfx/Android-Orma/compare/v4.2.3...v4.2.4
+
+* [#400](https://github.com/gfx/Android-Orma/pull/400): Upgrade ANTRL4 runtime to 4.6, requiring `diable "InvalidPackage"` in Android Lint
+
 ## v4.2.3 2017/03/17
 
 https://github.com/gfx/Android-Orma/compare/v4.2.2...v4.2.3
