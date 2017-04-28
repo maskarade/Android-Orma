@@ -20,9 +20,9 @@ import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteBaseListener;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteLexer;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
@@ -42,7 +42,7 @@ public class SQLiteParserUtils {
 
     @NonNull
     public static SQLiteParser createParser(@NonNull String sql) {
-        CharStream source = new ANTLRInputStream(sql);
+        CharStream source = CharStreams.fromString(sql);
         Lexer lexer = new SQLiteLexer(source);
         TokenStream tokenStream = new CommonTokenStream(lexer);
         SQLiteParser parser = new SQLiteParser(tokenStream);
