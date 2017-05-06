@@ -5,6 +5,9 @@ machine:
     TERM: dumb
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx1560m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
 dependencies:
+  cache_directories:
+    - "/usr/local/android-sdk-linux/build-tools"
+    - "/usr/local/android-sdk-linux/platforms"
   pre:
     - echo y | android -s update sdk -u -a -t "tools" # update Android SDK that includes sdkmanager(1)
     - mkdir -p "$ANDROID_HOME"/licenses
