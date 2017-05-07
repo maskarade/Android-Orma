@@ -55,6 +55,9 @@ as the author respects the Larry Wall's wisdom:
     - [`@StaticTypeAdapters` for Multiple Serializers at Once](#statictypeadapters-for-multiple-serializers-at-once)
     - [Built-In Type Adapters](#built-in-type-adapters)
     - [Generic Type Adapters](#generic-type-adapters)
+- [Pagination](#pagination)
+    - [limit and offset](#limit-and-offset)
+    - [page and per](#page-and-per)
 - [Raw Queries](#raw-queries)
 - [Migration](#migration)
 - [DataSet Changed Events](#dataset-changed-events)
@@ -972,6 +975,32 @@ public class EnumTypeAdapter {
 ```
 
 Now `deserialize()` uses the type information for the conclete target class.
+
+## Pagination
+
+There are two style pagination. You can use either, but not mixed.
+
+### limit and offset
+
+SQL style pagination:
+
+```java
+for (Todo todo : orma.selectFromTodo().titleEq("buy").offset(0).limit(10)) {
+    // ...
+}
+```
+
+### page and per
+
+"paging" style pagination inspired from Ruby's [kaminari](https://github.com/kaminari/kaminari).
+
+```java
+for (Todo todo : orma.selectFromTodo().titleEq("buy").page(1).per(10)) {
+    // ...
+}
+```
+
+Note that `page` starts from 1.
 
 ## Raw Queries
 
