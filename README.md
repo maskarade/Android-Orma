@@ -99,7 +99,7 @@ The answer is that I need an ORM that has *all* the following features:
   * Not a static-method based class
   * Even though it is designed to be used as a singleton scope
 * Easy migration
-  * Some `ALTER TABLE`, e.g. `add column` and `drop column`, should be detectd and processed
+  * Some `ALTER TABLE`, e.g. `add column` and `drop column`, should be detected and processed
   * There is a wheel in Perl: [SQL::Translator::Diff](https://metacpan.org/pod/SQL::Translator::Diff)
 * Type safe and code completion friendly
   * `db.selectFromModel()` is better than `new Select(Model.class)`
