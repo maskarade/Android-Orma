@@ -40,6 +40,7 @@ android {
 final PACKAGE = 'com.github.gfx.android.orma.migration.sqliteparser.g'
 final PACKAGE_PATH = PACKAGE.replaceAll(/\./, '/')
 final GRAMMAR_FILE = project.file("src/main/antlr/SQLite.g4")
+final ANTLR_TEMP_DIR = "$buildDir/tmp/antlr"
 final ANTLR_OUTPUT_DIR = "$buildDir/generated/source/antlr"
 
 configurations {
@@ -53,7 +54,7 @@ task generateParserSources(type: JavaExec) {
     main = 'org.antlr.v4.Tool'
 
     // See https://github.com/antlr/antlr4/blob/master/doc/tool-options.md for details
-    args = [GRAMMAR_FILE, '-o', "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH", '-package', PACKAGE, '-Werror', '-long-messages']
+    args = [GRAMMAR_FILE, '-o', "$ANTLR_TEMP_DIR/$PACKAGE_PATH", '-package', PACKAGE, '-Werror', '-long-messages']
     classpath = configurations.antlr
 
     // inputs and outputs are necessary for incremental build in ad-hoc task
@@ -62,9 +63,13 @@ task generateParserSources(type: JavaExec) {
     outputs.dir "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH"
 
     doLast {
-        delete fileTree(dir: "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH", include: '*.tokens')
-        fileTree(dir: "$ANTLR_OUTPUT_DIR/$PACKAGE_PATH", include: '*.java').each { File file ->
-            file.setLastModified(GRAMMAR_FILE.lastModified())
+        fileTree(dir: "$ANTLR_TEMP_DIR/$PACKAGE_PATH", include: '*.java').each { File srcFile ->
+            File dstFile = new File(ANTLR_OUTPUT_DIR, srcFile.absolutePath.substring(ANTLR_TEMP_DIR.length()))
+            if (!dstFile.exists() || dstFile.bytes != srcFile.bytes) {
+                dstFile.parentFile.mkdirs()
+                srcFile.renameTo(dstFile)
+                dstFile.setLastModified(GRAMMAR_FILE.lastModified())
+            }
         }
     }
 }
