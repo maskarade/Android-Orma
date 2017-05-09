@@ -1,0 +1,73 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+    buildTypes {
+        debug {
+            debuggable true
+            testCoverageEnabled true
+        }
+        release {
+        }
+    }
+    productFlavors {
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    lintOptions {
+        textReport true
+        textOutput 'stdout'
+        disable 'GoogleAppIndexingWarning'
+        disable 'InvalidPackage' // java.nio.file in ANLR4
+    }
+    dexOptions {
+        preDexLibraries = !System.getenv("CI")
+    }
+}
+
+dependencies {
+    compile project(':library')
+
+    provided 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
+
+    testAnnotationProcessor project(':processor')
+    testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.1.4'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
+    testCompile 'com.google.code.gson:gson:2.8.0'
+    testCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
+    testCompile 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
+
+    androidTestAnnotationProcessor project(':processor')
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'junit:junit:4.12'
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
+    androidTestCompile 'com.google.code.gson:gson:2.8.0'
+    androidTestCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
+    androidTestCompile 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
+}
+
+publish {
+    artifactId = 'orma-encryption'
+    desc = 'Encryption support for Android-Orma'
+
+    def metadata = rootProject.ext.metadata
+    groupId = metadata.groupId
+    publishVersion = metadata.version
+    website = metadata.website
+    repository = metadata.repository
+    licences = metadata.licences
+}
