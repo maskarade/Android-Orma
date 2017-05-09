@@ -18,6 +18,8 @@ package com.github.gfx.android.orma.example.fragment;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.Inserter;
+import com.github.gfx.android.orma.encryption.EncryptedDatabase;
+import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.databinding.FragmentBenchmarkBinding;
 import com.github.gfx.android.orma.example.databinding.ItemResultBinding;
 import com.github.gfx.android.orma.example.handwritten.HandWrittenOpenHelper;
@@ -135,8 +137,11 @@ public class BenchmarkFragment extends Fragment {
 
         Schedulers.io().createWorker().schedule(() -> {
             getContext().deleteDatabase("orma-benchmark.db");
-            orma = OrmaDatabase.builder(getContext())
-                    .name("orma-benchmark.db")
+            OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext()).name("orma-benchmark.db");
+            if (BuildConfig.FLAVOR.equals("encrypted")) {
+                builder = builder.provider(new EncryptedDatabase.Provider("password"));
+            }
+            orma = builder
                     .readOnMainThread(AccessThreadConstraint.NONE)
                     .writeOnMainThread(AccessThreadConstraint.NONE)
                     .trace(false)
@@ -191,7 +196,7 @@ public class BenchmarkFragment extends Fragment {
                     return startSelectAllWithHandWritten();
                 })
                 .subscribe(
-                        result ->  {
+                        result -> {
                             adapter.add(result);
                         },
                         error -> {

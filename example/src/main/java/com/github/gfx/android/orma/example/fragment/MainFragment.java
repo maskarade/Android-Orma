@@ -16,6 +16,7 @@
 
 package com.github.gfx.android.orma.example.fragment;
 
+import com.github.gfx.android.orma.encryption.EncryptedDatabase;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.activity.MainActivity;
@@ -45,6 +46,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.Locale;
 
 import io.reactivex.Single;
@@ -54,6 +56,8 @@ public class MainFragment extends Fragment {
     static final String TAG = MainActivity.class.getSimpleName();
 
     static final String DB_NAME = "main.db";
+
+    static final String PASSWORD = "password";
 
     ArrayAdapter<String> logsAdapter;
 
@@ -69,13 +73,27 @@ public class MainFragment extends Fragment {
     }
 
     public void setupV1Database() {
-        getContext().deleteDatabase(DB_NAME);
-        SQLiteDatabase db = getContext().openOrCreateDatabase(DB_NAME, 0, null);
-        db.setVersion(1);
-        db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
-        db.execSQL("CREATE INDEX index_note_on_todos ON todos (note)");
-        db.execSQL("INSERT INTO todos (note) values ('todo v1 #1'), ('todo v1 #2')");
-        db.close();
+        if (BuildConfig.FLAVOR.equals("encrypted")) {
+            File path = getContext().getDatabasePath(DB_NAME);
+            path.mkdirs();
+            path.delete();
+            net.sqlcipher.database.SQLiteDatabase.loadLibs(getContext());
+            net.sqlcipher.database.SQLiteDatabase db =
+                    net.sqlcipher.database.SQLiteDatabase.openOrCreateDatabase(path, PASSWORD, null);
+            db.setVersion(1);
+            db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
+            db.execSQL("CREATE INDEX index_note_on_todos ON todos (note)");
+            db.execSQL("INSERT INTO todos (note) values ('todo v1 #1'), ('todo v1 #2')");
+            db.close();
+        } else {
+            getContext().deleteDatabase(DB_NAME);
+            SQLiteDatabase db = getContext().openOrCreateDatabase(DB_NAME, 0, null);
+            db.setVersion(1);
+            db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
+            db.execSQL("CREATE INDEX index_note_on_todos ON todos (note)");
+            db.execSQL("INSERT INTO todos (note) values ('todo v1 #1'), ('todo v1 #2')");
+            db.close();
+        }
     }
 
     @Nullable
@@ -93,8 +111,11 @@ public class MainFragment extends Fragment {
         // OrmaDatabase with migration steps
         // The current database schema version is 10 (= BuildConfig.VERSION_CODE)
         setupV1Database();
-        orma = OrmaDatabase.builder(getContext())
-                .name(DB_NAME)
+        OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext()).name(DB_NAME);
+        if (BuildConfig.FLAVOR.equals("encrypted")) {
+            builder = builder.provider(new EncryptedDatabase.Provider(PASSWORD));
+        }
+        orma = builder
                 .migrationStep(5, new ManualStepMigration.ChangeStep() {
                     @Override
                     public void change(@NonNull ManualStepMigration.Helper helper) {

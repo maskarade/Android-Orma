@@ -16,6 +16,8 @@
 
 package com.github.gfx.android.orma.example.fragment;
 
+import com.github.gfx.android.orma.encryption.EncryptedDatabase;
+import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
 import com.github.gfx.android.orma.example.databinding.FragmentListViewBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
@@ -66,8 +68,11 @@ public class ListViewFragment extends Fragment {
         binding = FragmentListViewBinding.inflate(inflater, container, false);
 
         // NOTE: the DB handle should be a singleton in production
-        orma = OrmaDatabase.builder(getContext())
-                .build();
+        OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext());
+        if (BuildConfig.FLAVOR.equals("encrypted")) {
+            builder = builder.provider(new EncryptedDatabase.Provider("password"));
+        }
+        orma = builder.build();
 
         adapter = new Adapter(getContext(), orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);
