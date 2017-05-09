@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.function.Function1;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.Book;
@@ -42,6 +43,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -116,6 +118,18 @@ public class QueryTest {
 
         assertThat(books.get(1).title, is("friday"));
         assertThat(books.get(1).content, is("apple"));
+    }
+
+    @Test
+    public void toMap() throws Exception {
+        Map<String, Book> books = db.selectFromBook().toMap(new Function1<Book, String>() {
+            @Override
+            public String apply(Book book) {
+                return book.title;
+            }
+        });
+        assertThat(books.get("today").content, is("milk, banana"));
+        assertThat(books.get("friday").content, is("apple"));
     }
 
     @Test
