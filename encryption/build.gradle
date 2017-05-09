@@ -41,7 +41,7 @@ android {
 dependencies {
     compile project(':library')
 
-    provided 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
+    compile 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
 
     testAnnotationProcessor project(':processor')
     testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.1.4'
@@ -49,7 +49,6 @@ dependencies {
     testCompile 'org.hamcrest:hamcrest-library:1.3'
     testCompile 'com.google.code.gson:gson:2.8.0'
     testCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
-    testCompile 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
 
     androidTestAnnotationProcessor project(':processor')
     androidTestCompile 'com.android.support.test:runner:0.5'
@@ -57,7 +56,6 @@ dependencies {
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
     androidTestCompile 'com.google.code.gson:gson:2.8.0'
     androidTestCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
-    androidTestCompile 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
 }
 
 publish {
