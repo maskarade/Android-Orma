@@ -16,6 +16,8 @@
 
 package com.github.gfx.android.orma.migration.test;
 
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.migration.AbstractMigrationEngine;
 import com.github.gfx.android.orma.migration.MigrationSchema;
 import com.github.gfx.android.orma.migration.TraceListener;
@@ -32,8 +34,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
 public class AbstractMigrationEngineTest {
@@ -51,7 +53,7 @@ public class AbstractMigrationEngineTest {
         }
 
         @Override
-        public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
+        public void start(@NonNull Database db, @NonNull List<? extends MigrationSchema> schemas) {
             throw new UnsupportedOperationException();
         }
     }
@@ -66,7 +68,7 @@ public class AbstractMigrationEngineTest {
 
         assertThat(DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null), is(1L));
 
-        myEngine.transaction(db, new Runnable() {
+        myEngine.transaction(new DefaultDatabase(db), new Runnable() {
             @Override
             public void run() {
                 assertThat(DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null), is(0L));

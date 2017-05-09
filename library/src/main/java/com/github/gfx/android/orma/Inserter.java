@@ -19,8 +19,8 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.exception.InsertionFailureException;
 
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DatabaseStatement;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
@@ -43,12 +43,12 @@ public class Inserter<Model> implements Closeable {
 
     final boolean withoutAutoId;
 
-    final SQLiteStatement statement;
+    final DatabaseStatement statement;
 
     final String sql;
 
     public Inserter(OrmaConnection conn, Schema<Model> schema, @OnConflict int onConflictAlgorithm, boolean withoutAutoId) {
-        SQLiteDatabase db = conn.getWritableDatabase();
+        Database db = conn.getWritableDatabase();
         this.conn = conn;
         this.schema = schema;
         this.withoutAutoId = withoutAutoId;

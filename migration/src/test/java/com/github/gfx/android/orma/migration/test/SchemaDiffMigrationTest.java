@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma.migration.test;
 
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
 import com.github.gfx.android.orma.migration.SchemaDiffMigration;
 import com.github.gfx.android.orma.migration.test.util.SchemaData;
@@ -52,7 +54,7 @@ public class SchemaDiffMigrationTest {
 
     SchemaDiffMigration migration;
 
-    SQLiteDatabase db;
+    Database db;
 
     Map<String, SQLiteMaster> metadata;
 
@@ -78,7 +80,7 @@ public class SchemaDiffMigrationTest {
         );
 
         openHelper = new OpenHelper(getContext());
-        db = openHelper.getWritableDatabase();
+        db = new DefaultDatabase(openHelper.getWritableDatabase());
         migration = new SchemaDiffMigration(getContext(), SCHEMA_HASH);
         metadata = SchemaDiffMigration.loadMetadata(db, schemas);
     }
@@ -175,20 +177,20 @@ public class SchemaDiffMigrationTest {
     public void migrationStepTableMigration1To2() throws Exception {
         // setup v1 table
         db.execSQL("CREATE TABLE IF NOT EXISTS "
-                        + SchemaDiffMigration.MIGRATION_STEPS_TABLE_1 + " ("
-                        + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                        // no `db_version`
-                        + "version_name TEXT NOT NULL, "
-                        + "version_code INTEGER NOT NULL, "
-                        + "schema_hash TEXT NOT NULL, "
-                        + "sql TEXT NULL, "
-                        + "args TEXT NULL, "
-                        + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+                + SchemaDiffMigration.MIGRATION_STEPS_TABLE_1 + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                // no `db_version`
+                + "version_name TEXT NOT NULL, "
+                + "version_code INTEGER NOT NULL, "
+                + "schema_hash TEXT NOT NULL, "
+                + "sql TEXT NULL, "
+                + "args TEXT NULL, "
+                + "created_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)"
         );
         db.execSQL("INSERT INTO " + SchemaDiffMigration.MIGRATION_STEPS_TABLE_1
-                        + " (version_name, version_code, schema_hash, sql, args)"
-                        + " VALUES"
-                        + " ('1.2.3', 123, 'deadbeef', '--', '[]')"
+                + " (version_name, version_code, schema_hash, sql, args)"
+                + " VALUES"
+                + " ('1.2.3', 123, 'deadbeef', '--', '[]')"
         );
 
         migration.start(db, schemas);

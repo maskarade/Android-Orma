@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma.migration.test;
 
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.OrmaMigration;
 import com.github.gfx.android.orma.migration.SQLiteMaster;
@@ -45,7 +47,7 @@ public class OrmaMigrationTest {
 
     static int VERSION = 100;
 
-    SQLiteDatabase db;
+    Database db;
 
     OrmaMigration migration;
 
@@ -55,7 +57,7 @@ public class OrmaMigrationTest {
 
     @Before
     public void setUp() throws Exception {
-        db = SQLiteDatabase.create(null);
+        db = new DefaultDatabase(SQLiteDatabase.create(null));
         db.setVersion(1);
 
         migration = OrmaMigration.builder(getContext())

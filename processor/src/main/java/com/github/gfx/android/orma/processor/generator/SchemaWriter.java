@@ -574,7 +574,7 @@ public class SchemaWriter extends BaseWriter {
                                         .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addParameter(
-                                ParameterSpec.builder(Types.SQLiteStatement, "statement")
+                                ParameterSpec.builder(Types.DatabaseStatement, "statement")
                                         .addAnnotation(Annotations.nonNull())
                                         .build())
                         .addParameter(

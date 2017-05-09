@@ -16,7 +16,7 @@
 package com.github.gfx.android.orma.migration;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
+import com.github.gfx.android.orma.core.Database;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -97,14 +97,14 @@ public class OrmaMigration extends AbstractMigrationEngine {
     }
 
     /**
-     * Starts migration process, invoking {@link ManualStepMigration#start(SQLiteDatabase, List)} first, and then
-     * invoking {@link SchemaDiffMigration#start(SQLiteDatabase, List)}.
+     * Starts migration process, invoking {@link ManualStepMigration#start(Database, List)} first, and then
+     * invoking {@link SchemaDiffMigration#start(Database, List)}.
      *
      * @param db      A writable database
      * @param schemas Destination schemas
      */
     @Override
-    public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
+    public void start(@NonNull Database db, @NonNull List<? extends MigrationSchema> schemas) {
         manualStepMigration.start(db, schemas);
         schemaDiffMigration.start(db, schemas);
     }

@@ -20,7 +20,7 @@ import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.migration.MigrationSchema;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteStatement;
+import com.github.gfx.android.orma.core.DatabaseStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -85,7 +85,7 @@ public interface Schema<Model> extends MigrationSchema {
      * @param withoutAutoId If {@code true}, the primary key with {@link PrimaryKey#auto()} is omitted in the {@code INSERT}
      *                      statement.
      */
-    void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement, @NonNull Model model,
+    void bindArgs(@NonNull OrmaConnection conn, @NonNull DatabaseStatement statement, @NonNull Model model,
             boolean withoutAutoId);
 
     @NonNull
