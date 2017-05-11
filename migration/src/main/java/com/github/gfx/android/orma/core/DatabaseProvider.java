@@ -22,5 +22,8 @@ import android.support.annotation.NonNull;
 public interface DatabaseProvider {
 
     @NonNull
-    Database provide(@NonNull Context context, @NonNull String name, int mode);
+    Database provideOnDiskDatabase(@NonNull Context context, @NonNull String name, int mode);
+
+    @NonNull
+    Database provideOnMemoryDatabase(@NonNull Context context);
 }

@@ -164,10 +164,17 @@ public class EncryptedDatabase implements Database {
 
         @NonNull
         @Override
-        public Database provide(@NonNull Context context, @NonNull String name, int mode) {
+        public Database provideOnDiskDatabase(@NonNull Context context, @NonNull String name, int mode) {
             SQLiteDatabase.loadLibs(context);
             File path = context.getDatabasePath(name);
             return new EncryptedDatabase(SQLiteDatabase.openOrCreateDatabase(path, password, null));
+        }
+
+        @NonNull
+        @Override
+        public Database provideOnMemoryDatabase(@NonNull Context context) {
+            SQLiteDatabase.loadLibs(context);
+            return new EncryptedDatabase(SQLiteDatabase.create(null, password));
         }
     }
 }

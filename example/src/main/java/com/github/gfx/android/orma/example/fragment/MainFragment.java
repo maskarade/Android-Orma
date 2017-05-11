@@ -76,9 +76,9 @@ public class MainFragment extends Fragment {
         getContext().deleteDatabase(DB_NAME);
         Database db;
         if (BuildConfig.FLAVOR.equals("encrypted")) {
-            db = new EncryptedDatabase.Provider(PASSWORD).provide(getContext(), DB_NAME, 0);
+            db = new EncryptedDatabase.Provider(PASSWORD).provideOnDiskDatabase(getContext(), DB_NAME, 0);
         } else {
-            db = new DefaultDatabase.Provider().provide(getContext(), DB_NAME, 0);
+            db = new DefaultDatabase.Provider().provideOnDiskDatabase(getContext(), DB_NAME, 0);
         }
         db.setVersion(1);
         db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
@@ -102,7 +102,7 @@ public class MainFragment extends Fragment {
         // OrmaDatabase with migration steps
         // The current database schema version is 10 (= BuildConfig.VERSION_CODE)
         setupV1Database();
-        OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext()).name(DB_NAME);
+        OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext()).name(null);
         if (BuildConfig.FLAVOR.equals("encrypted")) {
             builder = builder.provider(new EncryptedDatabase.Provider(PASSWORD));
         }

@@ -145,8 +145,14 @@ public class DefaultDatabase implements Database {
 
         @NonNull
         @Override
-        public Database provide(@NonNull Context context, @NonNull String name, int mode) {
+        public Database provideOnDiskDatabase(@NonNull Context context, @NonNull String name, int mode) {
             return new DefaultDatabase(context.openOrCreateDatabase(name, mode, null, null));
+        }
+
+        @NonNull
+        @Override
+        public Database provideOnMemoryDatabase(@NonNull Context context) {
+            return new DefaultDatabase(SQLiteDatabase.create(null));
         }
     }
 }

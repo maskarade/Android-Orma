@@ -101,9 +101,9 @@ public class OrmaConnection {
     private Database openDatabase(OrmaDatabaseBuilderBase<?> builder) {
         Database db;
         if (name == null) {
-            db = new DefaultDatabase(SQLiteDatabase.create(null));
+            db = builder.databaseProvider.provideOnMemoryDatabase(builder.context);
         } else {
-            db = builder.databaseProvider.provide(builder.context, name, openFlags());
+            db = builder.databaseProvider.provideOnDiskDatabase(builder.context, name, openFlags());
         }
         onConfigure(db);
         return db;
