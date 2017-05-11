@@ -26,10 +26,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.annotation.TargetApi;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.util.List;
@@ -58,23 +58,27 @@ public class AbstractMigrationEngineTest {
         }
     }
 
+    Context getContext() {
+        return InstrumentationRegistry.getTargetContext();
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Test
     public void testTransaction() throws Exception {
         MyEngine myEngine = new MyEngine();
 
-        final SQLiteDatabase db = SQLiteDatabase.create(null);
+        final Database db = new DefaultDatabase.Provider().provideOnMemoryDatabase(getContext());
         db.setForeignKeyConstraintsEnabled(true);
 
-        assertThat(DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null), is(1L));
+        assertThat(db.longForQuery("PRAGMA foreign_keys", null), is(1L));
 
-        myEngine.transaction(new DefaultDatabase(db), new Runnable() {
+        myEngine.transaction(db, new Runnable() {
             @Override
             public void run() {
-                assertThat(DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null), is(0L));
+                assertThat(db.longForQuery("PRAGMA foreign_keys", null), is(0L));
             }
         });
 
-        assertThat(DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null), is(1L));
+        assertThat(db.longForQuery("PRAGMA foreign_keys", null), is(1L));
     }
 }

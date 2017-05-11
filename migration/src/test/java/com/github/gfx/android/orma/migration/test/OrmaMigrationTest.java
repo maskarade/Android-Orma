@@ -57,7 +57,7 @@ public class OrmaMigrationTest {
 
     @Before
     public void setUp() throws Exception {
-        db = new DefaultDatabase(SQLiteDatabase.create(null));
+        db = new DefaultDatabase.Provider().provideOnMemoryDatabase(getContext());
         db.setVersion(1);
 
         migration = OrmaMigration.builder(getContext())

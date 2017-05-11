@@ -27,8 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -80,7 +78,7 @@ public class SchemaDiffMigrationTest {
         );
 
         openHelper = new OpenHelper(getContext());
-        db = new DefaultDatabase(openHelper.getWritableDatabase());
+        db = openHelper.getWritableDatabase();
         migration = new SchemaDiffMigration(getContext(), SCHEMA_HASH);
         metadata = SchemaDiffMigration.loadMetadata(db, schemas);
     }
@@ -202,14 +200,25 @@ public class SchemaDiffMigrationTest {
     }
 
 
-    class OpenHelper extends SQLiteOpenHelper {
+    class OpenHelper {
 
-        public OpenHelper(Context context) {
-            super(context, null, null, 1);
+        private final Context context;
+
+        private Database db;
+
+        OpenHelper(Context context) {
+            this.context = context;
         }
 
-        @Override
-        public void onCreate(SQLiteDatabase db) {
+        Database getWritableDatabase() {
+            if (db == null) {
+                db = new DefaultDatabase.Provider().provideOnMemoryDatabase(context);
+                onCreate(db);
+            }
+            return db;
+        }
+
+        private void onCreate(Database db) {
             for (SchemaData ddl : schemas) {
                 db.execSQL(ddl.getCreateTableStatement());
                 for (String sql : ddl.getCreateIndexStatements()) {
@@ -219,11 +228,6 @@ public class SchemaDiffMigrationTest {
             for (String sql : initialData) {
                 db.execSQL(sql);
             }
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
         }
     }
 }

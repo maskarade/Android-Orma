@@ -29,7 +29,7 @@ public class DefaultDatabase implements Database {
 
     private final SQLiteDatabase database;
 
-    public DefaultDatabase(SQLiteDatabase database) {
+    private DefaultDatabase(SQLiteDatabase database) {
         this.database = database;
     }
 

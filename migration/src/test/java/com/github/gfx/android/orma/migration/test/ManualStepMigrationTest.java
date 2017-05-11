@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -54,7 +53,7 @@ public class ManualStepMigrationTest {
 
     @Before
     public void setUp() throws Exception {
-        db = new DefaultDatabase(SQLiteDatabase.create(null));
+        db = new DefaultDatabase.Provider().provideOnMemoryDatabase(getContext());
         db.setVersion(1);
 
         migration = new ManualStepMigration(getContext(), VERSION, true);
