@@ -16,6 +16,8 @@
 
 package com.github.gfx.android.orma.example.fragment;
 
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.encryption.EncryptedDatabase;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
@@ -31,7 +33,6 @@ import com.github.gfx.android.orma.migration.TraceListener;
 
 import org.threeten.bp.ZonedDateTime;
 
-import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,7 +47,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import java.io.File;
 import java.util.Locale;
 
 import io.reactivex.Single;
@@ -73,27 +73,18 @@ public class MainFragment extends Fragment {
     }
 
     public void setupV1Database() {
+        getContext().deleteDatabase(DB_NAME);
+        Database db;
         if (BuildConfig.FLAVOR.equals("encrypted")) {
-            File path = getContext().getDatabasePath(DB_NAME);
-            path.mkdirs();
-            path.delete();
-            net.sqlcipher.database.SQLiteDatabase.loadLibs(getContext());
-            net.sqlcipher.database.SQLiteDatabase db =
-                    net.sqlcipher.database.SQLiteDatabase.openOrCreateDatabase(path, PASSWORD, null);
-            db.setVersion(1);
-            db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
-            db.execSQL("CREATE INDEX index_note_on_todos ON todos (note)");
-            db.execSQL("INSERT INTO todos (note) values ('todo v1 #1'), ('todo v1 #2')");
-            db.close();
+            db = new EncryptedDatabase.Provider(PASSWORD).provide(getContext(), DB_NAME, 0);
         } else {
-            getContext().deleteDatabase(DB_NAME);
-            SQLiteDatabase db = getContext().openOrCreateDatabase(DB_NAME, 0, null);
-            db.setVersion(1);
-            db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
-            db.execSQL("CREATE INDEX index_note_on_todos ON todos (note)");
-            db.execSQL("INSERT INTO todos (note) values ('todo v1 #1'), ('todo v1 #2')");
-            db.close();
+            db = new DefaultDatabase.Provider().provide(getContext(), DB_NAME, 0);
         }
+        db.setVersion(1);
+        db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
+        db.execSQL("CREATE INDEX index_note_on_todos ON todos (note)");
+        db.execSQL("INSERT INTO todos (note) values ('todo v1 #1'), ('todo v1 #2')");
+        db.close();
     }
 
     @Nullable
