@@ -44,6 +44,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -131,14 +132,22 @@ public class BenchmarkFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        RealmConfiguration realmConf = new RealmConfiguration.Builder().build();
-        Realm.setDefaultConfiguration(realmConf);
-        Realm.deleteRealm(realmConf);
+        {
+            RealmConfiguration.Builder builder = new RealmConfiguration.Builder();
+            if (encryptionIsRequired()) {
+                byte[] key = new byte[64];
+                new SecureRandom().nextBytes(key);
+                builder = builder.encryptionKey(key);
+            }
+            RealmConfiguration realmConf = builder.build();
+            Realm.setDefaultConfiguration(realmConf);
+            Realm.deleteRealm(realmConf);
+        }
 
         Schedulers.io().createWorker().schedule(() -> {
             getContext().deleteDatabase("orma-benchmark.db");
             OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext()).name("orma-benchmark.db");
-            if (BuildConfig.FLAVOR.equals("encrypted")) {
+            if (encryptionIsRequired()) {
                 builder = builder.provider(new EncryptedDatabase.Provider("password"));
             }
             orma = builder
@@ -390,6 +399,10 @@ public class BenchmarkFragment extends Fragment {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    boolean encryptionIsRequired() {
+        return BuildConfig.FLAVOR.equals("encrypted");
     }
 
     static class Result {
