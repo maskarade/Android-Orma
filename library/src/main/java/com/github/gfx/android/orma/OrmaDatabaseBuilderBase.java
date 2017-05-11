@@ -16,6 +16,7 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.core.DatabaseProvider;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.OrmaMigration;
@@ -42,7 +43,7 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
     @Nullable
     String name;
 
-    @Nullable
+    @NonNull
     DatabaseProvider databaseProvider;
 
     MigrationEngine migrationEngine;
@@ -67,6 +68,7 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
         this.context = context.getApplicationContext();
         this.debug = extractDebuggable(context);
         this.name = getDefaultDatabaseName(context);
+        this.databaseProvider = new DefaultDatabase.Provider();
 
         // debug flags
 

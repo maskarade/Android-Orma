@@ -18,7 +18,6 @@ package com.github.gfx.android.orma;
 import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.core.Database;
-import com.github.gfx.android.orma.core.DatabaseProvider;
 import com.github.gfx.android.orma.core.DatabaseStatement;
 import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
@@ -104,11 +103,7 @@ public class OrmaConnection {
         if (name == null) {
             db = new DefaultDatabase(SQLiteDatabase.create(null));
         } else {
-            DatabaseProvider provider = builder.databaseProvider;
-            if (provider == null) {
-                provider = new DefaultDatabase.Provider();
-            }
-            db = provider.provide(builder.context, name, openFlags());
+            db = builder.databaseProvider.provide(builder.context, name, openFlags());
         }
         onConfigure(db);
         return db;
