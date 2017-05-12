@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma;
 
+import com.github.gfx.android.orma.core.DatabaseProvider;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.MigrationEngine;
 import com.github.gfx.android.orma.migration.OrmaMigration;
@@ -41,6 +43,9 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
     @Nullable
     String name;
 
+    @NonNull
+    DatabaseProvider databaseProvider;
+
     MigrationEngine migrationEngine;
 
     boolean foreignKeys = true;
@@ -63,6 +68,7 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
         this.context = context.getApplicationContext();
         this.debug = extractDebuggable(context);
         this.name = getDefaultDatabaseName(context);
+        this.databaseProvider = new DefaultDatabase.Provider();
 
         // debug flags
 
@@ -96,6 +102,17 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
      */
     public T name(@Nullable String name) {
         this.name = name;
+        return (T) this;
+    }
+
+    /**
+     * Replaces the provider of SQLite database.
+     *
+     * @param databaseProvider A provider of SQLite database
+     * @return the receiver itself
+     */
+    public T provider(@NonNull DatabaseProvider databaseProvider) {
+        this.databaseProvider = databaseProvider;
         return (T) this;
     }
 
@@ -157,7 +174,7 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
      * Just calls {@link OrmaMigration.Builder#step(int, ManualStepMigration.Step)}.
      *
      * @param schemaVersion A {@code VERSION_CODE} for the step
-     * @param step A migration step
+     * @param step          A migration step
      * @return the receiver itself
      */
     public T migrationStep(@IntRange(from = 1) int schemaVersion, @NonNull ManualStepMigration.Step step) {

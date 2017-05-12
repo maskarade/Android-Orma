@@ -17,6 +17,9 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DatabaseStatement;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.event.DataSetChangedTrigger;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
@@ -29,11 +32,8 @@ import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.database.sqlite.SQLiteStatement;
 import android.os.Build;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -59,7 +59,7 @@ public class OrmaConnection {
     /**
      * Do not use "db" field directly. Use `getWritableDatabase()` or `getReadableDatabase()` instead.
      */
-    final SQLiteDatabase db;
+    final Database db;
 
     final List<Schema<?>> schemas;
 
@@ -93,17 +93,17 @@ public class OrmaConnection {
         this.trace = builder.trace;
         this.readOnMainThread = builder.readOnMainThread;
         this.writeOnMainThread = builder.writeOnMainThread;
-        this.db = openDatabase(builder.context);
+        this.db = openDatabase(builder);
 
         checkSchemas(schemas);
     }
 
-    private SQLiteDatabase openDatabase(Context context) {
-        SQLiteDatabase db;
+    private Database openDatabase(OrmaDatabaseBuilderBase<?> builder) {
+        Database db;
         if (name == null) {
-            db = SQLiteDatabase.create(null);
+            db = builder.databaseProvider.provideOnMemoryDatabase(builder.context);
         } else {
-            db = context.openOrCreateDatabase(name, openFlags(), null, null);
+            db = builder.databaseProvider.provideOnDiskDatabase(builder.context, name, openFlags());
         }
         onConfigure(db);
         return db;
@@ -132,7 +132,7 @@ public class OrmaConnection {
         return schemas;
     }
 
-    public synchronized SQLiteDatabase getWritableDatabase() {
+    public synchronized Database getWritableDatabase() {
         if (writeOnMainThread != AccessThreadConstraint.NONE) {
             if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
                 if (writeOnMainThread == AccessThreadConstraint.FATAL) {
@@ -149,7 +149,7 @@ public class OrmaConnection {
         return db;
     }
 
-    public synchronized SQLiteDatabase getReadableDatabase() {
+    public synchronized Database getReadableDatabase() {
         if (readOnMainThread != AccessThreadConstraint.NONE) {
             if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
                 if (readOnMainThread == AccessThreadConstraint.FATAL) {
@@ -249,7 +249,7 @@ public class OrmaConnection {
     }
 
     public int update(Schema<?> schema, ContentValues values, String whereClause, String[] whereArgs) {
-        SQLiteDatabase db = getWritableDatabase();
+        Database db = getWritableDatabase();
         if (trace) {
             traceUpdateQuery(schema, values, whereClause, whereArgs);
         }
@@ -292,14 +292,14 @@ public class OrmaConnection {
     @NonNull
     public Cursor rawQuery(@NonNull String sql, String... bindArgs) {
         trace(sql, bindArgs);
-        SQLiteDatabase db = getReadableDatabase();
+        Database db = getReadableDatabase();
         return db.rawQuery(sql, bindArgs);
     }
 
     public long rawQueryForLong(@NonNull String sql, String... bindArgs) {
         trace(sql, bindArgs);
-        SQLiteDatabase db = getReadableDatabase();
-        return DatabaseUtils.longForQuery(db, sql, bindArgs);
+        Database db = getReadableDatabase();
+        return db.longForQuery(sql, bindArgs);
     }
 
     @NonNull
@@ -313,8 +313,7 @@ public class OrmaConnection {
     @Nullable
     public <T> T querySingle(Schema<T> schema, String[] columns, String whereClause, String[] whereArgs, String groupBy,
             String having, String orderBy, long offset) {
-        SQLiteCursor cursor = (SQLiteCursor) query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy,
-                offset + ",1");
+        Cursor cursor = query(schema, columns, whereClause, whereArgs, groupBy, having, orderBy, offset + ",1");
 
         try {
             if (cursor.moveToFirst()) {
@@ -328,12 +327,12 @@ public class OrmaConnection {
     }
 
     public int delete(@NonNull Schema<?> schema, @Nullable String whereClause, @Nullable String[] whereArgs) {
-        SQLiteDatabase db = getWritableDatabase();
+        Database db = getWritableDatabase();
 
         String sql = "DELETE FROM " + schema.getEscapedTableName()
                 + (!TextUtils.isEmpty(whereClause) ? " WHERE " + whereClause : "");
         trace(sql, whereArgs);
-        SQLiteStatement statement = db.compileStatement(sql);
+        DatabaseStatement statement = db.compileStatement(sql);
         statement.bindAllArgsAsStrings(whereArgs);
         try {
             int count = statement.executeUpdateDelete();
@@ -345,7 +344,7 @@ public class OrmaConnection {
     }
 
     public void transactionNonExclusiveSync(@NonNull Runnable task) {
-        SQLiteDatabase db = getReadableDatabase();
+        Database db = getReadableDatabase();
         trace("begin transaction (non exclusive)", null);
         db.beginTransactionNonExclusive();
 
@@ -362,7 +361,7 @@ public class OrmaConnection {
 
     @WorkerThread
     public void transactionSync(@NonNull Runnable task) {
-        SQLiteDatabase db = getWritableDatabase();
+        Database db = getWritableDatabase();
         trace("begin transaction", null);
         db.beginTransaction();
         try {
@@ -401,7 +400,7 @@ public class OrmaConnection {
 
     public void execSQL(@NonNull String sql, @NonNull Object... bindArgs) {
         trace(sql, bindArgs);
-        SQLiteDatabase db = getWritableDatabase();
+        Database db = getWritableDatabase();
         db.execSQL(sql, bindArgs);
     }
 
@@ -413,7 +412,7 @@ public class OrmaConnection {
         }
     }
 
-    protected void execSQL(@NonNull SQLiteDatabase db, @NonNull String sql) {
+    protected void execSQL(@NonNull Database db, @NonNull String sql) {
         trace(sql, null);
         db.execSQL(sql);
     }
@@ -430,7 +429,7 @@ public class OrmaConnection {
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    protected void setForeignKeyConstraintsEnabled(SQLiteDatabase db, boolean enabled) {
+    protected void setForeignKeyConstraintsEnabled(Database db, boolean enabled) {
         if (isRunningOnJellyBean()) {
             db.setForeignKeyConstraintsEnabled(enabled);
         } else {
@@ -442,7 +441,7 @@ public class OrmaConnection {
         }
     }
 
-    protected void onConfigure(SQLiteDatabase db) {
+    protected void onConfigure(Database db) {
         if (wal && name != null && !isRunningOnJellyBean()) {
             db.enableWriteAheadLogging();
         }
@@ -450,7 +449,7 @@ public class OrmaConnection {
         setForeignKeyConstraintsEnabled(db, foreignKeys);
     }
 
-    protected void onMigrate(SQLiteDatabase db) {
+    protected void onMigrate(Database db) {
         long t0 = 0;
         if (trace) {
             Log.i(TAG, "migration started");

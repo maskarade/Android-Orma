@@ -16,6 +16,9 @@
 
 package com.github.gfx.android.orma.example.fragment;
 
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DefaultDatabase;
+import com.github.gfx.android.orma.encryption.EncryptedDatabase;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.R;
 import com.github.gfx.android.orma.example.activity.MainActivity;
@@ -30,7 +33,6 @@ import com.github.gfx.android.orma.migration.TraceListener;
 
 import org.threeten.bp.ZonedDateTime;
 
-import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -55,6 +57,8 @@ public class MainFragment extends Fragment {
 
     static final String DB_NAME = "main.db";
 
+    static final String PASSWORD = "password";
+
     ArrayAdapter<String> logsAdapter;
 
     FragmentMainBinding binding;
@@ -70,7 +74,12 @@ public class MainFragment extends Fragment {
 
     public void setupV1Database() {
         getContext().deleteDatabase(DB_NAME);
-        SQLiteDatabase db = getContext().openOrCreateDatabase(DB_NAME, 0, null);
+        Database db;
+        if (BuildConfig.FLAVOR.equals("encrypted")) {
+            db = new EncryptedDatabase.Provider(PASSWORD).provideOnDiskDatabase(getContext(), DB_NAME, 0);
+        } else {
+            db = new DefaultDatabase.Provider().provideOnDiskDatabase(getContext(), DB_NAME, 0);
+        }
         db.setVersion(1);
         db.execSQL("CREATE TABLE todos (id INTEGER PRIMARY KEY, note TEXT NOT NULL)");
         db.execSQL("CREATE INDEX index_note_on_todos ON todos (note)");
@@ -93,8 +102,11 @@ public class MainFragment extends Fragment {
         // OrmaDatabase with migration steps
         // The current database schema version is 10 (= BuildConfig.VERSION_CODE)
         setupV1Database();
-        orma = OrmaDatabase.builder(getContext())
-                .name(DB_NAME)
+        OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext()).name(null);
+        if (BuildConfig.FLAVOR.equals("encrypted")) {
+            builder = builder.provider(new EncryptedDatabase.Provider(PASSWORD));
+        }
+        orma = builder
                 .migrationStep(5, new ManualStepMigration.ChangeStep() {
                     @Override
                     public void change(@NonNull ManualStepMigration.Helper helper) {

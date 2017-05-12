@@ -22,6 +22,9 @@ android {
         targetSdkVersion 25
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a", "x86"
+        }
     }
     signingConfigs {
         debug {
@@ -48,6 +51,10 @@ android {
         }
     }
     productFlavors {
+        normal {}
+        encrypted {
+            applicationIdSuffix ".encrypted"
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -75,6 +82,7 @@ android {
 dependencies {
     annotationProcessor project(':processor')
     compile project(':library')
+    compile project(':encryption')
     compile "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
     compile "com.android.support:cardview-v7:${SUPPORT_LIBRARY_VERSION}"
     compile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"

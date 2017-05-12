@@ -63,7 +63,7 @@ public class Types {
 
     public static final ClassName Cursor = ClassName.get("android.database", "Cursor");
 
-    public static final ClassName SQLiteStatement = ClassName.get("android.database.sqlite", "SQLiteStatement");
+    public static final ClassName DatabaseStatement = ClassName.get("com.github.gfx.android.orma.core", "DatabaseStatement");
 
     public static final ClassName SQLiteConstraintException = ClassName
             .get("android.database.sqlite", "SQLiteConstraintException");

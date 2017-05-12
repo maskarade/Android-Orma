@@ -20,7 +20,7 @@ import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.annotation.Experimental;
 
-import android.database.sqlite.SQLiteDatabase;
+import com.github.gfx.android.orma.core.Database;
 import android.support.annotation.RestrictTo;
 
 import java.util.HashSet;
@@ -54,7 +54,7 @@ public class DataSetChangedTrigger {
         observerMap.put((Observer<DataSetChangedEvent<?>>)(Object)observer, selector);
     }
 
-    public <Model> void fire(SQLiteDatabase db, DataSetChangedEvent.Type type, Schema<Model> schema) {
+    public <Model> void fire(Database db, DataSetChangedEvent.Type type, Schema<Model> schema) {
         if (observerMap.isEmpty()) {
             return;
         }

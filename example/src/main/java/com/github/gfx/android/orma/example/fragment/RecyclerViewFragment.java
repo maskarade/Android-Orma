@@ -17,6 +17,8 @@
 package com.github.gfx.android.orma.example.fragment;
 
 import com.github.gfx.android.orma.Relation;
+import com.github.gfx.android.orma.encryption.EncryptedDatabase;
+import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
 import com.github.gfx.android.orma.example.databinding.FragmentRecyclerViewBinding;
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
@@ -67,8 +69,11 @@ public class RecyclerViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentRecyclerViewBinding.inflate(inflater, container, false);
 
-        orma = OrmaDatabase.builder(getContext())
-                .build();
+        OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext());
+        if (BuildConfig.FLAVOR.equals("encrypted")) {
+            builder = builder.provider(new EncryptedDatabase.Provider("password"));
+        }
+        orma = builder.build();
 
         adapter = new Adapter(getContext(), orma.relationOfTodo().orderByCreatedTimeAsc());
         binding.list.setAdapter(adapter);

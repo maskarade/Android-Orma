@@ -17,6 +17,7 @@ package com.github.gfx.android.orma.test;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.ModelFactory;
+import com.github.gfx.android.orma.core.Database;
 import com.github.gfx.android.orma.test.database_package_test.OrmaDatabaseInAnotherPackage;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
@@ -28,8 +29,6 @@ import org.junit.runner.RunWith;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
@@ -154,7 +153,7 @@ public class OrmaDatabaseTest {
     }
 
     boolean isForeignKeyEnabled(OrmaDatabase orma) {
-        SQLiteDatabase db = orma.getConnection().getReadableDatabase();
-        return DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null) != 0;
+        Database db = orma.getConnection().getReadableDatabase();
+        return db.longForQuery("PRAGMA foreign_keys", null) != 0;
     }
 }

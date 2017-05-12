@@ -15,20 +15,42 @@
  */
 package com.github.gfx.android.orma.example.handwritten;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DatabaseProvider;
 
-public class HandWrittenOpenHelper extends SQLiteOpenHelper {
+import android.content.Context;
+
+public class HandWrittenOpenHelper {
 
     static final int VERSION = 4;
 
-    public HandWrittenOpenHelper(Context context, String name) {
-        super(context, name, null, VERSION);
+    private final Context context;
+
+    private final String name;
+
+    private final DatabaseProvider provider;
+
+    private Database db;
+
+    public HandWrittenOpenHelper(Context context, String name, DatabaseProvider provider) {
+        this.context = context;
+        this.name = name;
+        this.provider = provider;
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
+    public Database getWritableDatabase() {
+        if (db == null) {
+            db = provider.provideOnDiskDatabase(context, name, 0);
+            onCreate(db);
+        }
+        return db;
+    }
+
+    public Database getReadableDatabase() {
+        return getWritableDatabase();
+    }
+
+    private void onCreate(Database db) {
         db.execSQL("CREATE TABLE todo ("
                 + "id INTEGER PRIMARY KEY,"
                 + "title TEXT NOT NULL,"
@@ -38,15 +60,5 @@ public class HandWrittenOpenHelper extends SQLiteOpenHelper {
                 + ")");
         db.execSQL("CREATE INDEX title_on_todo ON todo (title)");
         db.execSQL("CREATE INDEX createdTimeMillis_on_todo ON todo (createdTime)");
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE todo");
-    }
-
-    @Override
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // nop
     }
 }

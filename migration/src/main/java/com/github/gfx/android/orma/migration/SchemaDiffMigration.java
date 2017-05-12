@@ -15,6 +15,7 @@
  */
 package com.github.gfx.android.orma.migration;
 
+import com.github.gfx.android.orma.core.Database;
 import com.github.gfx.android.orma.migration.sqliteparser.CreateIndexStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.CreateTableStatement;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
@@ -26,8 +27,6 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -121,7 +120,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         return array.toString();
     }
 
-    public static Map<String, SQLiteMaster> loadMetadata(SQLiteDatabase db, List<? extends MigrationSchema> schemas) {
+    public static Map<String, SQLiteMaster> loadMetadata(Database db, List<? extends MigrationSchema> schemas) {
         Map<String, SQLiteMaster> metadata = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         Set<String> tableNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
@@ -144,7 +143,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     @Override
-    public void start(@NonNull SQLiteDatabase db, @NonNull List<? extends MigrationSchema> schemas) {
+    public void start(@NonNull Database db, @NonNull List<? extends MigrationSchema> schemas) {
         if (isSchemaChanged(db)) {
             Map<String, ? extends MigrationSchema> masterSchemas = loadMetadata(db, schemas);
             List<String> statements = diffAll(masterSchemas, schemas);
@@ -157,14 +156,14 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         }
     }
 
-    public boolean isSchemaChanged(SQLiteDatabase db) {
+    public boolean isSchemaChanged(Database db) {
         Pair<Integer, String> versions = fetchSchemaVersions(db);
         int dbVersion = fetchDbVersion(db);
         return !(dbVersion == versions.first && schemaHash.equals(versions.second));
     }
 
     @NonNull
-    private Pair<Integer, String> fetchSchemaVersions(SQLiteDatabase db) {
+    private Pair<Integer, String> fetchSchemaVersions(Database db) {
         ensureHistoryTableExists(db);
         Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kDbVersion, kSchemaHash},
                 null, null, null, null, kId + " DESC", "1");
@@ -179,14 +178,14 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         }
     }
 
-    void ensureHistoryTableExists(SQLiteDatabase db) {
+    void ensureHistoryTableExists(Database db) {
         if (!tableCreated) {
             migrate(db);
             tableCreated = true;
         }
     }
 
-    public void migrate(SQLiteDatabase db) {
+    public void migrate(Database db) {
         if (SQLiteMaster.checkIfTableNameExists(db, MIGRATION_STEPS_TABLE_1)) {
             try {
                 db.beginTransaction();
@@ -319,7 +318,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         return "DROP INDEX IF EXISTS " + createIndexStatement.getIndexName();
     }
 
-    public void saveStep(@NonNull SQLiteDatabase db, int dbVersion, @Nullable String sql, @NonNull Object... args) {
+    public void saveStep(@NonNull Database db, int dbVersion, @Nullable String sql, @NonNull Object... args) {
         ensureHistoryTableExists(db);
 
         ContentValues values = new ContentValues();
@@ -332,7 +331,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         db.insertOrThrow(MIGRATION_STEPS_TABLE, null, values);
     }
 
-    public void executeStatements(final SQLiteDatabase db, final List<String> statements) {
+    public void executeStatements(final Database db, final List<String> statements) {
         if (statements.isEmpty()) {
             return;
         }
@@ -353,7 +352,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         });
     }
 
-    private static int fetchDbVersion(SQLiteDatabase db) {
-        return (int) DatabaseUtils.longForQuery(db, "PRAGMA schema_version", null);
+    private static int fetchDbVersion(Database db) {
+        return (int) db.longForQuery("PRAGMA schema_version", null);
     }
 }

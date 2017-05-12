@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.migration;
 
-import com.github.gfx.android.orma.core.Database;
+package com.github.gfx.android.orma.core;
 
-import android.support.annotation.NonNull;
+public interface DatabaseStatement {
 
-import java.util.List;
+    void bindAllArgsAsStrings(String[] bindArgs);
 
-public interface MigrationEngine {
+    int executeUpdateDelete();
 
-    /**
-     * @return a tag for {@link android.util.Log}
-     */
-    @NonNull
-    String getTag();
+    void close();
 
-    /**
-     * Starts migration for {@code db} with {@code schemas}.
-     *
-     * @param db      a writable database
-     * @param schemas target table definitions
-     */
-    void start(@NonNull Database db, @NonNull List<? extends MigrationSchema> schemas);
+    long executeInsert();
+
+    void bindNull(int index);
+
+    void bindLong(int index, long value);
+
+    void bindDouble(int index, double value);
+
+    void bindString(int index, String value);
+
+    void bindBlob(int index, byte[] value);
 }

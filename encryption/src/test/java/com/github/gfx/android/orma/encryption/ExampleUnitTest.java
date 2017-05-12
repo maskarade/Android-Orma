@@ -13,27 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.gfx.android.orma.migration;
 
-import com.github.gfx.android.orma.core.Database;
+package com.github.gfx.android.orma.encryption;
 
-import android.support.annotation.NonNull;
+import org.junit.Test;
 
-import java.util.List;
+import static org.junit.Assert.*;
 
-public interface MigrationEngine {
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+public class ExampleUnitTest {
 
-    /**
-     * @return a tag for {@link android.util.Log}
-     */
-    @NonNull
-    String getTag();
-
-    /**
-     * Starts migration for {@code db} with {@code schemas}.
-     *
-     * @param db      a writable database
-     * @param schemas target table definitions
-     */
-    void start(@NonNull Database db, @NonNull List<? extends MigrationSchema> schemas);
+    @Test
+    public void addition_isCorrect() throws Exception {
+        assertEquals(4, 2 + 2);
+    }
 }

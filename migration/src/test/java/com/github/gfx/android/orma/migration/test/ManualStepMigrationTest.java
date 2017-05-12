@@ -15,6 +15,8 @@
  */
 package com.github.gfx.android.orma.migration.test;
 
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.migration.ManualStepMigration;
 import com.github.gfx.android.orma.migration.test.util.SchemaData;
 
@@ -24,7 +26,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -40,7 +41,7 @@ public class ManualStepMigrationTest {
 
     static int VERSION = 100;
 
-    SQLiteDatabase db;
+    Database db;
 
     ManualStepMigration migration;
 
@@ -52,7 +53,7 @@ public class ManualStepMigrationTest {
 
     @Before
     public void setUp() throws Exception {
-        db = SQLiteDatabase.create(null);
+        db = new DefaultDatabase.Provider().provideOnMemoryDatabase(getContext());
         db.setVersion(1);
 
         migration = new ManualStepMigration(getContext(), VERSION, true);

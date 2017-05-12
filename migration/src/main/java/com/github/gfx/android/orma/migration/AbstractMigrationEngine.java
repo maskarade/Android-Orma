@@ -16,12 +16,12 @@
 
 package com.github.gfx.android.orma.migration;
 
+import com.github.gfx.android.orma.core.Database;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.TimeUnit;
@@ -82,8 +82,8 @@ public abstract class AbstractMigrationEngine implements MigrationEngine {
         traceListener.onTrace(this, format, args);
     }
 
-    public void transaction(@NonNull SQLiteDatabase db, @NonNull Runnable task) {
-        boolean foreignKey = DatabaseUtils.longForQuery(db, "PRAGMA foreign_keys", null) != 0;
+    public void transaction(@NonNull Database db, @NonNull Runnable task) {
+        boolean foreignKey = db.longForQuery("PRAGMA foreign_keys", null) != 0;
         if (foreignKey) {
             db.execSQL("PRAGMA foreign_keys = OFF");
         }
