@@ -44,7 +44,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +66,8 @@ public class BenchmarkFragment extends Fragment {
     static final int N_ITEMS = 10;
 
     static final int N_OPS = 100;
+
+    static final String PASSWORD = "password";
 
     final String titlePrefix = "title ";
 
@@ -136,7 +137,8 @@ public class BenchmarkFragment extends Fragment {
             RealmConfiguration.Builder builder = new RealmConfiguration.Builder();
             if (encryptionIsRequired()) {
                 byte[] key = new byte[64];
-                new SecureRandom().nextBytes(key);
+                byte[] passwordBytes = PASSWORD.getBytes();
+                System.arraycopy(passwordBytes, 0, key, 0, Math.min(64, passwordBytes.length));
                 builder = builder.encryptionKey(key);
             }
             RealmConfiguration realmConf = builder.build();
@@ -148,7 +150,7 @@ public class BenchmarkFragment extends Fragment {
             getContext().deleteDatabase("orma-benchmark.db");
             OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext()).name("orma-benchmark.db");
             if (encryptionIsRequired()) {
-                builder = builder.provider(new EncryptedDatabase.Provider("password"));
+                builder = builder.provider(new EncryptedDatabase.Provider(PASSWORD));
             }
             orma = builder
                     .readOnMainThread(AccessThreadConstraint.NONE)
