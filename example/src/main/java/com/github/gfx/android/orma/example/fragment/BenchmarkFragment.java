@@ -18,6 +18,10 @@ package com.github.gfx.android.orma.example.fragment;
 
 import com.github.gfx.android.orma.AccessThreadConstraint;
 import com.github.gfx.android.orma.Inserter;
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DatabaseProvider;
+import com.github.gfx.android.orma.core.DatabaseStatement;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.encryption.EncryptedDatabase;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.databinding.FragmentBenchmarkBinding;
@@ -31,8 +35,6 @@ import com.github.gfx.android.orma.example.realm.RealmTodo;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -91,7 +93,7 @@ public class BenchmarkFragment extends Fragment {
         return new BenchmarkFragment();
     }
 
-    static long longForQuery(SQLiteDatabase db, String sql, String[] args) {
+    static long longForQuery(Database db, String sql, String[] args) {
         Cursor cursor = db.rawQuery(sql, args);
         cursor.moveToFirst();
         long value = cursor.getLong(0);
@@ -161,7 +163,13 @@ public class BenchmarkFragment extends Fragment {
         });
 
         getContext().deleteDatabase("hand-written.db");
-        hw = new HandWrittenOpenHelper(getContext(), "hand-written.db");
+        DatabaseProvider provider;
+        if (encryptionIsRequired()) {
+            provider = new EncryptedDatabase.Provider(PASSWORD);
+        } else {
+            provider = new DefaultDatabase.Provider();
+        }
+        hw = new HandWrittenOpenHelper(getContext(), "hand-written.db", provider);
     }
 
     @Override
@@ -272,10 +280,10 @@ public class BenchmarkFragment extends Fragment {
     Single<Result> startInsertWithHandWritten() {
         return Single.fromCallable(() -> {
             long result = runWithBenchmark(() -> {
-                SQLiteDatabase db = hw.getWritableDatabase();
+                Database db = hw.getWritableDatabase();
                 db.beginTransaction();
 
-                SQLiteStatement inserter = db.compileStatement(
+                DatabaseStatement inserter = db.compileStatement(
                         "INSERT INTO todo (title, content, done, createdTime) VALUES (?, ?, ?, ?)");
 
                 long now = System.currentTimeMillis();
@@ -366,11 +374,11 @@ public class BenchmarkFragment extends Fragment {
             long result = runWithBenchmark(() -> {
                 AtomicInteger count = new AtomicInteger();
 
-                SQLiteDatabase db = hw.getReadableDatabase();
+                Database db = hw.getReadableDatabase();
                 Cursor cursor = db.query(
                         "todo",
                         new String[]{"id, title, content, done, createdTime"},
-                        null, null, null, null, "createdTime ASC" // whereClause, whereArgs, groupBy, having, orderBy
+                        null, null, null, null, "createdTime ASC", null // whereClause, whereArgs, groupBy, having, orderBy, limit
                 );
 
                 if (cursor.moveToFirst()) {
