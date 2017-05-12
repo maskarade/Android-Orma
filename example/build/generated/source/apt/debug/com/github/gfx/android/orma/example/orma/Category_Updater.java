@@ -40,6 +40,56 @@ public class Category_Updater extends Updater<Category, Category_Updater> {
     return this;
   }
 
+  @Deprecated
+  public Category_Updater nameEq(@NonNull String name) {
+    return where(schema.name, "=", name);
+  }
+
+  @Deprecated
+  public Category_Updater nameNotEq(@NonNull String name) {
+    return where(schema.name, "<>", name);
+  }
+
+  @Deprecated
+  public Category_Updater nameIn(@NonNull Collection<String> values) {
+    return in(false, schema.name, values);
+  }
+
+  @Deprecated
+  public Category_Updater nameNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.name, values);
+  }
+
+  @Deprecated
+  public final Category_Updater nameIn(@NonNull String... values) {
+    return nameIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Category_Updater nameNotIn(@NonNull String... values) {
+    return nameNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Category_Updater nameLt(@NonNull String name) {
+    return where(schema.name, "<", name);
+  }
+
+  @Deprecated
+  public Category_Updater nameLe(@NonNull String name) {
+    return where(schema.name, "<=", name);
+  }
+
+  @Deprecated
+  public Category_Updater nameGt(@NonNull String name) {
+    return where(schema.name, ">", name);
+  }
+
+  @Deprecated
+  public Category_Updater nameGe(@NonNull String name) {
+    return where(schema.name, ">=", name);
+  }
+
   public Category_Updater idEq(long id) {
     return where(schema.id, "=", id);
   }

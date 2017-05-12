@@ -73,6 +73,114 @@ public class Entry_Relation extends Relation<Entry, Entry_Relation> {
     return new Entry_Deleter(this);
   }
 
+  @Deprecated
+  public Entry_Relation resourceTypeEq(@NonNull String resourceType) {
+    return where(schema.resourceType, "=", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceTypeNotEq(@NonNull String resourceType) {
+    return where(schema.resourceType, "<>", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceTypeIn(@NonNull Collection<String> values) {
+    return in(false, schema.resourceType, values);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceTypeNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.resourceType, values);
+  }
+
+  @Deprecated
+  public final Entry_Relation resourceTypeIn(@NonNull String... values) {
+    return resourceTypeIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Entry_Relation resourceTypeNotIn(@NonNull String... values) {
+    return resourceTypeNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Entry_Relation resourceTypeLt(@NonNull String resourceType) {
+    return where(schema.resourceType, "<", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceTypeLe(@NonNull String resourceType) {
+    return where(schema.resourceType, "<=", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceTypeGt(@NonNull String resourceType) {
+    return where(schema.resourceType, ">", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceTypeGe(@NonNull String resourceType) {
+    return where(schema.resourceType, ">=", resourceType);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceIdEq(long resourceId) {
+    return where(schema.resourceId, "=", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceIdNotEq(long resourceId) {
+    return where(schema.resourceId, "<>", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceIdIn(@NonNull Collection<Long> values) {
+    return in(false, schema.resourceId, values);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceIdNotIn(@NonNull Collection<Long> values) {
+    return in(true, schema.resourceId, values);
+  }
+
+  @Deprecated
+  public final Entry_Relation resourceIdIn(@NonNull Long... values) {
+    return resourceIdIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Entry_Relation resourceIdNotIn(@NonNull Long... values) {
+    return resourceIdNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Entry_Relation resourceIdLt(long resourceId) {
+    return where(schema.resourceId, "<", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceIdLe(long resourceId) {
+    return where(schema.resourceId, "<=", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceIdGt(long resourceId) {
+    return where(schema.resourceId, ">", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Relation resourceIdGe(long resourceId) {
+    return where(schema.resourceId, ">=", resourceId);
+  }
+
+  /**
+   * To build a condition <code>resourceId BETWEEN a AND b</code>, which is equivalent to <code>a <= resourceId AND resourceId <= b</code>.
+   */
+  @Deprecated
+  public Entry_Relation resourceIdBetween(long resourceIdA, long resourceIdB) {
+    return whereBetween(schema.resourceId, resourceIdA, resourceIdB);
+  }
+
   public Entry_Relation idEq(long id) {
     return where(schema.id, "=", id);
   }
@@ -122,6 +230,36 @@ public class Entry_Relation extends Relation<Entry, Entry_Relation> {
 
   public Entry_Relation resourceTypeAndResourceIdEq(@NonNull String resourceType, long resourceId) {
     return where(schema.resourceType, "=", resourceType).where(schema.resourceId, "=", resourceId);
+  }
+
+  @Deprecated
+  public Entry_Relation orderByResourceTypeAsc() {
+    return orderBy(schema.resourceType.orderInAscending());
+  }
+
+  @Deprecated
+  public Entry_Relation orderByResourceTypeDesc() {
+    return orderBy(schema.resourceType.orderInDescending());
+  }
+
+  @Deprecated
+  public Entry_Relation orderByResourceIdAsc() {
+    return orderBy(schema.resourceId.orderInAscending());
+  }
+
+  @Deprecated
+  public Entry_Relation orderByResourceIdDesc() {
+    return orderBy(schema.resourceId.orderInDescending());
+  }
+
+  @Deprecated
+  public Entry_Relation orderByIdAsc() {
+    return orderBy(schema.id.orderInAscending());
+  }
+
+  @Deprecated
+  public Entry_Relation orderByIdDesc() {
+    return orderBy(schema.id.orderInDescending());
   }
 
   public Entry_Relation orderByresourceTypeAndResourceIdAsc() {

@@ -7,8 +7,10 @@ import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.function.Function1;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 public class Todo_Relation extends Relation<Todo, Todo_Relation> {
   final Todo_Schema schema;
@@ -116,6 +118,66 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     return where(schema.title, ">=", title);
   }
 
+  @Deprecated
+  public Todo_Relation contentIsNull() {
+    return where(schema.content, " IS NULL");
+  }
+
+  @Deprecated
+  public Todo_Relation contentIsNotNull() {
+    return where(schema.content, " IS NOT NULL");
+  }
+
+  @Deprecated
+  public Todo_Relation contentEq(@NonNull String content) {
+    return where(schema.content, "=", content);
+  }
+
+  @Deprecated
+  public Todo_Relation contentNotEq(@NonNull String content) {
+    return where(schema.content, "<>", content);
+  }
+
+  @Deprecated
+  public Todo_Relation contentIn(@NonNull Collection<String> values) {
+    return in(false, schema.content, values);
+  }
+
+  @Deprecated
+  public Todo_Relation contentNotIn(@NonNull Collection<String> values) {
+    return in(true, schema.content, values);
+  }
+
+  @Deprecated
+  public final Todo_Relation contentIn(@NonNull String... values) {
+    return contentIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Todo_Relation contentNotIn(@NonNull String... values) {
+    return contentNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Todo_Relation contentLt(@NonNull String content) {
+    return where(schema.content, "<", content);
+  }
+
+  @Deprecated
+  public Todo_Relation contentLe(@NonNull String content) {
+    return where(schema.content, "<=", content);
+  }
+
+  @Deprecated
+  public Todo_Relation contentGt(@NonNull String content) {
+    return where(schema.content, ">", content);
+  }
+
+  @Deprecated
+  public Todo_Relation contentGe(@NonNull String content) {
+    return where(schema.content, ">=", content);
+  }
+
   public Todo_Relation doneEq(boolean done) {
     return where(schema.done, "=", done);
   }
@@ -154,6 +216,74 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
 
   public Todo_Relation doneGe(boolean done) {
     return where(schema.done, ">=", done);
+  }
+
+  @Deprecated
+  public Todo_Relation createdTimeEq(@NonNull Date createdTime) {
+    return where(schema.createdTime, "=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Relation createdTimeNotEq(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<>", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Relation createdTimeIn(@NonNull Collection<Date> values) {
+    return in(false, schema.createdTime, values, new Function1<Date, Long>() {
+      @Override
+      public Long apply(Date value) {
+        return BuiltInSerializers.serializeDate(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public Todo_Relation createdTimeNotIn(@NonNull Collection<Date> values) {
+    return in(true, schema.createdTime, values, new Function1<Date, Long>() {
+      @Override
+      public Long apply(Date value) {
+        return BuiltInSerializers.serializeDate(value);
+      }
+    });
+  }
+
+  @Deprecated
+  public final Todo_Relation createdTimeIn(@NonNull Date... values) {
+    return createdTimeIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public final Todo_Relation createdTimeNotIn(@NonNull Date... values) {
+    return createdTimeNotIn(Arrays.asList(values));
+  }
+
+  @Deprecated
+  public Todo_Relation createdTimeLt(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Relation createdTimeLe(@NonNull Date createdTime) {
+    return where(schema.createdTime, "<=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Relation createdTimeGt(@NonNull Date createdTime) {
+    return where(schema.createdTime, ">", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  @Deprecated
+  public Todo_Relation createdTimeGe(@NonNull Date createdTime) {
+    return where(schema.createdTime, ">=", BuiltInSerializers.serializeDate(createdTime));
+  }
+
+  /**
+   * To build a condition <code>createdTime BETWEEN a AND b</code>, which is equivalent to <code>a <= createdTime AND createdTime <= b</code>.
+   */
+  @Deprecated
+  public Todo_Relation createdTimeBetween(@NonNull Date createdTimeA, @NonNull Date createdTimeB) {
+    return whereBetween(schema.createdTime, BuiltInSerializers.serializeDate(createdTimeA), BuiltInSerializers.serializeDate(createdTimeB));
   }
 
   public Todo_Relation idEq(long id) {
@@ -211,6 +341,16 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     return orderBy(schema.title.orderInDescending());
   }
 
+  @Deprecated
+  public Todo_Relation orderByContentAsc() {
+    return orderBy(schema.content.orderInAscending());
+  }
+
+  @Deprecated
+  public Todo_Relation orderByContentDesc() {
+    return orderBy(schema.content.orderInDescending());
+  }
+
   public Todo_Relation orderByDoneAsc() {
     return orderBy(schema.done.orderInAscending());
   }
@@ -225,5 +365,15 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
 
   public Todo_Relation orderByCreatedTimeDesc() {
     return orderBy(schema.createdTime.orderInDescending());
+  }
+
+  @Deprecated
+  public Todo_Relation orderByIdAsc() {
+    return orderBy(schema.id.orderInAscending());
+  }
+
+  @Deprecated
+  public Todo_Relation orderByIdDesc() {
+    return orderBy(schema.id.orderInDescending());
   }
 }
