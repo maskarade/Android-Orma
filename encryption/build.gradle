@@ -31,7 +31,6 @@ android {
         textReport true
         textOutput 'stdout'
         disable 'GoogleAppIndexingWarning'
-        disable 'InvalidPackage' // java.nio.file in ANLR4
     }
     dexOptions {
         preDexLibraries = !System.getenv("CI")
@@ -39,23 +38,10 @@ android {
 }
 
 dependencies {
-    compile project(':library')
+    compile project(':core')
 
-    compile 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
-
-    testAnnotationProcessor project(':processor')
-    testCompile 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.1.4'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.hamcrest:hamcrest-library:1.3'
-    testCompile 'com.google.code.gson:gson:2.8.0'
-    testCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
-
-    androidTestAnnotationProcessor project(':processor')
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-    androidTestCompile 'com.google.code.gson:gson:2.8.0'
-    androidTestCompile "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
+    // https://github.com/sqlcipher/android-database-sqlcipher
+    compile 'net.zetetic:android-database-sqlcipher:3.5.7'
 }
 
 publish {

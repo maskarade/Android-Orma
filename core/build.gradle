@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2015 FUJI Goro (gfx).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        debug {
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    compile "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
+}
+
+publish {
+    artifactId = 'orma-core'
+    desc = 'The core module for Android-Orma'
+
+    def metadata = rootProject.ext.metadata
+    groupId = metadata.groupId
+    publishVersion = metadata.version
+    website = metadata.website
+    repository = metadata.repository
+    licences = metadata.licences
+}

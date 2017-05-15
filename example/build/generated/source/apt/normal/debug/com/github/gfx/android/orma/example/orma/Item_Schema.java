@@ -1,7 +1,6 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.github.gfx.android.orma.AssociationDef;
@@ -9,6 +8,7 @@ import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.core.DatabaseStatement;
 import com.github.gfx.android.orma.internal.Aliases;
 import com.github.gfx.android.orma.internal.Schemas;
 import java.util.Arrays;
@@ -202,7 +202,7 @@ public class Item_Schema implements Schema<Item> {
   }
 
   @Override
-  public void bindArgs(@NonNull OrmaConnection conn, @NonNull SQLiteStatement statement,
+  public void bindArgs(@NonNull OrmaConnection conn, @NonNull DatabaseStatement statement,
       @NonNull Item model, boolean withoutAutoId) {
     statement.bindLong(1, model.category.id);
     statement.bindString(2, model.name);

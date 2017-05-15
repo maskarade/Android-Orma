@@ -16,6 +16,8 @@
 
 package com.github.gfx.android.orma.test.toolbox;
 
+import com.github.gfx.android.orma.core.DatabaseProvider;
+import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 
@@ -38,9 +40,15 @@ public class OrmaFactory {
         }
     }
 
+    static DatabaseProvider createProvider() {
+        return new DefaultDatabase.Provider();
+        // return new EncryptedDatabase.Provider("password");
+    }
+
     public static OrmaDatabase.Builder builder() {
         return OrmaDatabase.builder(InstrumentationRegistry.getTargetContext())
                 .name(createTempfileName())
+                .provider(createProvider())
                 .trace(true);
     }
 
@@ -52,6 +60,7 @@ public class OrmaFactory {
         return OrmaDatabaseToAvoidTryParsing.builder(InstrumentationRegistry.getTargetContext())
                 .tryParsingSql(false)
                 .name(createTempfileName())
+                .provider(createProvider())
                 .trace(true)
                 .build();
     }
