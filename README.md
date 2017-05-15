@@ -62,6 +62,7 @@ as the author respects the Larry Wall's wisdom:
 - [Migration](#migration)
 - [DataSet Changed Events](#dataset-changed-events)
 - [Cooperation with Serialization Libraries](#cooperation-with-serialization-libraries)
+- [Encryption](#encryption)
 - [Example](#example)
 - [Benchmark](#benchmark)
 - [Method Count](#method-count)
@@ -1100,6 +1101,30 @@ trigger `#notifyDataSetChanged()`.
 
 Beause Orma reuqires nothing to do to models, serializers, e.g. Android Parcels or GSON, can
 serialize Orma models.
+
+## Encryption
+
+There's an encryption extension as `orma-encryption` since Orma v5.0.0-rc1:
+
+```build.gradle
+dependencies {
+    compile 'com.github.gfx.android.orma:orma-encryption:5.0.0-rc1'
+}
+```
+
+That provies `EncryptedDatabase`:
+
+```java
+String password = "...";
+OrmaDatabase orma = OrmaDatabase.builder(context)
+    .provider(new EncryptedDatabase.Provider(password))
+    // ...
+    .build();
+```
+
+Encrypted database are managed by [SQLCipher](https://github.com/sqlcipher/android-database-sqlcipher), so the database files are not compatible with non-encrypted ones.
+
+Note that with this extension the database handle throws `net.sqlcipher.database.SQLException` instead of `android.database.SQLException` as runtime exceptions, so it might not be 100% compatible with the default database.
 
 ## Example
 

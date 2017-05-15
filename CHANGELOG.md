@@ -10,6 +10,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v5.0.0-rc1 2017/05/15
+
+https://github.com/gfx/Android-Orma/compare/v4.2.4...v5.0.0-rc1
+
+* [#402](https://github.com/gfx/Android-Orma/pull/402) by @k-kagurazaka: Encryption support with SQLCipher, introducing new modules, `orma-encryption` and `orma-core`
+
 ## v4.2.4 2017/04/28
 
 https://github.com/gfx/Android-Orma/compare/v4.2.3...v4.2.4
