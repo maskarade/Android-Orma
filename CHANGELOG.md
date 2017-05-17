@@ -16,11 +16,17 @@ https://github.com/gfx/Android-Orma/compare/v4.2.4...v5.0.0-rc1
 
 * [#402](https://github.com/gfx/Android-Orma/pull/402) by @k-kagurazaka: Encryption support with SQLCipher, introducing new modules, `orma-encryption` and `orma-core`
 
+## v4.2.5 2017/05/17
+
+https://github.com/gfx/Android-Orma/compare/v4.2.4...v4.2.5
+
+* Downgrade ANTLR4 from 4.7 to 4.6; ANTLR4 4.7 crashes Android before 4.4 (issued in [#404](https://github.com/gfx/Android-Orma/issues/404))
+
 ## v4.2.4 2017/04/28
 
 https://github.com/gfx/Android-Orma/compare/v4.2.3...v4.2.4
 
-* [#400](https://github.com/gfx/Android-Orma/pull/400): Upgrade ANTRL4 runtime to 4.6, requiring `diable "InvalidPackage"` in Android Lint
+* [#400](https://github.com/gfx/Android-Orma/pull/400): Upgrade ANTRL4 runtime to 4.7, requiring `diable "InvalidPackage"` in Android Lint
 
 ## v4.2.3 2017/03/17
 

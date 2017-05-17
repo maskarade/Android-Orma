@@ -31,7 +31,6 @@ android {
         textReport true
         textOutput 'stdout'
         disable 'GoogleAppIndexingWarning'
-        disable 'InvalidPackage' // java.nio.file in ANLR4
     }
     dexOptions {
         preDexLibraries = !System.getenv("CI")

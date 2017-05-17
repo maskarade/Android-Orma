@@ -122,8 +122,8 @@ Declare dependencies to use Orma and its annotation processor.
 
 ```gradle:build.gradle
 dependencies {
-    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.2.4'
-    compile 'com.github.gfx.android.orma:orma:4.2.4'
+    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.2.5'
+    compile 'com.github.gfx.android.orma:orma:4.2.5'
 }
 ```
 
@@ -1056,7 +1056,7 @@ See [migration/README.md](migration/README.md) for details.
 
 ## DataSet Changed Events
 
-NOTE: **This is experimental in v4.2.4: its existence, signature or behavior might change without warning from one release to the next.**
+NOTE: **This is experimental in v4.2.5: its existence, signature or behavior might change without warning from one release to the next.**
 
 `Relation#createQueryObservable()` can create a event stream to observe data-set changed events for the relation.
 
@@ -1141,7 +1141,7 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 [example/BenchmarkFragment](example/src/main/java/com/github/gfx/android/orma/example/fragment/BenchmarkFragment.java)
 
 Here is a result performed on Android 6.0.0 / Xperia Z4
-as of Orma v4.2.4 and Realm 2.3.0, processing 10 items x 100 times:
+as of Orma v4.2.5 and Realm 2.3.0, processing 10 items x 100 times:
 
 <img src="benchmark.png" alt="" width="420"/>
 
@@ -1149,7 +1149,7 @@ I welcome benchmark in another condition and/or another code.
 
 ## Method Count
 
-Orma runtime is very lightweight: [Method Count for v4.2.4](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:4.2.4)
+Orma runtime is very lightweight: [Method Count for v4.2.5](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:4.2.5)
 
 ## FAQ
 
@@ -1203,8 +1203,8 @@ Yes. As of Android Gradle Plugin 2.2.2, Orma should work with Jack.
 
 ```gradle:build.gradle
 dependencies {
-    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.2.4'
-    compile 'com.github.gfx.android.orma:orma:4.2.4'
+    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.2.5'
+    compile 'com.github.gfx.android.orma:orma:4.2.5'
 }
 ```
 
