@@ -240,7 +240,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     @Nullable
     public Model getOrNull(@IntRange(from = 0) long position) {
         return conn.querySingle(getSchema(), getSchema().getDefaultResultColumns(),
-                getWhereClause(), getBindArgs(), groupBy, having, orderBy, position);
+                getWhereClause(), getBindArgs(), groupBy, having, orderBy, position + Math.max(offset, 0));
     }
 
     @NonNull
