@@ -10,6 +10,12 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v5.0.0-rc2 2017/05/17
+
+https://github.com/gfx/Android-Orma/compare/v5.0.0-rc1...v5.0.0-rc2
+
+* Merge v4.2.5 into master
+
 ## v5.0.0-rc1 2017/05/15
 
 https://github.com/gfx/Android-Orma/compare/v4.2.4...v5.0.0-rc1
