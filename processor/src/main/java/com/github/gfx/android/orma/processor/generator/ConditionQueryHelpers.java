@@ -133,6 +133,12 @@ public class ConditionQueryHelpers {
                 .build();
     }
 
+    ParameterSpec buildStringParameterSpec(String name) {
+        return ParameterSpec.builder(Types.String, name)
+                .addAnnotations(Collections.singletonList(Annotations.nonNull()))
+                .build();
+    }
+
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
         AssociationDefinition r = column.getAssociation();
 
@@ -311,6 +317,26 @@ public class ConditionQueryHelpers {
                     .returns(targetClassName)
                     .addStatement("return $L($T.asList(values))",
                             column.name + "NotIn", Types.Arrays)
+                    .build()
+            );
+        }
+
+        if (column.hasHelper(Column.Helpers.CONDITION_CONTAINS) && type.equals(Types.String) && !column.primaryKey) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Contains")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(buildStringParameterSpec("value"))
+                    .returns(targetClassName)
+                    .addStatement("return glob(false, $L, \"*\" + value + \"*\")", columnExpr)
+                    .build()
+            );
+        }
+
+        if (column.hasHelper(Column.Helpers.CONDITION_NOT_CONTAINS) && type.equals(Types.String) && !column.primaryKey) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "NotContains")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(buildStringParameterSpec("value"))
+                    .returns(targetClassName)
+                    .addStatement("return glob(true, $L, \"*\" + value + \"*\")", columnExpr)
                     .build()
             );
         }

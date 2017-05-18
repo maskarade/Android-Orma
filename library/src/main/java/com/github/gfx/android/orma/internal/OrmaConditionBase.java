@@ -149,6 +149,20 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
         return in(not, column, serializedValues);
     }
 
+    protected C glob(boolean not, @NonNull ColumnDef<Model, ?> column, @NonNull String pattern) {
+        String columnName = buildColumnName(column);
+
+        StringBuilder clause = new StringBuilder();
+
+        clause.append(columnName);
+        if (not) {
+            clause.append(" NOT");
+        }
+        clause.append(" GLOB ?");
+
+        return where(clause, pattern);
+    }
+
     /**
      * {@code and()} changes the conjunction to {@code AND} (default).
      *
