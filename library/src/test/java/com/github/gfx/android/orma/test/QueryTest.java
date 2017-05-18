@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.function.Function1;
 import com.github.gfx.android.orma.test.model.Author;
 import com.github.gfx.android.orma.test.model.Author_Selector;
 import com.github.gfx.android.orma.test.model.Book;
@@ -345,6 +346,26 @@ public class QueryTest {
                 .titleNotLike("%day")
                 .toList();
         assertThat(books, hasSize(0));
+    }
+
+    @Test
+    public void whereConditionGroup() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .conditionGroup(new Function1<Book_Selector, Book_Selector>() {
+                   @Override
+                    public Book_Selector apply(Book_Selector it) {
+                       return it.titleEq("today").or().titleEq("friday");
+                   }
+                })
+                .and()
+                .conditionGroup(new Function1<Book_Selector, Book_Selector>() {
+                    @Override
+                    public Book_Selector apply(Book_Selector it) {
+                        return it.where("content LIKE ?", "%,%").or().where("content = ?", "apple");
+                    }
+                })
+                .toList();
+        assertThat(books, hasSize(2));
     }
 
     @Test
