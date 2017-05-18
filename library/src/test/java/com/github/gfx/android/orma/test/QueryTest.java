@@ -162,6 +162,14 @@ public class QueryTest {
         assertThat(book, is(nullValue()));
     }
 
+    @Test
+    public void valueWithOffset() throws Exception {
+        Book book = db.selectFromBook().offset(1).value();
+
+        assertThat(book.title, is("friday"));
+        assertThat(book.content, is("apple"));
+    }
+
     @Test(expected = NoValueException.class)
     public void valueIfNull() throws Exception {
         db.deleteFromBook().execute();
@@ -189,6 +197,14 @@ public class QueryTest {
         assert book != null;
         assertThat(book.bookId, is(db.selectFromBook().get(0).bookId));
         assertThat(db.selectFromBook().get(10), is(nullValue()));
+    }
+
+    @Test
+    public void testGetWithOffset() throws Exception {
+        Book book = db.selectFromBook().offset(1).get(0);
+
+        assertThat(book.title, is("friday"));
+        assertThat(book.content, is("apple"));
     }
 
     @Test
