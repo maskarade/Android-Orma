@@ -364,6 +364,15 @@ The following are generated for numeric columns
 | `*Ge(value)`     | `* >= value`        |
 | `*Between(a, b)` | `* BETWEEN a AND b` |
 
+The following are generated for `TEXT` and not `PRIMARY KEY` columns.
+
+| Method              | SQL                  |
+|:-------------------:|:--------------------:|
+| `*Glob(pattern)`    | `* GLOB pattern`     |
+| `*NotGlob(pattern)` | `* NOT GLOB pattern` |
+| `*Like(pattern)`    | `* LIKE pattern`     |
+| `*NotLike(pattern)` | `* NOT LIKE pattern` |
+
 And `ORDER BY` helpers:
 
 | Method           | SQL               |
