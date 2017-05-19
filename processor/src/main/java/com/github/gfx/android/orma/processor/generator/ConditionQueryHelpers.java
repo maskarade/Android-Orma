@@ -341,6 +341,26 @@ public class ConditionQueryHelpers {
             );
         }
 
+        if (column.hasHelper(Column.Helpers.CONDITION_LIKE) && type.equals(Types.String) && !column.primaryKey) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Like")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(buildStringParameterSpec("pattern"))
+                    .returns(targetClassName)
+                    .addStatement("return where($L, $S, pattern)", columnExpr, "LIKE")
+                    .build()
+            );
+        }
+
+        if (column.hasHelper(Column.Helpers.CONDITION_NOT_LIKE) && type.equals(Types.String) && !column.primaryKey) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "NotLike")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(buildStringParameterSpec("pattern"))
+                    .returns(targetClassName)
+                    .addStatement("return where($L, $S, pattern)", columnExpr, "NOT LIKE")
+                    .build()
+            );
+        }
+
         if (column.hasHelper(Column.Helpers.CONDITION_LT)) {
             methodSpecs.add(MethodSpec.methodBuilder(column.name + "Lt")
                     .addModifiers(Modifier.PUBLIC)

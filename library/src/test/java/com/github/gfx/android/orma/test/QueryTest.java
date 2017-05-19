@@ -332,6 +332,22 @@ public class QueryTest {
     }
 
     @Test
+    public void like() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .titleLike("%ri%")
+                .toList();
+        assertThat(books, hasSize(1));
+    }
+
+    @Test
+    public void notLike() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .titleNotLike("%day")
+                .toList();
+        assertThat(books, hasSize(0));
+    }
+
+    @Test
     public void orderBy() throws Exception {
         List<Book> books = db.selectFromBook().orderBy("bookId DESC").toList();
         assertThat(books, hasSize(2));
