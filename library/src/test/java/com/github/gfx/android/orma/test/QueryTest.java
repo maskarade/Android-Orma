@@ -316,6 +316,22 @@ public class QueryTest {
     }
 
     @Test
+    public void glob() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .titleGlob("*ri*")
+                .toList();
+        assertThat(books, hasSize(1));
+    }
+
+    @Test
+    public void notGlob() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .titleNotGlob("*day")
+                .toList();
+        assertThat(books, hasSize(0));
+    }
+
+    @Test
     public void orderBy() throws Exception {
         List<Book> books = db.selectFromBook().orderBy("bookId DESC").toList();
         assertThat(books, hasSize(2));

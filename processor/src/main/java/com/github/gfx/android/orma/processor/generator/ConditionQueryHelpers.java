@@ -133,6 +133,12 @@ public class ConditionQueryHelpers {
                 .build();
     }
 
+    ParameterSpec buildStringParameterSpec(String name) {
+        return ParameterSpec.builder(Types.String, name)
+                .addAnnotations(Collections.singletonList(Annotations.nonNull()))
+                .build();
+    }
+
     void buildConditionHelpersForEachColumn(List<MethodSpec> methodSpecs, ColumnDefinition column) {
         AssociationDefinition r = column.getAssociation();
 
@@ -311,6 +317,26 @@ public class ConditionQueryHelpers {
                     .returns(targetClassName)
                     .addStatement("return $L($T.asList(values))",
                             column.name + "NotIn", Types.Arrays)
+                    .build()
+            );
+        }
+
+        if (column.hasHelper(Column.Helpers.CONDITION_GLOB) && type.equals(Types.String) && !column.primaryKey) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "Glob")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(buildStringParameterSpec("pattern"))
+                    .returns(targetClassName)
+                    .addStatement("return where($L, $S, pattern)", columnExpr, "GLOB")
+                    .build()
+            );
+        }
+
+        if (column.hasHelper(Column.Helpers.CONDITION_NOT_GLOB) && type.equals(Types.String) && !column.primaryKey) {
+            methodSpecs.add(MethodSpec.methodBuilder(column.name + "NotGlob")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(buildStringParameterSpec("pattern"))
+                    .returns(targetClassName)
+                    .addStatement("return where($L, $S, pattern)", columnExpr, "NOT GLOB")
                     .build()
             );
         }
