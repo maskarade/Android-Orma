@@ -351,21 +351,42 @@ public class QueryTest {
     @Test
     public void whereConditionGroup() throws Exception {
         List<Book> books = db.selectFromBook()
-                .where(new Function1<Book_Selector, Book_Selector>() {
-                   @Override
-                    public Book_Selector apply(Book_Selector it) {
-                       return it.titleEq("today").or().titleEq("friday");
-                   }
-                })
+                .titleEq("today").or().where("content GLOB ?", "*,*")
                 .and()
+                .titleGlob("fri*")
+                .toList();
+        assertThat(books, hasSize(1));
+
+        Book_Selector condition = db.selectFromBook()
+                .titleEq("today").or().where("content GLOB ?", "*,*");
+        books = db.selectFromBook()
+                .where(condition)
+                .and()
+                .titleGlob("fri*")
+                .toList();
+        assertThat(books, hasSize(0));
+    }
+
+    @Test
+    public void whereConditionGroupFunction() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .titleEq("today").or().where("content GLOB ?", "*,*")
+                .and()
+                .titleGlob("fri*")
+                .toList();
+        assertThat(books, hasSize(1));
+
+        books = db.selectFromBook()
                 .where(new Function1<Book_Selector, Book_Selector>() {
                     @Override
                     public Book_Selector apply(Book_Selector it) {
-                        return it.where("content LIKE ?", "%,%").or().where("content = ?", "apple");
+                        return it.titleEq("today").or().where("content GLOB ?", "*,*");
                     }
                 })
+                .and()
+                .titleGlob("fri*")
                 .toList();
-        assertThat(books, hasSize(2));
+        assertThat(books, hasSize(0));
     }
 
     @Test
