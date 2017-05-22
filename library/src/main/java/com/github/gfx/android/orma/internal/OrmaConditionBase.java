@@ -182,7 +182,7 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
      * @return the receiver itself
      */
     @SuppressWarnings("unchecked")
-    public C conditionGroup(@NonNull Function1<C, C> block) {
+    public C where(@NonNull Function1<C, C> block) {
         String currentConjunction = whereConjunction;
         skipConjunction = true;
 

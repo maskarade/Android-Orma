@@ -351,14 +351,14 @@ public class QueryTest {
     @Test
     public void whereConditionGroup() throws Exception {
         List<Book> books = db.selectFromBook()
-                .conditionGroup(new Function1<Book_Selector, Book_Selector>() {
+                .where(new Function1<Book_Selector, Book_Selector>() {
                    @Override
                     public Book_Selector apply(Book_Selector it) {
                        return it.titleEq("today").or().titleEq("friday");
                    }
                 })
                 .and()
-                .conditionGroup(new Function1<Book_Selector, Book_Selector>() {
+                .where(new Function1<Book_Selector, Book_Selector>() {
                     @Override
                     public Book_Selector apply(Book_Selector it) {
                         return it.where("content LIKE ?", "%,%").or().where("content = ?", "apple");
