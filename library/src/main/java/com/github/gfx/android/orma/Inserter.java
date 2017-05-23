@@ -96,6 +96,19 @@ public class Inserter<Model> implements Closeable {
     }
 
     /**
+     * Does {@link #execute(Object)} and then does {@link #close()} immediately
+     * @param model A model to insert
+     * @return A last-inserted row id
+     */
+    public long executeAndClose(@NonNull Model model) {
+        try {
+            return execute(model);
+        } finally {
+            close();
+        }
+    }
+
+    /**
      * {@link Single} wrapper to {@code execute(Model)}
      *
      * @param model A model object to insert
