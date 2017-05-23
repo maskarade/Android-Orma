@@ -3,7 +3,7 @@ machine:
     version: oraclejdk8
   environment:
     TERM: dumb
-    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx1560m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
+    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
 dependencies:
   pre:
     - echo y | android -s update sdk -u -a -t "tools" # update Android SDK that includes sdkmanager(1)
