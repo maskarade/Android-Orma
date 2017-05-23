@@ -419,7 +419,7 @@ public class DatabaseWriter extends BaseWriter {
                                             .addAnnotation(Annotations.nonNull())
                                             .build()
                             )
-                            .addStatement("return prepareInsertInto$L().execute(model)",
+                            .addStatement("return prepareInsertInto$L().executeAndClose(model)",
                                     simpleModelName
                             )
                             .build());
