@@ -404,6 +404,15 @@ public class OrmaConnection {
         db.execSQL(sql, bindArgs);
     }
 
+    /**
+     * Close this connection.
+     *
+     * All queries are no longer acceptable unless the database is re-build.
+     */
+    public void close() {
+        db.close();
+    }
+
     protected void checkSchemas(List<Schema<?>> schemas) {
         if (tryParsingSql) {
             for (Schema<?> schema : schemas) {
