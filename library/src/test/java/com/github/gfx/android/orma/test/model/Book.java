@@ -38,7 +38,7 @@ public class Book {
     @Column
     public boolean inPrint;
 
-    @Column
+    @Column(indexed = true)
     public long price = 100;
 
     @Column(indexed = true)

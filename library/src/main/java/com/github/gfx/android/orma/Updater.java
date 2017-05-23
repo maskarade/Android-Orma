@@ -42,6 +42,7 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
         super(relation);
     }
 
+    @Override
     public abstract Updater<Model, U> clone();
 
     @NonNull

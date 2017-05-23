@@ -82,7 +82,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @Override
-    public abstract S clone();
+    public abstract Selector<Model, S> clone();
 
     @NonNull
     @Override

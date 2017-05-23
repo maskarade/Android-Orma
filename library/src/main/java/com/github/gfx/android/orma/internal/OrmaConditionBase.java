@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model, ?>> {
+public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model, ?>> implements Cloneable {
 
     protected final OrmaConnection conn;
 
@@ -47,6 +47,9 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
         this(condition.conn);
         where(condition);
     }
+
+    @Override
+    abstract public OrmaConditionBase<Model, C> clone();
 
     public OrmaConnection getConnection() {
         return conn;
@@ -179,20 +182,7 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
      */
     @SuppressWarnings("unchecked")
     public C where(@NonNull Function1<C, C> block) {
-        String currentConjunction = whereConjunction;
-
-        if (whereClause == null) {
-            whereClause = new StringBuilder();
-        } else {
-            whereClause.append(whereConjunction);
-        }
-
-        whereClause.append('(');
-        block.apply((C) this);
-        whereClause.append(')');
-
-        whereConjunction = currentConjunction;
-        return (C) this;
+        return where(block.apply((C) clone()));
     }
 
     @SuppressWarnings("unchecked")
