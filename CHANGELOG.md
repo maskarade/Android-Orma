@@ -17,7 +17,7 @@ https://github.com/gfx/Android-Orma/compare/v5.0.0-rc2...v5.0.0-rc3
 * [#405](https://github.com/gfx/Android-Orma/pull/405): `Selector#value()` and `Selector#getOrNull()` now respect `offset` (@k-kagurazaka)
 * [#407](https://github.com/gfx/Android-Orma/pull/407): Add condition helpers for `GLOB` and `LIKE` and their negative variants (@k-kagurazaka)
 * [#408](https://github.com/gfx/Android-Orma/pull/408): Add `Selector#where(Function<Selector, Selector>)` to build grouped conditions (@k-kagurazaka)
-* [#411](https://github.com/gfx/Android-Orma/pull/411): Add `OrmaConnection#close()` to close the connection; keep in mind that it is not needed for typical use-cases
+* [#411](https://github.com/gfx/Android-Orma/pull/411): Add `OrmaConnection#close()` to close the connection; keep in mind that it is not needed for typical use-cases (@k-kagurazaka)
 * [#413](https://github.com/gfx/Android-Orma/pull/413): Fix crashes with SQLCipher's `DatabaseObjectNotClosedException` in `OrmaDatabase#prepareInsertInto*()`
 
 ## v5.0.0-rc2 2017/05/17
