@@ -222,7 +222,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @Override
-    public abstract R clone();
+    public abstract Relation<Model, R> clone();
 
     /**
      * {@code selector()} creates a {@link Selector} with queries that the relation has.
