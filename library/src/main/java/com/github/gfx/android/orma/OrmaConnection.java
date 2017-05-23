@@ -19,7 +19,6 @@ import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.core.Database;
 import com.github.gfx.android.orma.core.DatabaseStatement;
-import com.github.gfx.android.orma.core.DefaultDatabase;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.event.DataSetChangedTrigger;
 import com.github.gfx.android.orma.exception.DatabaseAccessOnMainThreadException;
@@ -32,7 +31,6 @@ import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Build;
 import android.os.Looper;
@@ -42,6 +40,7 @@ import android.support.annotation.WorkerThread;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.Closeable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,7 +49,7 @@ import io.reactivex.Observable;
 /**
  * Low-level interface to Orma database connection.
  */
-public class OrmaConnection {
+public class OrmaConnection implements Closeable {
 
     static final String TAG = "Orma";
 
@@ -405,10 +404,12 @@ public class OrmaConnection {
     }
 
     /**
-     * Close this connection.
+     * Closes this connection.
      *
-     * All queries are no longer acceptable unless the database is re-build.
+     * Basically, you should keep a database handle as an application-scope instance.
+     * Don't close the connection unless you know what you do.
      */
+    @Override
     public void close() {
         db.close();
     }
