@@ -33,8 +33,6 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
 
     protected String whereConjunction = " AND ";
 
-    private boolean skipConjunction = false;
-
     @Nullable
     protected StringBuilder whereClause;
 
@@ -87,8 +85,6 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     public C where(@NonNull CharSequence conditions, @NonNull Object... args) {
         if (whereClause == null) {
             whereClause = new StringBuilder(conditions.length() + 2);
-        } else if (skipConjunction) {
-            skipConjunction = false;
         } else {
             whereClause.append(whereConjunction);
         }
@@ -184,7 +180,6 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
     @SuppressWarnings("unchecked")
     public C where(@NonNull Function1<C, C> block) {
         String currentConjunction = whereConjunction;
-        skipConjunction = true;
 
         if (whereClause == null) {
             whereClause = new StringBuilder();
