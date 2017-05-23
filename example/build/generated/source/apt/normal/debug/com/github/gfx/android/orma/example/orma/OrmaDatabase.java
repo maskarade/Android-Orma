@@ -167,7 +167,7 @@ public class OrmaDatabase implements DatabaseHandle {
    */
   @WorkerThread
   public long insertIntoCategory(@NonNull Category model) {
-    return prepareInsertIntoCategory().execute(model);
+    return prepareInsertIntoCategory().executeAndClose(model);
   }
 
   /**
@@ -281,7 +281,7 @@ public class OrmaDatabase implements DatabaseHandle {
    */
   @WorkerThread
   public long insertIntoEntry(@NonNull Entry model) {
-    return prepareInsertIntoEntry().execute(model);
+    return prepareInsertIntoEntry().executeAndClose(model);
   }
 
   /**
@@ -395,7 +395,7 @@ public class OrmaDatabase implements DatabaseHandle {
    */
   @WorkerThread
   public long insertIntoItem(@NonNull Item model) {
-    return prepareInsertIntoItem().execute(model);
+    return prepareInsertIntoItem().executeAndClose(model);
   }
 
   /**
@@ -509,7 +509,7 @@ public class OrmaDatabase implements DatabaseHandle {
    */
   @WorkerThread
   public long insertIntoItem2(@NonNull Item2 model) {
-    return prepareInsertIntoItem2().execute(model);
+    return prepareInsertIntoItem2().executeAndClose(model);
   }
 
   /**
@@ -623,7 +623,7 @@ public class OrmaDatabase implements DatabaseHandle {
    */
   @WorkerThread
   public long insertIntoTodo(@NonNull Todo model) {
-    return prepareInsertIntoTodo().execute(model);
+    return prepareInsertIntoTodo().executeAndClose(model);
   }
 
   /**

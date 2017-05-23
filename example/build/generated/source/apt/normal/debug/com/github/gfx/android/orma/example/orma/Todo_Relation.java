@@ -100,6 +100,22 @@ public class Todo_Relation extends Relation<Todo, Todo_Relation> {
     return titleNotIn(Arrays.asList(values));
   }
 
+  public Todo_Relation titleGlob(@NonNull String pattern) {
+    return where(schema.title, "GLOB", pattern);
+  }
+
+  public Todo_Relation titleNotGlob(@NonNull String pattern) {
+    return where(schema.title, "NOT GLOB", pattern);
+  }
+
+  public Todo_Relation titleLike(@NonNull String pattern) {
+    return where(schema.title, "LIKE", pattern);
+  }
+
+  public Todo_Relation titleNotLike(@NonNull String pattern) {
+    return where(schema.title, "NOT LIKE", pattern);
+  }
+
   public Todo_Relation titleLt(@NonNull String title) {
     return where(schema.title, "<", title);
   }

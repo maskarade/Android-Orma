@@ -59,6 +59,22 @@ public class Todo_Selector extends Selector<Todo, Todo_Selector> {
     return titleNotIn(Arrays.asList(values));
   }
 
+  public Todo_Selector titleGlob(@NonNull String pattern) {
+    return where(schema.title, "GLOB", pattern);
+  }
+
+  public Todo_Selector titleNotGlob(@NonNull String pattern) {
+    return where(schema.title, "NOT GLOB", pattern);
+  }
+
+  public Todo_Selector titleLike(@NonNull String pattern) {
+    return where(schema.title, "LIKE", pattern);
+  }
+
+  public Todo_Selector titleNotLike(@NonNull String pattern) {
+    return where(schema.title, "NOT LIKE", pattern);
+  }
+
   public Todo_Selector titleLt(@NonNull String title) {
     return where(schema.title, "<", title);
   }

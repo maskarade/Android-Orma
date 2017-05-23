@@ -59,6 +59,22 @@ public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
     return titleNotIn(Arrays.asList(values));
   }
 
+  public Todo_Deleter titleGlob(@NonNull String pattern) {
+    return where(schema.title, "GLOB", pattern);
+  }
+
+  public Todo_Deleter titleNotGlob(@NonNull String pattern) {
+    return where(schema.title, "NOT GLOB", pattern);
+  }
+
+  public Todo_Deleter titleLike(@NonNull String pattern) {
+    return where(schema.title, "LIKE", pattern);
+  }
+
+  public Todo_Deleter titleNotLike(@NonNull String pattern) {
+    return where(schema.title, "NOT LIKE", pattern);
+  }
+
   public Todo_Deleter titleLt(@NonNull String title) {
     return where(schema.title, "<", title);
   }

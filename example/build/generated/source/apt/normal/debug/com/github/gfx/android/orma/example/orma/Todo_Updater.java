@@ -87,6 +87,22 @@ public class Todo_Updater extends Updater<Todo, Todo_Updater> {
     return titleNotIn(Arrays.asList(values));
   }
 
+  public Todo_Updater titleGlob(@NonNull String pattern) {
+    return where(schema.title, "GLOB", pattern);
+  }
+
+  public Todo_Updater titleNotGlob(@NonNull String pattern) {
+    return where(schema.title, "NOT GLOB", pattern);
+  }
+
+  public Todo_Updater titleLike(@NonNull String pattern) {
+    return where(schema.title, "LIKE", pattern);
+  }
+
+  public Todo_Updater titleNotLike(@NonNull String pattern) {
+    return where(schema.title, "NOT LIKE", pattern);
+  }
+
   public Todo_Updater titleLt(@NonNull String title) {
     return where(schema.title, "<", title);
   }
