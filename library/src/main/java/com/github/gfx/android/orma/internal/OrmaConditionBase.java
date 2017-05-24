@@ -182,7 +182,7 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
      */
     @SuppressWarnings("unchecked")
     public C where(@NonNull Function1<C, C> block) {
-        return where(block.apply((C) clone()));
+        return block.apply((C) clone());
     }
 
     @SuppressWarnings("unchecked")
