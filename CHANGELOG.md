@@ -10,6 +10,17 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v5.0.0 (not yet scheduled)
+
+https://github.com/gfx/Android-Orma/compare/v4.2.5...HEAD
+
+## v5.0.0-rc4 2017/06/14
+
+https://github.com/gfx/Android-Orma/compare/v5.0.0-rc2...v5.0.0-rc3
+
+* [#421](https://github.com/gfx/Android-Orma/pull/421): fix multi-thread issues in DataSetChangedTrigger
+* [#415](https://github.com/gfx/Android-Orma/pull/415): fix where-block issues (@k-kagurazaka)
+
 ## v5.0.0-rc3 2017/05/23
 
 https://github.com/gfx/Android-Orma/compare/v5.0.0-rc2...v5.0.0-rc3
