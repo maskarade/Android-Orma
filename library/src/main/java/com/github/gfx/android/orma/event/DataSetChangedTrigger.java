@@ -19,14 +19,15 @@ package com.github.gfx.android.orma.event;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.annotation.Experimental;
-
 import com.github.gfx.android.orma.core.Database;
+
 import android.support.annotation.RestrictTo;
 
+import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -38,8 +39,8 @@ import io.reactivex.subjects.PublishSubject;
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 @Experimental
 public class DataSetChangedTrigger {
-
-    final WeakHashMap<Observer<DataSetChangedEvent<?>>, Selector<?, ?>> observerMap = new WeakHashMap<>();
+    // TODO: use well-tested concurrent weak maps
+    final Map<WeakReference<Observer<DataSetChangedEvent<?>>>, Selector<?, ?>> observerMap = new ConcurrentHashMap<>();
 
     Set<Schema<?>> changedDataSetInTransaction = null;
 
@@ -51,7 +52,7 @@ public class DataSetChangedTrigger {
 
     @SuppressWarnings("unchecked")
     public <S extends Selector<?, ?>> void register(Observer<DataSetChangedEvent<S>> observer, Selector<?, ?> selector) {
-        observerMap.put((Observer<DataSetChangedEvent<?>>)(Object)observer, selector);
+        observerMap.put(new WeakReference<>((Observer<DataSetChangedEvent<?>>)(Object)observer), selector);
     }
 
     public <Model> void fire(Database db, DataSetChangedEvent.Type type, Schema<Model> schema) {
@@ -63,11 +64,15 @@ public class DataSetChangedTrigger {
             return;
         }
 
-        for (Map.Entry<Observer<DataSetChangedEvent<?>>, Selector<?, ?>> entry : observerMap.entrySet()) {
+        for (Map.Entry<WeakReference<Observer<DataSetChangedEvent<?>>>, Selector<?, ?>> entry : observerMap.entrySet()) {
             Selector<?, ?> selector = entry.getValue();
             if (schema == selector.getSchema()) {
-                Observer<DataSetChangedEvent<?>> observer = entry.getKey();
-                observer.onNext(new DataSetChangedEvent<>(type, selector));
+                WeakReference<Observer<DataSetChangedEvent<?>>> observerRef = entry.getKey();
+                if (observerRef.get() != null) {
+                    observerRef.get().onNext(new DataSetChangedEvent<>(type, selector));
+                } else {
+                    observerMap.remove(observerRef);
+                }
             }
         }
     }
@@ -87,11 +92,15 @@ public class DataSetChangedTrigger {
         if (schemaSet == null) {
             return;
         }
-        for (Map.Entry<Observer<DataSetChangedEvent<?>>, Selector<?, ?>> entry : observerMap.entrySet()) {
+        for (Map.Entry<WeakReference<Observer<DataSetChangedEvent<?>>>, Selector<?, ?>> entry : observerMap.entrySet()) {
             Selector<?, ?> selector = entry.getValue();
             if (schemaSet.contains(selector.getSchema())) {
-                Observer<DataSetChangedEvent<?>> observer = entry.getKey();
-                observer.onNext(new DataSetChangedEvent<>(DataSetChangedEvent.Type.TRANSACTION, selector));
+                WeakReference<Observer<DataSetChangedEvent<?>>> observerRef = entry.getKey();
+                if (observerRef.get() != null) {
+                    observerRef.get().onNext(new DataSetChangedEvent<>(DataSetChangedEvent.Type.TRANSACTION, selector));
+                } else {
+                    observerMap.remove(observerRef);
+                }
             }
         }
     }
