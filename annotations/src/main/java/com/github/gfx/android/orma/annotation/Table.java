@@ -46,4 +46,6 @@ public @interface Table {
     String deleterClassName() default "";
 
     String selectorClassName() default "";
+
+    String associationConditionClassName() default "";
 }
