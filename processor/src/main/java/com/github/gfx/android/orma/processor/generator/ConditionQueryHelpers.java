@@ -188,9 +188,10 @@ public class ConditionQueryHelpers {
         }
 
         if (isAssociation) {
-            // for foreign keys
             if (column.hasHelper(Column.Helpers.CONDITION_EQ)) {
                 SchemaDefinition associatedSchema = column.getAssociatedSchema();
+
+                // for foreign keys
                 associatedSchema.getPrimaryKey().ifPresent(foreignKey -> {
                     String paramName = column.name + Strings.toUpperFirst(foreignKey.name);
                     CodeBlock serializedParamExpr = foreignKey.applySerialization("conn", paramName);
@@ -206,9 +207,31 @@ public class ConditionQueryHelpers {
                                     .build()
                     );
                 });
-            }
 
-            // generates only "*Eq" for associations
+                // for querying association model
+                if (r.isDirectAssociation()) {
+                    ClassName associationConditionClassName = associatedSchema.getAssociationConditionClassName();
+                    TypeName paramType = Types.getFunction1(associationConditionClassName, associationConditionClassName);
+                    String paramName = "block";
+                    methodSpecs.add(
+                            MethodSpec.methodBuilder(column.name)
+                                    .addModifiers(Modifier.PUBLIC)
+                                    .addParameter(
+                                            ParameterSpec.builder(paramType, paramName)
+                                                    .addAnnotation(Annotations.nonNull())
+                                                    .build()
+                                    )
+                                    .returns(targetClassName)
+                                    .addStatement(
+                                            "return $L.apply(new $T(getConnection(), $L.associationSchema)).appendTo(this)",
+                                            paramName,
+                                            associationConditionClassName,
+                                            columnExpr
+                                    )
+                                    .build()
+                    );
+                }
+            }
             return;
         }
 

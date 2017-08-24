@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.annotation.StaticTypeAdapters;
 import com.github.gfx.android.orma.annotation.Table;
 import com.github.gfx.android.orma.annotation.VirtualTable;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
+import com.github.gfx.android.orma.processor.generator.AssociationConditionWriter;
 import com.github.gfx.android.orma.processor.generator.BaseWriter;
 import com.github.gfx.android.orma.processor.generator.DatabaseWriter;
 import com.github.gfx.android.orma.processor.generator.DeleterWriter;
@@ -92,7 +93,8 @@ public class OrmaProcessor extends AbstractProcessor {
                             new RelationWriter(context, schema),
                             new SelectorWriter(context, schema),
                             new UpdaterWriter(context, schema),
-                            new DeleterWriter(context, schema)))
+                            new DeleterWriter(context, schema),
+                            new AssociationConditionWriter(context, schema)))
                     .parallel()
                     .forEach(this::writeCodeForEachModel);
 
