@@ -28,7 +28,7 @@ public class ModelWithNestedDirectAssociations {
     @PrimaryKey
     public long id;
 
-    @Column
+    @Column(indexed = true)
     public ModelWithDirectAssociation md;
 
     @Column
