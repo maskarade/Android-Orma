@@ -108,6 +108,8 @@ public class Types {
 
     public static final ClassName Updater = ClassName.get(ormaPackageName, "Updater");
 
+    public static final ClassName RxUpdater = ClassName.get(ormaRxPackageName, "RxUpdater");
+
     public static final ClassName Deleter = ClassName.get(ormaPackageName, "Deleter");
 
     public static final ClassName AssociationCondition = ClassName.get(ormaPackageName, "AssociationCondition");
@@ -208,6 +210,10 @@ public class Types {
 
     public static ParameterizedTypeName getUpdater(TypeName modelType, TypeName concreteUpdaterType) {
         return ParameterizedTypeName.get(Updater, modelType, concreteUpdaterType);
+    }
+
+    public static ParameterizedTypeName getRxUpdater(TypeName modelType, TypeName concreteUpdaterType) {
+        return ParameterizedTypeName.get(RxUpdater, modelType, concreteUpdaterType);
     }
 
     public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concleteDeleterType) {
