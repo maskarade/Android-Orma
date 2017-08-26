@@ -102,6 +102,8 @@ public class Types {
 
     public static final ClassName Relation = ClassName.get(ormaPackageName, "Relation");
 
+    public static final ClassName RxRelation = ClassName.get(ormaRxPackageName, "RxRelation");
+
     public static final ClassName Selector = ClassName.get(ormaPackageName, "Selector");
 
     public static final ClassName RxSelector = ClassName.get(ormaRxPackageName, "RxSelector");
@@ -200,6 +202,10 @@ public class Types {
 
     public static ParameterizedTypeName getRelation(TypeName modelType, TypeName concreteRelationType) {
         return ParameterizedTypeName.get(Relation, modelType, concreteRelationType);
+    }
+
+    public static ParameterizedTypeName getRxRelation(TypeName modelType, TypeName concreteRelationType) {
+        return ParameterizedTypeName.get(RxRelation, modelType, concreteRelationType);
     }
 
     public static ParameterizedTypeName getSelector(TypeName modelType, TypeName concreteSelectorType) {

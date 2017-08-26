@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.example.fragment;
 
-import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.encryption.EncryptedDatabase;
 import com.github.gfx.android.orma.example.BuildConfig;
 import com.github.gfx.android.orma.example.databinding.CardTodoBinding;
@@ -24,6 +23,7 @@ import com.github.gfx.android.orma.example.databinding.FragmentRecyclerViewBindi
 import com.github.gfx.android.orma.example.orma.OrmaDatabase;
 import com.github.gfx.android.orma.example.orma.Todo;
 import com.github.gfx.android.orma.example.orma.Todo_Relation;
+import com.github.gfx.android.orma.rx.RxRelation;
 import com.github.gfx.android.orma.widget.OrmaRecyclerViewAdapter;
 
 import org.threeten.bp.ZonedDateTime;
@@ -104,7 +104,7 @@ public class RecyclerViewFragment extends Fragment {
 
     static class Adapter extends OrmaRecyclerViewAdapter<Todo, VH> {
 
-        public Adapter(@NonNull Context context, @NonNull Relation<Todo, ?> relation) {
+        public Adapter(@NonNull Context context, @NonNull RxRelation<Todo, ?> relation) {
             super(context, relation);
         }
 

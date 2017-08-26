@@ -21,6 +21,7 @@ import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.rx.RxRelation;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -49,7 +50,7 @@ public class OrmaAdapter<Model> {
 
     protected final Context context;
 
-    protected final Relation<Model, ?> relation;
+    protected final RxRelation<Model, ?> relation;
 
     protected final LruCache<Integer, Model> cache = new LruCache<>(CACHE_SIZE);
 
@@ -57,7 +58,7 @@ public class OrmaAdapter<Model> {
 
     protected final CompositeDisposable queryObservableSubscription;
 
-    public OrmaAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
+    public OrmaAdapter(@NonNull Context context, @NonNull RxRelation<Model, ?> relation) {
         this.context = context;
         this.relation = relation;
         this.queryObservable = relation.createQueryObservable();

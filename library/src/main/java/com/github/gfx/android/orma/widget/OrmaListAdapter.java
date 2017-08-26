@@ -19,6 +19,7 @@ package com.github.gfx.android.orma.widget;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.annotation.Experimental;
+import com.github.gfx.android.orma.rx.RxRelation;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -43,7 +44,7 @@ public abstract class OrmaListAdapter<Model> extends BaseAdapter {
     protected final OrmaAdapter<Model> delegate;
 
 
-    public OrmaListAdapter(@NonNull Context context, @NonNull Relation<Model, ?> relation) {
+    public OrmaListAdapter(@NonNull Context context, @NonNull RxRelation<Model, ?> relation) {
         this(new OrmaAdapter<>(context, relation));
     }
 
