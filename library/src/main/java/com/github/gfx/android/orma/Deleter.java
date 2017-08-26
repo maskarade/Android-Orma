@@ -17,15 +17,10 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
-import java.util.concurrent.Callable;
-
-import io.reactivex.Single;
-
 public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaConditionBase<Model, D>
-    implements Cloneable {
+        implements Cloneable {
 
     public Deleter(@NonNull OrmaConnection connection) {
         super(connection);
@@ -52,16 +47,5 @@ public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaCo
      */
     public int execute() {
         return conn.delete(getSchema(), getWhereClause(), getBindArgs());
-    }
-
-    @CheckResult
-    @NonNull
-    public Single<Integer> executeAsSingle() {
-        return Single.fromCallable(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return execute();
-            }
-        });
     }
 }

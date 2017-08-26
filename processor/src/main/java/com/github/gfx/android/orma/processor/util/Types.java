@@ -112,6 +112,8 @@ public class Types {
 
     public static final ClassName Deleter = ClassName.get(ormaPackageName, "Deleter");
 
+    public static final ClassName RxDeleter = ClassName.get(ormaRxPackageName, "RxDeleter");
+
     public static final ClassName AssociationCondition = ClassName.get(ormaPackageName, "AssociationCondition");
 
     public static final ClassName OrmaConnection = ClassName.get(ormaPackageName, "OrmaConnection");
@@ -216,8 +218,12 @@ public class Types {
         return ParameterizedTypeName.get(RxUpdater, modelType, concreteUpdaterType);
     }
 
-    public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concleteDeleterType) {
-        return ParameterizedTypeName.get(Deleter, modelType, concleteDeleterType);
+    public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concreteDeleterType) {
+        return ParameterizedTypeName.get(Deleter, modelType, concreteDeleterType);
+    }
+
+    public static ParameterizedTypeName getRxDeleter(TypeName modelType, TypeName concreteDeleterType) {
+        return ParameterizedTypeName.get(RxDeleter, modelType, concreteDeleterType);
     }
 
     public static ParameterizedTypeName getAssociationCondition(TypeName modelType, TypeName concreteSelectorType) {
@@ -288,7 +294,8 @@ public class Types {
 
     public static boolean needsTypeAdapter(TypeName type) {
         return type instanceof ParameterizedTypeName
-                || !(type.isPrimitive() || type.isBoxedPrimitive() || type.equals(Types.String) || type.equals(Types.ByteArray));
+                || !(type.isPrimitive() || type.isBoxedPrimitive() || type.equals(Types.String) || type
+                .equals(Types.ByteArray));
     }
 
     public static TypeName asUnboxType(TypeName type) {
