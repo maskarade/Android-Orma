@@ -16,9 +16,11 @@
 package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Database;
+import com.github.gfx.android.orma.annotation.GenerationOption;
 import com.github.gfx.android.orma.processor.exception.ProcessingException;
 import com.github.gfx.android.orma.processor.generator.SqlGenerator;
 import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
+import com.github.gfx.android.orma.processor.model.GenerationOptionDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
 import com.github.gfx.android.orma.processor.util.SqlTypes;
@@ -54,6 +56,8 @@ public class ProcessingContext {
     public final Types typeUtils;
 
     public final List<ProcessingException> errors = new ArrayList<>();
+
+    public GenerationOptionDefinition generationOption = null;
 
     public final List<DatabaseDefinition> databases = new ArrayList<>();
 
@@ -97,6 +101,13 @@ public class ProcessingContext {
 
     public Elements getElements() {
         return processingEnv.getElementUtils();
+    }
+
+    public void setGenerationOptionDefinition(GenerationOptionDefinition generationOptionDefinition) {
+        if (generationOption != null) {
+            throw new ProcessingException("Multiple GenerationOption is not supported.", null);
+        }
+        generationOption = generationOptionDefinition;
     }
 
     public void addDatabaseDefinition(DatabaseDefinition databaseDefinition) {
@@ -204,6 +215,12 @@ public class ProcessingContext {
 
     public boolean isSameType(TypeMirror t1, TypeMirror t2) {
         return typeUtils.isSameType(t1, t2);
+    }
+
+    public void setupDefaultGenerationOptionIfNeeded() {
+        if (generationOption == null) {
+            generationOption = new GenerationOptionDefinition(GenerationOption.DEFAULT_RX_JAVA_SUPPORT);
+        }
     }
 
     public void setupDefaultDatabaseIfNeeded() {
