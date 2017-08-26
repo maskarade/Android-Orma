@@ -39,6 +39,8 @@ public class Types {
 
     public static final String ormaPackageName = "com.github.gfx.android.orma";
 
+    public static final String ormaRxPackageName = "com.github.gfx.android.orma.rx";
+
     // Android standard types
 
     public static final WildcardTypeName WildcardType = WildcardTypeName.subtypeOf(TypeName.OBJECT);
@@ -111,6 +113,8 @@ public class Types {
     public static final ClassName OrmaConnection = ClassName.get(ormaPackageName, "OrmaConnection");
 
     public static final ClassName Inserter = ClassName.get(ormaPackageName, "Inserter");
+
+    public static final ClassName RxInserter = ClassName.get(ormaRxPackageName, "RxInserter");
 
     public static final ClassName SingleAssociation = ClassName.get(ormaPackageName, "SingleAssociation");
 
@@ -227,6 +231,10 @@ public class Types {
 
     public static ParameterizedTypeName getInserter(TypeName typeName) {
         return ParameterizedTypeName.get(Inserter, typeName);
+    }
+
+    public static ParameterizedTypeName getRxInserter(TypeName typeName) {
+        return ParameterizedTypeName.get(RxInserter, typeName);
     }
 
     public static ParameterizedTypeName getSingle(TypeName typeName) {

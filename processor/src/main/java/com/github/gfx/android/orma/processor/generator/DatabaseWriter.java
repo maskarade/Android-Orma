@@ -430,6 +430,9 @@ public class DatabaseWriter extends BaseWriter {
                             .build());
 
             // For prepared statements
+            ParameterizedTypeName inserterType = context.generationOption.isRxJavaSupport()
+                    ? Types.getRxInserter(schema.getModelClassName())
+                    : Types.getInserter(schema.getModelClassName());
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
@@ -438,7 +441,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addAnnotation(Annotations.workerThread())
                             .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
-                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .returns(inserterType)
                             .addStatement("return prepareInsertInto$L($T.NONE, true)",
                                     simpleModelName,
                                     OnConflict.class
@@ -455,7 +458,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
                                     .addAnnotation(OnConflict.class)
                                     .build())
-                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .returns(inserterType)
                             .addStatement("return prepareInsertInto$L(onConflictAlgorithm, true)",
                                     simpleModelName
                             )
@@ -473,18 +476,16 @@ public class DatabaseWriter extends BaseWriter {
                                     .build())
                             .addParameter(ParameterSpec.builder(boolean.class, "withoutAutoId")
                                     .build())
-                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .returns(inserterType)
                             .addStatement("return new $T($L, $L, onConflictAlgorithm, withoutAutoId)",
-                                    Types.getInserter(schema.getModelClassName()),
+                                    inserterType,
                                     connection,
                                     schemaInstance
                             )
                             .build());
 
+            // For prepared statements RxJava observables
             if (context.generationOption.isRxJavaSupport()) {
-                // For prepared statements RxJava observables
-                TypeName inserterType = Types.getInserter(schema.getModelClassName());
-
                 // RxJava 2.x
                 TypeName inserterSingle2Type = Types.getSingle(inserterType);
 
