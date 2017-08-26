@@ -104,6 +104,8 @@ public class Types {
 
     public static final ClassName Selector = ClassName.get(ormaPackageName, "Selector");
 
+    public static final ClassName RxSelector = ClassName.get(ormaRxPackageName, "RxSelector");
+
     public static final ClassName Updater = ClassName.get(ormaPackageName, "Updater");
 
     public static final ClassName Deleter = ClassName.get(ormaPackageName, "Deleter");
@@ -198,6 +200,10 @@ public class Types {
 
     public static ParameterizedTypeName getSelector(TypeName modelType, TypeName concreteSelectorType) {
         return ParameterizedTypeName.get(Selector, modelType, concreteSelectorType);
+    }
+
+    public static ParameterizedTypeName getRxSelector(TypeName modelType, TypeName concreteSelectorType) {
+        return ParameterizedTypeName.get(RxSelector, modelType, concreteSelectorType);
     }
 
     public static ParameterizedTypeName getUpdater(TypeName modelType, TypeName concreteUpdaterType) {
