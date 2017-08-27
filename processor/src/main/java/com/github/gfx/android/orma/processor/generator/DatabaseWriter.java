@@ -59,9 +59,12 @@ public class DatabaseWriter extends BaseWriter {
 
     final DatabaseDefinition database;
 
+    final ClassName ormaConnectionType;
+
     public DatabaseWriter(ProcessingContext context, DatabaseDefinition database) {
         super(context);
         this.database = database;
+        this.ormaConnectionType = context.generationOption.isRxJavaSupport() ? Types.RxOrmaConnection : Types.OrmaConnection;
     }
 
     // http://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
@@ -146,7 +149,7 @@ public class DatabaseWriter extends BaseWriter {
         builder.addMethod(MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(getClassName())
-                .addStatement("return new $T(new $T(fillDefaults(), $L))", getClassName(), Types.OrmaConnection, SCHEMAS)
+                .addStatement("return new $T(new $T(fillDefaults(), $L))", getClassName(), ormaConnectionType, SCHEMAS)
                 .build());
 
         return builder.build();
@@ -169,7 +172,7 @@ public class DatabaseWriter extends BaseWriter {
                         .build());
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.OrmaConnection, connection, Modifier.PRIVATE, Modifier.FINAL)
+                FieldSpec.builder(ormaConnectionType, connection, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
 
         return fieldSpecs;
@@ -251,7 +254,7 @@ public class DatabaseWriter extends BaseWriter {
                 MethodSpec.methodBuilder("getConnection")
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.OrmaConnection)
+                        .returns(ormaConnectionType)
                         .addStatement("return $L", connection)
                         .build()
         );
@@ -575,7 +578,7 @@ public class DatabaseWriter extends BaseWriter {
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(
-                        ParameterSpec.builder(Types.OrmaConnection, connection)
+                        ParameterSpec.builder(ormaConnectionType, connection)
                                 .addAnnotation(Annotations.nonNull())
                                 .build())
                 .addStatement("this.$L = $L", connection, connection)

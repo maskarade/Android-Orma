@@ -46,9 +46,10 @@ public class ConditionBaseMethods {
     public List<MethodSpec> buildMethodSpecs() {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
+        ClassName ormaConnectionType = context.generationOption.isRxJavaSupport() ? Types.RxOrmaConnection : Types.OrmaConnection;
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(Types.OrmaConnection, "conn")
+                .addParameter(ormaConnectionType, "conn")
                 .addParameter(schema.getSchemaClassName(), "schema")
                 .addStatement("super(conn)")
                 .addStatement("this.schema = schema")

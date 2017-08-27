@@ -120,6 +120,8 @@ public class Types {
 
     public static final ClassName OrmaConnection = ClassName.get(ormaPackageName, "OrmaConnection");
 
+    public static final ClassName RxOrmaConnection = ClassName.get(ormaRxPackageName, "RxOrmaConnection");
+
     public static final ClassName Inserter = ClassName.get(ormaPackageName, "Inserter");
 
     public static final ClassName RxInserter = ClassName.get(ormaRxPackageName, "RxInserter");

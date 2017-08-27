@@ -19,7 +19,6 @@ package com.github.gfx.android.orma.rx;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.Selector;
 import com.github.gfx.android.orma.annotation.Experimental;
@@ -51,12 +50,16 @@ import io.reactivex.functions.Function;
  */
 public abstract class RxRelation<Model, R extends RxRelation<Model, ?>> extends Relation<Model, R> {
 
-    public RxRelation(@NonNull OrmaConnection connection) {
+    protected final RxOrmaConnection conn;
+
+    public RxRelation(@NonNull RxOrmaConnection connection) {
         super(connection);
+        conn = connection;
     }
 
     public RxRelation(@NonNull RxRelation<Model, ?> relation) {
         super(relation);
+        conn = relation.conn;
     }
 
     @CheckResult
