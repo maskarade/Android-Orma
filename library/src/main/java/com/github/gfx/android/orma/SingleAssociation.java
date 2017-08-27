@@ -24,11 +24,8 @@ import com.github.gfx.android.orma.internal.Schemas;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-
-import io.reactivex.Single;
 
 /**
  * Lazy has-one association. The {@code Model} is assumed to have a primary key with the `long` type.
@@ -41,30 +38,38 @@ public class SingleAssociation<Model> implements Parcelable {
 
     final long id;
 
-    final Single<Model> single;
+    final protected ModelFactory<Model> factory;
+
+    Model value = null;
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
-    public SingleAssociation(long id, @NonNull Model model) {
+    public SingleAssociation(long id, @NonNull final Model model) {
         this.id = id;
-        this.single = Single.just(model);
+        this.factory = new ModelFactory<Model>() {
+            @NonNull
+            @Override
+            public Model call() {
+                return model;
+            }
+        };
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
-    public SingleAssociation(long id, @NonNull Single<Model> single) {
+    public SingleAssociation(long id, @NonNull ModelFactory<Model> factory) {
         this.id = id;
-        this.single = single;
+        this.factory = factory;
     }
 
     // may be called from *_Schema
     public SingleAssociation(@NonNull final OrmaConnection conn, @NonNull final Schema<Model> schema, final long id) {
         this.id = id;
-        single = Single.fromCallable(new ModelFactory<Model>() {
+        this.factory = new ModelFactory<Model>() {
             @NonNull
             @Override
             public Model call() {
                 return conn.findByRowId(schema, id);
             }
-        });
+        };
     }
 
     /**
@@ -94,7 +99,13 @@ public class SingleAssociation<Model> implements Parcelable {
 
     @NonNull
     public static <T> SingleAssociation<T> just(final long id) {
-        return new SingleAssociation<>(id, Single.<T>error(new NoValueException("No value set for id=" + id)));
+        return new SingleAssociation<>(id, new ModelFactory<T>() {
+            @NonNull
+            @Override
+            public T call() {
+                throw new NoValueException("No value set for id=" + id);
+            }
+        });
     }
 
     // use just(id) instead
@@ -111,26 +122,27 @@ public class SingleAssociation<Model> implements Parcelable {
         return id;
     }
 
-    @CheckResult
-    @NonNull
-    public Single<Model> single() {
-        return single;
-    }
-
     /**
-     * A shortcut of {@code singleAssociation.single().blockingGet()}.
+     * Get the model referred from this instance with blocking.
      *
      * @return A model that the instance refers to.
      */
     @NonNull
     public Model get() throws NoValueException {
-        return single.blockingGet();
+        if (value == null) {
+            synchronized (this) {
+                if (value == null) {
+                    value = factory.call();
+                }
+            }
+        }
+        return value;
     }
 
     @Deprecated
     @NonNull
     public Model value() throws NoValueException {
-        return single.blockingGet();
+        return get();
     }
 
     @Override
@@ -168,7 +180,7 @@ public class SingleAssociation<Model> implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        Model model = single.blockingGet();
+        Model model = get();
         if (!(model instanceof Parcelable)) {
             throw new InvalidModelException("Orma model " + model.getClass() + " is not a Parcelable");
         }

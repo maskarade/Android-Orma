@@ -126,6 +126,8 @@ public class Types {
 
     public static final ClassName SingleAssociation = ClassName.get(ormaPackageName, "SingleAssociation");
 
+    public static final ClassName RxSingleAssociation = ClassName.get(ormaRxPackageName, "RxSingleAssociation");
+
     public static final ClassName ModelFactory = ClassName.get(ormaPackageName, "ModelFactory");
 
     public static final ClassName TypeHolder = ClassName.get(ormaPackageName + ".internal", "TypeHolder");
@@ -288,7 +290,7 @@ public class Types {
     public static boolean isSingleAssociation(TypeName type) {
         if (type instanceof ParameterizedTypeName) {
             ParameterizedTypeName pt = (ParameterizedTypeName) type;
-            return pt.rawType.equals(Types.SingleAssociation);
+            return pt.rawType.equals(Types.SingleAssociation) || pt.rawType.equals(Types.RxSingleAssociation);
         } else {
             return false;
         }
