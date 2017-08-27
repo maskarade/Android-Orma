@@ -182,7 +182,7 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
      */
     @SuppressWarnings("unchecked")
     public C where(@NonNull Function1<C, C> block) {
-        return block.apply((C) clone());
+        return where(block.apply(emptyClone()));
     }
 
     @SuppressWarnings("unchecked")
@@ -206,5 +206,14 @@ public abstract class OrmaConditionBase<Model, C extends OrmaConditionBase<Model
         } else {
             return null;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private C emptyClone() {
+        C copied = (C) clone();
+        copied.whereConjunction = " AND ";
+        copied.whereClause = null;
+        copied.bindArgs = null;
+        return copied;
     }
 }

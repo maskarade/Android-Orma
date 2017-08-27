@@ -79,6 +79,7 @@ public class QueryTest {
                 book.title = "today";
                 book.content = "milk, banana";
                 book.inPrint = true;
+                book.price = 200;
                 book.publisher = SingleAssociation.just(publisher);
                 return book;
             }
@@ -361,6 +362,21 @@ public class QueryTest {
                 .priceGe(100)
                 .toList();
         assertThat(books, hasSize(2));
+    }
+
+    @Test
+    public void whereComplexConditionGroup() throws Exception {
+        List<Book> books = db.selectFromBook()
+                .titleEq("friday")
+                .and()
+                .where(new Function1<Book_Selector, Book_Selector>() {
+                    @Override
+                    public Book_Selector apply(Book_Selector it) {
+                        return it.titleEq("today").or().priceGe(150);
+                    }
+                })
+                .toList();
+        assertThat(books, hasSize(0));
     }
 
     @Test
