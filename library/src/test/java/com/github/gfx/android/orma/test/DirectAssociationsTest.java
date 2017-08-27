@@ -19,14 +19,19 @@ package com.github.gfx.android.orma.test;
 import com.github.gfx.android.orma.ColumnDef;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
+import com.github.gfx.android.orma.function.Function1;
 import com.github.gfx.android.orma.test.model.Author;
+import com.github.gfx.android.orma.test.model.Author_AssociationCondition;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation2;
+import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_AssociationCondition;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Relation;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Schema;
 import com.github.gfx.android.orma.test.model.ModelWithDirectAssociation_Selector;
 import com.github.gfx.android.orma.test.model.ModelWithMoreNestedDirectAssociations;
+import com.github.gfx.android.orma.test.model.ModelWithMoreNestedDirectAssociations_Selector;
 import com.github.gfx.android.orma.test.model.ModelWithNestedDirectAssociations;
+import com.github.gfx.android.orma.test.model.ModelWithNestedDirectAssociations_AssociationCondition;
 import com.github.gfx.android.orma.test.model.ModelWithNullableDirectAssociations;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.Publisher;
@@ -438,6 +443,112 @@ public class DirectAssociationsTest {
 
         ModelWithDirectAssociation model = selector.value();
         assertThat(model.name, is("bar"));
+    }
+
+    @Test
+    public void testFindByAssociatedModelCondition() throws Exception {
+        Inserter<ModelWithDirectAssociation> inserter = orma.prepareInsertIntoModelWithDirectAssociation();
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.name = "foo";
+                model.author = author1;
+                model.publisher = publisher;
+                model.note = "SQLite rocks";
+                return model;
+            }
+        });
+        inserter.execute(new ModelFactory<ModelWithDirectAssociation>() {
+            @NonNull
+            @Override
+            public ModelWithDirectAssociation call() {
+                ModelWithDirectAssociation model = new ModelWithDirectAssociation();
+                model.name = "bar";
+                model.author = author2;
+                model.publisher = publisher;
+                model.note = "SQLite supports most of SQL92";
+                return model;
+            }
+        });
+
+        ModelWithDirectAssociation_Selector selector = orma.selectFromModelWithDirectAssociation()
+                .author(new Function1<Author_AssociationCondition, Author_AssociationCondition>() {
+                    @Override
+                    public Author_AssociationCondition apply(Author_AssociationCondition cond) {
+                        return cond.noteEq(author1.note);
+                    }
+                });
+
+        assertThat(selector.count(), is(1));
+
+        ModelWithDirectAssociation model = selector.value();
+        assertThat(model.name, is("foo"));
+        assertThat(model.note, is("SQLite rocks"));
+        assertThat(model.author, is(notNullValue()));
+        assertThat(model.author.name, is(author1.name));
+        assertThat(model.author.note, is(author1.note));
+    }
+
+    @Test
+    public void testFindByMoreNestedAssociatedModelCondition() throws Exception {
+        ModelWithMoreNestedDirectAssociations model =  orma.createModelWithMoreNestedDirectAssociations(
+                new ModelFactory<ModelWithMoreNestedDirectAssociations>() {
+                    @NonNull
+                    @Override
+                    public ModelWithMoreNestedDirectAssociations call() {
+                        ModelWithMoreNestedDirectAssociations model = new ModelWithMoreNestedDirectAssociations();
+                        model.note = "This is a more nested model";
+                        model.mnd = orma.createModelWithNestedDirectAssociations(
+                                new ModelFactory<ModelWithNestedDirectAssociations>() {
+                                    @NonNull
+                                    @Override
+                                    public ModelWithNestedDirectAssociations call() {
+                                        ModelWithNestedDirectAssociations model = new ModelWithNestedDirectAssociations();
+                                        model.note = "This is a nested model";
+                                        model.md = orma.createModelWithDirectAssociation(
+                                                new ModelFactory<ModelWithDirectAssociation>() {
+                                                    @NonNull
+                                                    @Override
+                                                    public ModelWithDirectAssociation call() {
+                                                        ModelWithDirectAssociation md = new ModelWithDirectAssociation();
+                                                        md.name = "foo";
+                                                        md.author = author1;
+                                                        md.publisher = publisher;
+                                                        md.note = "SQLite rocks";
+                                                        return md;
+                                                    }
+                                                });
+                                        return model;
+                                    }
+                                });
+                        return model;
+                    }
+                });
+
+        ModelWithMoreNestedDirectAssociations_Selector selector = orma.selectFromModelWithMoreNestedDirectAssociations()
+                .mnd(new Function1<ModelWithNestedDirectAssociations_AssociationCondition, ModelWithNestedDirectAssociations_AssociationCondition>() {
+                    @Override
+                    public ModelWithNestedDirectAssociations_AssociationCondition apply(ModelWithNestedDirectAssociations_AssociationCondition cond) {
+                        return cond.md(new Function1<ModelWithDirectAssociation_AssociationCondition, ModelWithDirectAssociation_AssociationCondition>() {
+                                    @Override
+                                    public ModelWithDirectAssociation_AssociationCondition apply(ModelWithDirectAssociation_AssociationCondition cond) {
+                                        return cond.author(new Function1<Author_AssociationCondition, Author_AssociationCondition>() {
+                                                    @Override
+                                                    public Author_AssociationCondition apply(Author_AssociationCondition cond) {
+                                                        return cond.noteEq(author1.note);
+                                                    }
+                                                });
+                                    }
+                                });
+                    }
+                });
+
+        assertThat(selector.count(), is(1));
+
+        ModelWithMoreNestedDirectAssociations actual = selector.value();
+        assertThat(actual.note, is(model.note));
     }
 
     @Test

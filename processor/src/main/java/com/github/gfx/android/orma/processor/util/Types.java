@@ -106,6 +106,8 @@ public class Types {
 
     public static final ClassName Deleter = ClassName.get(ormaPackageName, "Deleter");
 
+    public static final ClassName AssociationCondition = ClassName.get(ormaPackageName, "AssociationCondition");
+
     public static final ClassName OrmaConnection = ClassName.get(ormaPackageName, "OrmaConnection");
 
     public static final ClassName Inserter = ClassName.get(ormaPackageName, "Inserter");
@@ -200,6 +202,10 @@ public class Types {
 
     public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concleteDeleterType) {
         return ParameterizedTypeName.get(Deleter, modelType, concleteDeleterType);
+    }
+
+    public static ParameterizedTypeName getAssociationCondition(TypeName modelType, TypeName concreteSelectorType) {
+        return ParameterizedTypeName.get(AssociationCondition, modelType, concreteSelectorType);
     }
 
     public static ParameterizedTypeName getSet(ClassName typeName) {

@@ -58,4 +58,8 @@ public class AssociationDefinition {
     public boolean isSingleAssociation() {
         return Types.SingleAssociation.equals(associationType);
     }
+
+    public boolean isDirectAssociation() {
+        return associationType == null;
+    }
 }

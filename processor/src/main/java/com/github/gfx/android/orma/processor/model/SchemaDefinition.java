@@ -62,6 +62,8 @@ public class SchemaDefinition {
 
     final ClassName deleterClassName;
 
+    final ClassName associationConditionClassName;
+
     final String tableName;
 
     final List<ColumnDefinition> columns;
@@ -94,6 +96,8 @@ public class SchemaDefinition {
         this.selectorClassName = helperClassName(table.selectorClassName(), modelClassName, "_Selector");
         this.updaterClassName = helperClassName(table.updaterClassName(), modelClassName, "_Updater");
         this.deleterClassName = helperClassName(table.deleterClassName(), modelClassName, "_Deleter");
+        this.associationConditionClassName = helperClassName(
+                table.associationConditionClassName(), modelClassName, "_AssociationCondition");
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
         this.constructorElement = findSetterConstructor(context, typeElement);
@@ -397,6 +401,10 @@ public class SchemaDefinition {
 
     public ClassName getDeleterClassName() {
         return deleterClassName;
+    }
+
+    public ClassName getAssociationConditionClassName() {
+        return associationConditionClassName;
     }
 
     public List<ColumnDefinition> getColumns() {
