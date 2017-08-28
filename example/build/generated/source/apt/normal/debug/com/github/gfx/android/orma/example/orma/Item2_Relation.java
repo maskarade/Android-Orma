@@ -7,6 +7,7 @@ import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.example.tool.TypeAdapters;
+import com.github.gfx.android.orma.function.Function1;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -83,6 +84,10 @@ public class Item2_Relation extends Relation<Item2, Item2_Relation> {
     return where(schema.category1, "=", category1Id);
   }
 
+  public Item2_Relation category1(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+    return block.apply(new Category_AssociationCondition(getConnection(), schema.category1.associationSchema)).appendTo(this);
+  }
+
   public Item2_Relation category2IsNull() {
     return where(schema.category2, " IS NULL");
   }
@@ -97,6 +102,10 @@ public class Item2_Relation extends Relation<Item2, Item2_Relation> {
 
   public Item2_Relation category2Eq(long category2Id) {
     return where(schema.category2, "=", category2Id);
+  }
+
+  public Item2_Relation category2(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+    return block.apply(new Category_AssociationCondition(getConnection(), schema.category2.associationSchema)).appendTo(this);
   }
 
   public Item2_Relation nameEq(@NonNull String name) {

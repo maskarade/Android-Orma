@@ -3,6 +3,7 @@ package com.github.gfx.android.orma.example.orma;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.Deleter;
 import com.github.gfx.android.orma.OrmaConnection;
+import com.github.gfx.android.orma.function.Function1;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -41,6 +42,10 @@ public class Item_Deleter extends Deleter<Item, Item_Deleter> {
 
   public Item_Deleter categoryEq(long categoryId) {
     return where(schema.category, "=", categoryId);
+  }
+
+  public Item_Deleter category(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+    return block.apply(new Category_AssociationCondition(getConnection(), schema.category.associationSchema)).appendTo(this);
   }
 
   public Item_Deleter nameEq(@NonNull String name) {

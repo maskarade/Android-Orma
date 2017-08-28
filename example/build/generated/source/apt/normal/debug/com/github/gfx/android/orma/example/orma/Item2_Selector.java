@@ -3,6 +3,7 @@ package com.github.gfx.android.orma.example.orma;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.function.Function1;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -43,6 +44,10 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
     return where(schema.category1, "=", category1Id);
   }
 
+  public Item2_Selector category1(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+    return block.apply(new Category_AssociationCondition(getConnection(), schema.category1.associationSchema)).appendTo(this);
+  }
+
   public Item2_Selector category2IsNull() {
     return where(schema.category2, " IS NULL");
   }
@@ -57,6 +62,10 @@ public class Item2_Selector extends Selector<Item2, Item2_Selector> {
 
   public Item2_Selector category2Eq(long category2Id) {
     return where(schema.category2, "=", category2Id);
+  }
+
+  public Item2_Selector category2(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+    return block.apply(new Category_AssociationCondition(getConnection(), schema.category2.associationSchema)).appendTo(this);
   }
 
   public Item2_Selector nameEq(@NonNull String name) {
