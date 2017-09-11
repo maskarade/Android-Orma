@@ -1037,11 +1037,12 @@ schema changes by making diff with old and new DDL stored in `sqlite_master`.
 That is, you don't need migration steps for the following cases:
 
 * Adding tables
-* Adding columns
+* Adding columns (In this case, you need to add `defaultExpr` or `@Nullable` to new columns for auto-migration to work)
 * Changing column types
 * Changing column constraints (`NOT NULL`, `UNIQUE`, and etc.)
 
 Of course, you can define migration steps for each schema version (or `BuildConfig.VERSION`).
+If you add 
 
 Here is an example to define migration steps:
 
