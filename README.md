@@ -331,7 +331,7 @@ This is a query builder for `DELETE FROM *` statements.
 There are **Query Helpers** which are generated to query conditions and orders in a type-safe way.
 
 For example, `titleEq()` shown in the synopsis section, are generated to help make `WHERE` and `ORDER BY` clauses,
-for `Relation`, `Selecotr`, `Deleter`, and `Updater`.
+for `Relation`, `Selector`, `Deleter`, and `Updater`.
 
 Most of them are generated for columns with `indexed = true`, and some are for `@PrimaryKey` columns.
 
@@ -384,7 +384,7 @@ And `ORDER BY` helpers:
 
 **This is an advanced setting for those who know what they do.**
 
-You can control which Query Helpers are generater for a column by `@Column(helpers = ...)` attribute:
+You can control which Query Helpers are generated for a column by `@Column(helpers = ...)` attribute:
 
 ```java
 @Column(
@@ -490,7 +490,7 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
 
 You can create in-memory databases by passing `null` to `OrmaDatabase.Builder#name()`.
 
-This is useful for testhing.
+This is useful for testing.
 
 ## Details of Models
 
