@@ -1197,7 +1197,7 @@ SchemaDiffMigration migration = new SchemaDiffMigration(context, trace);
 
 As other annotation processors do, Orma save files to `$modle/build/generated/source/apt/`.
 
-You can see [generated files for example models](example/build/generated/source/apt/debug/com/github/gfx/android/orma/example/orma).
+You can see [generated files for example models](example/build/generated/source/apt/normal/debug/com/github/gfx/android/orma/example/orma).
 
 ### Does Orma work with Kotlin?
 
