@@ -61,7 +61,7 @@ public class Inserter<Model> implements Closeable {
     }
 
     /**
-     * <p>Inserts {@code model} into a table. Ths method does not modify the {@code model} even if a new row id is given to
+     * <p>Inserts {@code model} into a table. This method does not modify the {@code model} even if a new row id is given to
      * it.</p>
      *
      * @param model a model object to insert
