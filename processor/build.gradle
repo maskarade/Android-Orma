@@ -11,12 +11,12 @@ task copyTestResources(type: Copy) {
 processTestResources.dependsOn copyTestResources
 
 dependencies {
-    compile project(':annotations')
+    implementation project(':annotations')
     compileOnly "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
-    compile 'com.squareup:javapoet:1.9.0'
-    testCompile project.rootProject.ext.ANDROID_JAR
-    testCompile 'junit:junit:4.12'
-    testCompile 'com.google.testing.compile:compile-testing:0.10'
+    implementation 'com.squareup:javapoet:1.9.0'
+    testImplementation project.rootProject.ext.ANDROID_JAR
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.google.testing.compile:compile-testing:0.10'
 }
 
 publish {
