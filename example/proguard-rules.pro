@@ -4,7 +4,7 @@
 # To make debug easier
 -keepattributes SourceFile,LineNumberTable
 
-# Retrolambda
+-dontwarn java.lang.instrument.**
 -dontwarn java.lang.invoke.**
 
 # Android Support Library
