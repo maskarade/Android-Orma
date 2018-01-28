@@ -17,11 +17,11 @@ example/build/*
 captures/
 .gradletasknamecache
 
+# jacoco
+*.exec
+
 # gh-pages
 _site/
-
-# gradlew's bug?
-true
 
 # What orma generates for example
 !example/build/generated

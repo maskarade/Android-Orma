@@ -76,10 +76,11 @@ task updateSqliteGrammar(type: Exec) {
 }
 
 dependencies {
-    implementation project(':core')
+    api project(':core')
     antlr 'org.antlr:antlr4:4.6'
     implementation 'org.antlr:antlr4-runtime:4.6'
-    implementation "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
+    api "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
+
     testImplementation 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.1.4'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.hamcrest:hamcrest-library:1.3'

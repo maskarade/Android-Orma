@@ -23,7 +23,6 @@ import com.github.gfx.android.orma.migration.sqliteparser.SQLiteComponent;
 import com.github.gfx.android.orma.migration.sqliteparser.SQLiteParserUtils;
 import com.github.gfx.android.orma.migration.sqliteparser.g.SQLiteParser;
 
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -50,7 +49,7 @@ public class SQLiteParserUtilsTest {
         assertThat(parseContext.error(), is(empty()));
     }
 
-    @Test(expected = ParseCancellationException.class)
+    @Test(expected = SQLiteParserUtils.ParseException.class)
     public void testParseBad() throws Exception {
         SQLiteParser.ParseContext parseContext = SQLiteParserUtils.parse("CREATE TABLE");
         assertThat(parseContext.error(), is(not(empty())));

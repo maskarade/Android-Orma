@@ -38,19 +38,20 @@ android {
 }
 
 dependencies {
-    implementation project(':migration')
-    implementation project(':annotations')
+    api project(':annotations')
+    api project(':core')
+    api project(':migration')
 
     implementation "com.android.support:support-compat:${SUPPORT_LIBRARY_VERSION}"
-    implementation "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.0'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    api "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
+    api 'io.reactivex.rxjava2:rxjava:2.1.0' // TODO: compileOnly
+    api 'io.reactivex.rxjava2:rxandroid:2.0.1' // TODO: compileOnly
 
-    provided("com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}") {
+    compileOnly("com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}") {
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'support-annotations'
     }
-    provided 'com.google.code.gson:gson:2.8.2'
+    compileOnly 'com.google.code.gson:gson:2.8.2'
 
     testAnnotationProcessor project(':processor')
     testImplementation project(':encryption')

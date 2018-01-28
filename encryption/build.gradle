@@ -38,9 +38,9 @@ android {
 }
 
 dependencies {
-    implementation project(':core')
+    api project(':core')
 
-    provided "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
+    api "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
 
     // https://github.com/sqlcipher/android-database-sqlcipher
     implementation 'net.zetetic:android-database-sqlcipher:3.5.7'
