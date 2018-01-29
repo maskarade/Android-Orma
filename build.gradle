@@ -13,34 +13,27 @@ final ANDROID_SDK_PATH = {
     }
     androidSdkPath
 }()
-final ANDROID_SUPPORT_REPOSITORY = "${ANDROID_SDK_PATH}/extras/android/m2repository"
 
 ext {
-    SUPPORT_LIBRARY_VERSION = '26.0.0-alpha1'
-    ANDROID_JAR = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-25/", include: 'android.jar')
+    SUPPORT_LIBRARY_VERSION = '27.0.2'
+    ANDROID_JAR = fileTree(dir: "${ANDROID_SDK_PATH}/platforms/android-27/", include: 'android.jar')
     metadata.version = versionName
 }
 
 buildscript {
     repositories {
+        google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath 'com.novoda:bintray-release:0.5.0' // https://github.com/novoda/bintray-release
-        classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.novoda:bintray-release:0.8.0' // https://github.com/novoda/bintray-release
     }
-
-    // it conflicts with retrolambda
-    configurations.classpath.exclude group: 'com.android.tools.external.lombok'
 }
 
 allprojects {
     repositories {
-        maven {
-            url ANDROID_SUPPORT_REPOSITORY
-        }
-
+        google()
         jcenter()
     }
 

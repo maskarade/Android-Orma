@@ -2,11 +2,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.1'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -38,10 +38,12 @@ android {
 }
 
 dependencies {
-    compile project(':core')
+    api project(':core')
+
+    api "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
 
     // https://github.com/sqlcipher/android-database-sqlcipher
-    compile 'net.zetetic:android-database-sqlcipher:3.5.7'
+    implementation 'net.zetetic:android-database-sqlcipher:3.5.7'
 }
 
 publish {
