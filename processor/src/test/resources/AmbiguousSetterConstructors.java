@@ -20,21 +20,21 @@ import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 
 @Table
-public class TooManySetterConstructors {
+public class AmbiguousSetterConstructors {
 
     @PrimaryKey
     public final String foo;
 
     @Column
-    public final String bar;
+    public final int bar;
 
     @Setter
-    public TooManySetterConstructors() {
-        foo = String.valueOf(System.currentTimeMillis());
-        this.bar = "";
+    public AmbiguousSetterConstructors(String foo, int bar) {
+        this.foo = foo;
+        this.bar = bar;
     }
 
-    public TooManySetterConstructors(@Setter String bar) {
+    public AmbiguousSetterConstructors(@Setter int bar, int baz) {
         foo = String.valueOf(System.currentTimeMillis());
         this.bar = bar;
     }
