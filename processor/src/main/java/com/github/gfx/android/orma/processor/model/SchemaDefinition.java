@@ -100,7 +100,8 @@ public class SchemaDefinition {
                 table.associationConditionClassName(), modelClassName, "_AssociationCondition");
         this.tableName = firstNonEmptyName(table.value(), modelClassName.simpleName());
 
-        this.constructorElement = findSetterConstructor(context, typeElement);
+        long columnSize = countColumns(typeElement);
+        this.constructorElement = findSetterConstructor(context, typeElement, columnSize);
 
         columns = collectColumns(typeElement);
         // Places primaryKey as the last in columns to handle withoutAutoId.
@@ -159,19 +160,24 @@ public class SchemaDefinition {
      * @return null if it has the default constructor
      */
     @Nullable
-    static ExecutableElement findSetterConstructor(ProcessingContext context, TypeElement typeElement) {
+    static ExecutableElement findSetterConstructor(ProcessingContext context, TypeElement typeElement, long columnSize) {
         List<ExecutableElement> constructors = collectConstructors(typeElement);
 
         List<ExecutableElement> setterConstructors = collectSetterConstructors(constructors);
 
+        List<ExecutableElement> columnSizeMatchedConstructors = collectColumnSizeMatchedConstructors(setterConstructors, columnSize);
+
         if (setterConstructors.isEmpty()) {
             // use the default constructor
             return null;
-        } else if (setterConstructors.size() != 1) {
-            context.addError("Too many @Setter constructors", typeElement);
+        } else if (columnSizeMatchedConstructors.isEmpty()) {
+            context.addError("The @Setter constructor parameters must satisfy all the @Column fields", typeElement);
+            return null;
+        } else if (columnSizeMatchedConstructors.size() != 1) {
+            context.addError("Cannot detect a constructor from multiple @Setter constructors that have the same parameter size", typeElement);
             return null;
         } else {
-            return setterConstructors.get(0);
+            return columnSizeMatchedConstructors.get(0);
         }
     }
 
@@ -188,6 +194,12 @@ public class SchemaDefinition {
                 .filter(constructor -> constructor.getAnnotation(Setter.class) != null || constructor.getParameters()
                         .stream()
                         .anyMatch(param -> param.getAnnotation(Setter.class) != null))
+                .collect(Collectors.toList());
+    }
+
+    static List<ExecutableElement> collectColumnSizeMatchedConstructors(List<ExecutableElement> setterConstructors, long columnSize) {
+        return setterConstructors.stream()
+                .filter(constructor -> constructor.getParameters().size() == columnSize)
                 .collect(Collectors.toList());
     }
 
@@ -227,6 +239,12 @@ public class SchemaDefinition {
         return columns.stream().anyMatch(ColumnDefinition::isDirectAssociation);
     }
 
+    static long countColumns(@NonNull TypeElement typeElement) {
+        return typeElement.getEnclosedElements()
+                .stream()
+                .filter(SchemaDefinition::isColumn)
+                .count();
+    }
 
     List<ColumnDefinition> collectColumns(@NonNull TypeElement typeElement) {
         List<ColumnDefinition> columns = new ArrayList<>();
@@ -244,12 +262,8 @@ public class SchemaDefinition {
 
         typeElement.getEnclosedElements()
                 .forEach(element -> {
-                    if (element instanceof VariableElement) {
-                        if (element.getAnnotation(PrimaryKey.class) != null) {
-                            columnElements.add((VariableElement) element);
-                        } else if (element.getAnnotation(Column.class) != null) {
-                            columnElements.add((VariableElement) element);
-                        }
+                    if (isColumn(element)) {
+                        columnElements.add((VariableElement) element);
                         return;
                     }
 
@@ -279,6 +293,17 @@ public class SchemaDefinition {
                 })
                 .collect(Collectors.toList()));
         return columns;
+    }
+
+    static boolean isColumn(@NonNull Element element) {
+        if (element instanceof VariableElement) {
+            if (element.getAnnotation(PrimaryKey.class) != null) {
+                return true;
+            } else if (element.getAnnotation(Column.class) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @SafeVarargs

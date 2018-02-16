@@ -89,15 +89,15 @@ public class SchemaValidatorTest {
     }
 
     @Test
-    public void tooManySetterConstructors() throws Exception {
-        JavaFileObject modelFile = JavaFileObjects.forResource("TooManySetterConstructors.java");
+    public void ambiguousSetterConstructors() throws Exception {
+        JavaFileObject modelFile = JavaFileObjects.forResource("AmbiguousSetterConstructors.java");
 
         assert_().about(javaSource())
                 .that(modelFile)
                 .processedWith(new OrmaProcessor())
                 .failsToCompile()
                 .withErrorCount(1)
-                .withErrorContaining("Too many @Setter constructors");
+                .withErrorContaining("Cannot detect a constructor from multiple @Setter constructors that have the same parameter size");
     }
 
     @Test

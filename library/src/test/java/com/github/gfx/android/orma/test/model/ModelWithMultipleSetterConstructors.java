@@ -14,28 +14,36 @@
  * limitations under the License.
  */
 
+package com.github.gfx.android.orma.test.model;
+
 import com.github.gfx.android.orma.annotation.Column;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.annotation.Setter;
 import com.github.gfx.android.orma.annotation.Table;
 
 @Table
-public class TooManySetterConstructors {
+public class ModelWithMultipleSetterConstructors {
 
     @PrimaryKey
-    public final String foo;
+    public long id;
 
     @Column
-    public final String bar;
+    public int foo;
+
+    public int bar;
 
     @Setter
-    public TooManySetterConstructors() {
-        foo = String.valueOf(System.currentTimeMillis());
-        this.bar = "";
-    }
-
-    public TooManySetterConstructors(@Setter String bar) {
-        foo = String.valueOf(System.currentTimeMillis());
+    public ModelWithMultipleSetterConstructors(long id, int foo, int bar) {
+        this.id = id;
+        this.foo = foo;
         this.bar = bar;
     }
+
+    @Setter
+    public ModelWithMultipleSetterConstructors(long id, int foo) {
+        this.id = id;
+        this.foo = foo;
+        this.bar = 1;
+    }
+
 }
