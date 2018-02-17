@@ -44,9 +44,14 @@ public class ConditionBaseMethods {
     }
 
     public List<MethodSpec> buildMethodSpecs() {
+        return buildMethodSpecs(false);
+    }
+
+    public List<MethodSpec> buildMethodSpecs(boolean useRawConnectionType) {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
-        ClassName ormaConnectionType = context.generationOption.isRxJavaSupport() ? Types.RxOrmaConnection : Types.OrmaConnection;
+        ClassName ormaConnectionType = (!useRawConnectionType && context.generationOption.isRxJavaSupport())
+                ? Types.RxOrmaConnection : Types.OrmaConnection;
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ormaConnectionType, "conn")
