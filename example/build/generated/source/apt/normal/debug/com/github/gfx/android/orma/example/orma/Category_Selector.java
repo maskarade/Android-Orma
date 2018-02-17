@@ -1,15 +1,15 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
-import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
+import com.github.gfx.android.orma.rx.RxSelector;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Category_Selector extends Selector<Category, Category_Selector> {
+public class Category_Selector extends RxSelector<Category, Category_Selector> {
   final Category_Schema schema;
 
-  public Category_Selector(OrmaConnection conn, Category_Schema schema) {
+  public Category_Selector(RxOrmaConnection conn, Category_Schema schema) {
     super(conn);
     this.schema = schema;
   }

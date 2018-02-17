@@ -4,16 +4,16 @@ import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.github.gfx.android.orma.BuiltInSerializers;
-import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
+import com.github.gfx.android.orma.rx.RxRelation;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Todo_Relation extends Relation<Todo, Todo_Relation> {
+public class Todo_Relation extends RxRelation<Todo, Todo_Relation> {
   final Todo_Schema schema;
 
-  public Todo_Relation(OrmaConnection conn, Todo_Schema schema) {
+  public Todo_Relation(RxOrmaConnection conn, Todo_Schema schema) {
     super(conn);
     this.schema = schema;
   }

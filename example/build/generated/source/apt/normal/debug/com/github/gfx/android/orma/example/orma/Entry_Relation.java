@@ -3,16 +3,16 @@ package com.github.gfx.android.orma.example.orma;
 import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
+import com.github.gfx.android.orma.rx.RxRelation;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Entry_Relation extends Relation<Entry, Entry_Relation> {
+public class Entry_Relation extends RxRelation<Entry, Entry_Relation> {
   final Entry_Schema schema;
 
-  public Entry_Relation(OrmaConnection conn, Entry_Schema schema) {
+  public Entry_Relation(RxOrmaConnection conn, Entry_Schema schema) {
     super(conn);
     this.schema = schema;
   }

@@ -1,15 +1,15 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
-import com.github.gfx.android.orma.Deleter;
-import com.github.gfx.android.orma.OrmaConnection;
+import com.github.gfx.android.orma.rx.RxDeleter;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Todo_Deleter extends Deleter<Todo, Todo_Deleter> {
+public class Todo_Deleter extends RxDeleter<Todo, Todo_Deleter> {
   final Todo_Schema schema;
 
-  public Todo_Deleter(OrmaConnection conn, Todo_Schema schema) {
+  public Todo_Deleter(RxOrmaConnection conn, Todo_Schema schema) {
     super(conn);
     this.schema = schema;
   }

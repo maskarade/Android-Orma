@@ -1,16 +1,16 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
-import com.github.gfx.android.orma.Deleter;
-import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.function.Function1;
+import com.github.gfx.android.orma.rx.RxDeleter;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Item2_Deleter extends Deleter<Item2, Item2_Deleter> {
+public class Item2_Deleter extends RxDeleter<Item2, Item2_Deleter> {
   final Item2_Schema schema;
 
-  public Item2_Deleter(OrmaConnection conn, Item2_Schema schema) {
+  public Item2_Deleter(RxOrmaConnection conn, Item2_Schema schema) {
     super(conn);
     this.schema = schema;
   }

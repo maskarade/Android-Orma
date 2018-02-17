@@ -3,17 +3,17 @@ package com.github.gfx.android.orma.example.orma;
 import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Relation;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.function.Function1;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
+import com.github.gfx.android.orma.rx.RxRelation;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Item_Relation extends Relation<Item, Item_Relation> {
+public class Item_Relation extends RxRelation<Item, Item_Relation> {
   final Item_Schema schema;
 
-  public Item_Relation(OrmaConnection conn, Item_Schema schema) {
+  public Item_Relation(RxOrmaConnection conn, Item_Schema schema) {
     super(conn);
     this.schema = schema;
   }
