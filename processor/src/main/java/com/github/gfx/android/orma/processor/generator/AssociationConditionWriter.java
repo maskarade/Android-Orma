@@ -79,7 +79,7 @@ public class AssociationConditionWriter extends BaseWriter {
 
         methodSpecs.addAll(
                 new ConditionBaseMethods(context, schema, getTargetClassName())
-                        .buildMethodSpecs());
+                        .buildMethodSpecs(true));
 
         methodSpecs.addAll(queryHelpers.buildConditionHelpers(false));
 

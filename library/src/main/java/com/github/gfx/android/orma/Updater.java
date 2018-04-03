@@ -18,12 +18,7 @@ package com.github.gfx.android.orma;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.content.ContentValues;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-
-import java.util.concurrent.Callable;
-
-import io.reactivex.Single;
 
 public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaConditionBase<Model, U>
         implements Cloneable {
@@ -67,16 +62,5 @@ public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaCo
      */
     public int execute() {
         return conn.update(getSchema(), contents, getWhereClause(), getBindArgs());
-    }
-
-    @CheckResult
-    @NonNull
-    public Single<Integer> executeAsSingle() {
-        return Single.fromCallable(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return execute();
-            }
-        });
     }
 }

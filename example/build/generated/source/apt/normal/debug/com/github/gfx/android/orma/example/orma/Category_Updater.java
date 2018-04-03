@@ -1,15 +1,15 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
-import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Updater;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
+import com.github.gfx.android.orma.rx.RxUpdater;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Category_Updater extends Updater<Category, Category_Updater> {
+public class Category_Updater extends RxUpdater<Category, Category_Updater> {
   final Category_Schema schema;
 
-  public Category_Updater(OrmaConnection conn, Category_Schema schema) {
+  public Category_Updater(RxOrmaConnection conn, Category_Schema schema) {
     super(conn);
     this.schema = schema;
   }

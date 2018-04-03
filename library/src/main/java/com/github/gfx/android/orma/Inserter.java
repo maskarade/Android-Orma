@@ -16,21 +16,15 @@
 package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.core.Database;
+import com.github.gfx.android.orma.core.DatabaseStatement;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.exception.InsertionFailureException;
 
-import com.github.gfx.android.orma.core.Database;
-import com.github.gfx.android.orma.core.DatabaseStatement;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
 import java.io.Closeable;
 import java.util.concurrent.Callable;
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Single;
 
 /**
  * Represents a prepared statement to insert models in batch.
@@ -97,6 +91,7 @@ public class Inserter<Model> implements Closeable {
 
     /**
      * Does {@link #execute(Object)} and then does {@link #close()} immediately
+     *
      * @param model A model to insert
      * @return A last-inserted row id
      */
@@ -106,60 +101,6 @@ public class Inserter<Model> implements Closeable {
         } finally {
             close();
         }
-    }
-
-    /**
-     * {@link Single} wrapper to {@code execute(Model)}
-     *
-     * @param model A model object to insert
-     * @return An {@link Single} for the last inserted row id
-     */
-    @CheckResult
-    @NonNull
-    public Single<Long> executeAsSingle(@NonNull final Model model) {
-        return Single.fromCallable(new Callable<Long>() {
-            @Override
-            public Long call() throws Exception {
-                return execute(model);
-            }
-        });
-    }
-
-    /**
-     * {@link Single} wrapper to {@code execute(ModelFactory<Model>)}.
-     *
-     * @param modelFactory A model factory
-     * @return It yields the inserted row id
-     */
-    @CheckResult
-    @NonNull
-    public Single<Long> executeAsSingle(@NonNull final Callable<Model> modelFactory) {
-        return Single.fromCallable(new Callable<Long>() {
-            @Override
-            public Long call() throws Exception {
-                return execute(modelFactory);
-            }
-        });
-    }
-
-    /**
-     * {@link Observable} wrapper to {@code execute(Iterable<Model>)}
-     *
-     * @param models model objects to insert
-     * @return It yields the inserted row ids
-     */
-    @CheckResult
-    @NonNull
-    public Observable<Long> executeAllAsObservable(@NonNull final Iterable<Model> models) {
-        return Observable.create(new ObservableOnSubscribe<Long>() {
-            @Override
-            public void subscribe(ObservableEmitter<Long> emitter) throws Exception {
-                for (Model model : models) {
-                    emitter.onNext(execute(model));
-                }
-                emitter.onComplete();
-            }
-        });
     }
 
     @Override

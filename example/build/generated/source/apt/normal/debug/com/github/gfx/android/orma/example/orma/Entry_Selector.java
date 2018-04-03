@@ -3,15 +3,15 @@ package com.github.gfx.android.orma.example.orma;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
+import com.github.gfx.android.orma.rx.RxSelector;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Entry_Selector extends Selector<Entry, Entry_Selector> {
+public class Entry_Selector extends RxSelector<Entry, Entry_Selector> {
   final Entry_Schema schema;
 
-  public Entry_Selector(OrmaConnection conn, Entry_Schema schema) {
+  public Entry_Selector(RxOrmaConnection conn, Entry_Schema schema) {
     super(conn);
     this.schema = schema;
   }

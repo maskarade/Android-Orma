@@ -22,6 +22,7 @@ import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -64,7 +65,11 @@ public class DeleterWriter extends BaseWriter {
             classBuilder.addAnnotation(Annotations.suppressWarnings("rawtypes"));
         }
         classBuilder.addModifiers(Modifier.PUBLIC);
-        classBuilder.superclass(Types.getDeleter(schema.getModelClassName(), schema.getDeleterClassName()));
+
+        ParameterizedTypeName deleterType = context.generationOption.isRxJavaSupport()
+                ? Types.getRxDeleter(schema.getModelClassName(), schema.getDeleterClassName())
+                : Types.getDeleter(schema.getModelClassName(), schema.getDeleterClassName());
+        classBuilder.superclass(deleterType);
 
         classBuilder.addField(FieldSpec.builder(schema.getSchemaClassName(), "schema", Modifier.FINAL).build());
 

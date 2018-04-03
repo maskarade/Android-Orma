@@ -56,7 +56,7 @@ public class AssociationDefinition {
     }
 
     public boolean isSingleAssociation() {
-        return Types.SingleAssociation.equals(associationType);
+        return Types.SingleAssociation.equals(associationType) || Types.RxSingleAssociation.equals(associationType);
     }
 
     public boolean isDirectAssociation() {

@@ -15,7 +15,6 @@
  */
 package com.github.gfx.android.orma;
 
-import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.core.Database;
 import com.github.gfx.android.orma.core.DatabaseStatement;
@@ -43,8 +42,6 @@ import android.util.Log;
 import java.io.Closeable;
 import java.util.Arrays;
 import java.util.List;
-
-import io.reactivex.Observable;
 
 /**
  * Low-level interface to Orma database connection.
@@ -76,7 +73,7 @@ public class OrmaConnection implements Closeable {
 
     final AccessThreadConstraint writeOnMainThread;
 
-    final DataSetChangedTrigger trigger = new DataSetChangedTrigger();
+    final DataSetChangedTrigger trigger = new DataSetChangedTrigger.NoOp();
 
     boolean migrationCompleted = false;
 
@@ -354,7 +351,7 @@ public class OrmaConnection implements Closeable {
             db.endTransaction();
             trace("end transaction (non exclusive)", null);
 
-            trigger.fireForTransaction();
+            getTrigger().fireForTransaction();
         }
     }
 
@@ -370,7 +367,7 @@ public class OrmaConnection implements Closeable {
             db.endTransaction();
             trace("end transaction", null);
 
-            trigger.fireForTransaction();
+            getTrigger().fireForTransaction();
         }
     }
 
@@ -388,13 +385,8 @@ public class OrmaConnection implements Closeable {
         });
     }
 
-    @Experimental
-    public <S extends Selector<?, ?>> Observable<DataSetChangedEvent<S>> createEventObservable(S selector) {
-        return trigger.create(selector);
-    }
-
     public <Model> void trigger(DataSetChangedEvent.Type type, Schema<Model> schema) {
-        trigger.fire(db, type, schema);
+        getTrigger().fire(db, type, schema);
     }
 
     public void execSQL(@NonNull String sql, @NonNull Object... bindArgs) {
@@ -471,5 +463,9 @@ public class OrmaConnection implements Closeable {
         if (trace) {
             Log.i(TAG, "migration finished in " + (System.currentTimeMillis() - t0) + "ms");
         }
+    }
+
+    protected DataSetChangedTrigger getTrigger() {
+        return trigger;
     }
 }

@@ -15,13 +15,10 @@
  */
 package com.github.gfx.android.orma;
 
-import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
-import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,17 +26,6 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import io.reactivex.Maybe;
-import io.reactivex.MaybeEmitter;
-import io.reactivex.MaybeOnSubscribe;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Single;
-import io.reactivex.functions.Function;
 
 /**
  * Representation of a relation, or a {@code SELECT} query.
@@ -114,17 +100,6 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         }
     }
 
-    @CheckResult
-    @NonNull
-    public Single<Model> getAsSingle(@IntRange(from = 0) final int position) {
-        return Single.fromCallable(new Callable<Model>() {
-            @Override
-            public Model call() throws Exception {
-                return get(position);
-            }
-        });
-    }
-
     /**
      * Finds the index of the item, assuming an order specified by a set of {@code orderBy*()} methods.
      *
@@ -143,82 +118,6 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
             }
         }
         return selector.count();
-    }
-
-    /**
-     * Deletes a specified model and yields where it was. Suitable to implement {@link android.widget.Adapter}.
-     * Operations are executed in a transaction.
-     *
-     * @param item A model to delete.
-     * @return An {@link Maybe} that yields the position of the deleted item if the item is deleted.
-     */
-    @CheckResult
-    @NonNull
-    public Maybe<Integer> deleteAsMaybe(@NonNull final Model item) {
-        return Maybe.create(new MaybeOnSubscribe<Integer>() {
-            @Override
-            public void subscribe(MaybeEmitter<Integer> emitter) throws Exception {
-                final AtomicInteger positionRef = new AtomicInteger(-1);
-                conn.transactionSync(new Runnable() {
-                    @Override
-                    public void run() {
-                        int position = indexOf(item);
-                        ColumnDef<Model, ?> pk = getSchema().getPrimaryKey();
-                        int deletedRows = deleter()
-                                .where(pk, "=", pk.getSerialized(item))
-                                .execute();
-
-                        if (deletedRows > 0) {
-                            positionRef.set(position);
-                        }
-                    }
-                });
-                // emit the position *after* the transaction finished
-                if (positionRef.get() >= 0) {
-                    emitter.onSuccess(positionRef.get());
-                } else {
-                    emitter.onComplete();
-                }
-            }
-        });
-    }
-
-    /**
-     * Truncates the table to the specified size.
-     *
-     * @param size Size to truncate the table
-     * @return A {@link Single} that yields the number of rows deleted.
-     */
-    @CheckResult
-    @NonNull
-    public Single<Integer> truncateAsSingle(@IntRange(from = 0) final int size) {
-        return Single.fromCallable(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                String pk = getSchema().getPrimaryKey().getEscapedName();
-                Selector<Model, ?> subquery = selector();
-                subquery.limit(Integer.MAX_VALUE);
-                subquery.offset(size);
-                return conn.delete(getSchema(), pk + " IN (" + subquery.buildQueryWithColumns(pk) + ")", getBindArgs());
-            }
-        });
-    }
-
-    /**
-     * Inserts an item.
-     *
-     * @param factory A model to insert.
-     * @return An {@link Single} that yields the newly inserted row id.
-     */
-    @CheckResult
-    @NonNull
-    public Single<Long> insertAsSingle(@NonNull final Callable<Model> factory) {
-        return Single.fromCallable(new Callable<Long>() {
-            @Override
-            public Long call() throws Exception {
-                return inserter().execute(factory);
-            }
-        });
     }
 
     @Override
@@ -323,24 +222,6 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
         return modelRef.value;
     }
 
-    /**
-     * RxJava interface to {@link #upsert(Object)}.
-     *
-     * @param model A model to upsert
-     * @return An observable that yields a new model.
-     */
-    @NonNull
-    @CheckResult
-    public Single<Model> upsertAsSingle(@NonNull final Model model) {
-        return Single.fromCallable(new ModelFactory<Model>() {
-            @NonNull
-            @Override
-            public Model call() {
-                return upsert(model);
-            }
-        });
-    }
-
     @NonNull
     public List<Model> upsert(@NonNull final Iterable<Model> models) {
         final List<Model> result = new ArrayList<>();
@@ -357,59 +238,7 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
     }
 
     @NonNull
-    @CheckResult
-    public Observable<Model> upsertAsObservable(@NonNull final Iterable<Model> models) {
-        return Observable.create(new ObservableOnSubscribe<Model>() {
-            @Override
-            public void subscribe(final ObservableEmitter<Model> emitter) {
-                conn.transactionSync(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (Model model : models) {
-                            Model newModel = upsertWithoutTransaction(model);
-                            emitter.onNext(newModel);
-                        }
-                    }
-                });
-                emitter.onComplete();
-            }
-        });
-    }
-
-    @NonNull
     public abstract Model upsertWithoutTransaction(@NonNull final Model model);
-
-    /**
-     * Experimental API to observe data-set changed events.
-     *
-     * @param <S> A concrete {@link Selector} class.
-     * @return A hot observable that yields {@link Selector} when the target data-set is changed.
-     */
-    @Experimental
-    @SuppressWarnings("unchecked")
-    public <S extends Selector<Model, ?>> Observable<S> createQueryObservable() {
-        return conn.createEventObservable((S) selector())
-                .map(new Function<DataSetChangedEvent<S>, S>() {
-                    @Override
-                    public S apply(DataSetChangedEvent<S> event) throws Exception {
-                        return event.getSelector();
-                    }
-                });
-    }
-
-    /**
-     * Experimental API to observe data-set changed events.
-     * This is provided to test whether it is useful or not, and not intended to be used in production yet.
-     *
-     * @param <S> A concrete {@link Selector} class.
-     * @return A hot observable that yields {@link Selector} when the target data-set is changed.
-     */
-    @Experimental
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public <S extends Selector<Model, ?>> Observable<DataSetChangedEvent<S>> createEventObservable() {
-        return conn.createEventObservable((S) selector());
-    }
 
     // Iterator<Model>
 

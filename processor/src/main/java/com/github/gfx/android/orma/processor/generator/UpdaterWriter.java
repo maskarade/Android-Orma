@@ -26,6 +26,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -68,7 +69,11 @@ public class UpdaterWriter extends BaseWriter {
             classBuilder.addAnnotation(Annotations.suppressWarnings("rawtypes"));
         }
         classBuilder.addModifiers(Modifier.PUBLIC);
-        classBuilder.superclass(Types.getUpdater(schema.getModelClassName(), schema.getUpdaterClassName()));
+
+        ParameterizedTypeName updaterType = context.generationOption.isRxJavaSupport()
+                ? Types.getRxUpdater(schema.getModelClassName(), schema.getUpdaterClassName())
+                : Types.getUpdater(schema.getModelClassName(), schema.getUpdaterClassName());
+        classBuilder.superclass(updaterType);
 
         classBuilder.addField(FieldSpec.builder(schema.getSchemaClassName(), "schema", Modifier.FINAL).build());
 

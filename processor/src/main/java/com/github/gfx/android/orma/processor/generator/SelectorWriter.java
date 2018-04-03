@@ -23,6 +23,7 @@ import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -65,7 +66,11 @@ public class SelectorWriter extends BaseWriter {
             classBuilder.addAnnotation(Annotations.suppressWarnings("rawtypes"));
         }
         classBuilder.addModifiers(Modifier.PUBLIC);
-        classBuilder.superclass(Types.getSelector(schema.getModelClassName(), getTargetClassName()));
+
+        ParameterizedTypeName selectorType = context.generationOption.isRxJavaSupport()
+                ? Types.getRxSelector(schema.getModelClassName(), getTargetClassName())
+                : Types.getSelector(schema.getModelClassName(), getTargetClassName());
+        classBuilder.superclass(selectorType);
 
         classBuilder.addField(FieldSpec.builder(schema.getSchemaClassName(), "schema", Modifier.FINAL).build());
 

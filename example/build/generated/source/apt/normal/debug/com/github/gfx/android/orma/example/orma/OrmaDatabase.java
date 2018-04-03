@@ -7,12 +7,12 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.github.gfx.android.orma.DatabaseHandle;
-import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
-import com.github.gfx.android.orma.OrmaConnection;
 import com.github.gfx.android.orma.OrmaDatabaseBuilderBase;
 import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.OnConflict;
+import com.github.gfx.android.orma.rx.RxInserter;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import java.util.Arrays;
@@ -40,9 +40,9 @@ public class OrmaDatabase implements DatabaseHandle {
     Todo_Schema.INSTANCE
   );
 
-  private final OrmaConnection connection;
+  private final RxOrmaConnection connection;
 
-  public OrmaDatabase(@NonNull OrmaConnection connection) {
+  public OrmaDatabase(@NonNull RxOrmaConnection connection) {
     this.connection = connection;
   }
 
@@ -68,13 +68,17 @@ public class OrmaDatabase implements DatabaseHandle {
 
   @NonNull
   @Override
-  public OrmaConnection getConnection() {
+  public RxOrmaConnection getConnection() {
     return connection;
   }
 
   @WorkerThread
   public void transactionSync(@NonNull Runnable task) {
     connection.transactionSync(task);
+  }
+
+  public void transactionNonExclusiveSync(@NonNull Runnable task) {
+    connection.transactionNonExclusiveSync(task);
   }
 
   /**
@@ -88,10 +92,6 @@ public class OrmaDatabase implements DatabaseHandle {
         transactionSync(task);
       }
     });
-  }
-
-  public void transactionNonExclusiveSync(@NonNull Runnable task) {
-    connection.transactionNonExclusiveSync(task);
   }
 
   /**
@@ -174,7 +174,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Category ...}.
    */
   @WorkerThread
-  public Inserter<Category> prepareInsertIntoCategory() {
+  public RxInserter<Category> prepareInsertIntoCategory() {
     return prepareInsertIntoCategory(OnConflict.NONE, true);
   }
 
@@ -182,7 +182,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @WorkerThread
-  public Inserter<Category> prepareInsertIntoCategory(@OnConflict int onConflictAlgorithm) {
+  public RxInserter<Category> prepareInsertIntoCategory(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoCategory(onConflictAlgorithm, true);
   }
 
@@ -190,16 +190,16 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @WorkerThread
-  public Inserter<Category> prepareInsertIntoCategory(@OnConflict int onConflictAlgorithm,
+  public RxInserter<Category> prepareInsertIntoCategory(@OnConflict int onConflictAlgorithm,
       boolean withoutAutoId) {
-    return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+    return new RxInserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
   /**
    * Create a prepared statement for {@code INSERT INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle() {
+  public Single<RxInserter<Category>> prepareInsertIntoCategoryAsSingle() {
     return prepareInsertIntoCategoryAsSingle(OnConflict.NONE, true);
   }
 
@@ -207,7 +207,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict int onConflictAlgorithm) {
+  public Single<RxInserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoCategoryAsSingle(onConflictAlgorithm, true);
   }
 
@@ -215,12 +215,12 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Category ...}.
    */
   @CheckResult
-  public Single<Inserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict final int onConflictAlgorithm,
+  public Single<RxInserter<Category>> prepareInsertIntoCategoryAsSingle(@OnConflict final int onConflictAlgorithm,
       final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable<Inserter<Category>>() {
+    return Single.fromCallable(new Callable<RxInserter<Category>>() {
       @Override
-      public Inserter<Category> call() throws Exception {
-        return new Inserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+      public RxInserter<Category> call() throws Exception {
+        return new RxInserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -288,7 +288,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Entry ...}.
    */
   @WorkerThread
-  public Inserter<Entry> prepareInsertIntoEntry() {
+  public RxInserter<Entry> prepareInsertIntoEntry() {
     return prepareInsertIntoEntry(OnConflict.NONE, true);
   }
 
@@ -296,7 +296,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Entry ...}.
    */
   @WorkerThread
-  public Inserter<Entry> prepareInsertIntoEntry(@OnConflict int onConflictAlgorithm) {
+  public RxInserter<Entry> prepareInsertIntoEntry(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoEntry(onConflictAlgorithm, true);
   }
 
@@ -304,16 +304,16 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Entry ...}.
    */
   @WorkerThread
-  public Inserter<Entry> prepareInsertIntoEntry(@OnConflict int onConflictAlgorithm,
+  public RxInserter<Entry> prepareInsertIntoEntry(@OnConflict int onConflictAlgorithm,
       boolean withoutAutoId) {
-    return new Inserter<Entry>(connection, Entry_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+    return new RxInserter<Entry>(connection, Entry_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
   /**
    * Create a prepared statement for {@code INSERT INTO Entry ...}.
    */
   @CheckResult
-  public Single<Inserter<Entry>> prepareInsertIntoEntryAsSingle() {
+  public Single<RxInserter<Entry>> prepareInsertIntoEntryAsSingle() {
     return prepareInsertIntoEntryAsSingle(OnConflict.NONE, true);
   }
 
@@ -321,7 +321,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Entry ...}.
    */
   @CheckResult
-  public Single<Inserter<Entry>> prepareInsertIntoEntryAsSingle(@OnConflict int onConflictAlgorithm) {
+  public Single<RxInserter<Entry>> prepareInsertIntoEntryAsSingle(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoEntryAsSingle(onConflictAlgorithm, true);
   }
 
@@ -329,12 +329,12 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Entry ...}.
    */
   @CheckResult
-  public Single<Inserter<Entry>> prepareInsertIntoEntryAsSingle(@OnConflict final int onConflictAlgorithm,
+  public Single<RxInserter<Entry>> prepareInsertIntoEntryAsSingle(@OnConflict final int onConflictAlgorithm,
       final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable<Inserter<Entry>>() {
+    return Single.fromCallable(new Callable<RxInserter<Entry>>() {
       @Override
-      public Inserter<Entry> call() throws Exception {
-        return new Inserter<Entry>(connection, Entry_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+      public RxInserter<Entry> call() throws Exception {
+        return new RxInserter<Entry>(connection, Entry_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -402,7 +402,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Item ...}.
    */
   @WorkerThread
-  public Inserter<Item> prepareInsertIntoItem() {
+  public RxInserter<Item> prepareInsertIntoItem() {
     return prepareInsertIntoItem(OnConflict.NONE, true);
   }
 
@@ -410,7 +410,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @WorkerThread
-  public Inserter<Item> prepareInsertIntoItem(@OnConflict int onConflictAlgorithm) {
+  public RxInserter<Item> prepareInsertIntoItem(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoItem(onConflictAlgorithm, true);
   }
 
@@ -418,16 +418,16 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @WorkerThread
-  public Inserter<Item> prepareInsertIntoItem(@OnConflict int onConflictAlgorithm,
+  public RxInserter<Item> prepareInsertIntoItem(@OnConflict int onConflictAlgorithm,
       boolean withoutAutoId) {
-    return new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+    return new RxInserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
   /**
    * Create a prepared statement for {@code INSERT INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle() {
+  public Single<RxInserter<Item>> prepareInsertIntoItemAsSingle() {
     return prepareInsertIntoItemAsSingle(OnConflict.NONE, true);
   }
 
@@ -435,7 +435,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict int onConflictAlgorithm) {
+  public Single<RxInserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoItemAsSingle(onConflictAlgorithm, true);
   }
 
@@ -443,12 +443,12 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item ...}.
    */
   @CheckResult
-  public Single<Inserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict final int onConflictAlgorithm,
+  public Single<RxInserter<Item>> prepareInsertIntoItemAsSingle(@OnConflict final int onConflictAlgorithm,
       final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable<Inserter<Item>>() {
+    return Single.fromCallable(new Callable<RxInserter<Item>>() {
       @Override
-      public Inserter<Item> call() throws Exception {
-        return new Inserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+      public RxInserter<Item> call() throws Exception {
+        return new RxInserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -516,7 +516,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Item2 ...}.
    */
   @WorkerThread
-  public Inserter<Item2> prepareInsertIntoItem2() {
+  public RxInserter<Item2> prepareInsertIntoItem2() {
     return prepareInsertIntoItem2(OnConflict.NONE, true);
   }
 
@@ -524,7 +524,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @WorkerThread
-  public Inserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm) {
+  public RxInserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoItem2(onConflictAlgorithm, true);
   }
 
@@ -532,16 +532,16 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @WorkerThread
-  public Inserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm,
+  public RxInserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm,
       boolean withoutAutoId) {
-    return new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+    return new RxInserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
   /**
    * Create a prepared statement for {@code INSERT INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle() {
+  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle() {
     return prepareInsertIntoItem2AsSingle(OnConflict.NONE, true);
   }
 
@@ -549,7 +549,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict int onConflictAlgorithm) {
+  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoItem2AsSingle(onConflictAlgorithm, true);
   }
 
@@ -557,12 +557,12 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
    */
   @CheckResult
-  public Single<Inserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict final int onConflictAlgorithm,
+  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict final int onConflictAlgorithm,
       final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable<Inserter<Item2>>() {
+    return Single.fromCallable(new Callable<RxInserter<Item2>>() {
       @Override
-      public Inserter<Item2> call() throws Exception {
-        return new Inserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+      public RxInserter<Item2> call() throws Exception {
+        return new RxInserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -630,7 +630,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT INTO Todo ...}.
    */
   @WorkerThread
-  public Inserter<Todo> prepareInsertIntoTodo() {
+  public RxInserter<Todo> prepareInsertIntoTodo() {
     return prepareInsertIntoTodo(OnConflict.NONE, true);
   }
 
@@ -638,7 +638,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @WorkerThread
-  public Inserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm) {
+  public RxInserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoTodo(onConflictAlgorithm, true);
   }
 
@@ -646,16 +646,16 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @WorkerThread
-  public Inserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm,
+  public RxInserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm,
       boolean withoutAutoId) {
-    return new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+    return new RxInserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
   }
 
   /**
    * Create a prepared statement for {@code INSERT INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle() {
+  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle() {
     return prepareInsertIntoTodoAsSingle(OnConflict.NONE, true);
   }
 
@@ -663,7 +663,7 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict int onConflictAlgorithm) {
+  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict int onConflictAlgorithm) {
     return prepareInsertIntoTodoAsSingle(onConflictAlgorithm, true);
   }
 
@@ -671,12 +671,12 @@ public class OrmaDatabase implements DatabaseHandle {
    * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
    */
   @CheckResult
-  public Single<Inserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict final int onConflictAlgorithm,
+  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict final int onConflictAlgorithm,
       final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable<Inserter<Todo>>() {
+    return Single.fromCallable(new Callable<RxInserter<Todo>>() {
       @Override
-      public Inserter<Todo> call() throws Exception {
-        return new Inserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+      public RxInserter<Todo> call() throws Exception {
+        return new RxInserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -693,7 +693,7 @@ public class OrmaDatabase implements DatabaseHandle {
     }
 
     public OrmaDatabase build() {
-      return new OrmaDatabase(new OrmaConnection(fillDefaults(), SCHEMAS));
+      return new OrmaDatabase(new RxOrmaConnection(fillDefaults(), SCHEMAS));
     }
   }
 }

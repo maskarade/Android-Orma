@@ -39,6 +39,8 @@ public class Types {
 
     public static final String ormaPackageName = "com.github.gfx.android.orma";
 
+    public static final String ormaRxPackageName = "com.github.gfx.android.orma.rx";
+
     // Android standard types
 
     public static final WildcardTypeName WildcardType = WildcardTypeName.subtypeOf(TypeName.OBJECT);
@@ -100,19 +102,33 @@ public class Types {
 
     public static final ClassName Relation = ClassName.get(ormaPackageName, "Relation");
 
+    public static final ClassName RxRelation = ClassName.get(ormaRxPackageName, "RxRelation");
+
     public static final ClassName Selector = ClassName.get(ormaPackageName, "Selector");
+
+    public static final ClassName RxSelector = ClassName.get(ormaRxPackageName, "RxSelector");
 
     public static final ClassName Updater = ClassName.get(ormaPackageName, "Updater");
 
+    public static final ClassName RxUpdater = ClassName.get(ormaRxPackageName, "RxUpdater");
+
     public static final ClassName Deleter = ClassName.get(ormaPackageName, "Deleter");
+
+    public static final ClassName RxDeleter = ClassName.get(ormaRxPackageName, "RxDeleter");
 
     public static final ClassName AssociationCondition = ClassName.get(ormaPackageName, "AssociationCondition");
 
     public static final ClassName OrmaConnection = ClassName.get(ormaPackageName, "OrmaConnection");
 
+    public static final ClassName RxOrmaConnection = ClassName.get(ormaRxPackageName, "RxOrmaConnection");
+
     public static final ClassName Inserter = ClassName.get(ormaPackageName, "Inserter");
 
+    public static final ClassName RxInserter = ClassName.get(ormaRxPackageName, "RxInserter");
+
     public static final ClassName SingleAssociation = ClassName.get(ormaPackageName, "SingleAssociation");
+
+    public static final ClassName RxSingleAssociation = ClassName.get(ormaRxPackageName, "RxSingleAssociation");
 
     public static final ClassName ModelFactory = ClassName.get(ormaPackageName, "ModelFactory");
 
@@ -192,16 +208,32 @@ public class Types {
         return ParameterizedTypeName.get(Relation, modelType, concreteRelationType);
     }
 
+    public static ParameterizedTypeName getRxRelation(TypeName modelType, TypeName concreteRelationType) {
+        return ParameterizedTypeName.get(RxRelation, modelType, concreteRelationType);
+    }
+
     public static ParameterizedTypeName getSelector(TypeName modelType, TypeName concreteSelectorType) {
         return ParameterizedTypeName.get(Selector, modelType, concreteSelectorType);
+    }
+
+    public static ParameterizedTypeName getRxSelector(TypeName modelType, TypeName concreteSelectorType) {
+        return ParameterizedTypeName.get(RxSelector, modelType, concreteSelectorType);
     }
 
     public static ParameterizedTypeName getUpdater(TypeName modelType, TypeName concreteUpdaterType) {
         return ParameterizedTypeName.get(Updater, modelType, concreteUpdaterType);
     }
 
-    public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concleteDeleterType) {
-        return ParameterizedTypeName.get(Deleter, modelType, concleteDeleterType);
+    public static ParameterizedTypeName getRxUpdater(TypeName modelType, TypeName concreteUpdaterType) {
+        return ParameterizedTypeName.get(RxUpdater, modelType, concreteUpdaterType);
+    }
+
+    public static ParameterizedTypeName getDeleter(TypeName modelType, TypeName concreteDeleterType) {
+        return ParameterizedTypeName.get(Deleter, modelType, concreteDeleterType);
+    }
+
+    public static ParameterizedTypeName getRxDeleter(TypeName modelType, TypeName concreteDeleterType) {
+        return ParameterizedTypeName.get(RxDeleter, modelType, concreteDeleterType);
     }
 
     public static ParameterizedTypeName getAssociationCondition(TypeName modelType, TypeName concreteSelectorType) {
@@ -227,6 +259,10 @@ public class Types {
 
     public static ParameterizedTypeName getInserter(TypeName typeName) {
         return ParameterizedTypeName.get(Inserter, typeName);
+    }
+
+    public static ParameterizedTypeName getRxInserter(TypeName typeName) {
+        return ParameterizedTypeName.get(RxInserter, typeName);
     }
 
     public static ParameterizedTypeName getSingle(TypeName typeName) {
@@ -256,7 +292,7 @@ public class Types {
     public static boolean isSingleAssociation(TypeName type) {
         if (type instanceof ParameterizedTypeName) {
             ParameterizedTypeName pt = (ParameterizedTypeName) type;
-            return pt.rawType.equals(Types.SingleAssociation);
+            return pt.rawType.equals(Types.SingleAssociation) || pt.rawType.equals(Types.RxSingleAssociation);
         } else {
             return false;
         }
@@ -268,7 +304,8 @@ public class Types {
 
     public static boolean needsTypeAdapter(TypeName type) {
         return type instanceof ParameterizedTypeName
-                || !(type.isPrimitive() || type.isBoxedPrimitive() || type.equals(Types.String) || type.equals(Types.ByteArray));
+                || !(type.isPrimitive() || type.isBoxedPrimitive() || type.equals(Types.String) || type
+                .equals(Types.ByteArray));
     }
 
     public static TypeName asUnboxType(TypeName type) {

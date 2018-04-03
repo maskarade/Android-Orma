@@ -59,9 +59,12 @@ public class DatabaseWriter extends BaseWriter {
 
     final DatabaseDefinition database;
 
+    final ClassName ormaConnectionType;
+
     public DatabaseWriter(ProcessingContext context, DatabaseDefinition database) {
         super(context);
         this.database = database;
+        this.ormaConnectionType = context.generationOption.isRxJavaSupport() ? Types.RxOrmaConnection : Types.OrmaConnection;
     }
 
     // http://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
@@ -146,7 +149,7 @@ public class DatabaseWriter extends BaseWriter {
         builder.addMethod(MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(getClassName())
-                .addStatement("return new $T(new $T(fillDefaults(), $L))", getClassName(), Types.OrmaConnection, SCHEMAS)
+                .addStatement("return new $T(new $T(fillDefaults(), $L))", getClassName(), ormaConnectionType, SCHEMAS)
                 .build());
 
         return builder.build();
@@ -169,7 +172,7 @@ public class DatabaseWriter extends BaseWriter {
                         .build());
 
         fieldSpecs.add(
-                FieldSpec.builder(Types.OrmaConnection, connection, Modifier.PRIVATE, Modifier.FINAL)
+                FieldSpec.builder(ormaConnectionType, connection, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
 
         return fieldSpecs;
@@ -251,7 +254,7 @@ public class DatabaseWriter extends BaseWriter {
                 MethodSpec.methodBuilder("getConnection")
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.OrmaConnection)
+                        .returns(ormaConnectionType)
                         .addStatement("return $L", connection)
                         .build()
         );
@@ -269,21 +272,6 @@ public class DatabaseWriter extends BaseWriter {
         );
 
         methodSpecs.add(
-                MethodSpec.methodBuilder("transactionAsCompletable")
-                        .addJavadoc("RxJava 2.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}\n")
-                        .addAnnotation(Annotations.checkResult())
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.Completable)
-                        .addParameter(
-                                ParameterSpec.builder(Types.Runnable, "task")
-                                        .addAnnotation(Annotations.nonNull())
-                                        .addModifiers(Modifier.FINAL)
-                                        .build())
-                        .addStatement("return $T.fromRunnable($L)", Types.Completable, runnableWithCode("transactionSync(task)"))
-                        .build()
-        );
-
-        methodSpecs.add(
                 MethodSpec.methodBuilder("transactionNonExclusiveSync")
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(
@@ -294,20 +282,40 @@ public class DatabaseWriter extends BaseWriter {
                         .build()
         );
 
-        methodSpecs.add(
-                MethodSpec.methodBuilder("transactionNonExclusiveAsCompletable")
-                        .addJavadoc("RxJava 2.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}\n")
-                        .addAnnotation(Annotations.checkResult())
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(Types.Completable)
-                        .addParameter(
-                                ParameterSpec.builder(Types.Runnable, "task")
-                                        .addAnnotation(Annotations.nonNull())
-                                        .addModifiers(Modifier.FINAL)
-                                        .build())
-                        .addStatement("return $T.fromRunnable($L)", Types.Completable, runnableWithCode("transactionNonExclusiveSync(task)"))
-                        .build()
-        );
+        if (context.generationOption.isRxJavaSupport()) {
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("transactionAsCompletable")
+                            .addJavadoc("RxJava 2.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}\n")
+                            .addAnnotation(Annotations.checkResult())
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(Types.Completable)
+                            .addParameter(
+                                    ParameterSpec.builder(Types.Runnable, "task")
+                                            .addAnnotation(Annotations.nonNull())
+                                            .addModifiers(Modifier.FINAL)
+                                            .build())
+                            .addStatement("return $T.fromRunnable($L)", Types.Completable,
+                                    runnableWithCode("transactionSync(task)"))
+                            .build()
+            );
+
+            methodSpecs.add(
+                    MethodSpec.methodBuilder("transactionNonExclusiveAsCompletable")
+                            .addJavadoc(
+                                    "RxJava 2.x {@code Completable} wrapper to {@link #transactionNonExclusiveSync(Runnable)}\n")
+                            .addAnnotation(Annotations.checkResult())
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(Types.Completable)
+                            .addParameter(
+                                    ParameterSpec.builder(Types.Runnable, "task")
+                                            .addAnnotation(Annotations.nonNull())
+                                            .addModifiers(Modifier.FINAL)
+                                            .build())
+                            .addStatement("return $T.fromRunnable($L)", Types.Completable,
+                                    runnableWithCode("transactionNonExclusiveSync(task)"))
+                            .build()
+            );
+        }
 
         methodSpecs.add(
                 MethodSpec.methodBuilder("deleteAll")
@@ -425,6 +433,9 @@ public class DatabaseWriter extends BaseWriter {
                             .build());
 
             // For prepared statements
+            ParameterizedTypeName inserterType = context.generationOption.isRxJavaSupport()
+                    ? Types.getRxInserter(schema.getModelClassName())
+                    : Types.getInserter(schema.getModelClassName());
 
             methodSpecs.add(
                     MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName)
@@ -433,7 +444,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addAnnotation(Annotations.workerThread())
                             .addAnnotations(suppressWarningsRawtypes)
                             .addModifiers(Modifier.PUBLIC)
-                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .returns(inserterType)
                             .addStatement("return prepareInsertInto$L($T.NONE, true)",
                                     simpleModelName,
                                     OnConflict.class
@@ -450,7 +461,7 @@ public class DatabaseWriter extends BaseWriter {
                             .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
                                     .addAnnotation(OnConflict.class)
                                     .build())
-                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .returns(inserterType)
                             .addStatement("return prepareInsertInto$L(onConflictAlgorithm, true)",
                                     simpleModelName
                             )
@@ -468,70 +479,70 @@ public class DatabaseWriter extends BaseWriter {
                                     .build())
                             .addParameter(ParameterSpec.builder(boolean.class, "withoutAutoId")
                                     .build())
-                            .returns(Types.getInserter(schema.getModelClassName()))
+                            .returns(inserterType)
                             .addStatement("return new $T($L, $L, onConflictAlgorithm, withoutAutoId)",
-                                    Types.getInserter(schema.getModelClassName()),
+                                    inserterType,
                                     connection,
                                     schemaInstance
                             )
                             .build());
 
             // For prepared statements RxJava observables
+            if (context.generationOption.isRxJavaSupport()) {
+                // RxJava 2.x
+                TypeName inserterSingle2Type = Types.getSingle(inserterType);
 
-            TypeName inserterType = Types.getInserter(schema.getModelClassName());
+                methodSpecs.add(
+                        MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle")
+                                .addJavadoc("Create a prepared statement for {@code INSERT INTO $T ...}.\n",
+                                        schema.getModelClassName())
+                                .addAnnotation(Annotations.checkResult())
+                                .addAnnotations(suppressWarningsRawtypes)
+                                .addModifiers(Modifier.PUBLIC)
+                                .returns(inserterSingle2Type)
+                                .addStatement("return prepareInsertInto$LAsSingle($T.NONE, true)",
+                                        simpleModelName,
+                                        OnConflict.class
+                                )
+                                .build());
 
-            // RxJava 2.x
-            TypeName inserterSingle2Type = Types.getSingle(inserterType);
+                methodSpecs.add(
+                        MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle")
+                                .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
+                                        schema.getModelClassName())
+                                .addAnnotation(Annotations.checkResult())
+                                .addAnnotations(suppressWarningsRawtypes)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                        .addAnnotation(OnConflict.class)
+                                        .build())
+                                .returns(inserterSingle2Type)
+                                .addStatement("return prepareInsertInto$LAsSingle(onConflictAlgorithm, true)",
+                                        simpleModelName
+                                )
+                                .build());
+                methodSpecs.add(
+                        MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle")
+                                .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
+                                        schema.getModelClassName())
+                                .addAnnotation(Annotations.checkResult())
+                                .addAnnotations(suppressWarningsRawtypes)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
+                                        .addModifiers(Modifier.FINAL)
+                                        .addAnnotation(OnConflict.class)
+                                        .build())
+                                .addParameter(ParameterSpec.builder(boolean.class, "withoutAutoId")
+                                        .addModifiers(Modifier.FINAL)
+                                        .build())
+                                .returns(inserterSingle2Type)
+                                .addStatement("return $T.fromCallable($L)", Types.Single,
+                                        callableWithCode(inserterType,
+                                                "return new $T($L, $L, onConflictAlgorithm, withoutAutoId)",
+                                                inserterType, connection, schemaInstance))
+                                .build());
 
-            methodSpecs.add(
-                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle")
-                            .addJavadoc("Create a prepared statement for {@code INSERT INTO $T ...}.\n",
-                                    schema.getModelClassName())
-                            .addAnnotation(Annotations.checkResult())
-                            .addAnnotations(suppressWarningsRawtypes)
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(inserterSingle2Type)
-                            .addStatement("return prepareInsertInto$LAsSingle($T.NONE, true)",
-                                    simpleModelName,
-                                    OnConflict.class
-                            )
-                            .build());
-
-            methodSpecs.add(
-                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle")
-                            .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
-                                    schema.getModelClassName())
-                            .addAnnotation(Annotations.checkResult())
-                            .addAnnotations(suppressWarningsRawtypes)
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
-                                    .addAnnotation(OnConflict.class)
-                                    .build())
-                            .returns(inserterSingle2Type)
-                            .addStatement("return prepareInsertInto$LAsSingle(onConflictAlgorithm, true)",
-                                    simpleModelName
-                            )
-                            .build());
-            methodSpecs.add(
-                    MethodSpec.methodBuilder("prepareInsertInto" + simpleModelName + "AsSingle")
-                            .addJavadoc("Create a prepared statement for {@code INSERT OR ... INTO $T ...}.\n",
-                                    schema.getModelClassName())
-                            .addAnnotation(Annotations.checkResult())
-                            .addAnnotations(suppressWarningsRawtypes)
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(ParameterSpec.builder(int.class, "onConflictAlgorithm")
-                                    .addModifiers(Modifier.FINAL)
-                                    .addAnnotation(OnConflict.class)
-                                    .build())
-                            .addParameter(ParameterSpec.builder(boolean.class, "withoutAutoId")
-                                    .addModifiers(Modifier.FINAL)
-                                    .build())
-                            .returns(inserterSingle2Type)
-                            .addStatement("return $T.fromCallable($L)", Types.Single,
-                                    callableWithCode(inserterType, "return new $T($L, $L, onConflictAlgorithm, withoutAutoId)",
-                                            inserterType, connection, schemaInstance))
-                            .build());
-
+            }
         });
 
         return methodSpecs;
@@ -567,7 +578,7 @@ public class DatabaseWriter extends BaseWriter {
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(
-                        ParameterSpec.builder(Types.OrmaConnection, connection)
+                        ParameterSpec.builder(ormaConnectionType, connection)
                                 .addAnnotation(Annotations.nonNull())
                                 .build())
                 .addStatement("this.$L = $L", connection, connection)

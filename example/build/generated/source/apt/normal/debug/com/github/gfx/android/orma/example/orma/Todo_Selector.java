@@ -1,15 +1,15 @@
 package com.github.gfx.android.orma.example.orma;
 
 import android.support.annotation.NonNull;
-import com.github.gfx.android.orma.OrmaConnection;
-import com.github.gfx.android.orma.Selector;
+import com.github.gfx.android.orma.rx.RxOrmaConnection;
+import com.github.gfx.android.orma.rx.RxSelector;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Todo_Selector extends Selector<Todo, Todo_Selector> {
+public class Todo_Selector extends RxSelector<Todo, Todo_Selector> {
   final Todo_Schema schema;
 
-  public Todo_Selector(OrmaConnection conn, Todo_Schema schema) {
+  public Todo_Selector(RxOrmaConnection conn, Todo_Schema schema) {
     super(conn);
     this.schema = schema;
   }
