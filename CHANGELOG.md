@@ -14,6 +14,12 @@ Note that _experimental_ features, annotated with `@Experimental` may change wit
 
 https://github.com/gfx/Android-Orma/compare/v4.2.5...HEAD
 
+## v5.0.0-rc6 2018/08/13
+
+https://github.com/gfx/Android-Orma/compare/v5.0.0-rc5...v5.0.0-rc6
+
+* just confirming release engineering
+
 ## v5.0.0-rc5 2018/08/13
 
 https://github.com/gfx/Android-Orma/compare/v5.0.0-rc4...v5.0.0-rc5
