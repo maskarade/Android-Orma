@@ -23,41 +23,41 @@ as the author respects the Larry Wall's wisdom:
 - [Getting Started](#getting-started)
 - [Synopsis](#synopsis)
 - [The Components](#the-components)
-    - [Database Handles](#database-handles)
-    - [Models](#models)
-    - [Schema Helpers](#schema-helpers)
-    - [Relation Helpers](#relation-helpers)
-    - [Selector Helpers](#selector-helpers)
-    - [Updater Helpers](#updater-helpers)
-    - [Deleter Helpers](#deleter-helpers)
-    - [Query Helper Methods](#query-helper-methods)
-        - [List of Query Helper Methods](#list-of-query-helper-methods)
-        - [How to Control Generation of Query Helpers](#how-to-control-generation-of-query-helpers)
-    - [The Inserter Helpers](#the-inserter-helpers)
+  - [Database Handles](#database-handles)
+  - [Models](#models)
+  - [Schema Helpers](#schema-helpers)
+  - [Relation Helpers](#relation-helpers)
+  - [Selector Helpers](#selector-helpers)
+  - [Updater Helpers](#updater-helpers)
+  - [Deleter Helpers](#deleter-helpers)
+  - [Query Helper Methods](#query-helper-methods)
+    - [List of Query Helper Methods](#list-of-query-helper-methods)
+    - [How to Control Generation of Query Helpers](#how-to-control-generation-of-query-helpers)
+  - [The Inserter Helpers](#the-inserter-helpers)
 - [Details of Database Handles](#details-of-database-handles)
-    - [Configuration of Database Handles](#configuration-of-database-handles)
-    - [Database Handle Builders](#database-handle-builders)
-    - [In-Memory Database](#in-memory-database)
+  - [Configuration of Database Handles](#configuration-of-database-handles)
+  - [Database Handle Builders](#database-handle-builders)
+  - [In-Memory Database](#in-memory-database)
 - [Details of Models](#details-of-models)
-    - [Setters and Getters](#setters-and-getters)
-    - [Immutable Models](#immutable-models)
-    - [Composite Indexes](#composite-indexes)
-    - [Reserved Names](#reserved-names)
+  - [Setters and Getters](#setters-and-getters)
+  - [Immutable Models](#immutable-models)
+  - [Composite Indexes](#composite-indexes)
+  - [Reserved Names](#reserved-names)
 - [RxJava Integration](#rxjava-integration)
 - [Associations](#associations)
-    - [Has-One Associations with `SingleAssociation<T>`](#has-one-associations-with-singleassociationt)
-    - [Direct Associations](#direct-associations)
-    - [Has-Many Associations with `SingleAssociation<T>`](#has-many-associations-with-singleassociationt)
-    - [Has-Many Associations with Direct Associations](#has-many-associations-with-direct-associations)
-    - [Limitations in Associations](#limitations-in-associations)
+  - [Has-One Associations with `SingleAssociation<T>`](#has-one-associations-with-singleassociationt)
+  - [Direct Associations](#direct-associations)
+  - [Has-Many Associations with `SingleAssociation<T>`](#has-many-associations-with-singleassociationt)
+  - [Has-Many Associations with Direct Associations](#has-many-associations-with-direct-associations)
+  - [Limitations in Associations](#limitations-in-associations)
 - [Type Adapters](#type-adapters)
-    - [How Serialized Types Used](#how-serialized-types-used)
-    - [`@StaticTypeAdapters` for Multiple Serializers at Once](#statictypeadapters-for-multiple-serializers-at-once)
-    - [Built-In Type Adapters](#built-in-type-adapters)
-    - [Generic Type Adapters](#generic-type-adapters)
+  - [How Serialized Types Used](#how-serialized-types-used)
+  - [`@StaticTypeAdapters` for Multiple Serializers at Once](#statictypeadapters-for-multiple-serializers-at-once)
+  - [Built-In Type Adapters](#built-in-type-adapters)
+  - [Generic Type Adapters](#generic-type-adapters)
 - [Pagination](#pagination)
-    - [limit and offset](#limit-and-offset)
-    - [page and per](#page-and-per)
+  - [limit and offset](#limit-and-offset)
+  - [page and per](#page-and-per)
 - [Raw Queries](#raw-queries)
 - [Migration](#migration)
 - [DataSet Changed Events](#dataset-changed-events)
@@ -67,17 +67,20 @@ as the author respects the Larry Wall's wisdom:
 - [Benchmark](#benchmark)
 - [Method Count](#method-count)
 - [FAQ](#faq)
-    - [Can't build my project.](#cant-build-my-project)
-    - [How can I enable debug logging on release build?](#how-can-i-enable-debug-logging-on-release-build)
-    - [How can see the generated Java files?](#how-can-see-the-generated-java-files)
-    - [Does Orma work with Kotlin?](#does-orma-work-with-kotlin)
-    - [Does Orma work with the Jack compiler?](#does-orma-work-with-the-jack-compiler)
-    - [When the database handle is opened and closed?](#when-the-database-handle-is-opened-and-closed)
-    - [Who uses Orma?](#who-uses-orma)
+  - [Can't build my project.](#cant-build-my-project)
+  - [How can I enable debug logging on release build?](#how-can-i-enable-debug-logging-on-release-build)
+  - [How can see the generated Java files?](#how-can-see-the-generated-java-files)
+  - [Does Orma work with Kotlin?](#does-orma-work-with-kotlin)
+  - [Does Orma work with the Jack compiler?](#does-orma-work-with-the-jack-compiler)
+  - [When the database handle is opened and closed?](#when-the-database-handle-is-opened-and-closed)
+  - [Who uses Orma?](#who-uses-orma)
 - [Support](#support)
 - [Licenses in Runtime Dependencies](#licenses-in-runtime-dependencies)
 - [Contribution](#contribution)
 - [Release Engineering for Maintainers](#release-engineering-for-maintainers)
+  - [Artifact Repository](#artifact-repository)
+  - [What you do](#what-you-do)
+  - [Documentation Tools](#documentation-tools)
 - [See Also](#see-also)
 - [Authors and Contributors](#authors-and-contributors)
 - [License](#license)
@@ -1042,7 +1045,7 @@ That is, you don't need migration steps for the following cases:
 * Changing column constraints (`NOT NULL`, `UNIQUE`, and etc.)
 
 Of course, you can define migration steps for each schema version (or `BuildConfig.VERSION`).
-If you add 
+If you add
 
 Here is an example to define migration steps:
 
@@ -1264,11 +1267,22 @@ Patches are welcome!
 
 ## Release Engineering for Maintainers
 
+### Artifact Repository
+
+https://bintray.com/orma
+
+### What you do
+
 ```shell
 ./gradlew bumpMajor # or bumpMinor / bumpPatch
+code CHANGES.md # edit change logs
 git add -va
-make publish # run tests, build artifacts, publish to jcenter, and make a tag
+make publish # run tests, build artifacts, publish to jcenter, and make a git tag to HEAD
 ```
+
+See `Makefile` for details.
+
+### Documentation Tools
 
 Visual Studio Code (a.k.a. vscode) is recommended to edit README.md and CHANGELOG.md. Especially the ToC section is managed by [AlanWalk/Markdown-TOC](https://github.com/AlanWalk/Markdown-TOC).
 
