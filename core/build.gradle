@@ -52,6 +52,7 @@ publish {
     desc = 'The core module for Android-Orma'
 
     def metadata = rootProject.ext.metadata
+    userOrg = metadata.userOrg
     groupId = metadata.groupId
     publishVersion = metadata.version
     website = metadata.website

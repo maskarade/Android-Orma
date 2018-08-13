@@ -94,6 +94,7 @@ publish {
     desc = 'A smart SQLiteDatabase migration engine'
 
     def metadata = rootProject.ext.metadata
+    userOrg = metadata.userOrg
     groupId = metadata.groupId
     publishVersion = metadata.version
     website = metadata.website
