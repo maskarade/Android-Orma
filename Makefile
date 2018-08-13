@@ -1,9 +1,8 @@
 
 check:
-	./gradlew clean check bintrayUpload
+	./gradlew clean assemble check bintrayUpload
 
 publish: check
-	./gradlew assemble
 	./gradlew releng
 	./gradlew -PdryRun=false annotations:bintrayUpload
 	./gradlew -PdryRun=false processor:bintrayUpload
