@@ -30,14 +30,14 @@ public class OrmaDatabase implements DatabaseHandle {
   /**
    * The SHA-256 digest of all the {@code CREATE TABLE} and {@code CREATE INDEX} statements.
    */
-  public static String SCHEMA_HASH = "5E820B3B2CB5F8FC4A0BF837061BA001770FB044218B0DCBBD8EBC342ACE278B";
+  public static String SCHEMA_HASH = "B180A070B8F2FE2CBEBE4B6F7B5E56FA8ED0C61FEB7AA492B2830EE71522E036";
 
   public static final List<Schema<?>> SCHEMAS = Arrays.<Schema<?>>asList(
-    Category_Schema.INSTANCE,
-    Entry_Schema.INSTANCE,
-    Item_Schema.INSTANCE,
     Item2_Schema.INSTANCE,
-    Todo_Schema.INSTANCE
+    Category_Schema.INSTANCE,
+    Todo_Schema.INSTANCE,
+    Entry_Schema.INSTANCE,
+    Item_Schema.INSTANCE
   );
 
   private final RxOrmaConnection connection;
@@ -109,6 +109,120 @@ public class OrmaDatabase implements DatabaseHandle {
 
   public void deleteAll() {
     connection.deleteAll();
+  }
+
+  /**
+   * Retrieves a model from a cursor. */
+  @NonNull
+  public Item2 newItem2FromCursor(@NonNull Cursor cursor) {
+    return Item2_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
+  }
+
+  /**
+   * Inserts a model created by {@code ModelFactory<T>}, and retrieves it which is just inserted.
+   *  The return value has the row ID.
+   */
+  @NonNull
+  @WorkerThread
+  public Item2 createItem2(@NonNull ModelFactory<Item2> factory) {
+    return connection.createModel(Item2_Schema.INSTANCE, factory);
+  }
+
+  /**
+   * Creates a relation of {@code Item2}, which is an entry point of all the operations.
+   */
+  @NonNull
+  public Item2_Relation relationOfItem2() {
+    return new Item2_Relation(connection, Item2_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code SELECT * FROM Item2 ...}.
+   */
+  @NonNull
+  public Item2_Selector selectFromItem2() {
+    return new Item2_Selector(connection, Item2_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code UPDATE Item2 ...}.
+   */
+  @WorkerThread
+  @NonNull
+  public Item2_Updater updateItem2() {
+    return new Item2_Updater(connection, Item2_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code DELETE FROM Item2 ...}.
+   */
+  @WorkerThread
+  @NonNull
+  public Item2_Deleter deleteFromItem2() {
+    return new Item2_Deleter(connection, Item2_Schema.INSTANCE);
+  }
+
+  /**
+   * Executes a query: {@code INSERT INTO Item2 ...}.
+   */
+  @WorkerThread
+  public long insertIntoItem2(@NonNull Item2 model) {
+    return prepareInsertIntoItem2().executeAndClose(model);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Item2 ...}.
+   */
+  @WorkerThread
+  public RxInserter<Item2> prepareInsertIntoItem2() {
+    return prepareInsertIntoItem2(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
+   */
+  @WorkerThread
+  public RxInserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItem2(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
+   */
+  @WorkerThread
+  public RxInserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm,
+      boolean withoutAutoId) {
+    return new RxInserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Item2 ...}.
+   */
+  @CheckResult
+  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle() {
+    return prepareInsertIntoItem2AsSingle(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
+   */
+  @CheckResult
+  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoItem2AsSingle(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
+   */
+  @CheckResult
+  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict final int onConflictAlgorithm,
+      final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<RxInserter<Item2>>() {
+      @Override
+      public RxInserter<Item2> call() throws Exception {
+        return new RxInserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+      }
+    });
   }
 
   /**
@@ -221,6 +335,120 @@ public class OrmaDatabase implements DatabaseHandle {
       @Override
       public RxInserter<Category> call() throws Exception {
         return new RxInserter<Category>(connection, Category_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+      }
+    });
+  }
+
+  /**
+   * Retrieves a model from a cursor. */
+  @NonNull
+  public Todo newTodoFromCursor(@NonNull Cursor cursor) {
+    return Todo_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
+  }
+
+  /**
+   * Inserts a model created by {@code ModelFactory<T>}, and retrieves it which is just inserted.
+   *  The return value has the row ID.
+   */
+  @NonNull
+  @WorkerThread
+  public Todo createTodo(@NonNull ModelFactory<Todo> factory) {
+    return connection.createModel(Todo_Schema.INSTANCE, factory);
+  }
+
+  /**
+   * Creates a relation of {@code Todo}, which is an entry point of all the operations.
+   */
+  @NonNull
+  public Todo_Relation relationOfTodo() {
+    return new Todo_Relation(connection, Todo_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code SELECT * FROM Todo ...}.
+   */
+  @NonNull
+  public Todo_Selector selectFromTodo() {
+    return new Todo_Selector(connection, Todo_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code UPDATE Todo ...}.
+   */
+  @WorkerThread
+  @NonNull
+  public Todo_Updater updateTodo() {
+    return new Todo_Updater(connection, Todo_Schema.INSTANCE);
+  }
+
+  /**
+   * Starts building a query: {@code DELETE FROM Todo ...}.
+   */
+  @WorkerThread
+  @NonNull
+  public Todo_Deleter deleteFromTodo() {
+    return new Todo_Deleter(connection, Todo_Schema.INSTANCE);
+  }
+
+  /**
+   * Executes a query: {@code INSERT INTO Todo ...}.
+   */
+  @WorkerThread
+  public long insertIntoTodo(@NonNull Todo model) {
+    return prepareInsertIntoTodo().executeAndClose(model);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Todo ...}.
+   */
+  @WorkerThread
+  public RxInserter<Todo> prepareInsertIntoTodo() {
+    return prepareInsertIntoTodo(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
+   */
+  @WorkerThread
+  public RxInserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoTodo(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
+   */
+  @WorkerThread
+  public RxInserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm,
+      boolean withoutAutoId) {
+    return new RxInserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT INTO Todo ...}.
+   */
+  @CheckResult
+  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle() {
+    return prepareInsertIntoTodoAsSingle(OnConflict.NONE, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
+   */
+  @CheckResult
+  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict int onConflictAlgorithm) {
+    return prepareInsertIntoTodoAsSingle(onConflictAlgorithm, true);
+  }
+
+  /**
+   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
+   */
+  @CheckResult
+  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict final int onConflictAlgorithm,
+      final boolean withoutAutoId) {
+    return Single.fromCallable(new Callable<RxInserter<Todo>>() {
+      @Override
+      public RxInserter<Todo> call() throws Exception {
+        return new RxInserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
@@ -449,234 +677,6 @@ public class OrmaDatabase implements DatabaseHandle {
       @Override
       public RxInserter<Item> call() throws Exception {
         return new RxInserter<Item>(connection, Item_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
-      }
-    });
-  }
-
-  /**
-   * Retrieves a model from a cursor. */
-  @NonNull
-  public Item2 newItem2FromCursor(@NonNull Cursor cursor) {
-    return Item2_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
-  }
-
-  /**
-   * Inserts a model created by {@code ModelFactory<T>}, and retrieves it which is just inserted.
-   *  The return value has the row ID.
-   */
-  @NonNull
-  @WorkerThread
-  public Item2 createItem2(@NonNull ModelFactory<Item2> factory) {
-    return connection.createModel(Item2_Schema.INSTANCE, factory);
-  }
-
-  /**
-   * Creates a relation of {@code Item2}, which is an entry point of all the operations.
-   */
-  @NonNull
-  public Item2_Relation relationOfItem2() {
-    return new Item2_Relation(connection, Item2_Schema.INSTANCE);
-  }
-
-  /**
-   * Starts building a query: {@code SELECT * FROM Item2 ...}.
-   */
-  @NonNull
-  public Item2_Selector selectFromItem2() {
-    return new Item2_Selector(connection, Item2_Schema.INSTANCE);
-  }
-
-  /**
-   * Starts building a query: {@code UPDATE Item2 ...}.
-   */
-  @WorkerThread
-  @NonNull
-  public Item2_Updater updateItem2() {
-    return new Item2_Updater(connection, Item2_Schema.INSTANCE);
-  }
-
-  /**
-   * Starts building a query: {@code DELETE FROM Item2 ...}.
-   */
-  @WorkerThread
-  @NonNull
-  public Item2_Deleter deleteFromItem2() {
-    return new Item2_Deleter(connection, Item2_Schema.INSTANCE);
-  }
-
-  /**
-   * Executes a query: {@code INSERT INTO Item2 ...}.
-   */
-  @WorkerThread
-  public long insertIntoItem2(@NonNull Item2 model) {
-    return prepareInsertIntoItem2().executeAndClose(model);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT INTO Item2 ...}.
-   */
-  @WorkerThread
-  public RxInserter<Item2> prepareInsertIntoItem2() {
-    return prepareInsertIntoItem2(OnConflict.NONE, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
-   */
-  @WorkerThread
-  public RxInserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoItem2(onConflictAlgorithm, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
-   */
-  @WorkerThread
-  public RxInserter<Item2> prepareInsertIntoItem2(@OnConflict int onConflictAlgorithm,
-      boolean withoutAutoId) {
-    return new RxInserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT INTO Item2 ...}.
-   */
-  @CheckResult
-  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle() {
-    return prepareInsertIntoItem2AsSingle(OnConflict.NONE, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
-   */
-  @CheckResult
-  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoItem2AsSingle(onConflictAlgorithm, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Item2 ...}.
-   */
-  @CheckResult
-  public Single<RxInserter<Item2>> prepareInsertIntoItem2AsSingle(@OnConflict final int onConflictAlgorithm,
-      final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable<RxInserter<Item2>>() {
-      @Override
-      public RxInserter<Item2> call() throws Exception {
-        return new RxInserter<Item2>(connection, Item2_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
-      }
-    });
-  }
-
-  /**
-   * Retrieves a model from a cursor. */
-  @NonNull
-  public Todo newTodoFromCursor(@NonNull Cursor cursor) {
-    return Todo_Schema.INSTANCE.newModelFromCursor(connection, cursor, 0);
-  }
-
-  /**
-   * Inserts a model created by {@code ModelFactory<T>}, and retrieves it which is just inserted.
-   *  The return value has the row ID.
-   */
-  @NonNull
-  @WorkerThread
-  public Todo createTodo(@NonNull ModelFactory<Todo> factory) {
-    return connection.createModel(Todo_Schema.INSTANCE, factory);
-  }
-
-  /**
-   * Creates a relation of {@code Todo}, which is an entry point of all the operations.
-   */
-  @NonNull
-  public Todo_Relation relationOfTodo() {
-    return new Todo_Relation(connection, Todo_Schema.INSTANCE);
-  }
-
-  /**
-   * Starts building a query: {@code SELECT * FROM Todo ...}.
-   */
-  @NonNull
-  public Todo_Selector selectFromTodo() {
-    return new Todo_Selector(connection, Todo_Schema.INSTANCE);
-  }
-
-  /**
-   * Starts building a query: {@code UPDATE Todo ...}.
-   */
-  @WorkerThread
-  @NonNull
-  public Todo_Updater updateTodo() {
-    return new Todo_Updater(connection, Todo_Schema.INSTANCE);
-  }
-
-  /**
-   * Starts building a query: {@code DELETE FROM Todo ...}.
-   */
-  @WorkerThread
-  @NonNull
-  public Todo_Deleter deleteFromTodo() {
-    return new Todo_Deleter(connection, Todo_Schema.INSTANCE);
-  }
-
-  /**
-   * Executes a query: {@code INSERT INTO Todo ...}.
-   */
-  @WorkerThread
-  public long insertIntoTodo(@NonNull Todo model) {
-    return prepareInsertIntoTodo().executeAndClose(model);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT INTO Todo ...}.
-   */
-  @WorkerThread
-  public RxInserter<Todo> prepareInsertIntoTodo() {
-    return prepareInsertIntoTodo(OnConflict.NONE, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
-   */
-  @WorkerThread
-  public RxInserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoTodo(onConflictAlgorithm, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
-   */
-  @WorkerThread
-  public RxInserter<Todo> prepareInsertIntoTodo(@OnConflict int onConflictAlgorithm,
-      boolean withoutAutoId) {
-    return new RxInserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT INTO Todo ...}.
-   */
-  @CheckResult
-  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle() {
-    return prepareInsertIntoTodoAsSingle(OnConflict.NONE, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
-   */
-  @CheckResult
-  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict int onConflictAlgorithm) {
-    return prepareInsertIntoTodoAsSingle(onConflictAlgorithm, true);
-  }
-
-  /**
-   * Create a prepared statement for {@code INSERT OR ... INTO Todo ...}.
-   */
-  @CheckResult
-  public Single<RxInserter<Todo>> prepareInsertIntoTodoAsSingle(@OnConflict final int onConflictAlgorithm,
-      final boolean withoutAutoId) {
-    return Single.fromCallable(new Callable<RxInserter<Todo>>() {
-      @Override
-      public RxInserter<Todo> call() throws Exception {
-        return new RxInserter<Todo>(connection, Todo_Schema.INSTANCE, onConflictAlgorithm, withoutAutoId);
       }
     });
   }
