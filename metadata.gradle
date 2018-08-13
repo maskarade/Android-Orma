@@ -1,8 +1,9 @@
 ext {
     metadata = [
+            userOrg: 'orma', // https://bintray.com/orma
             groupId   : 'com.github.gfx.android.orma',
-            website   : 'https://github.com/gfx/Android-Orma',
-            repository: 'git@github.com:gfx/Android-Orma.git',
+            website   : 'https://github.com/maskarade/Android-Orma',
+            repository: 'git@github.com:maskarade/Android-Orma.git',
             licences  : ['Apache-2.0']
     ]
 }

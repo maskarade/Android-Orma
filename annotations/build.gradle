@@ -13,6 +13,7 @@ publish {
     desc = 'Annotations for Orma'
 
     def metadata = project.rootProject.ext.metadata
+    userOrg = metadata.userOrg
     groupId = metadata.groupId
     publishVersion = metadata.version
     website = metadata.website

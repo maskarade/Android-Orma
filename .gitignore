@@ -4,6 +4,7 @@ gradle.properties
 .idea/*.xml
 .idea/.*
 .idea/*/*.xml
+.idea/caches/*
 !.idea/copyright/*.xml
 !.idea/dictionaries/orma.xml
 !.idea/codeStyleSettings.xml
