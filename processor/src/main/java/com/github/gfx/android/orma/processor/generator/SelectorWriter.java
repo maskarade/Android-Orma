@@ -39,10 +39,13 @@ public class SelectorWriter extends BaseWriter {
 
     private final ConditionQueryHelpers queryHelpers;
 
+    private final boolean isRxJavaSupport;
+
     public SelectorWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
         this.queryHelpers = new ConditionQueryHelpers(context, schema, getTargetClassName());
+        this.isRxJavaSupport = context.isRxJavaSupport(schema);
     }
 
     ClassName getTargetClassName() {
@@ -67,7 +70,7 @@ public class SelectorWriter extends BaseWriter {
         }
         classBuilder.addModifiers(Modifier.PUBLIC);
 
-        ParameterizedTypeName selectorType = context.generationOption.isRxJavaSupport()
+        ParameterizedTypeName selectorType = isRxJavaSupport
                 ? Types.getRxSelector(schema.getModelClassName(), getTargetClassName())
                 : Types.getSelector(schema.getModelClassName(), getTargetClassName());
         classBuilder.superclass(selectorType);

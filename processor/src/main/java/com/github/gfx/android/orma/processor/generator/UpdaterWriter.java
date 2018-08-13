@@ -42,10 +42,13 @@ public class UpdaterWriter extends BaseWriter {
 
     private final ConditionQueryHelpers queryHelpers;
 
+    private final boolean isRxJavaSupport;
+
     public UpdaterWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
         queryHelpers = new ConditionQueryHelpers(context, schema, schema.getUpdaterClassName());
+        isRxJavaSupport = context.isRxJavaSupport(schema);
     }
 
     ClassName getTargetClassName() {
@@ -70,7 +73,7 @@ public class UpdaterWriter extends BaseWriter {
         }
         classBuilder.addModifiers(Modifier.PUBLIC);
 
-        ParameterizedTypeName updaterType = context.generationOption.isRxJavaSupport()
+        ParameterizedTypeName updaterType = isRxJavaSupport
                 ? Types.getRxUpdater(schema.getModelClassName(), schema.getUpdaterClassName())
                 : Types.getUpdater(schema.getModelClassName(), schema.getUpdaterClassName());
         classBuilder.superclass(updaterType);

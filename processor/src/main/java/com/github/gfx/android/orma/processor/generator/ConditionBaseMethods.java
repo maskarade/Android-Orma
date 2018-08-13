@@ -37,10 +37,13 @@ public class ConditionBaseMethods {
 
     private final ClassName targetClassName;
 
+    private final boolean isRxJavaSupport;
+
     public ConditionBaseMethods(ProcessingContext context, SchemaDefinition schema, ClassName targetClassName) {
         this.context = context;
         this.schema = schema;
         this.targetClassName = targetClassName;
+        this.isRxJavaSupport = context.isRxJavaSupport(schema);
     }
 
     public List<MethodSpec> buildMethodSpecs() {
@@ -50,7 +53,7 @@ public class ConditionBaseMethods {
     public List<MethodSpec> buildMethodSpecs(boolean useRawConnectionType) {
         List<MethodSpec> methodSpecs = new ArrayList<>();
 
-        ClassName ormaConnectionType = (!useRawConnectionType && context.generationOption.isRxJavaSupport())
+        ClassName ormaConnectionType = (!useRawConnectionType && isRxJavaSupport)
                 ? Types.RxOrmaConnection : Types.OrmaConnection;
         methodSpecs.add(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
