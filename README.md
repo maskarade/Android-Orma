@@ -1280,6 +1280,8 @@ git add -va
 make publish # run tests, build artifacts, publish to jcenter, and make a git tag to HEAD
 ```
 
+Note that you have to edit `VERSION` file by hand if you'd like to release release candidates.
+
 See `Makefile` for details.
 
 ### Documentation Tools
