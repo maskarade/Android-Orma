@@ -38,10 +38,13 @@ public class DeleterWriter extends BaseWriter {
 
     private final ConditionQueryHelpers queryHelpers;
 
+    private final boolean isRxJavaSupport;
+
     public DeleterWriter(ProcessingContext context, SchemaDefinition schema) {
         super(context);
         this.schema = schema;
         queryHelpers = new ConditionQueryHelpers(context, schema, schema.getDeleterClassName());
+        isRxJavaSupport = context.isRxJavaSupport(schema);
     }
 
     ClassName getTargetClassName() {
@@ -66,7 +69,7 @@ public class DeleterWriter extends BaseWriter {
         }
         classBuilder.addModifiers(Modifier.PUBLIC);
 
-        ParameterizedTypeName deleterType = context.generationOption.isRxJavaSupport()
+        ParameterizedTypeName deleterType = isRxJavaSupport
                 ? Types.getRxDeleter(schema.getModelClassName(), schema.getDeleterClassName())
                 : Types.getDeleter(schema.getModelClassName(), schema.getDeleterClassName());
         classBuilder.superclass(deleterType);

@@ -31,8 +31,11 @@ import java.lang.annotation.Target;
 public @interface Database {
 
     String DEFAULT_DATABASE_CLASS_NAME = "OrmaDatabase";
+    boolean DEFAULT_RX_JAVA_SUPPORT = true;
 
     String databaseClassName() default DEFAULT_DATABASE_CLASS_NAME;
+
+    boolean rxJavaSupport() default DEFAULT_RX_JAVA_SUPPORT;
 
     /**
      * @return A list of model classes the database handles.

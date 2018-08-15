@@ -42,6 +42,8 @@ public class DatabaseDefinition {
 
     final ClassName className;
 
+    final boolean rxJavaSupport;
+
     final Set<TypeName> includes;
 
     final Set<TypeName> excludes;
@@ -55,6 +57,8 @@ public class DatabaseDefinition {
         String name = database.getOrDefault("databaseClassName", String.class);
         className = ClassName.get(packageName, name);
 
+        rxJavaSupport = database.getOrDefault("rxJavaSupport", Boolean.class);
+
         includes = database.getValues("includes", TypeMirror.class)
                 .map(ClassName::get)
                 .collect(Collectors.toSet());
@@ -64,11 +68,12 @@ public class DatabaseDefinition {
                 .collect(Collectors.toSet());
     }
 
-    public DatabaseDefinition(ProcessingContext context, String packageName, String className) {
+    public DatabaseDefinition(ProcessingContext context, String packageName, String className, boolean rxJavaSupport) {
         this.context = context;
         this.element = null;
         this.packageName = packageName;
         this.className = ClassName.get(packageName, className);
+        this.rxJavaSupport = rxJavaSupport;
         this.includes = Collections.emptySet();
         this.excludes = Collections.emptySet();
     }
@@ -95,5 +100,9 @@ public class DatabaseDefinition {
 
     public ClassName getClassName() {
         return className;
+    }
+
+    public boolean isRxJavaSupport() {
+        return rxJavaSupport;
     }
 }

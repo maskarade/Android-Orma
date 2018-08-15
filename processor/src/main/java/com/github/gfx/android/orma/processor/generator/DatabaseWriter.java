@@ -64,7 +64,7 @@ public class DatabaseWriter extends BaseWriter {
     public DatabaseWriter(ProcessingContext context, DatabaseDefinition database) {
         super(context);
         this.database = database;
-        this.ormaConnectionType = context.generationOption.isRxJavaSupport() ? Types.RxOrmaConnection : Types.OrmaConnection;
+        this.ormaConnectionType = database.isRxJavaSupport() ? Types.RxOrmaConnection : Types.OrmaConnection;
     }
 
     // http://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
@@ -282,7 +282,7 @@ public class DatabaseWriter extends BaseWriter {
                         .build()
         );
 
-        if (context.generationOption.isRxJavaSupport()) {
+        if (database.isRxJavaSupport()) {
             methodSpecs.add(
                     MethodSpec.methodBuilder("transactionAsCompletable")
                             .addJavadoc("RxJava 2.x {@code Completable} wrapper to {@link #transactionSync(Runnable)}\n")
@@ -433,7 +433,7 @@ public class DatabaseWriter extends BaseWriter {
                             .build());
 
             // For prepared statements
-            ParameterizedTypeName inserterType = context.generationOption.isRxJavaSupport()
+            ParameterizedTypeName inserterType = database.isRxJavaSupport()
                     ? Types.getRxInserter(schema.getModelClassName())
                     : Types.getInserter(schema.getModelClassName());
 
@@ -488,7 +488,7 @@ public class DatabaseWriter extends BaseWriter {
                             .build());
 
             // For prepared statements RxJava observables
-            if (context.generationOption.isRxJavaSupport()) {
+            if (database.isRxJavaSupport()) {
                 // RxJava 2.x
                 TypeName inserterSingle2Type = Types.getSingle(inserterType);
 

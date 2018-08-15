@@ -16,7 +16,6 @@
 package com.github.gfx.android.orma.processor;
 
 import com.github.gfx.android.orma.annotation.Database;
-import com.github.gfx.android.orma.annotation.GenerationOption;
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
 import com.github.gfx.android.orma.annotation.StaticTypeAdapters;
 import com.github.gfx.android.orma.annotation.Table;
@@ -31,7 +30,6 @@ import com.github.gfx.android.orma.processor.generator.SchemaWriter;
 import com.github.gfx.android.orma.processor.generator.SelectorWriter;
 import com.github.gfx.android.orma.processor.generator.UpdaterWriter;
 import com.github.gfx.android.orma.processor.model.DatabaseDefinition;
-import com.github.gfx.android.orma.processor.model.GenerationOptionDefinition;
 import com.github.gfx.android.orma.processor.model.SchemaDefinition;
 import com.github.gfx.android.orma.processor.model.TypeAdapterDefinition;
 import com.github.gfx.android.orma.processor.tool.AnnotationHandle;
@@ -70,10 +68,6 @@ public class OrmaProcessor extends AbstractProcessor {
 
         ProcessingContext context = new ProcessingContext(processingEnv);
         try {
-            buildGenerationOption(roundEnv)
-                    .forEach(context::setGenerationOptionDefinition);
-            context.setupDefaultGenerationOptionIfNeeded();
-
             buildDatabase(context, roundEnv)
                     .forEach(context::addDatabaseDefinition);
 
@@ -121,13 +115,6 @@ public class OrmaProcessor extends AbstractProcessor {
         context.note("process classes in " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0) + "ms");
 
         return false;
-    }
-
-    private Stream<GenerationOptionDefinition> buildGenerationOption(RoundEnvironment roundEnv) {
-        return roundEnv
-                .getElementsAnnotatedWith(GenerationOption.class)
-                .stream()
-                .map(element -> new GenerationOptionDefinition((TypeElement) element));
     }
 
     private Stream<DatabaseDefinition> buildDatabase(ProcessingContext context, RoundEnvironment roundEnv) {
