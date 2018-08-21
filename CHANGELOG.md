@@ -10,9 +10,18 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
-## v5.0.0 (not yet scheduled)
+## v5.0.0 2018/08/21
 
-https://github.com/gfx/Android-Orma/compare/v4.2.5...HEAD
+https://github.com/maskarade/Android-Orma/compare/v4.2.5...v5.0.0
+
+### New Features
+
+* Encryption via SQLCifer
+* Opt-out RxJava from generated code
+
+## Bug Fixes
+
+There are lots of bug fixes. See the diff.
 
 ## v5.0.0-rc6 2018/08/13
 
