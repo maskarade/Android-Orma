@@ -16,7 +16,7 @@ https://github.com/maskarade/Android-Orma/compare/v4.2.5...v5.0.0
 
 ### New Features
 
-* Encryption via SQLCifer
+* Encryption via SQLCipher
 * Opt-out RxJava from generated code
 
 ## Bug Fixes
