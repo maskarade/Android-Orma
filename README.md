@@ -1,4 +1,4 @@
-# Android Orma [![Circle CI](https://circleci.com/gh/maskarade/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/maskarade/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/gfx/maven/orma/images/download.svg) ](https://bintray.com/gfx/maven/orma/) [![Gitter](http://badges.gitter.im/Android-Orma.svg)](https://gitter.im/Android-Orma/Lobby)
+# Android Orma [![Circle CI](https://circleci.com/gh/maskarade/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/maskarade/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/orma/maven/orma/images/download.svg) ](https://bintray.com/orma/maven/orma/) [![Gitter](http://badges.gitter.im/Android-Orma.svg)](https://gitter.im/Android-Orma/Lobby)
 
 <p align="center">
 <img src="Orma.png" width="256" height="256"  alt="Android Orma" />
