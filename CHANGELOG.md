@@ -10,8 +10,14 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v5.0.2 2018/09/03
+
+* No code change from v5.0.0
+* Fix pom metadata for bintray.com
+
 ## v5.0.1 2018/09/03
 
+* No code change from v5.0.0
 * Changed the `groupId` from `com.github.gfx.android.orma` to `com.github.maskarade.android.orma`. No package name is changed, though.
 
 ## v5.0.0 2018/08/21
