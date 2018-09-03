@@ -125,8 +125,8 @@ Declare dependencies to use Orma and its annotation processor.
 
 ```gradle:build.gradle
 dependencies {
-    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.2.5'
-    compile 'com.github.gfx.android.orma:orma:4.2.5'
+    annotationProcessor 'com.github.maskarade.android.orma:orma-processor:5.0.1'
+    compile 'com.github.maskarade.android.orma:orma:5.0.1'
 }
 ```
 
@@ -1121,7 +1121,7 @@ There's an encryption extension as `orma-encryption` since Orma v5.0.0-rc1:
 
 ```build.gradle
 dependencies {
-    compile 'com.github.gfx.android.orma:orma-encryption:5.0.0-rc1'
+    compile 'com.github.maskarade.android.orma:orma-encryption:5.0.1'
 }
 ```
 
@@ -1216,8 +1216,8 @@ Yes. As of Android Gradle Plugin 2.2.2, Orma should work with Jack.
 
 ```gradle:build.gradle
 dependencies {
-    annotationProcessor 'com.github.gfx.android.orma:orma-processor:4.2.5'
-    compile 'com.github.gfx.android.orma:orma:4.2.5'
+    annotationProcessor 'com.github.maskarade.android.orma:orma-processor:5.0.1'
+    compile 'com.github.maskarade.android.orma:orma:5.0.1'
 }
 ```
 
