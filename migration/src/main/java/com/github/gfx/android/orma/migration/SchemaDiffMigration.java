@@ -148,7 +148,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
             Map<String, ? extends MigrationSchema> masterSchemas = loadMetadata(db, schemas);
             List<String> statements = diffAll(masterSchemas, schemas);
             if (statements.isEmpty()) {
-                int dbVersion = fetchDbVersion(db);
+                int dbVersion = fetchDbSchemaVersion(db);
                 saveStep(db, dbVersion, null); // just to save the db version
             } else {
                 executeStatements(db, statements);
@@ -158,7 +158,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     public boolean isSchemaChanged(Database db) {
         Pair<Integer, String> versions = fetchSchemaVersions(db);
-        int dbVersion = fetchDbVersion(db);
+        int dbVersion = fetchDbSchemaVersion(db);
         return !(dbVersion == versions.first && schemaHash.equals(versions.second));
     }
 
@@ -344,7 +344,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
                     db.execSQL(statement);
                 }
 
-                int dbVersion = fetchDbVersion(db);
+                int dbVersion = fetchDbSchemaVersion(db);
                 for (String statement : statements) {
                     saveStep(db, dbVersion, statement);
                 }
@@ -352,7 +352,9 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         });
     }
 
-    private static int fetchDbVersion(Database db) {
+    // "SQLite automatically increments the schema-version whenever the schema changes."
+    // as described in https://www.sqlite.org/pragma.html#pragma_schema_version
+    private static int fetchDbSchemaVersion(Database db) {
         return (int) db.longForQuery("PRAGMA schema_version", null);
     }
 }
