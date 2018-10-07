@@ -54,7 +54,6 @@ public class ManualStepMigrationTest {
     @Before
     public void setUp() throws Exception {
         db = new DefaultDatabase.Provider().provideOnMemoryDatabase(getContext());
-        db.setVersion(1);
 
         migration = new ManualStepMigration(getContext(), VERSION, true);
 
