@@ -15,10 +15,11 @@
  */
 package com.github.gfx.android.orma.migration;
 
+import com.github.gfx.android.orma.core.Database;
+
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
-import com.github.gfx.android.orma.core.Database;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
@@ -99,11 +100,6 @@ public class ManualStepMigration extends AbstractMigrationEngine {
     @Override
     public void start(@NonNull Database db, @NonNull List<? extends MigrationSchema> schemas) {
         int dbVersion = fetchDbVersion(db);
-
-        if (dbVersion == 0) {
-            db.setVersion(version);
-            return;
-        }
 
         if (dbVersion == version) {
             return;
