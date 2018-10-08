@@ -112,7 +112,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @SuppressWarnings("unchecked")
-    public S limit(@IntRange(from = 1, to = Integer.MAX_VALUE) long limit) {
+    public S limit(@IntRange(from = 1) long limit) {
         this.limit = limit;
         return (S) this;
     }
@@ -130,7 +130,7 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
     }
 
     @SuppressWarnings("unchecked")
-    public S per(@IntRange(from = 1, to = Integer.MAX_VALUE) long per) {
+    public S per(@IntRange(from = 1) long per) {
         this.limit = per;
         return (S) this;
     }
