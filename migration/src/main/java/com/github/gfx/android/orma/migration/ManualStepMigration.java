@@ -15,10 +15,11 @@
  */
 package com.github.gfx.android.orma.migration;
 
+import com.github.gfx.android.orma.core.Database;
+
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
-import com.github.gfx.android.orma.core.Database;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
@@ -66,7 +67,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     boolean tableCreated = false;
 
-    public ManualStepMigration(Context context, int version, SparseArray<Step> steps, @NonNull TraceListener traceListener) {
+    public ManualStepMigration(@NonNull Context context, int version, @NonNull SparseArray<Step> steps, @NonNull TraceListener traceListener) {
         super(traceListener);
         this.versionName = extractVersionName(context);
         this.versionCode = extractVersionCode(context);
@@ -74,11 +75,11 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         this.steps = steps.clone();
     }
 
-    public ManualStepMigration(Context context, int version, @NonNull TraceListener traceListener) {
+    public ManualStepMigration(@NonNull Context context, int version, @NonNull TraceListener traceListener) {
         this(context, version, new SparseArray<Step>(0), traceListener);
     }
 
-    public ManualStepMigration(Context context, int version, boolean trace) {
+    public ManualStepMigration(@NonNull Context context, int version, boolean trace) {
         this(context, version, new SparseArray<Step>(0), trace ? TraceListener.LOGCAT : TraceListener.EMPTY);
     }
 
@@ -92,7 +93,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         steps.put(version, step);
     }
 
-    public int fetchDbVersion(Database db) {
+    public int fetchDbVersion(@NonNull  Database db) {
         return db.getVersion();
     }
 
@@ -118,14 +119,14 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         }
     }
 
-    void ensureHistoryTableExists(Database db) {
+    void ensureHistoryTableExists(@NonNull Database db) {
         if (!tableCreated) {
             db.execSQL(MIGRATION_STEPS_DDL);
             tableCreated = true;
         }
     }
 
-    public void upgrade(Database db, int oldVersion, int newVersion) {
+    public void upgrade(@NonNull Database db, int oldVersion, int newVersion) {
         assert oldVersion < newVersion;
 
         ensureHistoryTableExists(db);
@@ -148,7 +149,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         runTasksInTransaction(db, tasks);
     }
 
-    public void downgrade(Database db, int oldVersion, int newVersion) {
+    public void downgrade(@NonNull Database db, int oldVersion, int newVersion) {
         assert oldVersion > newVersion;
 
         ensureHistoryTableExists(db);
@@ -171,7 +172,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         runTasksInTransaction(db, tasks);
     }
 
-    private void runTasksInTransaction(Database db, final List<Runnable> tasks) {
+    private void runTasksInTransaction(@NonNull Database db, @NonNull final List<Runnable> tasks) {
         if (tasks.isEmpty()) {
             saveStep(db, version, null);
             return;
@@ -187,7 +188,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         });
     }
 
-    public void saveStep(Database db, int version, @Nullable String sql) {
+    public void saveStep(@NonNull Database db, int version, @Nullable String sql) {
         ensureHistoryTableExists(db);
 
         ContentValues values = new ContentValues();
@@ -197,7 +198,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         db.setVersion(version);
     }
 
-    public void execStep(Database db, int version, @Nullable String sql) {
+    public void execStep(@NonNull Database db, int version, @Nullable String sql) {
         if (sql != null) {
             trace("%s", sql);
         }

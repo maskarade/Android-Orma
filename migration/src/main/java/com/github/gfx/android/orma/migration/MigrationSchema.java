@@ -15,13 +15,15 @@
  */
 package com.github.gfx.android.orma.migration;
 
+import android.support.annotation.NonNull;
+
 import java.util.List;
 
 public interface MigrationSchema {
 
-    String getTableName();
+    @NonNull String getTableName();
 
-    String getCreateTableStatement();
+    @NonNull String getCreateTableStatement();
 
-    List<String> getCreateIndexStatements();
+    @NonNull List<String> getCreateIndexStatements();
 }

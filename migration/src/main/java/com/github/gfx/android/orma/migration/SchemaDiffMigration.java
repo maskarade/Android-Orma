@@ -100,7 +100,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         this(context, schemaHash, extractDebuggable(context) ? TraceListener.LOGCAT : TraceListener.EMPTY);
     }
 
-    static private Map<CreateIndexStatement, String> parseIndexes(Collection<String> indexes) {
+    static private Map<CreateIndexStatement, String> parseIndexes(@NonNull Collection<String> indexes) {
         Map<CreateIndexStatement, String> parsedIndexPairs = new LinkedHashMap<>();
         for (String createIndexStatement : indexes) {
             parsedIndexPairs.put(SQLiteParserUtils.parseIntoCreateIndexStatement(createIndexStatement), createIndexStatement);
@@ -120,7 +120,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         return array.toString();
     }
 
-    public static Map<String, SQLiteMaster> loadMetadata(Database db, List<? extends MigrationSchema> schemas) {
+    public static Map<String, SQLiteMaster> loadMetadata(@NonNull Database db, List<? extends MigrationSchema> schemas) {
         Map<String, SQLiteMaster> metadata = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         Set<String> tableNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
@@ -156,14 +156,14 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         }
     }
 
-    public boolean isSchemaChanged(Database db) {
+    public boolean isSchemaChanged(@NonNull Database db) {
         Pair<Integer, String> versions = fetchSchemaVersions(db);
         int dbVersion = fetchDbSchemaVersion(db);
         return !(dbVersion == versions.first && schemaHash.equals(versions.second));
     }
 
     @NonNull
-    private Pair<Integer, String> fetchSchemaVersions(Database db) {
+    private Pair<Integer, String> fetchSchemaVersions(@NonNull Database db) {
         ensureHistoryTableExists(db);
         Cursor cursor = db.query(MIGRATION_STEPS_TABLE, new String[]{kDbVersion, kSchemaHash},
                 null, null, null, null, kId + " DESC", "1");
@@ -178,14 +178,14 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         }
     }
 
-    void ensureHistoryTableExists(Database db) {
+    void ensureHistoryTableExists(@NonNull Database db) {
         if (!tableCreated) {
             migrate(db);
             tableCreated = true;
         }
     }
 
-    public void migrate(Database db) {
+    public void migrate(@NonNull Database db) {
         if (SQLiteMaster.checkIfTableNameExists(db, MIGRATION_STEPS_TABLE_1)) {
             try {
                 db.beginTransaction();
@@ -268,7 +268,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     @NonNull
-    public List<String> tableDiff(String from, String to) {
+    public List<String> tableDiff(@NonNull String from, @NonNull String to) {
         if (from.equals(to)) {
             return Collections.emptyList();
         }
@@ -309,12 +309,12 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
     }
 
     @NonNull
-    public String buildDropIndexStatement(String createIndexStatement) {
+    public String buildDropIndexStatement(@NonNull String createIndexStatement) {
         return buildDropIndexStatement(SQLiteParserUtils.parseIntoCreateIndexStatement(createIndexStatement));
     }
 
     @NonNull
-    public String buildDropIndexStatement(CreateIndexStatement createIndexStatement) {
+    public String buildDropIndexStatement(@NonNull CreateIndexStatement createIndexStatement) {
         return "DROP INDEX IF EXISTS " + createIndexStatement.getIndexName();
     }
 
@@ -331,7 +331,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
         db.insertOrThrow(MIGRATION_STEPS_TABLE, null, values);
     }
 
-    public void executeStatements(final Database db, final List<String> statements) {
+    public void executeStatements(@NonNull final Database db, @NonNull final List<String> statements) {
         if (statements.isEmpty()) {
             return;
         }
@@ -354,7 +354,7 @@ public class SchemaDiffMigration extends AbstractMigrationEngine {
 
     // "SQLite automatically increments the schema-version whenever the schema changes."
     // as described in https://www.sqlite.org/pragma.html#pragma_schema_version
-    private static int fetchDbSchemaVersion(Database db) {
+    private static int fetchDbSchemaVersion(@NonNull Database db) {
         return (int) db.longForQuery("PRAGMA schema_version", null);
     }
 }
