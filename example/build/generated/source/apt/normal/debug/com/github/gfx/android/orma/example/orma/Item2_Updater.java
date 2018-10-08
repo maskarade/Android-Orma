@@ -73,7 +73,8 @@ public class Item2_Updater extends RxUpdater<Item2, Item2_Updater> {
     return where(schema.category1, "=", category1Id);
   }
 
-  public Item2_Updater category1(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+  public Item2_Updater category1(
+      @NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
     return block.apply(new Category_AssociationCondition(getConnection(), schema.category1.associationSchema)).appendTo(this);
   }
 
@@ -93,7 +94,8 @@ public class Item2_Updater extends RxUpdater<Item2, Item2_Updater> {
     return where(schema.category2, "=", category2Id);
   }
 
-  public Item2_Updater category2(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+  public Item2_Updater category2(
+      @NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
     return block.apply(new Category_AssociationCondition(getConnection(), schema.category2.associationSchema)).appendTo(this);
   }
 

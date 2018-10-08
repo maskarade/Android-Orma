@@ -44,7 +44,8 @@ public class Item_Selector extends RxSelector<Item, Item_Selector> {
     return where(schema.category, "=", categoryId);
   }
 
-  public Item_Selector category(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+  public Item_Selector category(
+      @NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
     return block.apply(new Category_AssociationCondition(getConnection(), schema.category.associationSchema)).appendTo(this);
   }
 

@@ -44,7 +44,8 @@ public class Item_Deleter extends RxDeleter<Item, Item_Deleter> {
     return where(schema.category, "=", categoryId);
   }
 
-  public Item_Deleter category(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+  public Item_Deleter category(
+      @NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
     return block.apply(new Category_AssociationCondition(getConnection(), schema.category.associationSchema)).appendTo(this);
   }
 
