@@ -18,6 +18,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.exception.InvalidStatementException;
 import com.github.gfx.android.orma.exception.NoValueException;
+import com.github.gfx.android.orma.function.Function1;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 import com.github.gfx.android.orma.internal.OrmaIterator;
 
@@ -250,6 +251,21 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
         return result;
     }
 
+    @NonNull
+    public <T> List<T> getRawValuesAndMap(@NonNull Function1<Cursor, T> mapper) {
+        List<T> result;
+        Cursor cursor = execute();
+        try {
+            result = new ArrayList<>(cursor.getCount());
+            for (int pos = 0; cursor.moveToPosition(pos); pos++) {
+                result.add(mapper.apply((cursor)));
+            }
+        } finally {
+            cursor.close();
+        }
+        return result;
+    }
+
     @CheckResult
     @NonNull
     public Cursor execute() {
@@ -288,17 +304,12 @@ public abstract class Selector<Model, S extends Selector<Model, ?>>
      */
     @NonNull
     public List<Model> toList() {
-        Cursor cursor = execute();
-
-        ArrayList<Model> list = new ArrayList<>(cursor.getCount());
-        try {
-            for (int pos = 0; cursor.moveToPosition(pos); pos++) {
-                list.add(newModelFromCursor(cursor));
+        return getRawValuesAndMap(new Function1<Cursor, Model>() {
+            @Override
+            public Model apply(Cursor cursor) {
+                return newModelFromCursor(cursor);
             }
-        } finally {
-            cursor.close();
-        }
-        return list;
+        });
     }
 
     @NonNull
