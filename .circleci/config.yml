@@ -5,21 +5,19 @@ jobs:
     docker:
       - image: circleci/android:api-27-alpha
     environment:
-      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+      GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx1024m -Dorg.gradle.daemon=false"
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "annotations/build.gradle" }}-{{ checksum  "processor/build.gradle" }}-{{ checksum  "migration/build.gradle" }}-{{ checksum  "library/build.gradle" }}-{{ checksum  "example/build.gradle" }}-{{ checksum  "encryption/build.gradle" }}-{{ checksum  "core/build.gradle" }}
-      - run:
-         name: Chmod permissions
-         command: sudo chmod +x ./gradlew
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "annotations/build.gradle" }}-{{ checksum "processor/build.gradle" }}-{{ checksum "migration/build.gradle" }}-{{ checksum "library/build.gradle" }}-{{ checksum "example/build.gradle" }}-{{ checksum "encryption/build.gradle" }}-{{ checksum "core/build.gradle" }}
       - run:
           name: Download Dependencies
-          command: ./gradlew androidDependencies --daemon --console=plain
+          command: ./gradlew androidDependencies
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "annotations/build.gradle" }}-{{ checksum  "processor/build.gradle" }}-{{ checksum  "migration/build.gradle" }}-{{ checksum  "library/build.gradle" }}-{{ checksum  "example/build.gradle" }}-{{ checksum  "encryption/build.gradle" }}-{{ checksum  "core/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "annotations/build.gradle" }}-{{ checksum "processor/build.gradle" }}-{{ checksum "migration/build.gradle" }}-{{ checksum "library/build.gradle" }}-{{ checksum "example/build.gradle" }}-{{ checksum "encryption/build.gradle" }}-{{ checksum "core/build.gradle" }}
       - run:
           name: Run Tests 1
           command: ./gradlew lint example:assembleDebug
