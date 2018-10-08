@@ -54,7 +54,8 @@ public class Item_Updater extends RxUpdater<Item, Item_Updater> {
     return where(schema.category, "=", categoryId);
   }
 
-  public Item_Updater category(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+  public Item_Updater category(
+      @NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
     return block.apply(new Category_AssociationCondition(getConnection(), schema.category.associationSchema)).appendTo(this);
   }
 

@@ -16,6 +16,7 @@
 
 package com.github.gfx.android.orma.test;
 
+import com.github.gfx.android.orma.BuiltInSerializers;
 import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.rx.RxRelation;
@@ -30,9 +31,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.content.ContentValues;
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -288,6 +291,26 @@ public class RelationTest {
         assertThat(rel.get(0).id, is(200L));
         assertThat(rel.get(1).id, is(100L));
         assertThat(rel.get(2).id, is(300L));
+    }
+
+    @Test
+    public void convertToContentValues() {
+        ModelWithDate model = rel().get(0);
+        ContentValues contentValues = rel().convertToContentValues(model, true);
+
+        assertThat(contentValues.keySet(), containsInAnyOrder("name", "note", "time"));
+        assertThat(contentValues.getAsString("name"), is(model.name));
+        assertThat(contentValues.getAsString("note"), is(model.note));
+        assertThat(contentValues.getAsLong("time"), is(BuiltInSerializers.serializeDate(model.time)));
+    }
+
+    @Test
+    public void convertToArgs() {
+        ModelWithDate model = rel().get(0);
+        Object[] args = rel().convertToArgs(model, true);
+
+        assertThat(Arrays.asList(args),
+                containsInAnyOrder((Object) model.name, model.note, BuiltInSerializers.serializeDate(model.time)));
     }
 
     @Test

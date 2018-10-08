@@ -19,6 +19,7 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
+import android.content.ContentValues;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -239,6 +240,29 @@ public abstract class Relation<Model, R extends Relation<Model, ?>> extends Orma
 
     @NonNull
     public abstract Model upsertWithoutTransaction(@NonNull final Model model);
+
+    /**
+     * Convert a model to {@code ContentValues}. You can use the content values for raw INSERT and/or UPDATE queries.
+     * @param model A model to convert.
+     * @param withoutAutoId If true, the autoId is omitted from the return value.
+     * @return
+     */
+    @NonNull
+    public ContentValues convertToContentValues(@NonNull Model model, boolean withoutAutoId) {
+        return getSchema().convertToContentValues(conn, model, withoutAutoId);
+    }
+
+    /**
+     * Convert a model to {@code Object[]}, This is similar to {@link #convertToContentValues(Object, boolean)},
+     * except for the return value is an array of {@code Object}.
+     * @param model A model to convert.
+     * @param withoutAutoId If true, the autoId is omitted from the return value.
+     * @return
+     */
+    @NonNull
+    public Object[] convertToArgs(@NonNull Model model, boolean withoutAutoId) {
+        return getSchema().convertToArgs(conn, model, withoutAutoId);
+    }
 
     // Iterator<Model>
 

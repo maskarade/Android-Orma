@@ -80,7 +80,8 @@ public class Item_Relation extends RxRelation<Item, Item_Relation> {
     return where(schema.category, "=", categoryId);
   }
 
-  public Item_Relation category(@NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
+  public Item_Relation category(
+      @NonNull Function1<Category_AssociationCondition, Category_AssociationCondition> block) {
     return block.apply(new Category_AssociationCondition(getConnection(), schema.category.associationSchema)).appendTo(this);
   }
 

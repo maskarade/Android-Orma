@@ -546,8 +546,27 @@ public class SchemaWriter extends BaseWriter {
         );
 
         methodSpecs.add(
+                MethodSpec.methodBuilder("convertToContentValues")
+                        .addJavadoc("Convert a model to {@code ContentValues). You can use the content values for UPDATE and/or INSERT.\n")
+                        .addAnnotations(Annotations.overrideAndNonNull())
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(Types.ContentValues)
+                        .addParameter(
+                                ParameterSpec.builder(Types.OrmaConnection, "conn")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .addParameter(
+                                ParameterSpec.builder(schema.getModelClassName(), "model")
+                                        .addAnnotation(Annotations.nonNull())
+                                        .build())
+                        .addParameter(boolean.class, withoutAutoId)
+                        .addCode(buildConvertToContentValues())
+                        .build()
+        );
+
+        methodSpecs.add(
                 MethodSpec.methodBuilder("convertToArgs")
-                        .addJavadoc("Convert models to {@code Object[]}. Provided for debugging\n")
+                        .addJavadoc("Convert a model to {@code Object[]}. Provided for debugging.\n")
                         .addAnnotations(Annotations.overrideAndNonNull())
                         .addModifiers(Modifier.PUBLIC)
                         .returns(ArrayTypeName.of(TypeName.OBJECT))
@@ -619,6 +638,44 @@ public class SchemaWriter extends BaseWriter {
         return code.build();
     }
 
+    private CodeBlock buildConvertToContentValues() {
+        CodeBlock.Builder builder = CodeBlock.builder();
+
+        List<ColumnDefinition> columns = schema.getColumns();
+
+        builder.addStatement("$T contentValues = new $T()", Types.ContentValues, Types.ContentValues);
+
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnDefinition c = columns.get(i);
+
+            if (c.isNullableInJava()) {
+                builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
+            }
+
+            if (c.autoId) {
+                builder.beginControlFlow("if (!$L)", withoutAutoId);
+            }
+
+            CodeBlock rhsExpr = c.buildSerializedColumnExpr("conn", "model");
+            builder.addStatement("contentValues.put($S, $L)", c.columnName, rhsExpr);
+
+            if (c.autoId) {
+                builder.endControlFlow();
+            }
+
+            if (c.isNullableInJava()) {
+                builder.endControlFlow();
+
+                builder.beginControlFlow("else");
+                builder.addStatement("contentValues.putNull($S)", c.columnName);
+                builder.endControlFlow();
+            }
+        }
+
+        builder.addStatement("return contentValues");
+        return builder.build();
+    }
+
     private CodeBlock buildConvertToArgs() {
         CodeBlock.Builder builder = CodeBlock.builder();
 
@@ -635,6 +692,7 @@ public class SchemaWriter extends BaseWriter {
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition c = columns.get(i);
 
+            // Because this method is for debugging usage, use `isPrimitive()` instead of `c.isNullableInJava()`
             if (!c.getType().isPrimitive()) {
                 builder.beginControlFlow("if ($L != null)", c.buildGetColumnExpr("model"));
             }

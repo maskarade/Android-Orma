@@ -1,5 +1,6 @@
 package com.github.gfx.android.orma.example.orma;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -260,7 +261,28 @@ public class Item2_Schema implements Schema<Item2> {
   }
 
   /**
-   * Convert models to {@code Object[]}. Provided for debugging
+   * Convert a model to {@code ContentValues). You can use the content values for UPDATE and/or INSERT.
+   */
+  @NonNull
+  @Override
+  public ContentValues convertToContentValues(@NonNull OrmaConnection conn, @NonNull Item2 model,
+      boolean withoutAutoId) {
+    ContentValues contentValues = new ContentValues();
+    contentValues.put("category1", model.category1.id);
+    if (model.category2 != null) {
+      contentValues.put("category2", model.category2.id);
+    }
+    else {
+      contentValues.putNull("category2");
+    }
+    contentValues.put("zonedTimestamp", TypeAdapters.serializeZonedDateTime(model.zonedTimestamp));
+    contentValues.put("localDateTime", TypeAdapters.serializeLocalDateTime(model.localDateTime));
+    contentValues.put("name", model.name);
+    return contentValues;
+  }
+
+  /**
+   * Convert a model to {@code Object[]}. Provided for debugging.
    */
   @NonNull
   @Override

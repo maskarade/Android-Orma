@@ -17,10 +17,11 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
+import com.github.gfx.android.orma.core.DatabaseStatement;
 import com.github.gfx.android.orma.migration.MigrationSchema;
 
+import android.content.ContentValues;
 import android.database.Cursor;
-import com.github.gfx.android.orma.core.DatabaseStatement;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -76,6 +77,10 @@ public interface Schema<Model> extends MigrationSchema {
     @NonNull
     String getInsertStatement(@OnConflict int onConflictAlgorithm, boolean withoutAutoId);
 
+    @NonNull
+    ContentValues convertToContentValues(@NonNull OrmaConnection conn, @NonNull Model model, boolean withoutAutoId);
+
+    @NonNull
     Object[] convertToArgs(@NonNull OrmaConnection conn, @NonNull Model mode, boolean withoutAutoId);
 
     /**
