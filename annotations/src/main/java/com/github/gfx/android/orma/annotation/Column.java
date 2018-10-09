@@ -15,7 +15,7 @@
  */
 package com.github.gfx.android.orma.annotation;
 
-import android.support.annotation.IntDef;
+import android.support.annotation.LongDef;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -122,7 +122,7 @@ public @interface Column {
 
     @Target({ElementType.FIELD, ElementType.LOCAL_VARIABLE, ElementType.PARAMETER, ElementType.METHOD})
     @Retention(RetentionPolicy.CLASS)
-    @IntDef(flag = true, value = {
+    @LongDef(flag = true, value = {
             Helpers.NONE,
             Helpers.AUTO,
             Helpers.CONDITION_EQ,
