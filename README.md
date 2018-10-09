@@ -1020,16 +1020,24 @@ Note that `page` starts from 1.
 For low-level operations, e.g. executing a raw query, you can use
 `OrmaDatabase#getConnection()`, which returns `OrmaConnection`.
 
-For example:
+For example of `#rawQuery`:
 
 ```java
 Cursor cursor = db.getConnection().rawQuery("SELECT max(bookId) as max_id, min(bookId) as min_id FROM Book");
 cursor.moveToFirst();
-// get data from cursor
+// ...get data from cursor...
 cursor.close();
 ```
 
-NOTE: Don't use `rawQuery()` for performance because Orma query builders are fast enough.
+Or, you can use `#execSQL` for mutations:
+
+```java
+OrmaConnection conn = db.getConnection();
+conn.execSQL("VACUUM");
+conn.execSQL("ANALYZE");
+```
+
+NOTE: Don't use `#rawQuery()` for performance because Orma query builders are fast enough.
 
 ## Migration
 
