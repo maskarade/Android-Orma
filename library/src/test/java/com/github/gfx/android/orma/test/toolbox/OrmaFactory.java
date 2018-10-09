@@ -18,6 +18,7 @@ package com.github.gfx.android.orma.test.toolbox;
 
 import com.github.gfx.android.orma.core.DatabaseProvider;
 import com.github.gfx.android.orma.core.DefaultDatabase;
+import com.github.gfx.android.orma.encryption.EncryptedDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 
@@ -64,4 +65,11 @@ public class OrmaFactory {
                 .trace(true)
                 .build();
     }
+
+    public static OrmaDatabase createEncrypted() {
+        return builder()
+                .provider(new EncryptedDatabase.Provider("password"))
+                .build();
+    }
+
 }
