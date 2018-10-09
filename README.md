@@ -70,7 +70,6 @@ as the author respects the Larry Wall's wisdom:
   - [How can I enable debug logging on release build?](#how-can-i-enable-debug-logging-on-release-build)
   - [How can see the generated Java files?](#how-can-see-the-generated-java-files)
   - [Does Orma work with Kotlin?](#does-orma-work-with-kotlin)
-  - [Does Orma work with the Jack compiler?](#does-orma-work-with-the-jack-compiler)
   - [When the database handle is opened and closed?](#when-the-database-handle-is-opened-and-closed)
   - [Who uses Orma?](#who-uses-orma)
 - [Support](#support)
@@ -1206,19 +1205,6 @@ Yes, but it's _experimental_. Here is an example to use Orma with Kotlin:
 https://github.com/gfx/OrmaWithKotlin
 
 NOTE: Kotlin APT support, a.k.a. _kapt_, is **really unstable**. Don't ask me how to solve kapt problems.
-
-### Does Orma work with the Jack compiler?
-
-Yes. As of Android Gradle Plugin 2.2.2, Orma should work with Jack.
-
-```gradle:build.gradle
-dependencies {
-    annotationProcessor 'com.github.maskarade.android.orma:orma-processor:5.1.0'
-    compile 'com.github.maskarade.android.orma:orma:5.1.0'
-}
-```
-
-See https://github.com/gfx/OrmaWithJack for a working example.
 
 ### When the database handle is opened and closed?
 
