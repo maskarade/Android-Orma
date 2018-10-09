@@ -12,13 +12,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion SDK_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION
     dataBinding.enabled = true
     defaultConfig {
         applicationId "com.github.gfx.android.orma.example"
-        minSdkVersion 15
-        targetSdkVersion 27
+        minSdkVersion MIN_SDK_VERSION
+        targetSdkVersion SDK_VERSION
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
         ndk {
