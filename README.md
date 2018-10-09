@@ -67,7 +67,6 @@ as the author respects the Larry Wall's wisdom:
 - [Benchmark](#benchmark)
 - [Method Count](#method-count)
 - [FAQ](#faq)
-  - [Can't build my project.](#cant-build-my-project)
   - [How can I enable debug logging on release build?](#how-can-i-enable-debug-logging-on-release-build)
   - [How can see the generated Java files?](#how-can-see-the-generated-java-files)
   - [Does Orma work with Kotlin?](#does-orma-work-with-kotlin)
@@ -1143,7 +1142,7 @@ OrmaDatabase orma = OrmaDatabase.builder(context)
     .build();
 ```
 
-Encrypted database are managed by [SQLCipher](https://github.com/sqlcipher/android-database-sqlcipher), so the database files are not compatible with non-encrypted ones.
+Encrypted databases are managed by [SQLCipher](https://github.com/sqlcipher/android-database-sqlcipher), so the database files are not compatible with non-encrypted ones.
 
 Note that with this extension the database handle throws `net.sqlcipher.database.SQLException` instead of `android.database.SQLException` as runtime exceptions, so it might not be 100% compatible with the default database.
 
@@ -1173,16 +1172,6 @@ I welcome benchmark in another condition and/or another code.
 Orma runtime is very lightweight: [Method Count for v4.2.5](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:4.2.5)
 
 ## FAQ
-
-### Can't build my project.
-
-Check your toolchain. FYI here are my toolchain versions:
-
-* JDK 1.8.0_66
-* Android SDK Tools 25 or later
-* Android SDK Platform Tools 24 or later
-* Android SDK Build Tools 24 or later
-* Android Gradle Plugin 2.2.0 or later
 
 ### How can I enable debug logging on release build?
 
