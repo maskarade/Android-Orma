@@ -10,6 +10,15 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v5.1.1
+
+https://github.com/maskarade/Android-Orma/compare/v5.0.2...v5.1.0
+
+* No code changes
+* Upgraded dependencies
+* Built with the latest toolchain
+
+
 ## v5.1.0 2018/10/09
 
 https://github.com/maskarade/Android-Orma/compare/v5.0.2...v5.1.0
