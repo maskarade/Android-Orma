@@ -1050,13 +1050,12 @@ That is, you don't need migration steps for the following cases:
 * Changing column types
 * Changing column constraints (`NOT NULL`, `UNIQUE`, and etc.)
 
-Of course, you can define migration steps for each schema version (or `BuildConfig.VERSION`).
-If you add
+You can also define migration steps for each schema version, which uses applications version code (i.e. `BuildConfig.VERSION`) as schema versions.
 
 Here is an example to define migration steps:
 
 ```java
-int VERSION_2; // a past version of VERSION_CODE
+int VERSION_2; // a past version of application's VERSION_CODE
 
 OrmaDatabase orma = OrmaDatabase.builder(this)
         .migrationStep(VERSION_2, new ManualStepMigration.ChangeStep() {
