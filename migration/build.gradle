@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion SDK_VERSION
@@ -89,15 +89,6 @@ dependencies {
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
 }
 
-publish {
-    artifactId = 'orma-migration'
-    desc = 'A smart SQLiteDatabase migration engine'
-
-    def metadata = rootProject.ext.metadata
-    userOrg = metadata.userOrg
-    groupId = metadata.groupId
-    publishVersion = metadata.version
-    website = metadata.website
-    repository = metadata.repository
-    licences = metadata.licences
-}
+archivesBaseName = 'orma-migration'
+metadata.desc = 'A smart SQLiteDatabase migration engine'
+apply from: "${project.rootDir}/publish.gradle"

@@ -4,6 +4,11 @@ ext {
             groupId   : 'com.github.maskarade.android.orma',
             website   : 'https://github.com/maskarade/Android-Orma',
             repository: 'https://github.com/maskarade/Android-Orma.git',
-            licences  : ['Apache-2.0']
+            licences  : ['Apache-2.0'],
+            developer : {
+                id 'gfx'
+                name 'FUJI Goro'
+                email 'gfuji@cpan.org'
+            }
     ]
 }

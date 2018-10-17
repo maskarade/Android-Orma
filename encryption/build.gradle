@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion SDK_VERSION
@@ -46,15 +46,6 @@ dependencies {
     implementation 'net.zetetic:android-database-sqlcipher:3.5.9'
 }
 
-publish {
-    artifactId = 'orma-encryption'
-    desc = 'Encryption support for Android-Orma'
-
-    def metadata = rootProject.ext.metadata
-    userOrg = metadata.userOrg
-    groupId = metadata.groupId
-    publishVersion = metadata.version
-    website = metadata.website
-    repository = metadata.repository
-    licences = metadata.licences
-}
+archivesBaseName = 'orma-encryption'
+metadata.desc = 'Encryption support for Android-Orma'
+apply from: "${project.rootDir}/publish.gradle"
