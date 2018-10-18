@@ -1,6 +1,6 @@
 package com.github.gfx.android.orma.example.orma;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.github.gfx.android.orma.function.Function1;
 import com.github.gfx.android.orma.rx.RxDeleter;
 import com.github.gfx.android.orma.rx.RxOrmaConnection;
