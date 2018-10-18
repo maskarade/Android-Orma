@@ -10,6 +10,7 @@ bintray {
     user = findProperty('bintrayUser')
     key = findProperty('bintrayKey')
     configurations = ['archives']
+    publish = true
     pkg {
         repo = 'maven'
         name = archivesBaseName
