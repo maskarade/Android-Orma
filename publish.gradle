@@ -7,8 +7,8 @@ group = metadata.groupId
 version = metadata.version
 
 bintray {
-    user = findProperty('bintrayUser') ?: "dummy"
-    key = findProperty('bintrayKey') ?: "dummy"
+    user = findProperty('bintrayUser')
+    key = findProperty('bintrayKey')
     configurations = ['archives']
     pkg {
         repo = 'maven'
