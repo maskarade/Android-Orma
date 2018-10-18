@@ -7,8 +7,8 @@ group = metadata.groupId
 version = metadata.version
 
 bintray {
-    user = ext.bintrayUser
-    key = ext.bintrayKey
+    user = property('bintrayUser')
+    key = property('bintrayKey')
 
     configurations = ['archives']
     pkg {
