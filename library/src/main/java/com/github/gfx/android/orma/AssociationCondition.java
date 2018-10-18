@@ -18,7 +18,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public abstract class AssociationCondition<Model, A extends AssociationCondition<Model, ?>>
         extends OrmaConditionBase<Model, A> implements Cloneable {

@@ -17,7 +17,7 @@ package com.github.gfx.android.orma.migration;
 
 import com.github.gfx.android.orma.core.Database;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.List;
 

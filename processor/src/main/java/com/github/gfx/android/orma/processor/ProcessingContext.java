@@ -25,7 +25,7 @@ import com.github.gfx.android.orma.processor.util.SqlTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -11,7 +11,7 @@ processTestResources.dependsOn copyTestResources
 
 dependencies {
     implementation project(':annotations')
-    compileOnly "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
+    compileOnly "androidx.annotation:annotation:${ANDROIDX_ANNOTATION_VERSION}"
     implementation 'com.squareup:javapoet:1.11.1'
     testImplementation project.rootProject.ext.ANDROID_JAR
     testImplementation 'junit:junit:4.12'

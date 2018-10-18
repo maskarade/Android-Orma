@@ -20,7 +20,7 @@ import com.github.gfx.android.orma.Schema;
 import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.core.Database;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 /**
  * Helper class for query observables. This class is NOT thread-safe.

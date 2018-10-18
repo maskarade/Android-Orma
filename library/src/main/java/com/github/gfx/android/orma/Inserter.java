@@ -21,7 +21,7 @@ import com.github.gfx.android.orma.core.DatabaseStatement;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.exception.InsertionFailureException;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.io.Closeable;
 import java.util.concurrent.Callable;

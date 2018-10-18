@@ -23,7 +23,7 @@ import com.github.gfx.android.orma.core.Database;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.event.DataSetChangedTrigger;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 import java.lang.ref.WeakReference;
 import java.util.HashSet;

@@ -40,8 +40,8 @@ import org.junit.runner.RunWith;
 
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
+import androidx.test.runner.AndroidJUnit4;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

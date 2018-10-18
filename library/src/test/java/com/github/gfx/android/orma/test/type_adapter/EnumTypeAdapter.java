@@ -19,7 +19,7 @@ package com.github.gfx.android.orma.test.type_adapter;
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
 import com.github.gfx.android.orma.test.toolbox.EnumDescription;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * An example for generic type adapters; its {@code deserialize ()} methods takes a {@code Class<T> type} parameter.

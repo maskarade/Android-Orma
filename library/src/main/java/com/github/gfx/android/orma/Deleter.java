@@ -17,7 +17,7 @@ package com.github.gfx.android.orma;
 
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public abstract class Deleter<Model, D extends Deleter<Model, ?>> extends OrmaConditionBase<Model, D>
         implements Cloneable {

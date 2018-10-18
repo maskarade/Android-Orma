@@ -22,7 +22,7 @@ import com.github.gfx.android.orma.encryption.EncryptedDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 import java.io.File;
 import java.io.IOException;

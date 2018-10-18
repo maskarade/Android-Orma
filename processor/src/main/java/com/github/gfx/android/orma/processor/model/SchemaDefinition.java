@@ -26,8 +26,8 @@ import com.github.gfx.android.orma.processor.util.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

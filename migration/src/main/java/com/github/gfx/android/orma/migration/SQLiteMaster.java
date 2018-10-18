@@ -18,7 +18,7 @@ package com.github.gfx.android.orma.migration;
 import com.github.gfx.android.orma.core.Database;
 
 import android.database.Cursor;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;

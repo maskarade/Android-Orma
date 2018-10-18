@@ -25,9 +25,9 @@ import com.github.gfx.android.orma.migration.TraceListener;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * This class represents Orma options, and it is the base class of {@code OrmaDatabase.Builder}.

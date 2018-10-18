@@ -24,8 +24,8 @@ import com.github.gfx.android.orma.internal.Schemas;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
 
 /**
  * Lazy has-one association. The {@code Model} is assumed to have a primary key with the `long` type.

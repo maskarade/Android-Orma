@@ -38,8 +38,8 @@ import org.junit.runner.RunWith;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import android.support.annotation.NonNull;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
+import androidx.test.runner.AndroidJUnit4;
 
 import java.util.ArrayList;
 import java.util.List;

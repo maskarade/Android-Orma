@@ -23,9 +23,9 @@ import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.internal.Schemas;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
 
 import java.util.concurrent.Callable;
 

@@ -23,7 +23,7 @@ import com.github.gfx.android.orma.annotation.Table;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZonedDateTime;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * To demonstrate multiple associations to the same model.

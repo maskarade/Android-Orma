@@ -21,4 +21,4 @@
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 package com.github.gfx.android.orma.migration.sqliteparser.g;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;

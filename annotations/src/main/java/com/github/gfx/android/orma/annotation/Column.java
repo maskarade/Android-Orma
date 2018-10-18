@@ -15,7 +15,7 @@
  */
 package com.github.gfx.android.orma.annotation;
 
-import android.support.annotation.LongDef;
+import androidx.annotation.LongDef;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

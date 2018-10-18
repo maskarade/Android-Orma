@@ -18,7 +18,7 @@ package com.github.gfx.android.orma.test.toolbox;
 
 import com.github.gfx.android.orma.annotation.StaticTypeAdapter;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * A demo class to show how {@link com.github.gfx.android.orma.annotation.StaticTypeAdapter} works.

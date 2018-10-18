@@ -26,8 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.support.annotation.NonNull;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
+import androidx.test.runner.AndroidJUnit4;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
