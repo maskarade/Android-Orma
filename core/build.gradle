@@ -15,7 +15,7 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion SDK_VERSION
@@ -47,15 +47,6 @@ dependencies {
     api "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
 }
 
-publish {
-    artifactId = 'orma-core'
-    desc = 'The core module for Android-Orma'
-
-    def metadata = rootProject.ext.metadata
-    userOrg = metadata.userOrg
-    groupId = metadata.groupId
-    publishVersion = metadata.version
-    website = metadata.website
-    repository = metadata.repository
-    licences = metadata.licences
-}
+archivesBaseName = 'orma-core'
+metadata.desc = 'The core module for Android-Orma'
+apply from: "${project.rootDir}/publish.gradle"

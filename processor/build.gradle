@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'com.novoda.bintray-release'
 
 targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -19,15 +18,6 @@ dependencies {
     testImplementation 'com.google.testing.compile:compile-testing:0.10'
 }
 
-publish {
-    artifactId = 'orma-processor'
-    desc = 'An annotation processor for Ormat to generate schema representations'
-
-    def metadata = project.rootProject.ext.metadata
-    userOrg = metadata.userOrg
-    groupId = metadata.groupId
-    publishVersion = metadata.version
-    website = metadata.website
-    repository = metadata.repository
-    licences = metadata.licences
-}
+archivesBaseName = 'orma-processor'
+metadata.desc = 'An annotation processor for Ormat to generate schema representations'
+apply from: "${project.rootDir}/publish.gradle"

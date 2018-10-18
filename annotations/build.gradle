@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'com.novoda.bintray-release'
 
 targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -8,15 +7,6 @@ dependencies {
     compileOnly "com.android.support:support-annotations:${SUPPORT_LIBRARY_VERSION}"
 }
 
-publish {
-    artifactId = 'orma-annotations'
-    desc = 'Annotations for Orma'
-
-    def metadata = project.rootProject.ext.metadata
-    userOrg = metadata.userOrg
-    groupId = metadata.groupId
-    publishVersion = metadata.version
-    website = metadata.website
-    repository = metadata.repository
-    licences = metadata.licences
-}
+archivesBaseName = 'orma-annotations'
+metadata.desc = 'Annotations for Orma'
+apply from: "${project.rootDir}/publish.gradle"

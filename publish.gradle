@@ -1,0 +1,79 @@
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+
+group = metadata.groupId
+version = metadata.version
+
+bintray {
+    user = findProperty('bintrayUser')
+    key = findProperty('bintrayKey')
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        name = archivesBaseName
+        desc = metadata.desc
+        userOrg = metadata.userOrg
+        websiteUrl = metadata.website
+        vcsUrl = metadata.repository
+        licenses = metadata.licences
+    }
+}
+
+task ormaJavadoc(type: Javadoc) {
+    failOnError false
+    options.locale = 'en_US'
+    if (project.hasProperty('android')) {
+        source = android.sourceSets.main.java.sourceFiles
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        classpath += configurations.compile
+    } else {
+        source = sourceSets.main.allJava
+    }
+}
+
+task sourcesJar(type: Jar) {
+    if (project.hasProperty('android')) {
+        from android.sourceSets.main.java.srcDirs
+    } else {
+        from sourceSets.main.allJava
+    }
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: ormaJavadoc) {
+    from ormaJavadoc.destinationDir
+    classifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+install {
+    repositories {
+        mavenInstaller {
+            pom.project {
+                packaging 'aar'
+                artifactId archivesBaseName
+                url metadata.website
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer metadata.developer
+                }
+                scm {
+                    connection metadata.repository
+                    developerConnection metadata.repository
+                    url metadata.website
+                }
+            }
+        }
+    }
+}
