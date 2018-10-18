@@ -7,9 +7,8 @@ group = metadata.groupId
 version = metadata.version
 
 bintray {
-    //TODO Set appropriate authorize information
-    user = "foo"
-    key = "bar"
+    user = ext.bintrayUser
+    key = ext.bintrayKey
 
     configurations = ['archives']
     pkg {
