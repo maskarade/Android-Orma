@@ -123,8 +123,8 @@ Declare dependencies to use Orma and its annotation processor.
 
 ```gradle:build.gradle
 dependencies {
-    annotationProcessor 'com.github.maskarade.android.orma:orma-processor:6.0.0'
-    compile 'com.github.maskarade.android.orma:orma:6.0.0'
+    annotationProcessor 'com.github.maskarade.android.orma:orma-processor:6.0.1'
+    compile 'com.github.maskarade.android.orma:orma:6.0.1'
 }
 ```
 
@@ -1126,7 +1126,7 @@ There's an encryption extension as `orma-encryption` since Orma v5.0.0-rc1:
 
 ```build.gradle
 dependencies {
-    compile 'com.github.maskarade.android.orma:orma-encryption:6.0.0'
+    compile 'com.github.maskarade.android.orma:orma-encryption:6.0.1'
 }
 ```
 
@@ -1158,7 +1158,7 @@ There is a simple benchmark with [Realm](https://github.com/realm/realm-java) an
 
 [example/BenchmarkFragment](example/src/main/java/com/github/gfx/android/orma/example/fragment/BenchmarkFragment.java)
 
-Here is a result performed on Android 6.0.0 / Xperia Z4
+Here is a result performed on Android 6.0.1 / Xperia Z4
 as of Orma v4.2.5 and Realm 2.3.0, processing 10 items x 100 times:
 
 <img src="benchmark.png" alt="" width="420"/>
