@@ -1,6 +1,6 @@
 package com.github.gfx.android.orma.example.orma;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.github.gfx.android.orma.AssociationCondition;
 import com.github.gfx.android.orma.OrmaConnection;
 import java.util.Arrays;

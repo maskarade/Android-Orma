@@ -7,6 +7,5 @@
 -dontwarn java.lang.instrument.**
 -dontwarn java.lang.invoke.**
 
-# Android Support Library
--keep class android.support.** { *; }
--keep class android.databinding.** { *; }
+# AndroidX
+-keep class androidx.** { *; }

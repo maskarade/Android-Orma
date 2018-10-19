@@ -18,8 +18,8 @@ package com.github.gfx.android.orma.internal;
 
 import com.github.gfx.android.orma.Schema;
 
-import android.support.annotation.NonNull;
-import android.support.v4.util.SimpleArrayMap;
+import androidx.annotation.NonNull;
+import androidx.collection.SimpleArrayMap;
 
 /**
  * The set of all the {@link Schema} instances.

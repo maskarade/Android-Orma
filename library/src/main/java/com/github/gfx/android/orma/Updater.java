@@ -18,7 +18,7 @@ package com.github.gfx.android.orma;
 import com.github.gfx.android.orma.internal.OrmaConditionBase;
 
 import android.content.ContentValues;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public abstract class Updater<Model, U extends Updater<Model, ?>> extends OrmaConditionBase<Model, U>
         implements Cloneable {

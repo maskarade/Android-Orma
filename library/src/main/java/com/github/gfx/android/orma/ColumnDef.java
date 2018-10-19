@@ -16,7 +16,7 @@
 package com.github.gfx.android.orma;
 
 import android.database.Cursor;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.lang.reflect.Type;
 

@@ -18,7 +18,7 @@ package com.github.gfx.android.orma.migration.sqliteparser;
 
 import com.github.gfx.android.orma.migration.SqliteDdlBuilder;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;

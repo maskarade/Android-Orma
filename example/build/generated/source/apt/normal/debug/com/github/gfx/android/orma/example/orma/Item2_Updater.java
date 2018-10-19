@@ -1,7 +1,7 @@
 package com.github.gfx.android.orma.example.orma;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.github.gfx.android.orma.example.tool.TypeAdapters;
 import com.github.gfx.android.orma.function.Function1;
 import com.github.gfx.android.orma.rx.RxOrmaConnection;

@@ -26,9 +26,9 @@ import com.github.gfx.android.orma.annotation.OnConflict;
 import com.github.gfx.android.orma.annotation.PrimaryKey;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
+import androidx.annotation.CheckResult;
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;

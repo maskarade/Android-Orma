@@ -25,7 +25,7 @@ import com.github.gfx.android.orma.test.toolbox.MutableInt;
 import com.github.gfx.android.orma.test.toolbox.MutableLong;
 
 import android.net.Uri;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

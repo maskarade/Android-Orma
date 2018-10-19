@@ -70,13 +70,13 @@ public class Types {
     public static final ClassName SQLiteConstraintException = ClassName
             .get("android.database.sqlite", "SQLiteConstraintException");
 
-    public static final ClassName NonNull = ClassName.get("android.support.annotation", "NonNull");
+    public static final ClassName NonNull = ClassName.get("androidx.annotation", "NonNull");
 
-    public static final ClassName Nullable = ClassName.get("android.support.annotation", "Nullable");
+    public static final ClassName Nullable = ClassName.get("androidx.annotation", "Nullable");
 
-    public static final ClassName WorkerThread = ClassName.get("android.support.annotation", "WorkerThread");
+    public static final ClassName WorkerThread = ClassName.get("androidx.annotation", "WorkerThread");
 
-    public static final ClassName CheckResult = ClassName.get("android.support.annotation", "CheckResult");
+    public static final ClassName CheckResult = ClassName.get("androidx.annotation", "CheckResult");
 
     public static final ClassName Runnable = ClassName.get(java.lang.Runnable.class);
 

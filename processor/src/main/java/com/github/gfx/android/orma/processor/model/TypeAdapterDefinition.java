@@ -24,7 +24,7 @@ import com.github.gfx.android.orma.processor.util.Types;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

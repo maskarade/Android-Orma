@@ -24,7 +24,7 @@ import com.github.gfx.android.orma.annotation.Experimental;
 import com.github.gfx.android.orma.event.DataSetChangedEvent;
 import com.github.gfx.android.orma.event.DataSetChangedTrigger;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.List;
 

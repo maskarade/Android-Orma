@@ -89,12 +89,12 @@ dependencies {
     implementation project(':core')
     implementation project(':library')
     implementation project(':encryption')
-    implementation "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
-    implementation "com.android.support:cardview-v7:${SUPPORT_LIBRARY_VERSION}"
-    implementation "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
-    implementation "com.android.support:design:${SUPPORT_LIBRARY_VERSION}"
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
     implementation 'com.jakewharton.threetenabp:threetenabp:1.0.5'
     implementation 'com.facebook.stetho:stetho:1.5.0'
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.0'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
 }

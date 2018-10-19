@@ -24,13 +24,13 @@ import com.github.gfx.android.orma.exception.NoValueException;
 import com.github.gfx.android.orma.rx.RxRelation;
 
 import android.content.Context;
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.v4.util.LruCache;
 import android.view.LayoutInflater;
 
 import java.util.concurrent.Callable;
 
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
+import androidx.collection.LruCache;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;

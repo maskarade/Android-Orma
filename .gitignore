@@ -1,6 +1,5 @@
 .gradle/
 local.properties
-gradle.properties
 .idea/*.xml
 .idea/.*
 .idea/*/*.xml

@@ -16,7 +16,7 @@
 
 package com.github.gfx.android.orma.annotation;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 /**
  * Indicates the feature is in experimental state: its existence, signature or behavior
