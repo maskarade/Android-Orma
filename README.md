@@ -123,8 +123,8 @@ Declare dependencies to use Orma and its annotation processor.
 
 ```gradle:build.gradle
 dependencies {
-    annotationProcessor 'com.github.maskarade.android.orma:orma-processor:5.1.2'
-    compile 'com.github.maskarade.android.orma:orma:5.1.2'
+    annotationProcessor 'com.github.maskarade.android.orma:orma-processor:6.0.0'
+    compile 'com.github.maskarade.android.orma:orma:6.0.0'
 }
 ```
 
@@ -1126,7 +1126,7 @@ There's an encryption extension as `orma-encryption` since Orma v5.0.0-rc1:
 
 ```build.gradle
 dependencies {
-    compile 'com.github.maskarade.android.orma:orma-encryption:5.1.2'
+    compile 'com.github.maskarade.android.orma:orma-encryption:6.0.0'
 }
 ```
 

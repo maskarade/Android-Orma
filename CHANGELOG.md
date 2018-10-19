@@ -10,6 +10,13 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v6.0.0 2018/10/19
+
+https://github.com/maskarade/Android-Orma/compare/v5.1.2...v6.0.0
+
+Orma v6 supports AndroidX instead of Android Support Library.
+If your project depends on Android Support Library, you should keep to use Orma v5.x.
+
 ## v5.1.2 2018/10/18
 
 https://github.com/maskarade/Android-Orma/compare/v5.1.1...v5.1.2
