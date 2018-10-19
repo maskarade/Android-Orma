@@ -1,9 +1,10 @@
 
 check:
-	./gradlew clean assemble check bintrayUpload
+	./gradlew clean assemble check
 
 publish: check
 	./gradlew releng
+	./gradlew install
 	./gradlew -PdryRun=false annotations:bintrayUpload
 	./gradlew -PdryRun=false processor:bintrayUpload
 	./gradlew -PdryRun=false core:bintrayUpload
