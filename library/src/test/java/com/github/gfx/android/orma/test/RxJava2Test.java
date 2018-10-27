@@ -16,7 +16,6 @@
 
 package com.github.gfx.android.orma.test;
 
-import com.github.gfx.android.orma.Inserter;
 import com.github.gfx.android.orma.ModelFactory;
 import com.github.gfx.android.orma.SingleAssociation;
 import com.github.gfx.android.orma.rx.RxInserter;
@@ -31,14 +30,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import androidx.annotation.NonNull;
-import androidx.test.runner.AndroidJUnit4;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.reactivex.ObservableSource;
 import io.reactivex.SingleSource;
 import io.reactivex.functions.Function;

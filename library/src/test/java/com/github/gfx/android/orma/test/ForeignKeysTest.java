@@ -33,12 +33,13 @@ import org.junit.runner.RunWith;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteException;
-import androidx.annotation.NonNull;
-import androidx.test.runner.AndroidJUnit4;
 
-import static org.hamcrest.MatcherAssert.*;
+import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @see DirectAssociationsTest

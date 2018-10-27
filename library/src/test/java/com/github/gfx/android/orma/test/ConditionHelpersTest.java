@@ -25,11 +25,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -183,12 +183,12 @@ public class ConditionHelpersTest {
 
     @Test
     public void testBetween() throws Exception {
-        assertThat(selector().byteValueBetween((byte) 3 ,(byte)5).count(), is(3));
-        assertThat(selector().shortValueBetween((short) 3, (short)5).count(), is(3));
+        assertThat(selector().byteValueBetween((byte) 3, (byte) 5).count(), is(3));
+        assertThat(selector().shortValueBetween((short) 3, (short) 5).count(), is(3));
         assertThat(selector().intValueBetween(3, 5).count(), is(3));
         assertThat(selector().longValueBetween((long) 3, (long) 5).count(), is(3));
-        assertThat(selector().floatValueBetween((float) 3, (float)5).count(), is(3));
-        assertThat(selector().doubleValueBetween((double) 3, (double)5).count(), is(3));
+        assertThat(selector().floatValueBetween((float) 3, (float) 5).count(), is(3));
+        assertThat(selector().doubleValueBetween((double) 3, (double) 5).count(), is(3));
         assertThat(selector().dateValueBetween(new Date(3), new Date(5)).count(), is(3));
     }
 

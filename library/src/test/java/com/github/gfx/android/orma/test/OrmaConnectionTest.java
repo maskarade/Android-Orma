@@ -24,16 +24,15 @@ import org.junit.runner.RunWith;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteException;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 @RunWith(AndroidJUnit4.class)
 public class OrmaConnectionTest {
 
-    static final String NAME = "main.db";
-
     Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
+        return ApplicationProvider.getApplicationContext();
     }
 
     @Test

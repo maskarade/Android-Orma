@@ -27,11 +27,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -105,17 +104,17 @@ public class QueryObservableTest {
                     }
                 })
                 .map(new Function<Author, String>() {
-            @Override
-            public String apply(Author author) throws Exception {
-                return author.name;
-            }
-        })
+                    @Override
+                    public String apply(Author author) throws Exception {
+                        return author.name;
+                    }
+                })
                 .subscribe(new Consumer<String>() {
-            @Override
-            public void accept(String s) throws Exception {
-                result.add(s);
-            }
-        });
+                    @Override
+                    public void accept(String s) throws Exception {
+                        result.add(s);
+                    }
+                });
         subscription.dispose();
 
         System.gc();

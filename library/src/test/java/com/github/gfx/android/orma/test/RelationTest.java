@@ -32,11 +32,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.ContentValues;
-import androidx.annotation.NonNull;
-import androidx.test.runner.AndroidJUnit4;
 
 import java.util.Arrays;
 import java.util.Date;
+
+import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;

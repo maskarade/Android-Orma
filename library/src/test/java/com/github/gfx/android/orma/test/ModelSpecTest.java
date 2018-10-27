@@ -40,8 +40,6 @@ import org.junit.runner.RunWith;
 
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
-import androidx.annotation.NonNull;
-import androidx.test.runner.AndroidJUnit4;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -54,6 +52,9 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
+
+import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
