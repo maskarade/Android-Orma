@@ -1,4 +1,4 @@
-# Android Orma [![Circle CI](https://circleci.com/gh/maskarade/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/maskarade/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/orma/maven/orma/images/download.svg) ](https://bintray.com/orma/maven/orma/) [![Gitter](http://badges.gitter.im/Android-Orma.svg)](https://gitter.im/Android-Orma/Lobby)
+# Android Orma [![Circle CI](https://circleci.com/gh/maskarade/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/maskarade/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/orma/maven/orma/images/download.svg) ](https://bintray.com/orma/maven/orma/) [![Gitter](http://badges.gitter.im/Android-Orma.svg)](https://gitter.im/Android-Orma/Lobby) ![backers](https://opencollective.com/android-orma/tiers/backer/badge.svg?label=backer&color=brightgreen)
 
 <p align="center">
 <img src="Orma.png" width="256" height="256"  alt="Android Orma" />
@@ -1281,6 +1281,8 @@ Visual Studio Code (a.k.a. vscode) is recommended to edit README.md and CHANGELO
 FUJI Goro ([gfx](https://github.com/gfx)).
 
 And contributors are listed here: [Contributors](https://github.com/gfx/Android-Orma/graphs/contributors)
+
+If you are interested in sponsoring this project, it is really welcome, as I'll spend more time to develop this software: https://opencollective.com/android-orma
 
 ## License
 
