@@ -320,6 +320,11 @@ expr
  | expr ( '<<' | '>>' | '&' | '|' ) expr
  | expr ( '<' | '<=' | '>' | '>=' ) expr
  | expr ( '=' | '==' | '!=' | '<>' ) expr
+ | expr K_NOT? K_IN ( '(' ( select_stmt
+                          | expr ( ',' expr )*
+                          )? 
+                      ')'
+                    | ( database_name '.' )? table_name )
  | expr K_AND expr
  | expr K_OR expr
  | function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
@@ -330,11 +335,6 @@ expr
  | expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
  | expr K_IS K_NOT? expr
  | expr K_NOT? K_BETWEEN expr K_AND expr
- | expr K_NOT? K_IN ( '(' ( select_stmt
-                          | expr ( ',' expr )*
-                          )? 
-                      ')'
-                    | ( database_name '.' )? table_name )
  | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'
  | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END
  | raise_function
