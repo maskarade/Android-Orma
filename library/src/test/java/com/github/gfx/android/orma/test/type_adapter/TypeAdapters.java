@@ -22,18 +22,18 @@ import com.github.gfx.android.orma.test.toolbox.MutableInt;
 import com.github.gfx.android.orma.test.toolbox.MutableLong;
 
 @StaticTypeAdapters({
-    @StaticTypeAdapter(
-        targetType = MutableInt.class,
-        serializedType = int.class,
-        serializer = "serializeMutableInt",
-        deserializer = "deserializeMutableInt"
-    ),
-    @StaticTypeAdapter(
-        targetType = MutableLong.class,
-        serializedType = long.class,
-        serializer = "serializeMutableLong",
-        deserializer = "deserializeMutableLong"
-    )
+        @StaticTypeAdapter(
+                targetType = MutableInt.class,
+                serializedType = int.class,
+                serializer = "serializeMutableInt",
+                deserializer = "deserializeMutableInt"
+        ),
+        @StaticTypeAdapter(
+                targetType = MutableLong.class,
+                serializedType = long.class,
+                serializer = "serializeMutableLong",
+                deserializer = "deserializeMutableLong"
+        )
 })
 public class TypeAdapters {
 

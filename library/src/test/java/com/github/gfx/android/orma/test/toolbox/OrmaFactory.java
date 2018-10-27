@@ -22,10 +22,10 @@ import com.github.gfx.android.orma.encryption.EncryptedDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabase;
 import com.github.gfx.android.orma.test.model.OrmaDatabaseToAvoidTryParsing;
 
-import androidx.test.InstrumentationRegistry;
-
 import java.io.File;
 import java.io.IOException;
+
+import androidx.test.core.app.ApplicationProvider;
 
 public class OrmaFactory {
 
@@ -33,7 +33,7 @@ public class OrmaFactory {
 
     static String createTempfileName() {
         try {
-            File file = File.createTempFile("test", ".db", InstrumentationRegistry.getTargetContext().getCacheDir());
+            File file = File.createTempFile("test", ".db", ApplicationProvider.getApplicationContext().getCacheDir());
             file.deleteOnExit();
             return file.getName();
         } catch (IOException e) {
@@ -47,7 +47,7 @@ public class OrmaFactory {
     }
 
     public static OrmaDatabase.Builder builder() {
-        return OrmaDatabase.builder(InstrumentationRegistry.getTargetContext())
+        return OrmaDatabase.builder(ApplicationProvider.getApplicationContext())
                 .name(createTempfileName())
                 .provider(createProvider())
                 .trace(true);
@@ -58,7 +58,7 @@ public class OrmaFactory {
     }
 
     public static OrmaDatabaseToAvoidTryParsing create2() {
-        return OrmaDatabaseToAvoidTryParsing.builder(InstrumentationRegistry.getTargetContext())
+        return OrmaDatabaseToAvoidTryParsing.builder(ApplicationProvider.getApplicationContext())
                 .tryParsingSql(false)
                 .name(createTempfileName())
                 .provider(createProvider())

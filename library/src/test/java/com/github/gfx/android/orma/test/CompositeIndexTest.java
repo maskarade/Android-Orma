@@ -28,7 +28,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.database.sqlite.SQLiteConstraintException;
-import androidx.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;

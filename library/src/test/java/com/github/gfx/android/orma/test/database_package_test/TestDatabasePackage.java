@@ -24,8 +24,8 @@ import com.github.gfx.android.orma.test.model.Publisher;
  * @see OrmaDatabaseInAnotherPackage
  */
 @Database(
-    databaseClassName = "OrmaDatabaseInAnotherPackage",
-    includes = {Book.class, Publisher.class}
+        databaseClassName = "OrmaDatabaseInAnotherPackage",
+        includes = {Book.class, Publisher.class}
 )
 public class TestDatabasePackage {
 

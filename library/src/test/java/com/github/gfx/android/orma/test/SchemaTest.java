@@ -37,9 +37,9 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import java.util.List;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;

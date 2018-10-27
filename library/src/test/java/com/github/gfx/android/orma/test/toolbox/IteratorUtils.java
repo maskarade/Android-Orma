@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IteratorUtils {
+
     public static <T> List<T> listFromIterable(Iterable<T> iterable) {
         List<T> list = new ArrayList<>();
         for (T item : iterable) {

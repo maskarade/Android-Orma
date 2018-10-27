@@ -30,9 +30,10 @@ import org.junit.runner.RunWith;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -43,7 +44,7 @@ public class OrmaDatabaseTest {
     static final String NAME = "main.db";
 
     Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
+        return ApplicationProvider.getApplicationContext();
     }
 
     @After

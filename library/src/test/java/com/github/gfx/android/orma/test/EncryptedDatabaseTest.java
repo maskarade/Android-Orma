@@ -25,9 +25,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -35,8 +36,9 @@ import static org.junit.Assume.assumeTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class EncryptedDatabaseTest {
+
     Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
+        return ApplicationProvider.getApplicationContext();
     }
 
     @Test
@@ -45,16 +47,16 @@ public class EncryptedDatabaseTest {
 
         Publisher publisher = OrmaFactory.createEncrypted()
                 .createPublisher(new ModelFactory<Publisher>() {
-            @NonNull
-            @Override
-            public Publisher call() {
-                Publisher publisher = new Publisher();
-                publisher.name = "foo bar";
-                publisher.startedYear = 2015;
-                publisher.startedMonth = 12;
-                return publisher;
-            }
-        });
+                    @NonNull
+                    @Override
+                    public Publisher call() {
+                        Publisher publisher = new Publisher();
+                        publisher.name = "foo bar";
+                        publisher.startedYear = 2015;
+                        publisher.startedMonth = 12;
+                        return publisher;
+                    }
+                });
 
         assertThat(publisher.id, is(not(0L)));
     }

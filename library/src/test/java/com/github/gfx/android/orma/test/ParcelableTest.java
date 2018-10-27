@@ -29,12 +29,13 @@ import org.junit.runner.RunWith;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.NonNull;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
 public class ParcelableTest {
@@ -42,7 +43,7 @@ public class ParcelableTest {
     OrmaDatabase orma;
 
     Context getContext() {
-        return InstrumentationRegistry.getTargetContext();
+        return ApplicationProvider.getApplicationContext();
     }
 
     <T extends Parcelable> T reload(T parcelable) {
