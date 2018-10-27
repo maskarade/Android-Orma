@@ -55,7 +55,8 @@ dependencies {
 
     testAnnotationProcessor project(':processor')
     testImplementation project(':encryption')
-    testImplementation 'com.github.gfx.android.robolectricinstrumentation:robolectric-instrumentation:3.1.4'
+    testImplementation "org.robolectric:robolectric:4.0"
+    testImplementation 'androidx.test:runner:1.1.0'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.hamcrest:hamcrest-library:1.3'
     testImplementation 'com.google.code.gson:gson:2.8.2'
@@ -65,7 +66,7 @@ dependencies {
 
     androidTestAnnotationProcessor project(':processor')
     androidTestImplementation project(':encryption')
-    androidTestImplementation 'androidx.test:runner:1.1.0-beta02'
+    androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
     androidTestImplementation 'com.google.code.gson:gson:2.8.2'
