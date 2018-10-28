@@ -33,12 +33,8 @@ import com.github.gfx.android.orma.migration.TraceListener;
 
 import org.threeten.bp.ZonedDateTime;
 
-import androidx.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,6 +45,10 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
 import io.reactivex.Single;
 
 public class MainFragment extends Fragment {
@@ -58,6 +58,9 @@ public class MainFragment extends Fragment {
     static final String DB_NAME = "main.db";
 
     static final String PASSWORD = "password";
+
+    @SuppressWarnings("ConstantConditions")
+    static final boolean USE_ENCRYPTED_DB = BuildConfig.FLAVOR.equals("encrypted");
 
     ArrayAdapter<String> logsAdapter;
 
@@ -75,7 +78,7 @@ public class MainFragment extends Fragment {
     public void setupV1Database() {
         getContext().deleteDatabase(DB_NAME);
         Database db;
-        if (BuildConfig.FLAVOR.equals("encrypted")) {
+        if (USE_ENCRYPTED_DB) {
             db = new EncryptedDatabase.Provider(PASSWORD).provideOnDiskDatabase(getContext(), DB_NAME, 0);
         } else {
             db = new DefaultDatabase.Provider().provideOnDiskDatabase(getContext(), DB_NAME, 0);
@@ -103,7 +106,7 @@ public class MainFragment extends Fragment {
         // The current database schema version is 10 (= BuildConfig.VERSION_CODE)
         setupV1Database();
         OrmaDatabase.Builder builder = OrmaDatabase.builder(getContext()).name(null);
-        if (BuildConfig.FLAVOR.equals("encrypted")) {
+        if (USE_ENCRYPTED_DB) {
             builder = builder.provider(new EncryptedDatabase.Provider(PASSWORD));
         }
         orma = builder
