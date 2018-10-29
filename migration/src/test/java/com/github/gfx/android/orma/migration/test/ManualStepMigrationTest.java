@@ -151,7 +151,7 @@ public class ManualStepMigrationTest {
     public void upgradeFull() throws Exception {
         migration.upgrade(db, 1, 100);
 
-        assertThat(migration.fetchDbVersion(db), is(16));
+        assertThat(migration.fetchDbVersion(db), is(100));
 
         assertThat(seq.size(), is(4));
 
