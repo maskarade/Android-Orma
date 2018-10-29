@@ -45,6 +45,9 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     public static final String MIGRATION_STEPS_TABLE = "orma_migration_steps";
 
+    @Nullable
+    public static final String MIGRATION_COMPLETED = null;
+
     static final String kId = "id";
 
     static final String kVersion = "version";
@@ -177,7 +180,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
     private void runTasksInTransaction(@NonNull Database db, @NonNull final List<Runnable> tasks) {
         if (tasks.isEmpty()) {
-            saveStep(db, version, null);
+            saveStep(db, version, MIGRATION_COMPLETED);
             return;
         }
 
@@ -189,6 +192,8 @@ public class ManualStepMigration extends AbstractMigrationEngine {
                 }
             }
         });
+
+        saveStep(db, version, MIGRATION_COMPLETED);
     }
 
     public void saveStep(@NonNull Database db, int version, @Nullable String sql) {
