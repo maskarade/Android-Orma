@@ -10,6 +10,13 @@ The versioning follows [Semantic Versioning](http://semver.org/):
 
 Note that _experimental_ features, annotated with `@Experimental` may change without notice.
 
+## v6.0.2 2018/10/29
+
+https://github.com/maskarade/Android-Orma/compare/v6.0.1...v6.0.2
+
+* [#436](https://github.com/maskarade/Android-Orma/issues/436): ManualStepMigration not working at the first time of defining steps (the issue reported and the path reviewd by @k-kagurasaka)
+* [test] migration to Robolectric 4.0
+
 ## v6.0.1 2018/10/19
 
 https://github.com/maskarade/Android-Orma/compare/v6.0.0...v6.0.1
