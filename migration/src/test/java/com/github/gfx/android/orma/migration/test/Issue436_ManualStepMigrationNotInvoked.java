@@ -37,6 +37,9 @@ import static org.hamcrest.Matchers.*;
 
 @RunWith(AndroidJUnit4.class)
 public class Issue436_ManualStepMigrationNotInvoked {
+    static {
+        System.setProperty("robolectric.logging", "stderr");
+    }
 
     Context getContext() {
         return ApplicationProvider.getApplicationContext();
@@ -48,13 +51,14 @@ public class Issue436_ManualStepMigrationNotInvoked {
 
     @Test
     public void invokedWithoutSteps() {
-        int initialVersion = 2;
-        int secondVersion = 5;
+        int initialVersion = 5;
+        int secondVersion = 7;
 
         Database db = createDatabase();
         new ManualStepMigration(getContext(), initialVersion, true)
                 .start(db, new ArrayList<SchemaData>());
         assertThat(db.getVersion(), is(initialVersion));
+
 
         ManualStepMigration m = new ManualStepMigration(getContext(), secondVersion, true);
         m.start(db, new ArrayList<SchemaData>());
@@ -65,8 +69,8 @@ public class Issue436_ManualStepMigrationNotInvoked {
 
     @Test
     public void invokedWithSteps() {
-        int initialVersion = 2;
-        int secondVersion = 5;
+        int initialVersion = 1;
+        int secondVersion = 3;
 
         Database db = createDatabase();
         new ManualStepMigration(getContext(), initialVersion, true)

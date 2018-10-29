@@ -20,12 +20,13 @@ import com.github.gfx.android.orma.core.Database;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * <p>
@@ -103,10 +104,12 @@ public class ManualStepMigration extends AbstractMigrationEngine {
 
         if (dbVersion == 0) {
             db.setVersion(version);
+            trace("set version from 0 to %d", version);
             return;
         }
 
         if (dbVersion == version) {
+            trace("nothing tdo (version=%d)", version);
             return;
         }
 
@@ -196,6 +199,7 @@ public class ManualStepMigration extends AbstractMigrationEngine {
         values.put(kSql, sql);
         db.insertOrThrow(MIGRATION_STEPS_TABLE, null, values);
         db.setVersion(version);
+        trace("set version to %d, creating a migration log for %s", version, sql);
     }
 
     public void execStep(@NonNull Database db, int version, @Nullable String sql) {
