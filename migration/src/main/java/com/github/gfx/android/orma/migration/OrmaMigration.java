@@ -18,13 +18,14 @@ package com.github.gfx.android.orma.migration;
 import com.github.gfx.android.orma.core.Database;
 
 import android.content.Context;
+import android.util.SparseArray;
+
+import java.util.List;
+
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import android.util.SparseArray;
-
-import java.util.List;
 
 /**
  * <p>
@@ -150,12 +151,12 @@ public class OrmaMigration extends AbstractMigrationEngine {
         }
 
         public Builder trace(boolean value) {
-            traceListener = value ? TraceListener.LOGCAT : TraceListener.EMPTY;
+            trace(value ? TraceListener.LOGCAT : TraceListener.EMPTY);
             return this;
         }
 
-        public Builder trace(@NonNull TraceListener traceListener) {
-            this.traceListener = traceListener;
+        public Builder trace(@Nullable TraceListener traceListener) {
+            this.traceListener = traceListener != null ? traceListener : TraceListener.EMPTY;
             return this;
         }
 

@@ -25,6 +25,7 @@ import com.github.gfx.android.orma.migration.TraceListener;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,7 +47,11 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
     @NonNull
     DatabaseProvider databaseProvider;
 
+    @Nullable
     MigrationEngine migrationEngine;
+
+    @Nullable
+    TraceListener traceListener;
 
     boolean foreignKeys = true;
 
@@ -54,14 +59,15 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
 
     boolean trace;
 
-    TraceListener migrationTraceListener;
-
     boolean tryParsingSql;
 
-    OrmaMigration.Builder ormaMigrationBuilder;
+    @Nullable
+    OrmaMigration.Builder ormaMigrationBuilder = null;
 
+    @NonNull
     AccessThreadConstraint readOnMainThread;
 
+    @NonNull
     AccessThreadConstraint writeOnMainThread;
 
     public OrmaDatabaseBuilderBase(@NonNull Context context) {
@@ -126,14 +132,9 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
      */
     public T migrationEngine(@NonNull MigrationEngine migrationEngine) {
         if (ormaMigrationBuilder != null) {
-            throw new IllegalArgumentException("migrationStep() is already set");
+            throw new IllegalArgumentException("migrationEngine is already installed via fields like migrationStep()");
         }
         this.migrationEngine = migrationEngine;
-        return (T) this;
-    }
-
-    public T migrationTraceListener(@NonNull TraceListener traceListener) {
-        migrationTraceListener = traceListener;
         return (T) this;
     }
 
@@ -161,13 +162,15 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
         return (T) this;
     }
 
-    private void prepareOrmaMigrationBuilder() {
+    @NonNull
+    private OrmaMigration.Builder prepareOrmaMigrationBuilder() {
         if (migrationEngine != null) {
-            throw new IllegalArgumentException("migrationEngine() is already set");
+            throw new IllegalArgumentException("migrationEngine is already set");
         }
         if (ormaMigrationBuilder == null) {
             ormaMigrationBuilder = OrmaMigration.builder(context);
         }
+        return ormaMigrationBuilder;
     }
 
     /**
@@ -178,8 +181,8 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
      * @return the receiver itself
      */
     public T migrationStep(@IntRange(from = 1) int schemaVersion, @NonNull ManualStepMigration.Step step) {
-        prepareOrmaMigrationBuilder();
-        ormaMigrationBuilder.step(schemaVersion, step);
+        prepareOrmaMigrationBuilder()
+                .step(schemaVersion, step);
         return (T) this;
     }
 
@@ -190,8 +193,8 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
      * @return the receiver itself
      */
     public T versionForManualStepMigration(@IntRange(from = 1) int schemaVersion) {
-        prepareOrmaMigrationBuilder();
-        ormaMigrationBuilder.versionForManualStepMigration(schemaVersion);
+        prepareOrmaMigrationBuilder()
+                .versionForManualStepMigration(schemaVersion);
         return (T) this;
     }
 
@@ -218,11 +221,14 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
      */
     public T trace(boolean trace) {
         this.trace = trace;
-        if (migrationTraceListener == null) {
-            migrationTraceListener = trace ? TraceListener.LOGCAT : TraceListener.EMPTY;
-        }
         return (T) this;
     }
+
+    public T migrationTraceListener(@NonNull TraceListener traceListener) {
+        prepareOrmaMigrationBuilder().trace(traceListener);
+        return (T) this;
+    }
+
 
     /**
      * Sets {@link AccessThreadConstraint} for reading.
@@ -250,16 +256,12 @@ public abstract class OrmaDatabaseBuilderBase<T extends OrmaDatabaseBuilderBase<
     protected abstract String getSchemaHash();
 
     protected T fillDefaults() {
-        if (migrationTraceListener == null) {
-            migrationTraceListener = trace ? TraceListener.LOGCAT : TraceListener.EMPTY;
-        }
-        if (ormaMigrationBuilder != null) {
-            migrationEngine = ormaMigrationBuilder
-                    .trace(migrationTraceListener)
+        if (migrationEngine == null) {
+            migrationEngine = prepareOrmaMigrationBuilder()
+                    .trace(traceListener)
+                    // versionForManualStepMigration is extracted from the app's Build.VERSION
                     .schemaHashForSchemaDiffMigration(getSchemaHash())
                     .build();
-        } else if (migrationEngine == null) {
-            migrationEngine = new SchemaDiffMigration(context, getSchemaHash(), migrationTraceListener);
         }
 
         return (T) this;
