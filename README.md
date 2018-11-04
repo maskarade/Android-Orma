@@ -1,4 +1,4 @@
-# Android Orma [![Circle CI](https://circleci.com/gh/maskarade/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/maskarade/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/orma/maven/orma/images/download.svg) ](https://bintray.com/orma/maven/orma/) [![Gitter](http://badges.gitter.im/Android-Orma.svg)](https://gitter.im/Android-Orma/Lobby) ![backers](https://opencollective.com/android-orma/tiers/backer/badge.svg?label=backer&color=brightgreen)
+# Android Orma [![Circle CI](https://circleci.com/gh/maskarade/Android-Orma/tree/master.svg?style=svg)](https://circleci.com/gh/maskarade/Android-Orma/tree/master) [ ![Download](https://api.bintray.com/packages/orma/maven/orma/images/download.svg) ](https://bintray.com/orma/maven/orma/) [![Gitter](http://badges.gitter.im/Android-Orma.svg)](https://gitter.im/Android-Orma/Lobby) [![Backers on Open Collective](https://opencollective.com/Android-Orma/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/Android-Orma/sponsors/badge.svg)](#sponsors) 
 
 <p align="center">
 <img src="Orma.png" width="256" height="256"  alt="Android Orma" />
@@ -1237,6 +1237,10 @@ Tell me if your projects use Orma!
     * https://gitter.im/Android-Orma/Lobby (en)
     * https://gitter.im/Android-Orma/Ja (ja)
 
+
+
+
+
 ## Licenses in Runtime Dependencies
 
 * https://github.com/ReactiveX/RxJava - Apache Software License 2.0
@@ -1283,6 +1287,34 @@ FUJI Goro ([gfx](https://github.com/gfx)).
 And contributors are listed here: [Contributors](https://github.com/gfx/Android-Orma/graphs/contributors)
 
 If you are interested in sponsoring this project, it is really welcome, as I'll spend more time to develop this software: https://opencollective.com/android-orma
+
+## Contributors
+
+This project exists thanks to all the people who contribute. 
+<a href="https://github.com/maskarade/Android-Orma/contributors"><img src="https://opencollective.com/Android-Orma/contributors.svg?width=890&button=false" /></a>
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/Android-Orma#backer)]
+
+<a href="https://opencollective.com/Android-Orma#backers" target="_blank"><img src="https://opencollective.com/Android-Orma/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/Android-Orma#sponsor)]
+
+<a href="https://opencollective.com/Android-Orma/sponsor/0/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/1/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/2/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/3/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/4/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/5/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/6/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/7/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/8/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/Android-Orma/sponsor/9/website" target="_blank"><img src="https://opencollective.com/Android-Orma/sponsor/9/avatar.svg"></a>
 
 ## License
 
