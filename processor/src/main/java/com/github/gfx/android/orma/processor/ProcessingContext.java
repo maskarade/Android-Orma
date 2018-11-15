@@ -25,8 +25,6 @@ import com.github.gfx.android.orma.processor.util.SqlTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
-import androidx.annotation.Nullable;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
@@ -46,6 +44,8 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+
+import androidx.annotation.Nullable;
 
 public class ProcessingContext {
 
@@ -224,9 +224,27 @@ public class ProcessingContext {
         if (databases.isEmpty()) {
             return Database.DEFAULT_RX_JAVA_SUPPORT;
         }
-        return databases
+
+        long targetCount = databases
                 .stream()
-                .anyMatch((database) -> database.isRxJavaSupport() && database.getSchemas().contains(schema));
+                .filter((database) -> database.getSchemas().contains(schema))
+                .count();
+
+        long rxJavaSupportCount = databases
+                .stream()
+                .filter((database) -> database.getSchemas().contains(schema) && database.isRxJavaSupport())
+                .count();
+
+        if (rxJavaSupportCount == 0L) {
+            return false;
+        }
+
+        if (rxJavaSupportCount < targetCount) {
+            addError(schema.getModelClassName().simpleName() + " is included in different RxJavaSupport databases.",
+                    schema.getElement());
+        }
+
+        return true;
     }
 
     public void note(String message) {
