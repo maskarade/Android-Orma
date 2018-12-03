@@ -65,7 +65,6 @@ as the author respects the Larry Wall's wisdom:
 - [Encryption](#encryption)
 - [Example](#example)
 - [Benchmark](#benchmark)
-- [Method Count](#method-count)
 - [FAQ](#faq)
   - [How can I enable debug logging on release build?](#how-can-i-enable-debug-logging-on-release-build)
   - [How can see the generated Java files?](#how-can-see-the-generated-java-files)
@@ -1164,10 +1163,6 @@ as of Orma v4.2.5 and Realm 2.3.0, processing 10 items x 100 times:
 <img src="benchmark.png" alt="" width="420"/>
 
 I welcome benchmark in another condition and/or another code.
-
-## Method Count
-
-Orma runtime is very lightweight: [Method Count for v4.2.5](http://www.methodscount.com/?lib=com.github.gfx.android.orma:orma:4.2.5)
 
 ## FAQ
 
