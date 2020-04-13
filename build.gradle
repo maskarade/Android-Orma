@@ -9,7 +9,7 @@ final ANDROID_SDK_PATH = {
     }
     def androidSdkPath = localProperties['sdk.dir'] ?: System.getenv('ANDROID_HOME')
     if (!androidSdkPath) {
-        throw new RuntimeException("Missing local.properties")
+        throw new RuntimeException("Missing 'sdk.dir' in local.properties or ANDROID_HOME")
     }
     androidSdkPath
 }()
